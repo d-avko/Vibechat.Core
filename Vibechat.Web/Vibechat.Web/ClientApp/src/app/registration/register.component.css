@@ -1,0 +1,50 @@
+*{
+  color:white;
+}
+
+.validate_wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 0 -5px;
+}
+.validate_fieldswrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 5%;
+}
+
+.button {
+  margin: 0 5px;
+}
+
+.register_wrapper {
+  background-image: url('../../../dist/Assets/Login_Background.jpg');
+  background-repeat: round;
+  min-height: 2000px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.register_info {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 3%;
+}
+
+.register_info .app_name {
+  height: 30%;
+  font-size: 48px;
+  font-weight: lighter;
+}
+
+.register_input{
+  width: 50%;
+}
+
+.validate_fieldswrapper {
+  width: 100%;
+}
