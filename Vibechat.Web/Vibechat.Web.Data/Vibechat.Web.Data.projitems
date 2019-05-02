@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>3f7c5f2d-0e46-4d20-8e94-55f1f2ded94a</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Vibechat.Web.Data</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\AddToConversationApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\AddToConversationResultApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\ConversationInfoResultApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\CreateConversationCredentialsApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\CreateConversationResultApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\CredentialsForConversationInfoApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\GetConversationByIdApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\GetConversationByIdResultApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\GetParticipantsApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\GetParticipantsResultApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Login\LoginCredentialsApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Login\LoginResultApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Messages\GetMessagesApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Messages\GetMessagesResultApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Register\RegisterInformationApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\ResponseApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Users Info\UserByIdApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Users Info\UserByIdApiResponseModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Users Info\UsersByNickNameApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Users Info\UsersByNickNameResultApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Conversations\ConversationTemplate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Finding Users\FoundUser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Message.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Users\UserInfo.cs" />
+  </ItemGroup>
+</Project>
