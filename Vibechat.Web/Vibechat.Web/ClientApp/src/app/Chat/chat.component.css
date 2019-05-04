@@ -1,23 +1,52 @@
-.chat_wrapper{
-  display:flex;
-  flex-direction:row;
-  width: 90%;
-  margin-left: 2.6666666666666%;
-  margin-top:1%;
+.chat_wrapper {
+  width: 95%;
+  margin-left: 2.5%;
+  margin-top: 1%;
   min-height: 670px;
+  padding: 0 !important;
 }
 
-.conversations_wrapper{
-  width: 30%;
+.chat_wrapper_content {
+  display: flex;
+  flex-direction: row;
+  height: 670px;
+  margin: 0 0 0 0 !important;
 }
 
-.messages_wrapper{
-  width: 70%;
+.conversations_wrapper {
+  display: flex;
+  flex-direction:column;
+  width: 40%;
+  height: 100%;
+}
+
+.conversations_wrapper_searchbar{
+  height: 10%;
+  padding: 20px;
+}
+
+.conversations_wrapper_conversations{
+  height: 80%;
+}
+
+.messages_wrapper {
+  display:flex;
+  flex-direction:column;
+  width: 60%;
   height: 100%;
 }
 
 .messages_wrapper_conversationinfo{
-  height: 20%;
+  display:flex;
+  flex-direction:row;
+  height: 8%;
+}
+
+.conversationinfo--nameAndAdditional {
+  display: flex;
+  flex-direction: column;
+  width: 85%;
+  padding:1%;
 }
 
 .messages_wrapper_chatmessages {
@@ -25,5 +54,5 @@
 }
 
 .messages_wrapper_chat-input{
-  height: 20%;
+  height: 10%;
 }

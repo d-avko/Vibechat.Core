@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Text;
 using System.Threading.Tasks;
+using Vibechat.Web.Services;
 using VibeChat.Web;
 using VibeChat.Web.UserProviders;
 
@@ -106,6 +107,8 @@ namespace Vibechat.Web
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddSignalR();
+
+            services.AddScoped<DatabaseService, DatabaseService>();
 
             services.AddSingleton<ICustomHubUserIdProvider, DefaultUserIdProvider>();
 

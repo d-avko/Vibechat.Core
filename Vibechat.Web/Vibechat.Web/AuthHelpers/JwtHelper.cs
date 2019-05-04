@@ -8,6 +8,7 @@ namespace VibeChat.Web
 {
     public static class JwtHelper
     {
+        public static string JwtUserClaimName => "UserId";
         /// <summary>
         /// Generates jwt token and returns it as string
         /// </summary>
@@ -20,7 +21,7 @@ namespace VibeChat.Web
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
                 new Claim(ClaimsIdentity.DefaultNameClaimType, user.UserName),
                 //add custom claim to identify the user by his id
-                new Claim("UserId", user.Id)
+                new Claim(JwtUserClaimName, user.Id)
             };
 
             var credentials = new SigningCredentials(

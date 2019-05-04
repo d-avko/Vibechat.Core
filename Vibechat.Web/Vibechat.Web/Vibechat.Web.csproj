@@ -25,11 +25,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ClientApp\src\app\ApiModels\ConversationRequest.ts" />
+    <None Remove="ClientApp\src\app\ApiModels\ConversationResponse.ts" />
     <None Remove="ClientApp\src\app\Chat\chat.component.ts" />
+    <None Remove="ClientApp\src\app\Data\ConversationTemplate.ts" />
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Include="ClientApp\src\app\ApiModels\ConversationRequest.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\ApiModels\ConversationResponse.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Chat\chat.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationTemplate.ts" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
