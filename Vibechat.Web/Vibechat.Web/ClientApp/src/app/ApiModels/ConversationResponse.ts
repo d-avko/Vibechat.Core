@@ -1,3 +1,5 @@
+import { ConversationTemplate } from "../Data/ConversationTemplate";
+
 export class ConversationResponse {
-  Conversations: Array<
+  public Conversations: Array<ConversationTemplate>
 }

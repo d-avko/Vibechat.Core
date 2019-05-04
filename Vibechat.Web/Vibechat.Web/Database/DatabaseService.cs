@@ -150,13 +150,13 @@ namespace Vibechat.Web.Services
             await mContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async Task<ConversationInfoResultApiModel> GetConversationInformation(CredentialsForConversationInfoApiModel UserProvided, string whoAccessed)
+        public async Task<ConversationInfoResultApiModel> GetConversationInformation(CredentialsForConversationInfoApiModel UserProvided, string whoAccessedId)
         {
             var defaultError = new FormatException("User info provided was not correct.");
 
             var unAuthorizedError = new UnauthorizedAccessException("You are unauthorized to do such an action.");
 
-            if (UserProvided.UserId != whoAccessed)
+            if (UserProvided.UserId != whoAccessedId)
             {
                 throw unAuthorizedError;
             }
@@ -272,9 +272,11 @@ namespace Vibechat.Web.Services
         }
 
 
-        public async Task<GetMessagesResultApiModel> GetConversationMessages(GetMessagesApiModel convInfo)
+        public async Task<GetMessagesResultApiModel> GetConversationMessages(GetMessagesApiModel convInfo, string whoAccessedId)
         {
             var defaultErrorMessage = new FormatException("Wrong conversation was provided.");
+
+            var unAuthorizedError = new UnauthorizedAccessException("You are unauthorized to do such an action.");
 
             if (mContext.Messages.FirstOrDefault() == null)
             {
@@ -291,6 +293,13 @@ namespace Vibechat.Web.Services
 
             if (conversation == null)
                 throw defaultErrorMessage;
+
+            var members = await GetConversationParticipants(new GetParticipantsApiModel() { ConvId = convInfo.ConvID });
+
+            //only member of conversation could request messages (there should exist other calls for non-members).
+
+            if (members.Participants.Find(x => x.UserName == whoAccessedId) == null)
+                throw unAuthorizedError;
 
             // get related messages
             var messages = mContext.Messages.Where(msg => msg.ConversationID == convInfo.ConvID).Include(msg => msg.User);
@@ -325,41 +334,19 @@ namespace Vibechat.Web.Services
 
         }
 
-        /// <summary>
-        /// Helper method used to find user with whom 
-        /// current user have a dialogue
-        /// </summary>
-        /// <param name="convId"></param>
-        /// <param name="FirstUserInDialogueId"></param>
-        /// <returns></returns>
-        public UserInApplication GetAnotherUserInDialogue(int convId, string FirstUserInDialogueId)
-        {
-            var UsersConvs = mContext.UsersConversations
-               .Include(x => x.Conversation)
-               .Include(y => y.User);
 
-            foreach (var conv in UsersConvs)
-            {
-                // dialogues have only 2 users in them => find first user and then return second
-                if ((conv.Conversation.ConvID == convId) && (conv.User.Id != FirstUserInDialogueId))
-                {
-                    return conv.User;
-                }
-            }
-
-            return null;
-        }
-
-        public async Task<GetConversationByIdResultApiModel> GetConversationById(GetConversationByIdApiModel convInfo)
+        public async Task<GetConversationByIdResultApiModel> GetConversationById(GetConversationByIdApiModel convInfo, string whoAccessedId)
         {
 
             var conversation = mContext.Conversations.FirstOrDefault(x => x.ConvID == convInfo.ConversationId);
+
+            var unAuthorizedError = new UnauthorizedAccessException("You are unauthorized to do such an action.");
 
             var user = new UserInApplication();
 
             if (conversation.IsGroup)
             {
-                user = await mUserManager.FindByIdAsync(convInfo.UserId).ConfigureAwait(false);
+                user = await mUserManager.FindByIdAsync(whoAccessedId).ConfigureAwait(false);
             }
 
 
@@ -367,6 +354,13 @@ namespace Vibechat.Web.Services
             {
                 throw new FormatException("No such conversation was found.");
             }
+
+            var members = await GetConversationParticipants(new GetParticipantsApiModel() { ConvId = convInfo.ConversationId });
+
+            //only member of conversation could request messages (there should exist other calls for non-members).
+
+            if (members.Participants.Find(x => x.UserName == whoAccessedId) == null)
+                throw unAuthorizedError;
 
             if (conversation.IsGroup && user == null)
             {
@@ -405,6 +399,31 @@ namespace Vibechat.Web.Services
 
             };
 
+        }
+
+        /// <summary>
+        /// Helper method used to find user with whom 
+        /// current user have a dialogue
+        /// </summary>
+        /// <param name="convId"></param>
+        /// <param name="FirstUserInDialogueId"></param>
+        /// <returns></returns>
+        public UserInApplication GetAnotherUserInDialogue(int convId, string FirstUserInDialogueId)
+        {
+            var UsersConvs = mContext.UsersConversations
+               .Include(x => x.Conversation)
+               .Include(y => y.User);
+
+            foreach (var conv in UsersConvs)
+            {
+                // dialogues have only 2 users in them => find first user and then return second
+                if ((conv.Conversation.ConvID == convId) && (conv.User.Id != FirstUserInDialogueId))
+                {
+                    return conv.User;
+                }
+            }
+
+            return null;
         }
 
         #endregion
