@@ -1,7 +1,3 @@
-*{
-  color:white;
-}
-
 .validate_wrapper {
   display: flex;
   flex-direction: row;
@@ -18,28 +14,30 @@
   margin: 0 5px;
 }
 
-.login_wrapper {
-  background-image: url('../../../dist/Assets/Login_Background.jpg');
-  background-repeat: round;
-  min-height: 2000px;
+.login_head{
+  height: 240px;
+  background-color: cadetblue;
+}
+
+.login_page{
+  height: 960px;
+}
+
+.login_cardwrapper {
+  display: block;
+  text-align:center;
+  min-height: 1200px;
+}
+
+.login_card {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin: -131px auto 90px;
+  width: 40%;
 }
 
-.login_info {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  padding: 3%;
-}
-
-.login_info--image{
-  height: 50%;
-}
-
-.login_info .app_name {
-  height: 30%;
-  font-size: 40px;
-  font-weight: lighter;
+.login_card--logo {
+  background-image: url('/Assets/MainLogo.png');
+  background-size:cover;
 }

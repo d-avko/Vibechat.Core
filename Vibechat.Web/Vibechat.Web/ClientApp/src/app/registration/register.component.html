@@ -1,49 +1,68 @@
 <div class="register_wrapper" [formGroup]="registerGroup">
 
-  <div class="register_info">
-    <span class="app_name">Let's create new account.</span>
-  </div>
-
-  <div class="validate_fieldswrapper">
-    <mat-form-field class="register_input">
-      <mat-label>First Name</mat-label>
-      <input matInput formControlName="firstName">
-    </mat-form-field>
-
-    <mat-form-field class="register_input">
-      <mat-label>Last Name</mat-label>
-      <input matInput formControlName="lastName">
-    </mat-form-field>
-
-    <mat-form-field class="register_input">
-      <mat-label>Username</mat-label>
-      <input matInput formControlName="username" required>
-      <mat-error>Required</mat-error>
-    </mat-form-field>
-
-    <mat-form-field class="register_input">
-      <mat-label>E-mail:</mat-label>
-      <input matInput formControlName="email" required>
-      <mat-error>Required</mat-error>
-    </mat-form-field>
-
-    <mat-form-field class="register_input">
-      <mat-label>Password</mat-label>
-      <input type="password" matInput formControlName="password" required>
-      <mat-error>Required</mat-error>
-    </mat-form-field>
-
-    <mat-form-field class="register_input">
-      <mat-label>Confirm Password</mat-label>
-      <input type="password" matInput formControlName="confirmPassword" required>
-      <mat-error>Required</mat-error>
-    </mat-form-field>
+  <div class="register_head">
 
   </div>
 
-  <div class="validate_wrapper">
-    <button [disabled]="! canRegister" class="button" mat-flat-button color="primary" (click)="Register()">Register</button>
-    <button class="button" (click)="GotoLoginScreen()" mat-flat-button color="primary">Go Back</button>
+  <div class="register_page">
+
+    <mat-card class="register_card">
+
+      <mat-card-header>
+        <div mat-card-avatar class="register_card--logo"></div>
+        <mat-card-title>Vibechat</mat-card-title>
+        <mat-card-subtitle>Registration</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content class="register_card--content">
+
+
+        <div class="validate_fieldswrapper">
+          <mat-form-field class="register_input">
+            <mat-label>First Name</mat-label>
+            <input matInput formControlName="firstName">
+          </mat-form-field>
+
+          <mat-form-field class="register_input">
+            <mat-label>Last Name</mat-label>
+            <input matInput formControlName="lastName">
+          </mat-form-field>
+
+          <mat-form-field class="register_input">
+            <mat-label>Username</mat-label>
+            <input matInput formControlName="username" required>
+            <mat-error>Required</mat-error>
+          </mat-form-field>
+
+          <mat-form-field class="register_input">
+            <mat-label>E-mail:</mat-label>
+            <input matInput formControlName="email" required>
+            <mat-error>Required</mat-error>
+          </mat-form-field>
+
+          <mat-form-field class="register_input">
+            <mat-label>Password</mat-label>
+            <input type="password" matInput formControlName="password" required>
+            <mat-error>Required</mat-error>
+          </mat-form-field>
+
+          <mat-form-field class="register_input">
+            <mat-label>Confirm Password</mat-label>
+            <input type="password" matInput formControlName="confirmPassword" required>
+            <mat-error>Required</mat-error>
+          </mat-form-field>
+
+          <div class="validate_wrapper">
+            <button [disabled]="! canRegister" class="button" mat-flat-button color="primary" (click)="Register()">Register</button>
+            <button class="button" (click)="GotoLoginScreen()" mat-flat-button color="primary">Go Back</button>
+          </div>
+
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
   </div>
 
 </div>

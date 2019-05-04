@@ -43,11 +43,11 @@ export class LoginComponent {
       .subscribe(result => this.OnLoginResultReceived(result));
   }
 
-  public GotoRegisterPage() {
+  public GotoRegisterPage() : void {
     this.router.navigateByUrl('/register');
   }
 
-  private OnLoginResultReceived(result: ServerResponse<LoginResponse>) {
+  private OnLoginResultReceived(result: ServerResponse<LoginResponse>) : void {
     if (!result.isSuccessfull) {
       this.snackbar.openSnackBar(result.errorMessage); 
     }
