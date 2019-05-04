@@ -1,10 +1,14 @@
 <mat-card class="chat_wrapper">
 
-  <mat-card-content>
+  <mat-card-content class="chat_wrapper_content">
 
     <div class="conversations_wrapper">
       <div class="conversations_wrapper_searchbar">
-        Search bar
+        <mat-form-field appearance="fill">
+          <mat-label>Search</mat-label>
+          <input matInput placeholder="Search..." type="search">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
       </div>
 
       <div class="conversations_wrapper_conversations">
@@ -17,12 +21,14 @@
 
       <div class="messages_wrapper_conversationinfo">
 
-        <div class="conversationinfo--name">
-          <span>Name</span>
-        </div>
+        <div class="conversationinfo--nameAndAdditional">
 
-        <div class="conversationinfo--members">
-          <button class="conversationinfo_membersbutton">54 Members</button>
+          <span>Name</span>
+
+          <div class="conversationinfo--members">
+            <button class="conversationinfo_membersbutton">54 Members</button>
+          </div>
+
         </div>
 
         <button class="messages_wrapper_optionsbutton">Options</button>
