@@ -1,6 +1,3 @@
-*{
-  color:white;
-}
 
 .validate_wrapper {
   display: flex;
@@ -19,13 +16,19 @@
   margin: 0 5px;
 }
 
+.register_head {
+  height: 240px;
+  background-color: cadetblue;
+}
+
+.register_page {
+  height: 960px;
+}
+
 .register_wrapper {
-  background-image: url('../../../dist/Assets/Login_Background.jpg');
-  background-repeat: round;
-  min-height: 2000px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: block;
+  text-align: center;
+  min-height: 1200px;
 }
 
 .register_info {
@@ -41,10 +44,28 @@
   font-weight: lighter;
 }
 
+.register_card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: -131px auto 90px;
+  width: 40%;
+}
+
+.register_card--logo {
+  background-image: url('/Assets/MainLogo.png');
+  background-size: cover;
+}
+
+
 .register_input{
   width: 50%;
 }
 
 .validate_fieldswrapper {
+  width: 100%;
+}
+
+.register_card--content{
   width: 100%;
 }

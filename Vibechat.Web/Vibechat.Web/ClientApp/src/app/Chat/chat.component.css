@@ -1,0 +1,29 @@
+.chat_wrapper{
+  display:flex;
+  flex-direction:row;
+  width: 90%;
+  margin-left: 2.6666666666666%;
+  margin-top:1%;
+  min-height: 670px;
+}
+
+.conversations_wrapper{
+  width: 30%;
+}
+
+.messages_wrapper{
+  width: 70%;
+  height: 100%;
+}
+
+.messages_wrapper_conversationinfo{
+  height: 20%;
+}
+
+.messages_wrapper_chatmessages {
+  height: 60%;
+}
+
+.messages_wrapper_chat-input{
+  height: 20%;
+}
