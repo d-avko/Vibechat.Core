@@ -1,4 +1,5 @@
 ﻿using System;
+using VibeChat.Web.ChatData;
 
 namespace Vibechat.Web.ApiModels
 {
@@ -13,26 +14,7 @@ namespace Vibechat.Web.ApiModels
         /// </summary>
         public string Token { get; set; }
 
-        /// <summary>
-        /// Additional info about the user
-        /// </summary>
-        public string Firstname { get; set; }
-
-        public string Lastname { get; set; }
-
-        public string UserName { get; set; }
-
-        public string ID { get; set; }
-
-        public string ImageUrl { get; set; }
-
-        public string Email { get; set; }
-
-        public string ProfilePicRgb { get; set; }
-
-        public string ProfilePicImageURL { get; set; }
-
-        public DateTime LastSeen { get; set; }
+        public UserInfo Info { get; set; }
 
     }
 }

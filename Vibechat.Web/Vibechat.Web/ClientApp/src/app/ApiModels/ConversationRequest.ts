@@ -1,5 +1,5 @@
-export class ConversationRequest {
-    public constructor(init ?: Partial<ConversationRequest>){
+export class ConversationsRequest {
+    public constructor(init ?: Partial<ConversationsRequest>){
         (<any>Object).assign(this, init);
     }
 

@@ -106,7 +106,7 @@ namespace Vibechat.Web.Services
                           {
                               Id = SecondDialogueUser.Id,
                               Name = SecondDialogueUser.FirstName,
-                              ImageUrl = SecondDialogueUser.ProfilePicImageURL,
+                              ProfilePicImageUrl = SecondDialogueUser.ProfilePicImageURL,
                               LastName = SecondDialogueUser.LastName,
                               LastSeen = SecondDialogueUser.LastSeen,
                               UserName = SecondDialogueUser.UserName,
@@ -210,7 +210,7 @@ namespace Vibechat.Web.Services
                                 LastName = DialogueUser.LastName,
                                 LastSeen = DialogueUser.LastSeen,
                                 UserName = DialogueUser.UserName,
-                                ImageUrl = DialogueUser.ProfilePicImageURL,
+                                ProfilePicImageUrl = DialogueUser.ProfilePicImageURL,
                                 IsOnline = DialogueUser.IsOnline,
                                 ConnectionId = DialogueUser.ConnectionId
                             },
@@ -218,7 +218,7 @@ namespace Vibechat.Web.Services
                             PictureBackground = conv.PictureBackgroundRgb,
                             ImageUrl = conv.ImageUrl,
                             Participants = (await GetConversationParticipants(new GetParticipantsApiModel() { ConvId = conv.ConvID })).Participants,
-                            Messages = (await GetConversationMessages(new GetMessagesApiModel() { ConvID = conv.ConvID })).Messages
+                            Messages = (await GetConversationMessages(new GetMessagesApiModel() { ConvID = conv.ConvID }, whoAccessedId)).Messages
                         }
                     );
             }
@@ -259,7 +259,7 @@ namespace Vibechat.Web.Services
                      Name = UserConv.User.FirstName,
                      UserName = UserConv.User.UserName,
                      ProfilePicRgb = UserConv.User.ProfilePicRgb,
-                     ImageUrl = UserConv.User.ProfilePicImageURL,
+                     ProfilePicImageUrl = UserConv.User.ProfilePicImageURL,
                      ConnectionId = UserConv.User.ConnectionId,
                      IsOnline = UserConv.User.IsOnline
                  }).ToList();
@@ -321,7 +321,7 @@ namespace Vibechat.Web.Services
                     Name = msg.User.FirstName,
                     UserName = msg.User.UserName,
                     ProfilePicRgb = msg.User.ProfilePicRgb,
-                    ImageUrl = msg.User.ProfilePicImageURL,
+                    ProfilePicImageUrl = msg.User.ProfilePicImageURL,
                     IsOnline = msg.User.IsOnline,
                     ConnectionId = msg.User.ConnectionId
                 }
@@ -383,7 +383,7 @@ namespace Vibechat.Web.Services
                     {
                         Id = user.Id,
                         Name = user.FirstName,
-                        ImageUrl = user.ProfilePicImageURL,
+                        ProfilePicImageUrl = user.ProfilePicImageURL,
                         LastName = user.LastName,
                         LastSeen = user.LastSeen,
                         UserName = user.UserName,
@@ -464,16 +464,17 @@ namespace Vibechat.Web.Services
 
             return new LoginResultApiModel()
             {
-                Firstname = user.FirstName,
-                LastSeen = user.LastSeen,
-                ProfilePicImageURL = user.ProfilePicImageURL,
-                ProfilePicRgb = user.ProfilePicRgb,
-                Lastname = user.LastName,
-                Email = user.Email,
-                UserName = user.UserName,
+                Info = new UserInfo()
+                {
+                    Name = user.FirstName,
+                    LastSeen = user.LastSeen,
+                    ProfilePicImageUrl = user.ProfilePicImageURL,
+                    ProfilePicRgb = user.ProfilePicRgb,
+                    LastName = user.LastName,
+                    UserName = user.UserName,
+                    Id = user.Id
+                },
                 Token = user.GenerateJwtToken(),
-                ID = user.Id,
-                ImageUrl = user.ProfilePicImageURL
             };
         }
 
@@ -550,7 +551,7 @@ namespace Vibechat.Web.Services
                 User = new UserInfo()
                 {
                     Id = FoundUser.Id,
-                    ImageUrl = FoundUser.ProfilePicImageURL,
+                    ProfilePicImageUrl = FoundUser.ProfilePicImageURL,
                     LastName = FoundUser.LastName,
                     LastSeen = FoundUser.LastSeen,
                     Name = FoundUser.FirstName,
@@ -561,6 +562,24 @@ namespace Vibechat.Web.Services
                 }
             };
 
+        }
+
+        public async Task<UserInApplication> GetUserById(string userId)
+        {
+            if (userId == null)
+            {
+                throw new FormatException("Provided user was null");
+            }
+
+            var FoundUser = await mContext.Users.FindAsync(userId).ConfigureAwait(false);
+
+            if (FoundUser == null)
+            {
+                throw new FormatException("User was not found");
+            }
+
+
+            return FoundUser;
         }
 
         public async Task<UsersByNickNameResultApiModel> FindUsersByNickName(UsersByNickNameApiModel credentials)

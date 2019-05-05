@@ -7,6 +7,8 @@ import { ServerResponse } from '../ApiModels/ServerResponse';
 import { LoginResponse } from '../ApiModels/LoginResponse';
 import { LoginRequest } from '../ApiModels/LoginRequest';
 import { Router } from '@angular/router';
+import { Cache } from '../Auth/Cache';
+import { ApiRequestsBuilder } from '../Requests/ApiRequestsBuilder';
 
 @Component({
   selector: 'login-view',
@@ -18,20 +20,18 @@ export class LoginComponent {
   private usernameOrEmail: FormControl;
   private password: FormControl;
 
-  protected httpClient: HttpClient;
-  protected baseUrl: string;
   protected snackbar: SnackBarHelper;
   protected router: Router;
+  protected requestsBuilder: ApiRequestsBuilder;
 
   public canLogIn: boolean = true;
 
-  constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string, snackbar: MatSnackBar, router: Router ) {
-    this.httpClient = http;
-    this.baseUrl = baseUrl;
+  constructor(requestsBuilder: ApiRequestsBuilder, snackbar: MatSnackBar, router: Router ) {
     this.usernameOrEmail = new FormControl('', Validators.required);
     this.password = new FormControl('', Validators.required);
     this.snackbar = new SnackBarHelper(snackbar);
     this.router = router;
+    this.requestsBuilder = requestsBuilder;
   }
 
   public Login(): void {
@@ -39,19 +39,25 @@ export class LoginComponent {
 
     let credentials = new LoginRequest({ UserNameOrEmail: this.usernameOrEmail.value, Password: this.password.value })
 
-    this.httpClient.post<ServerResponse<LoginResponse>>(this.baseUrl + "api/login", credentials)
-      .subscribe(result => this.OnLoginResultReceived(result));
+    this.requestsBuilder.LoginRequest(credentials).subscribe(result => this.OnLoginResultReceived(result));
   }
 
   public GotoRegisterPage() : void {
     this.router.navigateByUrl('/register');
   }
 
-  private OnLoginResultReceived(result: ServerResponse<LoginResponse>) : void {
+  private OnLoginResultReceived(result: ServerResponse<LoginResponse>): void {
+
     if (!result.isSuccessfull) {
-      this.snackbar.openSnackBar(result.errorMessage); 
+      this.snackbar.openSnackBar(result.errorMessage);
+      return;
     }
+
     this.canLogIn = true;
+
+    Cache.OnUserLoggedIn(result.response);
+
+    this.router.navigateByUrl('/chat');
   }
 
 }

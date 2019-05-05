@@ -10,8 +10,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Threading.Tasks;
+using Vibechat.Web.AuthHelpers;
 using Vibechat.Web.Services;
 using VibeChat.Web;
 using VibeChat.Web.UserProviders;
@@ -111,6 +113,10 @@ namespace Vibechat.Web
             services.AddScoped<DatabaseService, DatabaseService>();
 
             services.AddSingleton<ICustomHubUserIdProvider, DefaultUserIdProvider>();
+
+            services.AddScoped<ITokenClaimValidator, JwtTokenClaimValidator>();
+
+            services.AddScoped<JwtSecurityTokenHandler, JwtSecurityTokenHandler>();
 
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>

@@ -1,21 +1,21 @@
 export class UserInfo {
 
-  public Id: string;
+  public id: string;
 
-  public Name: string;
+  public name: string;
 
-  public LastName: string;
+  public lastName: string;
 
-  public UserName: string;
+  public userName: string;
 
-  public LastSeen: Date;
+  public lastSeen: Date;
 
-  public ProfilePicRgb: string;
+  public profilePicRgb: string;
 
-  public ImageUrl: string;
+  public imageUrl: string;
 
-  public ConnectionId: string;
+  public connectionId: string;
 
-  public IsOnline: boolean;
+  public isOnline: boolean;
 
 }
