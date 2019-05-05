@@ -27,19 +27,23 @@
   <ItemGroup>
     <None Remove="ClientApp\src\app\ApiModels\ConversationRequest.ts" />
     <None Remove="ClientApp\src\app\ApiModels\ConversationResponse.ts" />
+    <None Remove="ClientApp\src\app\Auth\Cache.ts" />
     <None Remove="ClientApp\src\app\Chat\chat.component.ts" />
     <None Remove="ClientApp\src\app\Data\ConversationTemplate.ts" />
     <None Remove="ClientApp\src\app\Data\Message.ts" />
     <None Remove="ClientApp\src\app\Data\UserInfo.ts" />
+    <None Remove="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
   </ItemGroup>
 
   <ItemGroup>
     <TypeScriptCompile Include="ClientApp\src\app\ApiModels\ConversationRequest.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\ApiModels\ConversationResponse.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Auth\Cache.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Chat\chat.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationTemplate.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\Message.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\UserInfo.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

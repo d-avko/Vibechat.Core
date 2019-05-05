@@ -35,7 +35,7 @@ namespace VibeChat.Web.ChatData
         /// <summary>
         /// Thumbnail picture URL
         /// </summary>
-        public string ImageUrl { get; set; }
+        public string ProfilePicImageUrl { get; set; }
 
         /// <summary>
         /// Connection id needed in signalR

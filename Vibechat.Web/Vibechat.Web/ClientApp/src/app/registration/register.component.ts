@@ -6,6 +6,7 @@ import { RegisterRequest } from '../ApiModels/RegisterRequest';
 import { ServerResponse } from '../ApiModels/ServerResponse';
 import { LoginComponent } from '../login/login.component';
 import { Router } from '@angular/router';
+import { ApiRequestsBuilder } from '../Requests/ApiRequestsBuilder';
 
 @Component({
   selector: 'register-view',
@@ -20,9 +21,9 @@ export class RegisterComponent extends LoginComponent {
 
   public canLogOut: boolean = false;
 
-  constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string, snackbar: MatSnackBar, router: Router) {
+  constructor(requestsBuilder: ApiRequestsBuilder, snackbar: MatSnackBar, router: Router) {
 
-    super(http, baseUrl, snackbar, router);
+    super(requestsBuilder, snackbar, router);
 
     this.registerGroup = new FormGroup(
       {
@@ -56,8 +57,7 @@ export class RegisterComponent extends LoginComponent {
 
     this.canRegister = false;
 
-    this.httpClient.post<ServerResponse<string>>(this.baseUrl + "api/register", credentials)
-      .subscribe(result => this.OnRegisterResultReceived(result));
+    this.requestsBuilder.RegisterRequest(credentials).subscribe(result => this.OnRegisterResultReceived(result));
   }
 
   public GotoLoginScreen() {

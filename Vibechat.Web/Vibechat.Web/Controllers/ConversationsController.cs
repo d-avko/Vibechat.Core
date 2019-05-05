@@ -86,7 +86,7 @@ namespace VibeChat.Web.Controllers
             {
                 var result = await mDbService.GetConversationInformation(
                     UserProvided, 
-                    User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserClaimName)
+                    User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
                     .Value);
 
                 return new ResponseApiModel<ConversationInfoResultApiModel>()
@@ -143,7 +143,7 @@ namespace VibeChat.Web.Controllers
             {
                 var result = await mDbService.GetConversationMessages(
                     convInfo,
-                    User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserClaimName)
+                    User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
                     .Value);
 
                 return new ResponseApiModel<GetMessagesResultApiModel>()
@@ -173,7 +173,7 @@ namespace VibeChat.Web.Controllers
             {
                 var result = await mDbService.GetConversationById(
                     convInfo,
-                    User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserClaimName)
+                    User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
                     .Value);
 
                 return new ResponseApiModel<GetConversationByIdResultApiModel>()

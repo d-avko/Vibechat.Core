@@ -24,13 +24,12 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                await mDbService.LogInAsync(loginCredentials);
+                var result = await mDbService.LogInAsync(loginCredentials);
 
                 return new ResponseApiModel<LoginResultApiModel>()
                 {
                     IsSuccessfull = true,
-                    ErrorMessage = null,
-                    Response = null
+                    Response = result
                 };
             }
             catch (Exception ex)
@@ -39,7 +38,6 @@ namespace VibeChat.Web.Controllers
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
-                    Response = null
                 };
             }
         }
@@ -53,9 +51,7 @@ namespace VibeChat.Web.Controllers
 
                 return new ResponseApiModel<string>()
                 {
-                    IsSuccessfull = true,
-                    ErrorMessage = null,
-                    Response = null
+                    IsSuccessfull = true
                 };
             }
             catch (Exception ex)
@@ -64,7 +60,6 @@ namespace VibeChat.Web.Controllers
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
-                    Response = null
                 };
             }
         }
