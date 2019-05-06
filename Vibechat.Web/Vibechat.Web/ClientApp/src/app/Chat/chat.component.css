@@ -16,7 +16,7 @@
 .conversations_wrapper {
   display: flex;
   flex-direction:column;
-  width: 40%;
+  width: 30%;
   height: 100%;
 }
 
@@ -32,7 +32,7 @@
 .messages_wrapper {
   display:flex;
   flex-direction:column;
-  width: 60%;
+  width: 70%;
   height: 100%;
 }
 
@@ -55,4 +55,15 @@
 
 .messages_wrapper_chat-input{
   height: 10%;
+}
+
+.message_content_lastmessage{
+  width: 70%;
+  color: gray;
+}
+
+.message_content_lastmessageDate {
+  width: 30%;
+  color: lightgray;
+  padding-left: 5%;
 }

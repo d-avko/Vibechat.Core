@@ -1,14 +1,13 @@
 import { Component, Inject } from "@angular/core";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
-import { HttpClient } from "@angular/common/http";
 import { ConversationResponse } from "../ApiModels/ConversationResponse";
-import { ConversationsRequest } from "../ApiModels/ConversationRequest";
 import { Cache } from "../Auth/Cache";
 import { ServerResponse } from "../ApiModels/ServerResponse";
 import { MatSnackBar } from "@angular/material";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
 import { Router } from "@angular/router";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
+import { ConversationsFormatter } from "../Data/ConversationsFormatter";
 
 @Component({
   selector: 'chat-root',
@@ -25,11 +24,16 @@ export class ChatComponent {
 
   protected requestsBuilder: ApiRequestsBuilder;
 
+  public formatter: ConversationsFormatter;
 
-  constructor(requestsBuilder: ApiRequestsBuilder, snackbar: MatSnackBar, router: Router) {
+
+  constructor(requestsBuilder: ApiRequestsBuilder, snackbar: MatSnackBar, router: Router, formatter: ConversationsFormatter) {
+
     this.snackbar = new SnackBarHelper(snackbar);
     this.router = router;
     this.requestsBuilder = requestsBuilder;
+    this.Conversations = new Array<ConversationTemplate>();
+    this.formatter = formatter;
 
     if (!Cache.IsAuthenticated) {
 

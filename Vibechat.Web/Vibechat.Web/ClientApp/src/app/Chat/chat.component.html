@@ -13,32 +13,27 @@
 
       <mat-list class="conversations_wrapper_conversations">
         <h3 mat-subheader>Conversations</h3>
-        <mat-list-item>
-          <img matListAvatar src="/Assets/Shiba.jpg" alt="...">
-          <h3 matLine> kek </h3>
-          <p matLine>
-            <span> onetwothree </span>
-            <span class="demo-2"> -- shieeeeeeeeet </span>
-          </p>
+
+        <mat-list-item *ngFor="let conversation of Conversations">
+
+          <img matListAvatar *ngIf="conversation.isGroup; else dialogue" src="{{conversation.imageUrl}}" alt="Conversation logo">
+
+          <ng-template #dialogue>
+            <img matListAvatar src="{{conversation.dialogueUser.imageUrl}}" alt="Dialogue logo">
+          </ng-template>
+
+          <h3 matLine> {{conversation.name}} </h3>
+
+            <div matLine class="message_content">
+              <span class="message_content_lastmessage">
+                {{formatter.GetLastMessageFormatted(conversation)}}
+              </span>
+              <span class="message_content_lastmessageDate">
+                {{formatter.GetLastMessageDateFormatted(conversation)}}
+              </span>
+            </div>
         </mat-list-item>
 
-        <mat-list-item>
-          <img matListAvatar src="/Assets/Shiba.jpg" alt="...">
-          <h3 matLine> kek </h3>
-          <p matLine>
-            <span> onetwothree </span>
-            <span class="demo-2"> -- shieeeeeeeeet </span>
-          </p>
-        </mat-list-item>
-
-        <mat-list-item>
-          <img matListAvatar src="/Assets/Shiba.jpg" alt="...">
-          <h3 matLine> kek </h3>
-          <p matLine>
-            <span> onetwothree </span>
-            <span class="demo-2"> -- shieeeeeeeeet </span>
-          </p>
-        </mat-list-item>
       </mat-list>
 
     </div>

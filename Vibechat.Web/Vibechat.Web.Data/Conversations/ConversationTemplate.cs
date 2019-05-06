@@ -21,11 +21,6 @@ namespace VibeChat.Web.ChatData
         public string Name { get; set; }
 
         /// <summary>
-        /// Background color on picture by default
-        /// </summary>
-        public string PictureBackground { get; set; }
-
-        /// <summary>
         /// if the image is set, this points to url where the image is.
         /// </summary>  
         public string ImageUrl { get; set; }

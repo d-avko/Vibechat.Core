@@ -6,4 +6,4 @@ var ChatMessage = /** @class */ (function () {
     return ChatMessage;
 }());
 exports.ChatMessage = ChatMessage;
-//# sourceMappingURL=Message.js.map
+//# sourceMappingURL=ChatMessage.js.map

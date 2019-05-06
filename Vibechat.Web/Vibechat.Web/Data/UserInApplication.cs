@@ -12,11 +12,6 @@ namespace VibeChat.Web
         public DateTime LastSeen { get; set; }
 
         /// <summary>
-        /// User's circle color
-        /// </summary>
-        public string ProfilePicRgb { get; set; }
-
-        /// <summary>
         /// Url that points to a place the image is.
         /// </summary>
         public string ProfilePicImageURL { get; set; }

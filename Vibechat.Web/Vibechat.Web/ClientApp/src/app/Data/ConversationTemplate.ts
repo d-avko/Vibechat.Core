@@ -1,14 +1,14 @@
 import { UserInfo } from "./UserInfo";
-import { ChatMessage } from "./Message";
+import { ChatMessage } from "./ChatMessage";
+import { Cache } from "../Auth/Cache";
 
 export class ConversationTemplate {
+
   public conversationID: number;
 
   public dialogueUser: UserInfo;
 
   public name: string;
-
-  public pictureBackground: string;
 
   public imageUrl: string;
 

@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Vibechat.Web.AuthHelpers;
 using Vibechat.Web.Services;
+using Vibechat.Web.Services.ChatDataProviders;
 using VibeChat.Web;
 using VibeChat.Web.UserProviders;
 
@@ -117,6 +118,8 @@ namespace Vibechat.Web
             services.AddScoped<ITokenClaimValidator, JwtTokenClaimValidator>();
 
             services.AddScoped<JwtSecurityTokenHandler, JwtSecurityTokenHandler>();
+
+            services.AddSingleton<IChatDataProvider, DefaultChatDataProvider>();
 
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
