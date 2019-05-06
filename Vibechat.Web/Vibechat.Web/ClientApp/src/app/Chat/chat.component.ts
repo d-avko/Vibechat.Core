@@ -1,4 +1,4 @@
-import { Component, Inject } from "@angular/core";
+import { Component } from "@angular/core";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { ConversationResponse } from "../ApiModels/ConversationResponse";
 import { Cache } from "../Auth/Cache";
@@ -58,5 +58,21 @@ export class ChatComponent {
     }
 
     this.Conversations = response.response.conversations;
+  }
+
+  public IsCurrentConversation(conversation: ConversationTemplate): boolean {
+    if (Cache.CurrentConversation == null)
+      return false;
+
+    return Cache.CurrentConversation.conversationID == conversation.conversationID;
+  }
+
+  public ChangeConversation(conversation: ConversationTemplate): void {
+    if (conversation == Cache.CurrentConversation) {
+      Cache.CurrentConversation = null;
+      return;
+    }
+
+    Cache.CurrentConversation = conversation;
   }
 }

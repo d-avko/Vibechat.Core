@@ -67,3 +67,8 @@
   color: lightgray;
   padding-left: 5%;
 }
+
+.selected-conversation {
+  background-color: dodgerblue;
+  color:white;
+}
