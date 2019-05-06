@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Vibechat.Web.ApiModels;
+using Vibechat.Web.Services.ChatDataProviders;
 using VibeChat.Web;
 using VibeChat.Web.ApiModels;
 using VibeChat.Web.ChatData;
@@ -15,15 +16,18 @@ namespace Vibechat.Web.Services
 {
     public class DatabaseService
     {
-        public DatabaseService(ApplicationDbContext mContext, UserManager<UserInApplication> mUserManager)
+        public DatabaseService(ApplicationDbContext mContext, UserManager<UserInApplication> mUserManager, IChatDataProvider chatDataProvider)
         {
             this.mContext = mContext;
             this.mUserManager = mUserManager;
+            this.chatDataProvider = chatDataProvider;
         }
 
         protected ApplicationDbContext mContext;
 
         protected UserManager<UserInApplication> mUserManager;
+
+        protected IChatDataProvider chatDataProvider;
 
         #region Conversations
 
@@ -70,8 +74,7 @@ namespace Vibechat.Web.Services
             {
                 IsGroup = convInfo.IsGroup,
                 Name = convInfo.IsGroup ? convInfo.ConvName : SecondDialogueUser.UserName,
-                PictureBackgroundRgb = BackgroundColors.GetGroupBackground(),
-                ImageUrl = convInfo.ImageUrl
+                ImageUrl = convInfo.ImageUrl ?? chatDataProvider.GetGroupPictureUrl()
             };
 
             await mContext.Conversations.AddAsync(ConversationToAdd).ConfigureAwait(false);
@@ -110,15 +113,13 @@ namespace Vibechat.Web.Services
                               LastName = SecondDialogueUser.LastName,
                               LastSeen = SecondDialogueUser.LastSeen,
                               UserName = SecondDialogueUser.UserName,
-                              ProfilePicRgb = SecondDialogueUser.ProfilePicRgb,
                               ConnectionId = SecondDialogueUser.ConnectionId,
                               IsOnline = SecondDialogueUser.IsOnline
                           },
 
                         ImageUrl = ConversationToAdd.ImageUrl,
                         IsGroup = ConversationToAdd.IsGroup,
-                        Name = ConversationToAdd.Name,
-                        PictureBackground = ConversationToAdd.PictureBackgroundRgb
+                        Name = ConversationToAdd.Name
                     }
             };
 
@@ -206,7 +207,6 @@ namespace Vibechat.Web.Services
                             {
                                 Id = DialogueUser.Id,
                                 Name = DialogueUser.FirstName,
-                                ProfilePicRgb = DialogueUser.ProfilePicRgb,
                                 LastName = DialogueUser.LastName,
                                 LastSeen = DialogueUser.LastSeen,
                                 UserName = DialogueUser.UserName,
@@ -215,7 +215,6 @@ namespace Vibechat.Web.Services
                                 ConnectionId = DialogueUser.ConnectionId
                             },
                             IsGroup = conv.IsGroup,
-                            PictureBackground = conv.PictureBackgroundRgb,
                             ImageUrl = conv.ImageUrl,
                             Participants = (await GetConversationParticipants(new GetParticipantsApiModel() { ConvId = conv.ConvID })).Participants,
                             Messages = (await GetConversationMessages(new GetMessagesApiModel() { ConvID = conv.ConvID }, whoAccessedId)).Messages
@@ -258,7 +257,6 @@ namespace Vibechat.Web.Services
                      LastSeen = UserConv.User.LastSeen,
                      Name = UserConv.User.FirstName,
                      UserName = UserConv.User.UserName,
-                     ProfilePicRgb = UserConv.User.ProfilePicRgb,
                      ProfilePicImageUrl = UserConv.User.ProfilePicImageURL,
                      ConnectionId = UserConv.User.ConnectionId,
                      IsOnline = UserConv.User.IsOnline
@@ -298,7 +296,7 @@ namespace Vibechat.Web.Services
 
             //only member of conversation could request messages (there should exist other calls for non-members).
 
-            if (members.Participants.Find(x => x.UserName == whoAccessedId) == null)
+            if (members.Participants.Find(x => x.Id == whoAccessedId) == null)
                 throw unAuthorizedError;
 
             // get related messages
@@ -320,7 +318,6 @@ namespace Vibechat.Web.Services
                     LastSeen = msg.User.LastSeen,
                     Name = msg.User.FirstName,
                     UserName = msg.User.UserName,
-                    ProfilePicRgb = msg.User.ProfilePicRgb,
                     ProfilePicImageUrl = msg.User.ProfilePicImageURL,
                     IsOnline = msg.User.IsOnline,
                     ConnectionId = msg.User.ConnectionId
@@ -387,14 +384,12 @@ namespace Vibechat.Web.Services
                         LastName = user.LastName,
                         LastSeen = user.LastSeen,
                         UserName = user.UserName,
-                        ProfilePicRgb = user.ProfilePicRgb,
                         IsOnline = user.IsOnline,
                         ConnectionId = user.ConnectionId
                     },
                     ImageUrl = conversation.ImageUrl,
                     IsGroup = conversation.IsGroup,
-                    Name = conversation.Name,
-                    PictureBackground = conversation.PictureBackgroundRgb
+                    Name = conversation.Name
                 }
 
             };
@@ -469,7 +464,6 @@ namespace Vibechat.Web.Services
                     Name = user.FirstName,
                     LastSeen = user.LastSeen,
                     ProfilePicImageUrl = user.ProfilePicImageURL,
-                    ProfilePicRgb = user.ProfilePicRgb,
                     LastName = user.LastName,
                     UserName = user.UserName,
                     Id = user.Id
@@ -515,7 +509,7 @@ namespace Vibechat.Web.Services
                 Email = userToRegister.Email,
                 FirstName = userToRegister.FirstName,
                 LastName = userToRegister.LastName,
-                ProfilePicRgb = BackgroundColors.GetProfilePicRgb(),
+                ProfilePicImageURL = chatDataProvider.GetProfilePictureUrl()
             };
 
 
@@ -556,7 +550,6 @@ namespace Vibechat.Web.Services
                     LastSeen = FoundUser.LastSeen,
                     Name = FoundUser.FirstName,
                     UserName = FoundUser.UserName,
-                    ProfilePicRgb = FoundUser.ProfilePicRgb,
                     ConnectionId = FoundUser.ConnectionId,
                     IsOnline = FoundUser.IsOnline
                 }
@@ -602,7 +595,6 @@ namespace Vibechat.Web.Services
                 {
                     ID = FoundUser.Id,
                     Username = FoundUser.UserName,
-                    ProfilePicRgb = FoundUser.ProfilePicRgb,
                     FirstName = FoundUser.FirstName,
                     LastName = FoundUser.LastName
                 }).ToList()

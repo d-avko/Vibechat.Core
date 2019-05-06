@@ -33,7 +33,7 @@ export class ApiRequestsBuilder {
   public UpdateConversationsRequest(token: string, userId: string): Observable<ServerResponse<ConversationResponse>> {
 
     let headers = new HttpHeaders();
-    headers.set('Authorization Bearer', token);
+    headers = headers.append('Authorization', 'Bearer ' + token);
 
     return this.httpClient.post<ServerResponse<ConversationResponse>>(
       this.baseUrl + 'api/Conversations/GetConversationInfo',

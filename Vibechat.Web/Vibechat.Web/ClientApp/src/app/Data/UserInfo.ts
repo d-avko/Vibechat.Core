@@ -10,8 +10,6 @@ export class UserInfo {
 
   public lastSeen: Date;
 
-  public profilePicRgb: string;
-
   public imageUrl: string;
 
   public connectionId: string;

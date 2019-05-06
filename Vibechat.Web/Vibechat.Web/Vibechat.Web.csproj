@@ -29,8 +29,9 @@
     <None Remove="ClientApp\src\app\ApiModels\ConversationResponse.ts" />
     <None Remove="ClientApp\src\app\Auth\Cache.ts" />
     <None Remove="ClientApp\src\app\Chat\chat.component.ts" />
+    <None Remove="ClientApp\src\app\Data\ChatMessage.ts" />
+    <None Remove="ClientApp\src\app\Data\ConversationsFormatter.ts" />
     <None Remove="ClientApp\src\app\Data\ConversationTemplate.ts" />
-    <None Remove="ClientApp\src\app\Data\Message.ts" />
     <None Remove="ClientApp\src\app\Data\UserInfo.ts" />
     <None Remove="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
   </ItemGroup>
@@ -40,10 +41,16 @@
     <TypeScriptCompile Include="ClientApp\src\app\ApiModels\ConversationResponse.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Auth\Cache.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Chat\chat.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationsFormatter.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationTemplate.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\Data\Message.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Data\ChatMessage.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\UserInfo.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ClientApp\dist\Groups\" />
+    <Folder Include="ClientApp\dist\Users\" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

@@ -11,6 +11,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { RegisterComponent } from './registration/register.component';
 import { ChatComponent } from './Chat/chat.component';
 import { ApiRequestsBuilder } from './Requests/ApiRequestsBuilder';
+import { ConversationsFormatter } from './Data/ConversationsFormatter';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,7 @@ import { ApiRequestsBuilder } from './Requests/ApiRequestsBuilder';
     ReactiveFormsModule,
     BrowserAnimationsModule
   ],
-  providers: [ ApiRequestsBuilder ],
+  providers: [ ApiRequestsBuilder, ConversationsFormatter ],
   bootstrap: [AppComponent]
 })
 export class AppModule {}
