@@ -40,19 +40,27 @@
 
     <div class="messages_wrapper">
 
-      <div class="messages_wrapper_conversationinfo">
+      <div class="messages_wrapper_conversationinfo" [ngClass]="{'messages_wrapper_conversationinfo--activated': IsConversationSelected()}">
 
-        <div class="conversationinfo--nameAndAdditional">
+        <div *ngIf="IsConversationSelected()" class="conversation-header">
 
-          <span>Name</span>
+          <button mat-button class="conversation-viewinfoButton">
 
-          <div class="conversationinfo--members">
-            <button class="conversationinfo_membersbutton">54 Members</button>
-          </div>
+            <span class="conversation-header-name">
+              {{GetCurrentConversationName()}}
+            </span>
+
+            <span class="conversation-header-participants" *ngIf="IsCurrentConversationGroup()">
+              {{GetCurrentConversationMembersFormatted()}}
+            </span>
+
+          </button>
+
+          <button mat-button class="messages_wrapper_optionsbutton">
+            <mat-icon>expand_more</mat-icon>
+          </button>
 
         </div>
-
-        <button class="messages_wrapper_optionsbutton">Options</button>
 
       </div>
 

@@ -20,9 +20,10 @@
   height: 100%;
 }
 
-.conversations_wrapper_searchbar{
+.conversations_wrapper_searchbar {
   height: 10%;
   padding: 20px;
+  margin-left: 20%;
 }
 
 .conversations_wrapper_conversations{
@@ -37,16 +38,13 @@
 }
 
 .messages_wrapper_conversationinfo{
-  display:flex;
-  flex-direction:row;
+  display:block;
   height: 8%;
 }
 
-.conversationinfo--nameAndAdditional {
+.conversation-header {
   display: flex;
-  flex-direction: column;
-  width: 85%;
-  padding:1%;
+  flex-direction: row;
 }
 
 .messages_wrapper_chatmessages {
@@ -57,7 +55,11 @@
   height: 10%;
 }
 
-.message_content_lastmessage{
+.messages_wrapper_optionsbutton{
+  width: 10%;
+}
+
+.message_content_lastmessage {
   width: 70%;
   color: gray;
 }
@@ -69,6 +71,42 @@
 }
 
 .selected-conversation {
-  background-color: dodgerblue;
-  color:white;
+  background-color: cadetblue;
+  color: white;
+}
+
+.conversation-row1{
+  display:flex;
+  flex-direction: row;
+}
+
+
+.conversation-header-name{
+  font-weight: bold;
+  font-size: 15px;
+  width: 30%;
+}
+
+.conversation-header-participants {
+  font-size: 14px;
+  padding-left: 3%;
+  width: 70%;
+}
+
+.messages_wrapper_conversationinfo--activated {
+  background-color: cadetblue;
+  color: white;
+}
+
+.rounded-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.conversation-viewinfoButton{
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 90%;
 }

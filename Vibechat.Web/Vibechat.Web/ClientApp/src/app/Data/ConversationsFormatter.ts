@@ -52,4 +52,10 @@ export class ConversationsFormatter{
       }
     }
   }
+
+  public GetConversationMembersFormatted(conversation: ConversationTemplate) {
+    let membersAmount = conversation.participants == null ? 0 : conversation.participants.length;
+
+    return membersAmount.toString() + " Member(s)";
+  }
 }

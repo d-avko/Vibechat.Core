@@ -67,6 +67,35 @@ export class ChatComponent {
     return Cache.CurrentConversation.conversationID == conversation.conversationID;
   }
 
+  public GetCurrentDialogueUserImageUrl() : string {
+    return Cache.CurrentConversation.dialogueUser.imageUrl;
+  }
+
+  public GetCurrentConversationImageUrl(): string {
+    return Cache.CurrentConversation.imageUrl;
+  }
+
+  public IsConversationSelected(): boolean {
+    return Cache.CurrentConversation != null;
+  }
+
+  public IsCurrentConversationGroup(): boolean {
+    return Cache.CurrentConversation.isGroup;
+  }
+
+  public GetCurrentConversationName(): string {
+
+    if (Cache.CurrentConversation.name == '' || Cache.CurrentConversation.name == null) {
+      return Cache.CurrentConversation.dialogueUser.userName;
+    }
+
+    return Cache.CurrentConversation.name;
+  }
+
+  public GetCurrentConversationMembersFormatted(): string {
+    return this.formatter.GetConversationMembersFormatted(Cache.CurrentConversation);
+  }
+
   public ChangeConversation(conversation: ConversationTemplate): void {
     if (conversation == Cache.CurrentConversation) {
       Cache.CurrentConversation = null;
