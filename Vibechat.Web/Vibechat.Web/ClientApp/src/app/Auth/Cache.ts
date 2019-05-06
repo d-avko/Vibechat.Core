@@ -1,8 +1,11 @@
 import { LoginResponse } from "../ApiModels/LoginResponse";
 import { UserInfo } from "../Data/UserInfo";
+import { ConversationTemplate } from "../Data/ConversationTemplate";
 
 export class Cache {
   public static UserCache: UserInfo;
+
+  public static CurrentConversation: ConversationTemplate;
 
   public static JwtToken: string;
 
