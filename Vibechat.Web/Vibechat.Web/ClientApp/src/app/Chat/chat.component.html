@@ -64,9 +64,39 @@
 
       </div>
 
-      <div class="messages_wrapper_chatmessages">
-        Messages
-      </div>
+      <mat-list class="messages_wrapper_chatmessages">
+
+        <mat-list-item *ngFor="let message for Messages">
+
+          <div class="messages_main">
+
+            <div class="messages_message_content">
+              <img src="{{message.user.imageUrl}}" />
+            </div>
+
+            <mat-list>
+
+              <mat-list-item *ngFor="let attachment for message.attachments">
+
+                <div *ngIf="IsImage(attachment); then image" />
+
+                <ng-template #image>
+
+                  <div class="image_attachment">
+                    <img src="{{attachment.contentUrl}}" />
+                  </div>
+
+                </ng-template>
+
+              </mat-list-item>
+
+            </mat-list>
+
+          </div>
+
+        </mat-list-item>
+
+      </mat-list>
 
       <div class="messages_wrapper_chat-input">
 

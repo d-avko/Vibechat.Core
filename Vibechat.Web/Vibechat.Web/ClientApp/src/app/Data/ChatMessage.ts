@@ -10,5 +10,5 @@ export class ChatMessage {
     
   public timeReceived: string;
 
-  public Attachments: Array<MessageAttachment>;
+  public attachments: Array<MessageAttachment>;
 }

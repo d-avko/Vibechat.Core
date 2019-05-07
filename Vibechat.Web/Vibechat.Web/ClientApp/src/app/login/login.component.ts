@@ -1,5 +1,4 @@
 import { Component, Inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { FormControl, Validators } from '@angular/forms';
 import { SnackBarHelper } from '../Snackbar/SnackbarHelper';
 import { MatSnackBar } from '@angular/material';

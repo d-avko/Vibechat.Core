@@ -119,3 +119,13 @@
   height: 100%;
   width: 90%;
 }
+
+.messages_message_content{
+  display: flex;
+  flex-direction: row;
+}
+
+.messages_main{
+  display: flex;
+  flex-direction: column;
+}
