@@ -8,6 +8,8 @@ import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
 import { Router } from "@angular/router";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { ConversationsFormatter } from "../Data/ConversationsFormatter";
+import { MessageAttachment } from "../Data/MessageAttachment";
+import { AttachmentKinds } from "../Data/AttachmentKinds";
 
 @Component({
   selector: 'chat-root',
@@ -81,6 +83,12 @@ export class ChatComponent {
 
   public IsCurrentConversationGroup(): boolean {
     return Cache.CurrentConversation.isGroup;
+  }
+
+  public IsImage(attachment: MessageAttachment) {
+
+    return attachment.attachmentKind == AttachmentKinds.Image;
+
   }
 
   public GetCurrentConversationName(): string {

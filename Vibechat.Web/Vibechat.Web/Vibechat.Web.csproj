@@ -29,6 +29,7 @@
     <None Remove="ClientApp\src\app\ApiModels\ConversationResponse.ts" />
     <None Remove="ClientApp\src\app\Auth\Cache.ts" />
     <None Remove="ClientApp\src\app\Chat\chat.component.ts" />
+    <None Remove="ClientApp\src\app\Data\AttachmentKinds.ts" />
     <None Remove="ClientApp\src\app\Data\ChatMessage.ts" />
     <None Remove="ClientApp\src\app\Data\ConversationsFormatter.ts" />
     <None Remove="ClientApp\src\app\Data\ConversationTemplate.ts" />
@@ -42,6 +43,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\ApiModels\ConversationResponse.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Auth\Cache.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Chat\chat.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Data\AttachmentKinds.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationsFormatter.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationTemplate.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ChatMessage.ts" />
