@@ -28,14 +28,9 @@ namespace VibeChat.Web.ChatData
         public DateTime LastSeen { get; set; }
 
         /// <summary>
-        /// Background of thumbnail(if no picture is set)
-        /// </summary>
-        public string ProfilePicRgb { get; set; }
-
-        /// <summary>
         /// Thumbnail picture URL
         /// </summary>
-        public string ProfilePicImageUrl { get; set; }
+        public string ImageUrl { get; set; }
 
         /// <summary>
         /// Connection id needed in signalR

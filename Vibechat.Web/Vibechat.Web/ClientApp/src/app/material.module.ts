@@ -14,6 +14,8 @@ import {
   MatSnackBarModule
 } from '@angular/material';
 
+import { ScrollDispatchModule } from '@angular/cdk/scrolling';
+
 @NgModule({
   imports: [
     MatSidenavModule,

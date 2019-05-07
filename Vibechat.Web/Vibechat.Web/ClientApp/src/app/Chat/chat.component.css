@@ -48,11 +48,15 @@
 }
 
 .messages_wrapper_chatmessages {
-  height: 60%;
+  height: 75%;
 }
 
 .messages_wrapper_chat-input{
-  height: 10%;
+  display: flex;
+  flex-direction: row;
+  align-items:center;
+  justify-content:center;
+  height: 17%;
 }
 
 .messages_wrapper_optionsbutton{
@@ -104,7 +108,12 @@
   border-radius: 50%;
 }
 
-.conversation-viewinfoButton{
+.input_field{
+  width: 300px;
+  padding: 30px;
+}
+
+.conversation-viewinfoButton {
   display: flex;
   flex-direction: row;
   height: 100%;

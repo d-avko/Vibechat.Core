@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Vibechat.Web.ApiModels;
+using Vibechat.Web.ChatData.Messages;
 using Vibechat.Web.Services.ChatDataProviders;
 using VibeChat.Web;
 using VibeChat.Web.ApiModels;
@@ -109,7 +110,7 @@ namespace Vibechat.Web.Services
                           {
                               Id = SecondDialogueUser.Id,
                               Name = SecondDialogueUser.FirstName,
-                              ProfilePicImageUrl = SecondDialogueUser.ProfilePicImageURL,
+                              ImageUrl = SecondDialogueUser.ProfilePicImageURL,
                               LastName = SecondDialogueUser.LastName,
                               LastSeen = SecondDialogueUser.LastSeen,
                               UserName = SecondDialogueUser.UserName,
@@ -210,14 +211,17 @@ namespace Vibechat.Web.Services
                                 LastName = DialogueUser.LastName,
                                 LastSeen = DialogueUser.LastSeen,
                                 UserName = DialogueUser.UserName,
-                                ProfilePicImageUrl = DialogueUser.ProfilePicImageURL,
+                                ImageUrl = DialogueUser.ProfilePicImageURL,
                                 IsOnline = DialogueUser.IsOnline,
                                 ConnectionId = DialogueUser.ConnectionId
                             },
                             IsGroup = conv.IsGroup,
                             ImageUrl = conv.ImageUrl,
                             Participants = (await GetConversationParticipants(new GetParticipantsApiModel() { ConvId = conv.ConvID })).Participants,
-                            Messages = (await GetConversationMessages(new GetMessagesApiModel() { ConvID = conv.ConvID }, whoAccessedId)).Messages
+
+                            //only get last message here, client should fetch messages after he opened the conversation.
+
+                            Messages = (await GetConversationMessages(new GetMessagesApiModel() { ConversationID = conv.ConvID, Count = 1, MesssagesOffset = 0 }, whoAccessedId)).Messages
                         }
                     );
             }
@@ -257,7 +261,7 @@ namespace Vibechat.Web.Services
                      LastSeen = UserConv.User.LastSeen,
                      Name = UserConv.User.FirstName,
                      UserName = UserConv.User.UserName,
-                     ProfilePicImageUrl = UserConv.User.ProfilePicImageURL,
+                     ImageUrl = UserConv.User.ProfilePicImageURL,
                      ConnectionId = UserConv.User.ConnectionId,
                      IsOnline = UserConv.User.IsOnline
                  }).ToList();
@@ -287,25 +291,29 @@ namespace Vibechat.Web.Services
             if (convInfo == null)
                 throw defaultErrorMessage;
 
-            var conversation = await mContext.Conversations.FindAsync(convInfo.ConvID).ConfigureAwait(false);
+            var conversation = await mContext.Conversations.FindAsync(convInfo.ConversationID).ConfigureAwait(false);
 
             if (conversation == null)
                 throw defaultErrorMessage;
 
-            var members = await GetConversationParticipants(new GetParticipantsApiModel() { ConvId = convInfo.ConvID });
+            var members = await GetConversationParticipants(new GetParticipantsApiModel() { ConvId = convInfo.ConversationID });
 
             //only member of conversation could request messages (there should exist other calls for non-members).
 
             if (members.Participants.Find(x => x.Id == whoAccessedId) == null)
                 throw unAuthorizedError;
 
-            // get related messages
-            var messages = mContext.Messages.Where(msg => msg.ConversationID == convInfo.ConvID).Include(msg => msg.User);
+            var messages = mContext.Messages
+                .Where(msg => msg.ConversationID == convInfo.ConversationID)
+                .OrderByDescending(x => x.TimeReceived)
+                .Skip(convInfo.MesssagesOffset)
+                .Take(convInfo.Count)
+                .Include(msg => msg.User);
 
             var MessagesToReturn = (
 
             from msg in messages
-            where msg.ConversationID == convInfo.ConvID
+            where msg.ConversationID == convInfo.ConversationID
             select new Message()
             {
                 ConversationID = msg.ConversationID,
@@ -318,10 +326,16 @@ namespace Vibechat.Web.Services
                     LastSeen = msg.User.LastSeen,
                     Name = msg.User.FirstName,
                     UserName = msg.User.UserName,
-                    ProfilePicImageUrl = msg.User.ProfilePicImageURL,
+                    ImageUrl = msg.User.ProfilePicImageURL,
                     IsOnline = msg.User.IsOnline,
                     ConnectionId = msg.User.ConnectionId
-                }
+                },
+                Attachments = msg.Attachments.Select(x => new MessageAttachment()
+                {
+                    AttachmentKind = x.AttachmentKind.Name,
+                    AttachmentName = x.Name,
+                    ContentUrl = x.ContentUrl
+                })
             }).ToList();
 
             return new GetMessagesResultApiModel()
@@ -380,7 +394,7 @@ namespace Vibechat.Web.Services
                     {
                         Id = user.Id,
                         Name = user.FirstName,
-                        ProfilePicImageUrl = user.ProfilePicImageURL,
+                        ImageUrl = user.ProfilePicImageURL,
                         LastName = user.LastName,
                         LastSeen = user.LastSeen,
                         UserName = user.UserName,
@@ -463,7 +477,7 @@ namespace Vibechat.Web.Services
                 {
                     Name = user.FirstName,
                     LastSeen = user.LastSeen,
-                    ProfilePicImageUrl = user.ProfilePicImageURL,
+                    ImageUrl = user.ProfilePicImageURL,
                     LastName = user.LastName,
                     UserName = user.UserName,
                     Id = user.Id
@@ -545,7 +559,7 @@ namespace Vibechat.Web.Services
                 User = new UserInfo()
                 {
                     Id = FoundUser.Id,
-                    ProfilePicImageUrl = FoundUser.ProfilePicImageURL,
+                    ImageUrl = FoundUser.ProfilePicImageURL,
                     LastName = FoundUser.LastName,
                     LastSeen = FoundUser.LastSeen,
                     Name = FoundUser.FirstName,

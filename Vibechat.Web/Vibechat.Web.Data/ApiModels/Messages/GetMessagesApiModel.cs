@@ -11,6 +11,10 @@ namespace VibeChat.Web.ApiModels
     /// </summary>
     public class GetMessagesApiModel
     {
-        public int ConvID { get; set; }
+        public int ConversationID { get; set; }
+
+        public int MesssagesOffset { get; set; }
+
+        public int Count { get; set; }
     }
 }

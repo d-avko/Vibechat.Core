@@ -34,7 +34,7 @@ export class ChatComponent {
     this.requestsBuilder = requestsBuilder;
     this.Conversations = new Array<ConversationTemplate>();
     this.formatter = formatter;
-
+    
     if (!Cache.IsAuthenticated) {
 
       this.router.navigateByUrl('/login');
@@ -90,6 +90,14 @@ export class ChatComponent {
     }
 
     return Cache.CurrentConversation.name;
+  }
+
+  public GetThisUserImageUrl(): string {
+    return Cache.UserCache.imageUrl;
+  }
+
+  public SendMessage() {
+    //TODO
   }
 
   public GetCurrentConversationMembersFormatted(): string {

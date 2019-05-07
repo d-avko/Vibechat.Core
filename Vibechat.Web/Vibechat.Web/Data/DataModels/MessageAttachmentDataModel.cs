@@ -12,6 +12,8 @@ namespace VibeChat.Web.Data.DataModels
         public int AttachmentID { get; set; }
         public string ContentUrl { get; set; }
 
+        public string Name { get; set; }
+
         public AttachmentKindDataModel AttachmentKind { get; set; }
     }
 }
