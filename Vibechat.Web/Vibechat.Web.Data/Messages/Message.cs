@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Vibechat.Web.ChatData.Messages;
 
 namespace VibeChat.Web.ChatData
 {
@@ -8,5 +10,7 @@ namespace VibeChat.Web.ChatData
         public string MessageContent { get; set; }
         public int ConversationID { get; set; }
         public DateTime TimeReceived{ get; set; }
+
+        public IEnumerable<MessageAttachment> Attachments { get; set; }
     }
 }
