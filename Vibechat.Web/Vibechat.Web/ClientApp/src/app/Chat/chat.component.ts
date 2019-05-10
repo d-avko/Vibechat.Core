@@ -10,6 +10,7 @@ import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { ConversationsFormatter } from "../Data/ConversationsFormatter";
 import { MessageAttachment } from "../Data/MessageAttachment";
 import { AttachmentKinds } from "../Data/AttachmentKinds";
+import { ChatMessage } from "../Data/ChatMessage";
 
 @Component({
   selector: 'chat-root',
@@ -20,6 +21,8 @@ export class ChatComponent {
 
   public Conversations: Array<ConversationTemplate>;
 
+  public Messages: Array<ChatMessage>;
+
   protected snackbar: SnackBarHelper;
 
   protected router: Router;
@@ -27,6 +30,8 @@ export class ChatComponent {
   protected requestsBuilder: ApiRequestsBuilder;
 
   public formatter: ConversationsFormatter;
+
+  public static MessagesBufferLength: number = 50;
 
 
   constructor(requestsBuilder: ApiRequestsBuilder, snackbar: MatSnackBar, router: Router, formatter: ConversationsFormatter) {
@@ -36,6 +41,7 @@ export class ChatComponent {
     this.requestsBuilder = requestsBuilder;
     this.Conversations = new Array<ConversationTemplate>();
     this.formatter = formatter;
+    this.Messages = new Array<ChatMessage>();
     
     if (!Cache.IsAuthenticated) {
 
@@ -55,7 +61,7 @@ export class ChatComponent {
   public OnConversationsUpdated(response: ServerResponse<ConversationResponse>): void {
 
     if (!response.isSuccessfull) {
-      this.snackbar.openSnackBar(response.errorMessage);
+      this.snackbar.openSnackBar("Failed to update conversations. Reason: " + response.errorMessage);
       return;
     }
 
@@ -118,6 +124,66 @@ export class ChatComponent {
       return;
     }
 
+    // 1 message is sent by server on first request of UpdateConversatoins() in messages field
+
+    if (conversation.messages.length == 1) {
+      this.requestsBuilder.GetConversationMessages(0, ChatComponent.MessagesBufferLength, conversation.conversationID, Cache.JwtToken)
+        .subscribe((result) => {
+
+          if (!result) {
+            this.snackbar.openSnackBar("Failed to update messages for " + conversation.name);
+            return;
+          }
+
+          result.response.messages = result.response.messages.sort(this.MessagesSortFunc);
+
+          conversation.messages = result.response.messages;
+
+          this.Messages = this.Messages.concat(result.response.messages);
+        }
+      )
+    }
+
     Cache.CurrentConversation = conversation;
+  }
+
+  public IsFirstMessageInSequence(message: ChatMessage) : boolean {
+    let messageIndex = Cache.CurrentConversation.messages.findIndex((x) => x.id == message.id);
+
+    if (messageIndex == 0) {
+      return true;
+    }
+
+    return Cache.CurrentConversation.messages[messageIndex - 1].user.userName == message.user.userName;
+
+  }
+
+  public IsPreviousMessageOnAnotherDay(message: ChatMessage): boolean {
+    let messageIndex = Cache.CurrentConversation.messages.findIndex((x) => x.id == message.id);
+
+    if (messageIndex == 0) {
+      return true;
+    }
+
+    let thisMessageDay = new Date(message.timeReceived).getDay();
+    let previousMessageDay = new Date(Cache.CurrentConversation.messages[messageIndex - 1].timeReceived).getDay();
+
+    return thisMessageDay != previousMessageDay;
+  }
+
+  public GetMessagesDateStripFormatted(message: ChatMessage) : string {
+    let messageIndex = Cache.CurrentConversation.messages.findIndex((x) => x.id == message.id);
+
+    if (messageIndex == 0) {
+      return this.formatter.GetMessagesDateStripFormatted(message);
+    }
+
+    return this.formatter.GetMessagesDateStripFormatted(Cache.CurrentConversation.messages[messageIndex - 1]);
+  }
+
+  private MessagesSortFunc(left: ChatMessage, right: ChatMessage) : number {
+    if (left.timeReceived < right.timeReceived) return -1;
+    if (left.timeReceived > right.timeReceived) return 1;
+    return 0;
   }
 }

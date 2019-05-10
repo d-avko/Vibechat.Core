@@ -316,6 +316,7 @@ namespace Vibechat.Web.Services
             where msg.ConversationID == convInfo.ConversationID
             select new Message()
             {
+                Id = msg.MessageID,
                 ConversationID = msg.ConversationID,
                 MessageContent = msg.MessageContent,
                 TimeReceived = msg.TimeReceived,

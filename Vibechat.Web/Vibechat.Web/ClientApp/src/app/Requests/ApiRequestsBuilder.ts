@@ -7,6 +7,8 @@ import { RegisterRequest } from "../ApiModels/RegisterRequest";
 import { Injectable, Inject } from "@angular/core";
 import { ConversationResponse } from "../ApiModels/ConversationResponse";
 import { ConversationsRequest } from "../ApiModels/ConversationRequest";
+import { ConversationMessagesRequest } from "../ApiModels/ConversationMessagesRequest";
+import { ConversationMessagesResponse } from "../ApiModels/ConversationMessagesResponse";
 
 @Injectable({
   providedIn: 'root'
@@ -40,6 +42,21 @@ export class ApiRequestsBuilder {
       new ConversationsRequest(
         {
           UserId: userId
+        }),
+      { headers: headers });
+  }
+
+  public GetConversationMessages(offset: number, count: number, conversationId: number, token: string): Observable<ServerResponse<ConversationMessagesResponse>> {
+    let headers = new HttpHeaders();
+    headers = headers.append('Authorization', 'Bearer ' + token);
+
+    return this.httpClient.post<ServerResponse<ConversationMessagesResponse>>(
+      this.baseUrl + 'api/Conversations/GetConversationMessages',
+      new ConversationMessagesRequest(
+        {
+          Count: count,
+          ConversationID: conversationId,
+          MesssagesOffset: offset
         }),
       { headers: headers });
   }
