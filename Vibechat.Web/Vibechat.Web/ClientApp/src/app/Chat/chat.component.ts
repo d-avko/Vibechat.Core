@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, ViewChildren, QueryList, ElementRef, ViewChild } from "@angular/core";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { ConversationResponse } from "../ApiModels/ConversationResponse";
 import { Cache } from "../Auth/Cache";
@@ -11,6 +11,7 @@ import { ConversationsFormatter } from "../Data/ConversationsFormatter";
 import { MessageAttachment } from "../Data/MessageAttachment";
 import { AttachmentKinds } from "../Data/AttachmentKinds";
 import { ChatMessage } from "../Data/ChatMessage";
+import { CdkVirtualScrollViewport } from "@angular/cdk/scrolling";
 
 @Component({
   selector: 'chat-root',
@@ -33,6 +34,8 @@ export class ChatComponent {
 
   public static MessagesBufferLength: number = 50;
 
+  @ViewChild(CdkVirtualScrollViewport) viewport: CdkVirtualScrollViewport;
+
 
   constructor(requestsBuilder: ApiRequestsBuilder, snackbar: MatSnackBar, router: Router, formatter: ConversationsFormatter) {
 
@@ -51,6 +54,12 @@ export class ChatComponent {
       this.UpdateConversations();
     }
 
+  }
+
+  public OnMessageAdded(): void {
+    requestAnimationFrame(() => {
+      this.viewport.scrollToIndex(this.Messages.length, 'smooth');
+    });
   }
 
   public UpdateConversations() {
@@ -140,6 +149,8 @@ export class ChatComponent {
           conversation.messages = result.response.messages;
 
           this.Messages = this.Messages.concat(result.response.messages);
+
+          this.OnMessageAdded();
         }
       )
     }
@@ -154,7 +165,7 @@ export class ChatComponent {
       return true;
     }
 
-    return Cache.CurrentConversation.messages[messageIndex - 1].user.userName == message.user.userName;
+    return Cache.CurrentConversation.messages[messageIndex - 1].user.userName != message.user.userName;
 
   }
 
@@ -175,10 +186,10 @@ export class ChatComponent {
     let messageIndex = Cache.CurrentConversation.messages.findIndex((x) => x.id == message.id);
 
     if (messageIndex == 0) {
-      return this.formatter.GetMessagesDateStripFormatted(message);
+      return this.formatter.GetMessagesDateStripFormatted(message)
     }
 
-    return this.formatter.GetMessagesDateStripFormatted(Cache.CurrentConversation.messages[messageIndex - 1]);
+    return this.formatter.GetMessagesDateStripFormatted(Cache.CurrentConversation.messages[messageIndex]);
   }
 
   private MessagesSortFunc(left: ChatMessage, right: ChatMessage) : number {
