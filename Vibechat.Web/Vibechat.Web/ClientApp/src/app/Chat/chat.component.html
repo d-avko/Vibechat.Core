@@ -24,11 +24,11 @@
 
             <h3 matLine [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}"> {{conversation.name}} </h3>
 
-            <div matLine class="message_content">
-              <span class="message_content_lastmessage" [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
+            <div matLine class="lastmessage_content">
+              <span class="lastmessage_content_lastmessage" [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
                 {{formatter.GetLastMessageFormatted(conversation)}}
               </span>
-              <span class="message_content_lastmessageDate" [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
+              <span class="lastmessage_content_lastmessageDate" [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
                 {{formatter.GetLastMessageDateFormatted(conversation)}}
               </span>
             </div>
@@ -64,26 +64,43 @@
 
       </div>
 
-      <mat-list class="messages_wrapper_chatmessages">
+      <mat-list style="overflow-y:scroll;" class="messages_wrapper_chatmessages">
 
-        <mat-list-item *ngFor="let message for Messages">
+        <mat-list-item style="height: auto !important" *ngFor="let message of Messages">
 
           <div class="messages_main">
 
+            <div *ngIf="IsPreviousMessageOnAnotherDay(message)" class="messages_datestrip_wrapper">
+              <div class="datestrip_bubble">
+                <span class="datestrip">{{GetMessagesDateStripFormatted(message)}}</span>
+              </div>
+            </div>
+
             <div class="messages_message_content">
-              <img src="{{message.user.imageUrl}}" />
+
+              <div style="width: 35px; height: 35px; margin-right: 15px;">
+                <img *ngIf="IsFirstMessageInSequence(message)" class="rounded-chat-image" src="{{message.user.imageUrl}}" />
+              </div>
+
+              <div class="content_messageAndName">
+                  <span *ngIf="IsFirstMessageInSequence(message)" class="message_header">{{message.user.userName}}</span>
+
+                  <p class="message_text">{{message.messageContent}}</p>
+              </div>
+
+                <span class="message_timereceived">{{formatter.GetMessageTimeFormatted(message)}}</span>
             </div>
 
             <mat-list>
 
-              <mat-list-item *ngFor="let attachment for message.attachments">
+              <mat-list-item *ngFor="let attachment of message.attachments">
 
-                <div *ngIf="IsImage(attachment); then image" />
+                <div *ngIf="IsImage(attachment); then image" ></div>
 
                 <ng-template #image>
 
                   <div class="image_attachment">
-                    <img src="{{attachment.contentUrl}}" />
+                    <img style="width: 100%;" src="{{attachment.contentUrl}}" />
                   </div>
 
                 </ng-template>

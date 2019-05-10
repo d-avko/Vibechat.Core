@@ -1,6 +1,7 @@
 import { ConversationTemplate } from "./ConversationTemplate";
 import { Cache } from "../Auth/Cache";
 import { Injectable } from "@angular/core"
+import { ChatMessage } from "./ChatMessage";
 
 @Injectable({
   providedIn: 'root'
@@ -53,9 +54,37 @@ export class ConversationsFormatter{
     }
   }
 
+  public GetMessagesDateStripFormatted(message: ChatMessage) {
+
+    let messageDate = message.timeReceived;
+
+    let x = new Date().getTime();
+
+    let y = Date.parse(messageDate);
+
+    let daysSinceReceived = (x - y) / (1000 * 60 * 60 * 24);
+
+    switch (true) {
+      case daysSinceReceived <= 1: {
+        return "Today";
+      }
+      case daysSinceReceived == 2: {
+        return "Yesterday";
+      }
+      case daysSinceReceived > 2: {
+        return daysSinceReceived.toPrecision(1) + " days ago";
+      }
+    }
+  }
+
   public GetConversationMembersFormatted(conversation: ConversationTemplate) {
     let membersAmount = conversation.participants == null ? 0 : conversation.participants.length;
 
     return membersAmount.toString() + " Member(s)";
+  }
+
+  public GetMessageTimeFormatted(message: ChatMessage) {
+    let dateTime = Date.parse(message.timeReceived);
+    return new Date(dateTime).toLocaleTimeString();
   }
 }
