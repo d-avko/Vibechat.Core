@@ -12,6 +12,7 @@ import { RegisterComponent } from './registration/register.component';
 import { ChatComponent } from './Chat/chat.component';
 import { ApiRequestsBuilder } from './Requests/ApiRequestsBuilder';
 import { ConversationsFormatter } from './Data/ConversationsFormatter';
+import { ScrollDispatchModule } from '@angular/cdk/scrolling';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { ConversationsFormatter } from './Data/ConversationsFormatter';
     AppRoutersModule,
     HttpClientModule,
     ReactiveFormsModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    ScrollDispatchModule
   ],
   providers: [ ApiRequestsBuilder, ConversationsFormatter ],
   bootstrap: [AppComponent]

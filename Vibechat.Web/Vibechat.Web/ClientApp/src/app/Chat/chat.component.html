@@ -64,72 +64,117 @@
 
       </div>
 
-      <mat-list style="overflow-y:scroll;" class="messages_wrapper_chatmessages">
+      <cdk-virtual-scroll-viewport itemSize="50" class="messages_main" #chatScroll>
+        <div *cdkVirtualFor="let message of Messages;">
 
-        <mat-list-item style="height: auto !important" *ngFor="let message of Messages">
+          <div *ngIf="IsPreviousMessageOnAnotherDay(message)" class="messages_datestrip_wrapper">
+            <div class="datestrip_bubble">
+              <span class="datestrip">{{GetMessagesDateStripFormatted(message)}}</span>
+            </div>
+          </div>
 
-          <div class="messages_main">
+          <div class="messages_message_content">
 
-            <div *ngIf="IsPreviousMessageOnAnotherDay(message)" class="messages_datestrip_wrapper">
-              <div class="datestrip_bubble">
-                <span class="datestrip">{{GetMessagesDateStripFormatted(message)}}</span>
-              </div>
+            <div style="width: 35px; height: 35px; margin-right: 15px;">
+              <img *ngIf="IsFirstMessageInSequence(message)" class="rounded-chat-image" src="{{message.user.imageUrl}}" />
             </div>
 
-            <div class="messages_message_content">
+            <div class="content_messageAndName">
+              <span *ngIf="IsFirstMessageInSequence(message)" class="message_header">{{message.user.userName}}</span>
 
-              <div style="width: 35px; height: 35px; margin-right: 15px;">
-                <img *ngIf="IsFirstMessageInSequence(message)" class="rounded-chat-image" src="{{message.user.imageUrl}}" />
+              <p class="message_text">{{message.messageContent}}</p>
+            </div>
+
+            <span class="message_timereceived">{{formatter.GetMessageTimeFormatted(message)}}</span>
+          </div>
+
+          <mat-list>
+
+            <mat-list-item *ngFor="let attachment of message.attachments">
+
+              <div *ngIf="IsImage(attachment); then image"></div>
+
+              <ng-template #image>
+
+                <div class="image_attachment">
+                  <img style="width: 100%;" src="{{attachment.contentUrl}}" />
+                </div>
+
+              </ng-template>
+
+            </mat-list-item>
+
+          </mat-list>
+
+        </div>
+      </cdk-virtual-scroll-viewport>
+
+        <!--<mat-list style="overflow-y:scroll;" class="messages_wrapper_chatmessages">
+
+          <mat-list-item style="height: auto !important" *ngFor="let message of Messages">
+
+            <div class="messages_main">
+
+              <div *ngIf="IsPreviousMessageOnAnotherDay(message)" class="messages_datestrip_wrapper">
+                <div class="datestrip_bubble">
+                  <span class="datestrip">{{GetMessagesDateStripFormatted(message)}}</span>
+                </div>
               </div>
 
-              <div class="content_messageAndName">
+              <div class="messages_message_content">
+
+                <div style="width: 35px; height: 35px; margin-right: 15px;">
+                  <img *ngIf="IsFirstMessageInSequence(message)" class="rounded-chat-image" src="{{message.user.imageUrl}}" />
+                </div>
+
+                <div class="content_messageAndName">
                   <span *ngIf="IsFirstMessageInSequence(message)" class="message_header">{{message.user.userName}}</span>
 
                   <p class="message_text">{{message.messageContent}}</p>
-              </div>
+                </div>
 
                 <span class="message_timereceived">{{formatter.GetMessageTimeFormatted(message)}}</span>
+              </div>
+
+              <mat-list>
+
+                <mat-list-item *ngFor="let attachment of message.attachments">
+
+                  <div *ngIf="IsImage(attachment); then image"></div>
+
+                  <ng-template #image>
+
+                    <div class="image_attachment">
+                      <img style="width: 100%;" src="{{attachment.contentUrl}}" />
+                    </div>
+
+                  </ng-template>
+
+                </mat-list-item>
+
+              </mat-list>
+
             </div>
 
-            <mat-list>
+          </mat-list-item>
 
-              <mat-list-item *ngFor="let attachment of message.attachments">
+        </mat-list>-->
 
-                <div *ngIf="IsImage(attachment); then image" ></div>
+        <div class="messages_wrapper_chat-input">
 
-                <ng-template #image>
+          <img class="rounded-image" src="{{GetThisUserImageUrl()}}" />
 
-                  <div class="image_attachment">
-                    <img style="width: 100%;" src="{{attachment.contentUrl}}" />
-                  </div>
+          <mat-form-field class="input_field">
+            <textarea (keydown.control.enter)="SendMessage()" matInput placeholder="Type in your message..."></textarea>
+          </mat-form-field>
 
-                </ng-template>
+          <button mat-button style="color:cadetblue">
+            <mat-icon>send</mat-icon>
+          </button>
 
-              </mat-list-item>
+        </div>
 
-            </mat-list>
-
-          </div>
-
-        </mat-list-item>
-
-      </mat-list>
-
-      <div class="messages_wrapper_chat-input">
-
-        <img class="rounded-image" src="{{GetThisUserImageUrl()}}" />
-
-        <mat-form-field class="input_field">
-          <textarea (keydown.control.enter)="SendMessage()" matInput placeholder="Type in your message..."></textarea>
-        </mat-form-field>
-
-        <button mat-button style="color:cadetblue">
-          <mat-icon>send</mat-icon>
-        </button>
-
-      </div>
-
-    </div>
+</div>
 
   </mat-card-content>
 

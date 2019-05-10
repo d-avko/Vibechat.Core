@@ -43,9 +43,9 @@ export class ConversationsFormatter{
 
     switch (true) {
       case daysSinceReceived <= 1: {
-        return "Today";
+        return "Today"
       }
-      case daysSinceReceived == 2: {
+      case daysSinceReceived <= 2: {
         return "Yesterday";
       }
       case daysSinceReceived > 2: {
@@ -68,7 +68,7 @@ export class ConversationsFormatter{
       case daysSinceReceived <= 1: {
         return "Today";
       }
-      case daysSinceReceived == 2: {
+      case daysSinceReceived <= 2: {
         return "Yesterday";
       }
       case daysSinceReceived > 2: {
