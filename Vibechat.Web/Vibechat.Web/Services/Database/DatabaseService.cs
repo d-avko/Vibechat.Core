@@ -331,12 +331,12 @@ namespace Vibechat.Web.Services
                     IsOnline = msg.User.IsOnline,
                     ConnectionId = msg.User.ConnectionId
                 },
-                Attachments = msg.Attachments.Select(x => new MessageAttachment()
+                AttachmentInfo = new MessageAttachment()
                 {
-                    AttachmentKind = x.AttachmentKind.Name,
-                    AttachmentName = x.Name,
-                    ContentUrl = x.ContentUrl
-                })
+                    AttachmentKind = msg.AttachmentInfo.AttachmentKind.Name,
+                    ContentUrl = msg.AttachmentInfo.ContentUrl,
+                    AttachmentName = msg.AttachmentInfo.Name
+                } 
             }).ToList();
 
             return new GetMessagesResultApiModel()

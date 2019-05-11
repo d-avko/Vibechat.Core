@@ -188,6 +188,19 @@
   border-radius: 15px;
 }
 
+.selected-message {
+  background-color: #c4dbdc;
+}
+
+.chat_misc{
+  display: flex;
+  flex-direction: row;
+}
+
+.marginleft10px{
+  margin-left: 10px;
+}
+
 .load-spinner {
   margin-left: 45%;
 }
