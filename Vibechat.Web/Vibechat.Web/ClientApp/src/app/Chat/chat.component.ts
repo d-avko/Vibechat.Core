@@ -12,6 +12,7 @@ import { MessageAttachment } from "../Data/MessageAttachment";
 import { AttachmentKinds } from "../Data/AttachmentKinds";
 import { ChatMessage } from "../Data/ChatMessage";
 import { CdkVirtualScrollViewport } from "@angular/cdk/scrolling";
+import { element } from "protractor";
 
 @Component({
   selector: 'chat-root',
@@ -20,9 +21,13 @@ import { CdkVirtualScrollViewport } from "@angular/cdk/scrolling";
 })
 export class ChatComponent {
 
+  //This user conversations
+
   public Conversations: Array<ConversationTemplate>;
 
-  public Messages: Array<ChatMessage>;
+  public CurrentConversation: ConversationTemplate;
+
+  //pop-up that will inform user of errors.
 
   protected snackbar: SnackBarHelper;
 
@@ -34,31 +39,71 @@ export class ChatComponent {
 
   public static MessagesBufferLength: number = 50;
 
+  public IsMessagesLoading: boolean = false;
+
+  public IsAuthenticated: boolean;
+
   @ViewChild(CdkVirtualScrollViewport) viewport: CdkVirtualScrollViewport;
 
 
   constructor(requestsBuilder: ApiRequestsBuilder, snackbar: MatSnackBar, router: Router, formatter: ConversationsFormatter) {
 
     this.snackbar = new SnackBarHelper(snackbar);
+
     this.router = router;
+
     this.requestsBuilder = requestsBuilder;
+
     this.Conversations = new Array<ConversationTemplate>();
+
     this.formatter = formatter;
-    this.Messages = new Array<ChatMessage>();
-    
-    if (!Cache.IsAuthenticated) {
 
-      this.router.navigateByUrl('/login');
+    this.IsAuthenticated = Cache.IsAuthenticated;
 
-    } else {
+    if (this.IsAuthenticated) {
+
       this.UpdateConversations();
+    } 
+
+  }
+
+  public OnMessagesScrolled(messageIndex: number) {
+    // user scrolled to last loaded message, load more messages
+
+    if (this.IsMessagesLoading) {
+      return;
     }
 
+    if (messageIndex == 0) {
+      this.IsMessagesLoading = true;
+
+      this.requestsBuilder.GetConversationMessages(this.CurrentConversation.messages.length, ChatComponent.MessagesBufferLength, this.CurrentConversation.conversationID, Cache.JwtToken)
+        .subscribe((result) => {
+
+          if (!result) {
+            this.snackbar.openSnackBar("Failed to update messages for " + this.CurrentConversation.name);
+            this.IsMessagesLoading = false;
+            return;
+          }
+
+          result.response.messages = result.response.messages.sort(this.MessagesSortFunc);
+
+          if (result.response.messages == null) {
+            this.IsMessagesLoading = false;
+            return;
+          }
+
+          //append old messages to new ones.
+          this.CurrentConversation.messages = result.response.messages.concat(this.CurrentConversation.messages);
+          this.IsMessagesLoading = false;
+        }
+      )
+    }
   }
 
   public OnMessageAdded(): void {
     requestAnimationFrame(() => {
-      this.viewport.scrollToIndex(this.Messages.length, 'smooth');
+      this.viewport.scrollToIndex(this.CurrentConversation.messages.length, 'smooth');
     });
   }
 
@@ -78,26 +123,26 @@ export class ChatComponent {
   }
 
   public IsCurrentConversation(conversation: ConversationTemplate): boolean {
-    if (Cache.CurrentConversation == null)
+    if (this.CurrentConversation == null)
       return false;
 
-    return Cache.CurrentConversation.conversationID == conversation.conversationID;
+    return this.CurrentConversation.conversationID == conversation.conversationID;
   }
 
   public GetCurrentDialogueUserImageUrl() : string {
-    return Cache.CurrentConversation.dialogueUser.imageUrl;
+    return this.CurrentConversation.dialogueUser.imageUrl;
   }
 
   public GetCurrentConversationImageUrl(): string {
-    return Cache.CurrentConversation.imageUrl;
+    return this.CurrentConversation.imageUrl;
   }
 
   public IsConversationSelected(): boolean {
-    return Cache.CurrentConversation != null;
+    return this.CurrentConversation != null;
   }
 
   public IsCurrentConversationGroup(): boolean {
-    return Cache.CurrentConversation.isGroup;
+    return this.CurrentConversation.isGroup;
   }
 
   public IsImage(attachment: MessageAttachment) {
@@ -106,13 +151,17 @@ export class ChatComponent {
 
   }
 
+  public IsLastMessage(message: ChatMessage) : boolean {
+    return this.CurrentConversation.messages.findIndex((x) => x.id == message.id) == 0;
+  }
+
   public GetCurrentConversationName(): string {
 
-    if (Cache.CurrentConversation.name == '' || Cache.CurrentConversation.name == null) {
-      return Cache.CurrentConversation.dialogueUser.userName;
+    if (this.CurrentConversation.name == '' || this.CurrentConversation.name == null) {
+      return this.CurrentConversation.dialogueUser.userName;
     }
 
-    return Cache.CurrentConversation.name;
+    return this.CurrentConversation.name;
   }
 
   public GetThisUserImageUrl(): string {
@@ -124,72 +173,59 @@ export class ChatComponent {
   }
 
   public GetCurrentConversationMembersFormatted(): string {
-    return this.formatter.GetConversationMembersFormatted(Cache.CurrentConversation);
+    return this.formatter.GetConversationMembersFormatted(this.CurrentConversation);
   }
 
   public ChangeConversation(conversation: ConversationTemplate): void {
-    if (conversation == Cache.CurrentConversation) {
-      Cache.CurrentConversation = null;
+    if (conversation == this.CurrentConversation) {
+      this.CurrentConversation = null;
       return;
     }
 
+    this.CurrentConversation = conversation;
+
     // 1 message is sent by server on first request of UpdateConversatoins() in messages field
+    //should use bool var there instead.
+
 
     if (conversation.messages.length == 1) {
-      this.requestsBuilder.GetConversationMessages(0, ChatComponent.MessagesBufferLength, conversation.conversationID, Cache.JwtToken)
-        .subscribe((result) => {
-
-          if (!result) {
-            this.snackbar.openSnackBar("Failed to update messages for " + conversation.name);
-            return;
-          }
-
-          result.response.messages = result.response.messages.sort(this.MessagesSortFunc);
-
-          conversation.messages = result.response.messages;
-
-          this.Messages = this.Messages.concat(result.response.messages);
-
-          this.OnMessageAdded();
-        }
-      )
+      //forcibly update messages
+      this.OnMessagesScrolled(0);
     }
-
-    Cache.CurrentConversation = conversation;
   }
 
   public IsFirstMessageInSequence(message: ChatMessage) : boolean {
-    let messageIndex = Cache.CurrentConversation.messages.findIndex((x) => x.id == message.id);
+    let messageIndex = this.CurrentConversation.messages.findIndex((x) => x.id == message.id);
 
     if (messageIndex == 0) {
       return true;
     }
 
-    return Cache.CurrentConversation.messages[messageIndex - 1].user.userName != message.user.userName;
+    return this.CurrentConversation.messages[messageIndex - 1].user.userName != message.user.userName;
 
   }
 
   public IsPreviousMessageOnAnotherDay(message: ChatMessage): boolean {
-    let messageIndex = Cache.CurrentConversation.messages.findIndex((x) => x.id == message.id);
+    let messageIndex = this.CurrentConversation.messages.findIndex((x) => x.id == message.id);
 
     if (messageIndex == 0) {
       return true;
     }
 
     let thisMessageDay = new Date(message.timeReceived).getDay();
-    let previousMessageDay = new Date(Cache.CurrentConversation.messages[messageIndex - 1].timeReceived).getDay();
+    let previousMessageDay = new Date(this.CurrentConversation.messages[messageIndex - 1].timeReceived).getDay();
 
     return thisMessageDay != previousMessageDay;
   }
 
   public GetMessagesDateStripFormatted(message: ChatMessage) : string {
-    let messageIndex = Cache.CurrentConversation.messages.findIndex((x) => x.id == message.id);
+    let messageIndex = this.CurrentConversation.messages.findIndex((x) => x.id == message.id);
 
     if (messageIndex == 0) {
       return this.formatter.GetMessagesDateStripFormatted(message)
     }
 
-    return this.formatter.GetMessagesDateStripFormatted(Cache.CurrentConversation.messages[messageIndex]);
+    return this.formatter.GetMessagesDateStripFormatted(this.CurrentConversation.messages[messageIndex]);
   }
 
   private MessagesSortFunc(left: ChatMessage, right: ChatMessage) : number {

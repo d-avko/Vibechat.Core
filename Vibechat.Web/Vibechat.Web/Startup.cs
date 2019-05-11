@@ -42,7 +42,7 @@ namespace Vibechat.Web
             services.AddIdentity<UserInApplication, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
-
+            
             services.Configure<IdentityOptions>(options =>
             {
                 // Make weak passwords possible for now
