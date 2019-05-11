@@ -11,10 +11,9 @@ import {
   MatDialogModule,
   MatInputModule,
   MatSelectModule,
-  MatSnackBarModule
+  MatSnackBarModule,
+  MatProgressSpinnerModule
 } from '@angular/material';
-
-import { ScrollDispatchModule } from '@angular/cdk/scrolling';
 
 @NgModule({
   imports: [
@@ -28,7 +27,8 @@ import { ScrollDispatchModule } from '@angular/cdk/scrolling';
     MatDialogModule,
     MatInputModule,
     MatSelectModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatProgressSpinnerModule
   ],
   exports: [
     MatSidenavModule,
@@ -41,7 +41,8 @@ import { ScrollDispatchModule } from '@angular/cdk/scrolling';
     MatDialogModule,
     MatInputModule,
     MatSelectModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatProgressSpinnerModule
   ]
 })
 export class MaterialModule {}

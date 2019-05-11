@@ -35,11 +35,7 @@ export class ConversationsFormatter{
 
     let messageDate = conversation.messages[conversation.messages.length - 1].timeReceived;
 
-    let x = new Date().getTime();
-
-    let y = Date.parse(messageDate);
-
-    let daysSinceReceived = (x - y) / (1000 * 60 * 60 * 24);
+    let daysSinceReceived = (new Date().getTime() - Date.parse(messageDate)) / (1000 * 60 * 60 * 24);
 
     switch (true) {
       case daysSinceReceived <= 1: {
@@ -58,11 +54,7 @@ export class ConversationsFormatter{
 
     let messageDate = message.timeReceived;
 
-    let x = new Date().getTime();
-
-    let y = Date.parse(messageDate);
-
-    let daysSinceReceived = (x - y) / (1000 * 60 * 60 * 24);
+    let daysSinceReceived = (new Date().getTime() - Date.parse(messageDate)) / (1000 * 60 * 60 * 24);
 
     switch (true) {
       case daysSinceReceived <= 1: {
