@@ -21,7 +21,9 @@ namespace VibeChat.Web
 
         public string MessageContent { get; set; }
 
-        public ICollection<MessageAttachmentDataModel> Attachments { get; set; }
+        public MessageAttachmentDataModel AttachmentInfo { get; set; }
+
+        public bool IsAttachment { get; set; }
 
         //Id of a conversation where this message was sent 
 

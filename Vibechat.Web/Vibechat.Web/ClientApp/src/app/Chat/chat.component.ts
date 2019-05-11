@@ -12,12 +12,26 @@ import { MessageAttachment } from "../Data/MessageAttachment";
 import { AttachmentKinds } from "../Data/AttachmentKinds";
 import { ChatMessage } from "../Data/ChatMessage";
 import { CdkVirtualScrollViewport } from "@angular/cdk/scrolling";
-import { element } from "protractor";
+import { trigger, state, style, transition, animate } from "@angular/animations";
 
 @Component({
   selector: 'chat-root',
   templateUrl: './chat.component.html',
-  styleUrls: ['./chat.component.css']
+  styleUrls: ['./chat.component.css'],
+  animations: [
+    trigger('slideIn', [
+      state('*', style({ 'overflow-y': 'hidden' })),
+      state('void', style({ 'overflow-y': 'hidden' })),
+      transition('* => void', [
+        style({ height: '*' }),
+        animate(250, style({ height: 0 }))
+      ]),
+      transition('void => *', [
+        style({ height: '0' }),
+        animate(250, style({ height: '*' }))
+      ])
+    ])
+  ]
 })
 export class ChatComponent {
 
@@ -29,6 +43,8 @@ export class ChatComponent {
 
   //pop-up that will inform user of errors.
 
+  public SelectedMessages: Array<ChatMessage>;
+
   protected snackbar: SnackBarHelper;
 
   protected router: Router;
@@ -39,9 +55,15 @@ export class ChatComponent {
 
   public static MessagesBufferLength: number = 50;
 
+  public static MessagesToScrollForGoBackButtonToShowUp: number = 60;
+
   public IsMessagesLoading: boolean = false;
 
   public IsAuthenticated: boolean;
+
+  public IsConversationHistoryEnd: boolean = false;
+
+  public IsScrollingAssistNeeded: boolean = false;
 
   @ViewChild(CdkVirtualScrollViewport) viewport: CdkVirtualScrollViewport;
 
@@ -60,6 +82,8 @@ export class ChatComponent {
 
     this.IsAuthenticated = Cache.IsAuthenticated;
 
+    this.SelectedMessages = new Array<ChatMessage>();
+
     if (this.IsAuthenticated) {
 
       this.UpdateConversations();
@@ -70,11 +94,7 @@ export class ChatComponent {
   public OnMessagesScrolled(messageIndex: number) {
     // user scrolled to last loaded message, load more messages
 
-    if (this.IsMessagesLoading) {
-      return;
-    }
-
-    if (messageIndex == 0) {
+    if (messageIndex == 0 && !this.IsMessagesLoading) {
       this.IsMessagesLoading = true;
 
       this.requestsBuilder.GetConversationMessages(this.CurrentConversation.messages.length, ChatComponent.MessagesBufferLength, this.CurrentConversation.conversationID, Cache.JwtToken)
@@ -86,24 +106,43 @@ export class ChatComponent {
             return;
           }
 
-          result.response.messages = result.response.messages.sort(this.MessagesSortFunc);
-
-          if (result.response.messages == null) {
+          if (result.response.messages == null || result.response.messages.length == 0) {
             this.IsMessagesLoading = false;
+            this.IsConversationHistoryEnd = true;
             return;
           }
+
+          result.response.messages = result.response.messages.sort(this.MessagesSortFunc);
 
           //append old messages to new ones.
           this.CurrentConversation.messages = result.response.messages.concat(this.CurrentConversation.messages);
           this.IsMessagesLoading = false;
+          this.ScrollToMessage(result.response.messages.length);
         }
       )
     }
+
+    // if user scrolled <see cref="MessagesToScrollForGoBackButtonToShowUp"/> messages, show 'Go to start' button
+
+    if (this.CurrentConversation.messages.length - messageIndex > ChatComponent.MessagesToScrollForGoBackButtonToShowUp) {
+      this.IsScrollingAssistNeeded = true;
+    } else {
+      this.IsScrollingAssistNeeded = false;
+    }
   }
 
-  public OnMessageAdded(): void {
+  public DeleteMessages() {
+
+  }
+
+  public ScrollToStart() : void {
+    this.ScrollToMessage(this.CurrentConversation.messages.length);
+    this.IsScrollingAssistNeeded = false;
+  }
+
+  public ScrollToMessage(index: number): void {
     requestAnimationFrame(() => {
-      this.viewport.scrollToIndex(this.CurrentConversation.messages.length, 'smooth');
+      this.viewport.scrollToIndex(index, 'smooth');
     });
   }
 
@@ -145,9 +184,35 @@ export class ChatComponent {
     return this.CurrentConversation.isGroup;
   }
 
-  public IsImage(attachment: MessageAttachment) {
+  public IsText(message: ChatMessage) {
+    return !message.isAttachment;
+  }
 
-    return attachment.attachmentKind == AttachmentKinds.Image;
+  public IsMessageSelected(message: ChatMessage) : boolean {
+    return this.SelectedMessages.find(x => x.id == message.id) != null;
+  }
+
+  public SelectMessage(message: ChatMessage) : void {
+
+    let messageIndex = this.SelectedMessages.findIndex(x => x.id == message.id);
+
+    if (messageIndex == -1) {
+
+      this.SelectedMessages.push(message);
+
+    } else {
+
+      this.SelectedMessages.splice(messageIndex, 1);
+    }
+  }
+
+  public IsImage(message: ChatMessage): boolean {
+
+    if (!message.isAttachment) {
+      return false;
+    }
+
+    return message.attachmentInfo.attachmentKind == AttachmentKinds.Image;
 
   }
 
@@ -183,6 +248,8 @@ export class ChatComponent {
     }
 
     this.CurrentConversation = conversation;
+
+    this.IsConversationHistoryEnd = false;
 
     // 1 message is sent by server on first request of UpdateConversatoins() in messages field
     //should use bool var there instead.

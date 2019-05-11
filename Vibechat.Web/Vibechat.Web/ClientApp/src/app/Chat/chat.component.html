@@ -66,73 +66,69 @@
 
       <cdk-virtual-scroll-viewport (scrolledIndexChange)="OnMessagesScrolled($event)" itemSize="50" class="messages_main" #chatScroll>
         <div *cdkVirtualFor="let message of CurrentConversation.messages;">
-
-          <div *ngIf="IsMessagesLoading && IsLastMessage(message)" class="padding10px">
-            <mat-progress-spinner 
-                                  class="load-spinner"
-                                  diameter="60"
-                                  color="Primary"
-                                  mode="indeterminate">
-            </mat-progress-spinner>
-          </div>
-
-          <div *ngIf="IsPreviousMessageOnAnotherDay(message)" class="messages_datestrip_wrapper">
-            <div class="datestrip_bubble">
-              <span class="datestrip">{{GetMessagesDateStripFormatted(message)}}</span>
-            </div>
-          </div>
-
-          <div class="messages_message_content">
-
-            <div style="width: 35px; height: 35px; margin-right: 15px;">
-              <img *ngIf="IsFirstMessageInSequence(message)" class="rounded-chat-image" src="{{message.user.imageUrl}}" />
+          <div (click)="SelectMessage(message)">
+            <div *ngIf="IsMessagesLoading && IsLastMessage(message) && !IsConversationHistoryEnd" class="padding10px">
+              <mat-progress-spinner class="load-spinner"
+                                    diameter="60"
+                                    color="Primary"
+                                    mode="indeterminate">
+              </mat-progress-spinner>
             </div>
 
-            <div class="content_messageAndName">
-              <span *ngIf="IsFirstMessageInSequence(message)" class="message_header">{{message.user.userName}}</span>
-
-              <p class="message_text">{{message.messageContent}}</p>
+            <div *ngIf="IsPreviousMessageOnAnotherDay(message)" class="messages_datestrip_wrapper">
+              <div class="datestrip_bubble">
+                <span class="datestrip">{{GetMessagesDateStripFormatted(message)}}</span>
+              </div>
             </div>
 
-            <span class="message_timereceived">{{formatter.GetMessageTimeFormatted(message)}}</span>
-          </div>
+            <div class="messages_message_content" [ngClass]="{'selected-message': IsMessageSelected(message)}">
 
-          <mat-list>
+              <div style="width: 35px; height: 35px; margin-right: 15px;">
+                <img *ngIf="IsFirstMessageInSequence(message)" class="rounded-chat-image" src="{{message.user.imageUrl}}" />
+              </div>
 
-            <mat-list-item *ngFor="let attachment of message.attachments">
+              <div class="content_messageAndName">
+                <span *ngIf="IsFirstMessageInSequence(message)" class="message_header">{{message.user.userName}}</span>
 
-              <div *ngIf="IsImage(attachment); then image"></div>
+                <p *ngIf="IsText(message)" class="message_text">{{message.messageContent}}</p>
 
-              <ng-template #image>
+                <!--Attachments-->
 
-                <div class="image_attachment">
-                  <img style="width: 100%;" src="{{attachment.contentUrl}}" />
+                <div *ngIf="IsImage(message)" style="background-size: cover; background-image:url({{attachment.contentUrl}});" class="image_attachment">
                 </div>
 
-              </ng-template>
+                <!--Audio / archive / etc-->
+              </div>
 
-            </mat-list-item>
-
-          </mat-list>
-
+              <span class="message_timereceived">{{formatter.GetMessageTimeFormatted(message)}}</span>
+            </div>
+          </div>
         </div>
       </cdk-virtual-scroll-viewport>
 
-        <div class="messages_wrapper_chat-input">
+      <div class="chat_misc">
+        <button mat-fab color="primary" (click)="ScrollToStart()" *ngIf="IsScrollingAssistNeeded" [@slideIn]>
+          <mat-icon>arrow_drop_down_circle</mat-icon>
+        </button>
 
-          <img class="rounded-image" src="{{GetThisUserImageUrl()}}" />
+        <button mat-stroked-button color="primary" class="marginleft10px" *ngIf="SelectedMessages.length !== 0" (click)="DeleteMessages()" [@slideIn]>Delete messages</button>
+      </div>
 
-          <mat-form-field class="input_field">
-            <textarea (keydown.control.enter)="SendMessage()" matInput placeholder="Type in your message..."></textarea>
-          </mat-form-field>
+      <div class="messages_wrapper_chat-input">
 
-          <button mat-button style="color:cadetblue">
-            <mat-icon>send</mat-icon>
-          </button>
+        <img class="rounded-image" src="{{GetThisUserImageUrl()}}" />
 
-        </div>
+        <mat-form-field class="input_field">
+          <textarea (keydown.control.enter)="SendMessage()" matInput placeholder="Type in your message..."></textarea>
+        </mat-form-field>
 
-</div>
+        <button mat-button style="color:cadetblue">
+          <mat-icon>send</mat-icon>
+        </button>
+
+      </div>
+
+    </div>
 
   </mat-card-content>
   <img *ngIf="! IsAuthenticated" src="/Assets/401.jpg" />

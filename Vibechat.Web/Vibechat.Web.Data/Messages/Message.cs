@@ -12,6 +12,6 @@ namespace VibeChat.Web.ChatData
         public int ConversationID { get; set; }
         public DateTime TimeReceived{ get; set; }
 
-        public IEnumerable<MessageAttachment> Attachments { get; set; }
+        public MessageAttachment AttachmentInfo { get; set; }
     }
 }
