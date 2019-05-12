@@ -1,4 +1,4 @@
-import { Component, ViewChildren, QueryList, ElementRef, ViewChild } from "@angular/core";
+import { Component, ViewChildren, QueryList, ElementRef, ViewChild, AfterViewInit, OnInit } from "@angular/core";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { ConversationResponse } from "../ApiModels/ConversationResponse";
 import { Cache } from "../Auth/Cache";
@@ -7,12 +7,17 @@ import { MatSnackBar } from "@angular/material";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
 import { Router } from "@angular/router";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
-import { ConversationsFormatter } from "../Data/ConversationsFormatter";
 import { MessageAttachment } from "../Data/MessageAttachment";
 import { AttachmentKinds } from "../Data/AttachmentKinds";
 import { ChatMessage } from "../Data/ChatMessage";
 import { CdkVirtualScrollViewport } from "@angular/cdk/scrolling";
 import { trigger, state, style, transition, animate } from "@angular/animations";
+import { ConversationsFormatter } from "../Formatters/ConversationsFormatter";
+import { ConnectionManager } from "../Connections/ConnectionManager";
+import { MessageReceivedModel } from "../Shared/MessageReceivedModel";
+import { AddedToGroupModel } from "../Shared/AddedToGroupModel";
+import { RemovedFromGroupModel } from "../Shared/RemovedFromGroupModel";
+import { EmptyModel } from "../Shared/EmptyModel";
 
 @Component({
   selector: 'chat-root',
@@ -33,7 +38,7 @@ import { trigger, state, style, transition, animate } from "@angular/animations"
     ])
   ]
 })
-export class ChatComponent {
+export class ChatComponent implements OnInit {
 
   //This user conversations
 
@@ -45,9 +50,15 @@ export class ChatComponent {
 
   public SelectedMessages: Array<ChatMessage>;
 
+
+
   protected snackbar: SnackBarHelper;
 
   protected router: Router;
+
+  protected connectionManager: ConnectionManager;
+
+
 
   protected requestsBuilder: ApiRequestsBuilder;
 
@@ -56,6 +67,8 @@ export class ChatComponent {
   public static MessagesBufferLength: number = 50;
 
   public static MessagesToScrollForGoBackButtonToShowUp: number = 60;
+
+
 
   public IsMessagesLoading: boolean = false;
 
@@ -68,7 +81,7 @@ export class ChatComponent {
   @ViewChild(CdkVirtualScrollViewport) viewport: CdkVirtualScrollViewport;
 
 
-  constructor(requestsBuilder: ApiRequestsBuilder, snackbar: MatSnackBar, router: Router, formatter: ConversationsFormatter) {
+  constructor(requestsBuilder: ApiRequestsBuilder, snackbar: MatSnackBar, router: Router, formatter: ConversationsFormatter, connectionManager: ConnectionManager) {
 
     this.snackbar = new SnackBarHelper(snackbar);
 
@@ -87,8 +100,40 @@ export class ChatComponent {
     if (this.IsAuthenticated) {
 
       this.UpdateConversations();
+
+      this.connectionManager = connectionManager;
+
+      this.connectionManager.OnAddedToGroup.subscribe((res) => this.OnAddedToGroup(res));
+      this.connectionManager.OnConnectingNotify.subscribe((res) => this.OnConnecting(res));
+      this.connectionManager.OnMessageReceived.subscribe((res) => this.OnMessageReceived(res));
+      this.connectionManager.OnRemovedFromGroup.subscribe((res) => this.OnRemovedFromGroup(res));
     } 
 
+  }
+  ngOnInit(): void {
+    if (this.IsAuthenticated) {
+      this.connectionManager.Start();
+    }
+  }
+
+  public OnConnecting(data: EmptyModel) {
+    this.snackbar.openSnackBar("Connecting...");
+  }
+
+  public OnMessageReceived(data: MessageReceivedModel) : void {
+
+  }
+
+  public OnAddedToGroup(data: AddedToGroupModel): void {
+
+  }
+
+  public OnRemovedFromGroup(data: RemovedFromGroupModel) {
+
+  }
+
+  public OnDisconnected(data: EmptyModel) {
+    this.snackbar.openSnackBar("Disconnected. Retrying...");
   }
 
   public OnMessagesScrolled(messageIndex: number) {
@@ -255,8 +300,15 @@ export class ChatComponent {
     return Cache.UserCache.imageUrl;
   }
 
-  public SendMessage() {
-    //TODO
+  public SendMessage(event: any) {
+    this.connectionManager.SendMessage(
+      new ChatMessage(
+      {
+        messageContent: event.target.data,
+        isAttachment: false,
+        user: Cache.UserCache,
+        conversationID: this.CurrentConversation.conversationID
+      }), this.CurrentConversation, Cache.UserCache.id);
   }
 
   public GetCurrentConversationMembersFormatted(): string {
@@ -301,10 +353,12 @@ export class ChatComponent {
       return true;
     }
 
-    let thisMessageDay = new Date(message.timeReceived).getDay();
-    let previousMessageDay = new Date(this.CurrentConversation.messages[messageIndex - 1].timeReceived).getDay();
+    return (<Date>message.timeReceived).getDay() != (<Date>this.CurrentConversation.messages[messageIndex - 1].timeReceived).getDay();
+  }
 
-    return thisMessageDay != previousMessageDay;
+  public UploadFiles(event: any) {
+    let x = 1;
+    return ++x;
   }
 
   public GetMessagesDateStripFormatted(message: ChatMessage) : string {

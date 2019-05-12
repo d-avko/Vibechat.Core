@@ -19,6 +19,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\GetConversationByIdResultApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\GetParticipantsApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\GetParticipantsResultApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Files\FilesUploadResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Login\LoginCredentialsApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Login\LoginResultApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Messages\DeleteMessagesRequest.cs" />

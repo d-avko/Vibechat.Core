@@ -119,8 +119,13 @@
 
         <img class="rounded-image" src="{{GetThisUserImageUrl()}}" />
 
+        <div class="padding20px">
+          <input class="button_send-images" type="file" (change)="UploadFiles($event)" multiple="multiple" title="Send file" accept="image/*">
+          <mat-icon style="color: cadetblue">add_a_photo</mat-icon>
+        </div>
+
         <mat-form-field class="input_field">
-          <textarea (keydown.control.enter)="SendMessage()" matInput placeholder="Type in your message..."></textarea>
+          <textarea (keydown.control.enter)="SendMessage($event)" matInput placeholder="Type in your message..."></textarea>
         </mat-form-field>
 
         <button mat-button style="color:cadetblue">

@@ -13,6 +13,7 @@ using Vibechat.Web.Services.ChatDataProviders;
 using VibeChat.Web;
 using VibeChat.Web.ApiModels;
 using VibeChat.Web.ChatData;
+using VibeChat.Web.Data.DataModels;
 
 namespace Vibechat.Web.Services
 {
@@ -128,6 +129,69 @@ namespace Vibechat.Web.Services
 
         }
 
+        public async Task AddUserToGroup()
+        {
+            //TODO
+        }
+
+        public async Task RemoveUserFromGroup()
+        {
+            //TODO
+        }
+
+        public async Task AddMessage(Message message, int groupId, string SenderId)
+        {
+            UserInApplication whoSent = await mContext.Users.FindAsync(SenderId).ConfigureAwait(false);
+
+            if(whoSent == null)
+            {
+                throw new FormatException($"Failed to retrieve user with id {SenderId} from database: no such user exists");
+            }
+
+            mContext.Messages.Add(new MessageDataModel()
+            {
+                ConversationID = groupId,
+                MessageContent = message.MessageContent,
+                TimeReceived = DateTime.UtcNow,
+                User = whoSent,
+                AttachmentInfo = null,
+                IsAttachment = false
+            });
+
+            await mContext.SaveChangesAsync();
+        }
+
+        public async Task AddAttachmentMessage(Message message, int groupId, string SenderId)
+        {
+            UserInApplication whoSent = await mContext.Users.FindAsync(SenderId).ConfigureAwait(false);
+
+            if (whoSent == null)
+            {
+                throw new FormatException($"Failed to retrieve user with id {SenderId} from database: no such user exists");
+            }
+
+            var attachment = await mContext.Attachments.AddAsync(new MessageAttachmentDataModel()
+            {
+                AttachmentKind = await mContext.AttachmentKinds.FindAsync(message.AttachmentInfo.AttachmentKind),
+                ContentUrl = message.AttachmentInfo.ContentUrl,
+                ImageHeight = message.AttachmentInfo.ImageHeight,
+                ImageWidth = message.AttachmentInfo.ImageWidth,
+                AttachmentName = message.AttachmentInfo.AttachmentName
+            });
+
+            mContext.Messages.Add(new MessageDataModel()
+            {
+                ConversationID = groupId,
+                MessageContent = message.MessageContent,
+                TimeReceived = DateTime.UtcNow,
+                User = whoSent,
+                AttachmentInfo = attachment.Entity,
+                IsAttachment = true
+            });
+
+            await mContext.SaveChangesAsync();
+        }
+
 
         public async Task AddUserToConversation(AddToConversationApiModel UserProvided)
         {
@@ -229,7 +293,7 @@ namespace Vibechat.Web.Services
 
             return new ConversationInfoResultApiModel()
             {
-                    Conversations = returnData
+                Conversations = returnData
             };
 
         }
@@ -316,7 +380,6 @@ namespace Vibechat.Web.Services
                 .Take(convInfo.Count)
                 .Include(msg => msg.User);
 
-
             return new GetMessagesResultApiModel()
             {
                 Messages = (from msg in messages
@@ -342,7 +405,7 @@ namespace Vibechat.Web.Services
                                 {
                                     AttachmentKind = msg.AttachmentInfo.AttachmentKind.Name,
                                     ContentUrl = msg.AttachmentInfo.ContentUrl,
-                                    AttachmentName = msg.AttachmentInfo.Name,
+                                    AttachmentName = msg.AttachmentInfo.AttachmentName,
                                     ImageHeight = msg.AttachmentInfo.ImageHeight,
                                     ImageWidth = msg.AttachmentInfo.ImageWidth
                                 },
@@ -651,6 +714,31 @@ namespace Vibechat.Web.Services
                 }).ToList()
             };
         }
+
+        public async Task MakeUserOnline(string userId, string signalRConnectionId)
+        {
+            UserInApplication user = await mContext.Users.FindAsync(userId);
+
+            user.IsOnline = true;
+
+            user.LastSeen = DateTime.UtcNow;
+
+            user.ConnectionId = signalRConnectionId;
+
+            await mContext.SaveChangesAsync();
+        }
+
+        public async Task MakeUserOffline(string userId)
+        {
+            var user = await mContext.Users.FindAsync(userId);
+
+            user.IsOnline = false;
+
+            user.ConnectionId = null;
+
+            mContext.SaveChanges();
+        }
+
         #endregion
     }
 }
