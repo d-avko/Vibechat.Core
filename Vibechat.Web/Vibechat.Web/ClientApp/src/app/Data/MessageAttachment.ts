@@ -4,4 +4,8 @@ export class MessageAttachment{
   public attachmentName: string;
 
   public attachmentKind: string;
+
+  public imageWidth: number;
+
+  public imageHeight: number;
 }

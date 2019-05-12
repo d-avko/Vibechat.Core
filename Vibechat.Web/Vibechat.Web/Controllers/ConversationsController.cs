@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Vibechat.Web.ApiModels;
+using Vibechat.Web.Data.ApiModels.Messages;
 using Vibechat.Web.Services;
 using VibeChat.Web.ApiModels;
 using VibeChat.Web.ChatData;
@@ -165,6 +166,35 @@ namespace VibeChat.Web.Controllers
 
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Conversations/DeleteMessages")]
+        public async Task<ResponseApiModel<string>> DeleteConversationMessages([FromBody] DeleteMessagesRequest messagesInfo)
+        {
+            try
+            {
+                await mDbService.DeleteConversationMessages(
+                    messagesInfo,
+                    User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
+                    .Value);
+
+                return new ResponseApiModel<string>()
+                {
+                    IsSuccessfull = true,
+                    ErrorMessage = null,
+                    Response = null
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<string>()
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message,
+                    Response = null
+                };
+            }
+        }
+            
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/GetConversationInfoById")]
         public async Task<ResponseApiModel<GetConversationByIdResultApiModel>> GetConversationById([FromBody] GetConversationByIdApiModel convInfo)

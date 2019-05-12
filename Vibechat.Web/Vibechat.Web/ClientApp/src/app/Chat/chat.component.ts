@@ -114,6 +114,8 @@ export class ChatComponent {
 
           result.response.messages = result.response.messages.sort(this.MessagesSortFunc);
 
+          result.response.messages.forEach((x) => x.timeReceived = new Date(<string>x.timeReceived));
+
           //append old messages to new ones.
           this.CurrentConversation.messages = result.response.messages.concat(this.CurrentConversation.messages);
           this.IsMessagesLoading = false;
@@ -132,12 +134,27 @@ export class ChatComponent {
   }
 
   public DeleteMessages() {
-
+    this.requestsBuilder.DeleteMessages(this.SelectedMessages, this.CurrentConversation.conversationID, Cache.JwtToken)
+    .subscribe((result) => this.OnMessagesDeleted(result))
   }
 
-  public ScrollToStart() : void {
+  public OnMessagesDeleted(response: ServerResponse<string>) {
+    if (!response.isSuccessfull) {
+      this.snackbar.openSnackBar("Failed to delete messages. Reason: " + response.errorMessage);
+      return;
+    }
+
+    //delete messages locally
+
+    this.CurrentConversation.messages = this.CurrentConversation
+      .messages
+      .filter(msg => this.SelectedMessages.findIndex(selected => selected.id == msg.id) == -1);
+
+    this.SelectedMessages.splice(0, this.SelectedMessages.length);
+  }
+
+  public ScrollToStart(): void {
     this.ScrollToMessage(this.CurrentConversation.messages.length);
-    this.IsScrollingAssistNeeded = false;
   }
 
   public ScrollToMessage(index: number): void {
@@ -158,7 +175,12 @@ export class ChatComponent {
       return;
     }
 
-    this.Conversations = response.response.conversations;
+    //parse string date to js Date
+
+    response.response.conversations
+    .forEach((conversation) => conversation.messages.forEach(msg => msg.timeReceived = new Date(<string>msg.timeReceived)))
+
+    this.Conversations = response.response.conversations
   }
 
   public IsCurrentConversation(conversation: ConversationTemplate): boolean {

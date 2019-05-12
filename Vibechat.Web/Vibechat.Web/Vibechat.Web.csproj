@@ -25,6 +25,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20190511173230_DeletedMessagesFK1.cs" />
+    <Compile Remove="Migrations\20190511173230_DeletedMessagesFK1.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="ClientApp\src\app\ApiModels\ConversationMessagesResponse.ts" />
     <None Remove="ClientApp\src\app\ApiModels\ConversationRequest.ts" />
     <None Remove="ClientApp\src\app\ApiModels\ConversationResponse.ts" />
@@ -34,6 +39,7 @@
     <None Remove="ClientApp\src\app\Data\ChatMessage.ts" />
     <None Remove="ClientApp\src\app\Data\ConversationsFormatter.ts" />
     <None Remove="ClientApp\src\app\Data\ConversationTemplate.ts" />
+    <None Remove="ClientApp\src\app\Data\DeleteMessagesRequest.ts" />
     <None Remove="ClientApp\src\app\Data\MessageAttachment.ts" />
     <None Remove="ClientApp\src\app\Data\UserInfo.ts" />
     <None Remove="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
@@ -49,6 +55,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationsFormatter.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationTemplate.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ChatMessage.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Data\DeleteMessagesRequest.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\MessageAttachment.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\UserInfo.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />

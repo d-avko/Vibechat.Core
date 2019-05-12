@@ -21,6 +21,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\GetParticipantsResultApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Login\LoginCredentialsApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Login\LoginResultApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Messages\DeleteMessagesRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Messages\GetMessagesApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Messages\GetMessagesResultApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Register\RegisterInformationApiModel.cs" />

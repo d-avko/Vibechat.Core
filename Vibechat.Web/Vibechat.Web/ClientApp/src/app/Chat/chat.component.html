@@ -64,7 +64,7 @@
 
       </div>
 
-      <cdk-virtual-scroll-viewport (scrolledIndexChange)="OnMessagesScrolled($event)" itemSize="50" class="messages_main" #chatScroll>
+      <cdk-virtual-scroll-viewport (scrolledIndexChange)="OnMessagesScrolled($event)" itemSize="50" class="messages_main">
         <div *cdkVirtualFor="let message of CurrentConversation.messages;">
           <div (click)="SelectMessage(message)">
             <div *ngIf="IsMessagesLoading && IsLastMessage(message) && !IsConversationHistoryEnd" class="padding10px">
@@ -75,7 +75,7 @@
               </mat-progress-spinner>
             </div>
 
-            <div *ngIf="IsPreviousMessageOnAnotherDay(message)" class="messages_datestrip_wrapper">
+            <div *ngIf="IsPreviousMessageOnAnotherDay(message)" class="messages_datestrip_wrapper padding10px">
               <div class="datestrip_bubble">
                 <span class="datestrip">{{GetMessagesDateStripFormatted(message)}}</span>
               </div>
@@ -94,7 +94,8 @@
 
                 <!--Attachments-->
 
-                <div *ngIf="IsImage(message)" style="background-size: cover; background-image:url({{attachment.contentUrl}});" class="image_attachment">
+                <div *ngIf="IsImage(message)" class="image_attachment">
+                  <img [style.width.px]="message.attachmentInfo.imageWidth" [style.height.px]="message.attachmentInfo.imageHeight" src="{{message.attachmentInfo.contentUrl}}" />
                 </div>
 
                 <!--Audio / archive / etc-->
@@ -107,7 +108,7 @@
       </cdk-virtual-scroll-viewport>
 
       <div class="chat_misc">
-        <button mat-fab color="primary" (click)="ScrollToStart()" *ngIf="IsScrollingAssistNeeded" [@slideIn]>
+        <button mat-fab color="primary" (click)="ScrollToStart()" *ngIf="IsScrollingAssistNeeded" [@slideIn] class="button_slide-tobottom">
           <mat-icon>arrow_drop_down_circle</mat-icon>
         </button>
 

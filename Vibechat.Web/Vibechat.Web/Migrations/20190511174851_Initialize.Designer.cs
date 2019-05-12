@@ -10,8 +10,8 @@ using VibeChat.Web;
 namespace Vibechat.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20190506114448_RemoveRgbColumns")]
-    partial class RemoveRgbColumns
+    [Migration("20190511174851_Initialize")]
+    partial class Initialize
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -171,13 +171,11 @@ namespace Vibechat.Web.Migrations
 
                     b.Property<string>("ContentUrl");
 
-                    b.Property<int?>("MessageDataModelMessageID");
+                    b.Property<string>("Name");
 
                     b.HasKey("AttachmentID");
 
                     b.HasIndex("AttachmentKindAttachementKindID");
-
-                    b.HasIndex("MessageDataModelMessageID");
 
                     b.ToTable("MessageAttachmentDataModel");
                 });
@@ -204,13 +202,17 @@ namespace Vibechat.Web.Migrations
 
             modelBuilder.Entity("VibeChat.Web.DeletedMessagesDataModel", b =>
                 {
-                    b.Property<int>("MessageId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int?>("MessageID");
+
                     b.Property<string>("UserId");
 
-                    b.HasKey("MessageId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("MessageID");
 
                     b.ToTable("DeletedMessages");
                 });
@@ -221,7 +223,11 @@ namespace Vibechat.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int?>("AttachmentInfoAttachmentID");
+
                     b.Property<int>("ConversationID");
+
+                    b.Property<bool>("IsAttachment");
 
                     b.Property<string>("MessageContent");
 
@@ -230,6 +236,8 @@ namespace Vibechat.Web.Migrations
                     b.Property<string>("UserId");
 
                     b.HasKey("MessageID");
+
+                    b.HasIndex("AttachmentInfoAttachmentID");
 
                     b.HasIndex("UserId");
 
@@ -368,14 +376,21 @@ namespace Vibechat.Web.Migrations
                     b.HasOne("VibeChat.Web.Data.DataModels.AttachmentKindDataModel", "AttachmentKind")
                         .WithMany()
                         .HasForeignKey("AttachmentKindAttachementKindID");
+                });
 
-                    b.HasOne("VibeChat.Web.MessageDataModel")
-                        .WithMany("Attachments")
-                        .HasForeignKey("MessageDataModelMessageID");
+            modelBuilder.Entity("VibeChat.Web.DeletedMessagesDataModel", b =>
+                {
+                    b.HasOne("VibeChat.Web.MessageDataModel", "Message")
+                        .WithMany()
+                        .HasForeignKey("MessageID");
                 });
 
             modelBuilder.Entity("VibeChat.Web.MessageDataModel", b =>
                 {
+                    b.HasOne("VibeChat.Web.Data.DataModels.MessageAttachmentDataModel", "AttachmentInfo")
+                        .WithMany()
+                        .HasForeignKey("AttachmentInfoAttachmentID");
+
                     b.HasOne("VibeChat.Web.UserInApplication", "User")
                         .WithMany()
                         .HasForeignKey("UserId");

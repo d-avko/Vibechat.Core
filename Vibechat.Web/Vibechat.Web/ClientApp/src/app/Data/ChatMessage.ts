@@ -10,7 +10,7 @@ export class ChatMessage {
     
   public conversationID: number;
     
-  public timeReceived: string;
+  public timeReceived: Date | string;
 
   public attachmentInfo: MessageAttachment;
 
