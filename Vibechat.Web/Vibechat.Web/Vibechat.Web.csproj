@@ -35,6 +35,7 @@
     <None Remove="ClientApp\src\app\ApiModels\ConversationResponse.ts" />
     <None Remove="ClientApp\src\app\Auth\Cache.ts" />
     <None Remove="ClientApp\src\app\Chat\chat.component.ts" />
+    <None Remove="ClientApp\src\app\Connections\ConnectionManager.ts" />
     <None Remove="ClientApp\src\app\Data\AttachmentKinds.ts" />
     <None Remove="ClientApp\src\app\Data\ChatMessage.ts" />
     <None Remove="ClientApp\src\app\Data\ConversationsFormatter.ts" />
@@ -43,6 +44,10 @@
     <None Remove="ClientApp\src\app\Data\MessageAttachment.ts" />
     <None Remove="ClientApp\src\app\Data\UserInfo.ts" />
     <None Remove="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
+    <None Remove="ClientApp\src\app\Shared\AddedToGroupModel.ts" />
+    <None Remove="ClientApp\src\app\Shared\EmptyModel.ts" />
+    <None Remove="ClientApp\src\app\Shared\MessageReceivedModel.ts" />
+    <None Remove="ClientApp\src\app\Shared\RemovedFromGroupModel.ts" />
   </ItemGroup>
 
   <ItemGroup>
@@ -51,14 +56,19 @@
     <TypeScriptCompile Include="ClientApp\src\app\ApiModels\ConversationResponse.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Auth\Cache.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Chat\chat.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Connections\ConnectionManager.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\AttachmentKinds.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationsFormatter.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Formatters\ConversationsFormatter.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationTemplate.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ChatMessage.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\DeleteMessagesRequest.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\MessageAttachment.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\UserInfo.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Shared\AddedToGroupModel.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Shared\EmptyModel.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Shared\MessageReceivedModel.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Shared\RemovedFromGroupModel.ts" />
   </ItemGroup>
 
   <ItemGroup>

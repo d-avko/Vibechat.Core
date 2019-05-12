@@ -9,8 +9,6 @@ namespace VibeChat.Web.Data.DataModels
     public class AttachmentKindDataModel
     {
         [Key]
-        public int AttachementKindID { get; set; }
-
         public string Name { get; set; }
     }
 }

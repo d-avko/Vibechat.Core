@@ -1,7 +1,7 @@
-import { ConversationTemplate } from "./ConversationTemplate";
 import { Cache } from "../Auth/Cache";
 import { Injectable } from "@angular/core"
-import { ChatMessage } from "./ChatMessage";
+import { ChatMessage } from "../Data/ChatMessage";
+import { ConversationTemplate } from "../Data/ConversationTemplate";
 
 @Injectable({
   providedIn: 'root'

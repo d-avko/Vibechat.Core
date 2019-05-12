@@ -7,12 +7,13 @@ import { AppRoutersModule } from './app.routes';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
 import { ReactiveFormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
+import { NoopAnimationsModule } from '@angular/platform-browser/animations'
 import { RegisterComponent } from './registration/register.component';
 import { ChatComponent } from './Chat/chat.component';
 import { ApiRequestsBuilder } from './Requests/ApiRequestsBuilder';
-import { ConversationsFormatter } from './Data/ConversationsFormatter';
 import { ScrollDispatchModule } from '@angular/cdk/scrolling';
+import { ConversationsFormatter } from './Formatters/ConversationsFormatter';
+import { ConnectionManager } from './Connections/ConnectionManager';
 
 @NgModule({
   declarations: [
@@ -27,10 +28,10 @@ import { ScrollDispatchModule } from '@angular/cdk/scrolling';
     AppRoutersModule,
     HttpClientModule,
     ReactiveFormsModule,
-    BrowserAnimationsModule,
+    NoopAnimationsModule,
     ScrollDispatchModule
   ],
-  providers: [ ApiRequestsBuilder, ConversationsFormatter ],
+  providers: [ApiRequestsBuilder, ConversationsFormatter, ConnectionManager],
   bootstrap: [AppComponent]
 })
 export class AppModule {}

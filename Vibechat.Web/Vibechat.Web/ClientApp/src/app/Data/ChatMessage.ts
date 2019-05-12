@@ -2,6 +2,10 @@ import { UserInfo } from "./UserInfo";
 import { MessageAttachment } from "./MessageAttachment";
 
 export class ChatMessage {
+  constructor(init?: Partial<ChatMessage>) {
+    (<any>Object).assign(this, init);
+  }
+
   public id: number;
 
   public user: UserInfo;

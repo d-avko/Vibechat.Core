@@ -148,15 +148,12 @@ namespace Vibechat.Web.Migrations
 
             modelBuilder.Entity("VibeChat.Web.Data.DataModels.AttachmentKindDataModel", b =>
                 {
-                    b.Property<int>("AttachementKindID")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<string>("Name")
+                        .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Name");
+                    b.HasKey("Name");
 
-                    b.HasKey("AttachementKindID");
-
-                    b.ToTable("AttachmentKindDataModel");
+                    b.ToTable("AttachmentKinds");
                 });
 
             modelBuilder.Entity("VibeChat.Web.Data.DataModels.MessageAttachmentDataModel", b =>
@@ -164,8 +161,6 @@ namespace Vibechat.Web.Migrations
                     b.Property<int>("AttachmentID")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int?>("AttachmentKindAttachementKindID");
 
                     b.Property<string>("ContentUrl");
 
@@ -177,9 +172,9 @@ namespace Vibechat.Web.Migrations
 
                     b.HasKey("AttachmentID");
 
-                    b.HasIndex("AttachmentKindAttachementKindID");
+                    b.HasIndex("Name");
 
-                    b.ToTable("MessageAttachmentDataModel");
+                    b.ToTable("Attachments");
                 });
 
             modelBuilder.Entity("VibeChat.Web.Data.SettingsDataModel", b =>
@@ -377,7 +372,7 @@ namespace Vibechat.Web.Migrations
                 {
                     b.HasOne("VibeChat.Web.Data.DataModels.AttachmentKindDataModel", "AttachmentKind")
                         .WithMany()
-                        .HasForeignKey("AttachmentKindAttachementKindID");
+                        .HasForeignKey("Name");
                 });
 
             modelBuilder.Entity("VibeChat.Web.DeletedMessagesDataModel", b =>

@@ -8,7 +8,7 @@ import { Component } from "@angular/core";
   selector: 'snack-bar'
 })
 export class SnackBarHelper {
-  durationInSeconds = 2.5;
+  durationInSeconds = 4.5;
 
   constructor(private snackBar: MatSnackBar) { }
 

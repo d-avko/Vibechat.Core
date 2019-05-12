@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
+using Vibechat.Web.Services;
 using VibeChat.Web.ChatData;
 using VibeChat.Web.UserProviders;
 
@@ -14,41 +16,43 @@ namespace VibeChat.Web
     /// </summary>
     public class ChatsHub : Hub
     {
-        private ApplicationDbContext dbContext { get; set; }
-
         private ICustomHubUserIdProvider userProvider { get; set; }
 
+        private DatabaseService dbService { get; set; }
 
-        public ChatsHub(ApplicationDbContext dbContext, ICustomHubUserIdProvider userProvider)
+        private ILogger<ChatsHub> logger { get; set; }
+
+
+        public ChatsHub(ICustomHubUserIdProvider userProvider, DatabaseService dbService, ILogger<ChatsHub> logger)
         { 
-            this.dbContext = dbContext;
             this.userProvider = userProvider;
+            this.dbService = dbService;
+            this.logger = logger;
         }
 
         public async Task OnConnected()
         {
-            
-            var user = await dbContext.Users.SingleOrDefaultAsync(u => u.Id == userProvider.GetUserId(Context));
-
-            user.IsOnline = true;
-
-            user.LastSeen = DateTime.UtcNow;
-
-            user.ConnectionId = Context.ConnectionId;
-
-            await dbContext.SaveChangesAsync();
+            await dbService.MakeUserOnline(userProvider.GetUserId(Context), Context.ConnectionId);
         }
 
         public async Task OnDisconnected()
         {
-            var user = await dbContext.Users
-                .SingleOrDefaultAsync(u => u.Id == userProvider.GetUserId(Context));
+            await dbService.MakeUserOffline(userProvider.GetUserId(Context));       
+        }
 
-            user.IsOnline = false;
-
-            user.ConnectionId = null;
-
-            dbContext.SaveChanges();         
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task RemoveFromGroup(string userToRemoveId, int conversationId)
+        {
+            try
+            {
+                await dbService.RemoveUserFromGroup();
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, conversationId.ToString());
+                await RemovedFromGroup(userToRemoveId, conversationId, true);
+            }
+            catch(Exception ex)
+            {
+                logger.LogError(ex.Message);
+            }
         }
 
         /// <summary>
@@ -58,17 +62,18 @@ namespace VibeChat.Web
         /// <param name="conversationId">conversation to add to</param>
         /// <param name="connectionId"> connection to add</param>
         /// <returns></returns>
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task AddToGroup(string userId, int conversationId, string connectionId)
         {
-            await Groups.AddToGroupAsync(connectionId, conversationId.ToString());
-
             try
             {
+                await dbService.AddUserToGroup();
+                await Groups.AddToGroupAsync(connectionId, conversationId.ToString());
                 await AddedToGroup(userId, conversationId, true);
             }
             catch(Exception ex)
             {
-                await AddedToGroup(userId, conversationId, false, ex.Message);
+                logger.LogError(ex.Message);
             }
         }
 
@@ -83,44 +88,26 @@ namespace VibeChat.Web
             await Groups.AddToGroupAsync(Context.ConnectionId, groupId.ToString());
         }
 
-        /// <summary>
-        /// Used to stop the connection with a group
-        /// </summary>
-        /// <returns></returns>
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task DeletedFromGroup(int groupId)
-        {            
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupId.ToString());
-        }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task SendMessageToGroup(int groupId, string SenderId, string message)
+        public async Task SendMessageToGroup(Message message, string SenderId, int groupId)
         {
             try
             {
-                await SendMessageToGroup(groupId, SenderId, message, true);
+                await SendMessageToGroup(groupId, SenderId, message, true, true);
 
-                var whoSent = await dbContext.Users.FindAsync(SenderId).ConfigureAwait(false);
-
-                if (whoSent == null)
+                if (message.IsAttachment)
                 {
-                    await SendMessageToGroup(groupId, null, null, false, $"Failed to retrieve user with id {SenderId} from database: no such user exists");
-                    return;
+                    await dbService.AddAttachmentMessage(message, groupId, SenderId);
                 }
-
-                dbContext.Messages.Add(new MessageDataModel()
+                else
                 {
-                    ConversationID = groupId,
-                    MessageContent = message,
-                    TimeReceived = DateTime.UtcNow,
-                    User = whoSent
-                });
-
-                await dbContext.SaveChangesAsync();
+                    await dbService.AddMessage(message, groupId, SenderId);
+                }
             }
             catch(Exception ex)
             {
-                await SendMessageToGroup(groupId, null, null, false, ex.Message);
+                logger.LogError(ex.Message);
             }
         }
 
@@ -134,49 +121,52 @@ namespace VibeChat.Web
         /// <param name="conversationId"></param>
         /// <returns></returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task SendMessageToUser(string message, string SenderId, string UserToSendId, int conversationId)
+        public async Task SendMessageToUser(Message message, string SenderId, string UserToSendId, int conversationId)
         {
             try
             {
-                await SendMessageToUser(message, SenderId, UserToSendId, conversationId, true);
+                await SendMessageToUser(message, SenderId, UserToSendId, conversationId, true, true);
 
-                var whoSent = await dbContext.Users.FindAsync(SenderId).ConfigureAwait(false);
-
-                if (whoSent == null)
+                if (message.IsAttachment)
                 {
-                    await SendMessageToUser(null, null, UserToSendId, 0, false, $"Failed to retrieve user with id {SenderId} from database: no such user exists");
-                    return;
+                    await dbService.AddAttachmentMessage(message, conversationId, SenderId);
                 }
-
-                dbContext.Messages.Add(new MessageDataModel()
+                else
                 {
-                    User = whoSent,
-                    ConversationID = conversationId,
-                    MessageContent = message,
-                    TimeReceived = DateTime.UtcNow
-                });
-
-                await dbContext.SaveChangesAsync();
+                    await dbService.AddMessage(message, conversationId, SenderId);
+                }
             }
             catch(Exception ex)
             {
-                await SendMessageToUser(message, SenderId, UserToSendId, conversationId, true, ex.Message);
+                logger.LogError(ex.Message);
             }
         }
 
-        private async Task AddedToGroup(string userId, int conversationId, bool IsSuccessfull, string ErrorMessage = null)
+        /// <summary>
+        /// Used to notify users of leaving of specified member.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="conversationId"></param>
+        /// <param name="x"></param>
+        /// <returns></returns>
+        private async Task RemovedFromGroup(string userId, int conversationId, bool x)
         {
-            await Clients.Group(conversationId.ToString()).SendAsync("AddedToGroup", conversationId, userId, IsSuccessfull, ErrorMessage);
+            await Clients.Group(conversationId.ToString()).SendAsync("RemovedFromGroup", conversationId, userId);
         }
 
-        private async Task SendMessageToGroup(int groupId, string SenderId, string message, bool IsSuccessfull, string ErrorMessage = null)
+        private async Task AddedToGroup(string userId, int conversationId, bool x)
         {
-            await Clients.Group(groupId.ToString()).SendAsync("ReceiveMessage", SenderId, message, IsSuccessfull, groupId, ErrorMessage);
+            await Clients.Group(conversationId.ToString()).SendAsync("AddedToGroup", conversationId, userId);
         }
 
-        private async Task SendMessageToUser(string message, string SenderId, string UserToSendId, int conversationId, bool IsSuccessfull, string ErrorMessage = null)
+        private async Task SendMessageToGroup(int groupId, string SenderId, Message message, bool y, bool x)
         {
-            await Clients.User(UserToSendId).SendAsync("ReceiveMessage", SenderId, message,IsSuccessfull, conversationId, ErrorMessage);
+            await Clients.Group(groupId.ToString()).SendAsync("ReceiveMessage", SenderId, message, groupId);
+        }
+
+        private async Task SendMessageToUser(Message message, string SenderId, string UserToSendId, int conversationId, bool x, bool y)
+        {
+            await Clients.User(UserToSendId).SendAsync("ReceiveMessage", SenderId, message, conversationId);
         }
     }
 }

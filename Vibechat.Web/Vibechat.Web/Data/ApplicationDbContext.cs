@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using VibeChat.Web.Data;
+using VibeChat.Web.Data.DataModels;
 
 namespace VibeChat.Web
 {
@@ -16,6 +17,10 @@ namespace VibeChat.Web
         public DbSet<MessageDataModel> Messages { get; set; }
 
         public DbSet<DeletedMessagesDataModel> DeletedMessages { get; set; }
+
+        public DbSet<AttachmentKindDataModel> AttachmentKinds { get; set; }
+
+        public DbSet<MessageAttachmentDataModel> Attachments { get; set; }
              
 
         #region Constructor
