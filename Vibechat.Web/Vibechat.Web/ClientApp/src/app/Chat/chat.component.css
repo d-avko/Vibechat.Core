@@ -185,7 +185,9 @@
 }
 
 .image_attachment{
-  border-radius: 15px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 }
 
 .selected-message {
@@ -197,7 +199,8 @@
   flex-direction: row;
 }
 
-.marginleft10px{
+
+.marginleft10px {
   margin-left: 10px;
 }
 

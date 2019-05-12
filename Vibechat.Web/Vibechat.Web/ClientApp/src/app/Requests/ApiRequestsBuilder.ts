@@ -9,6 +9,8 @@ import { ConversationResponse } from "../ApiModels/ConversationResponse";
 import { ConversationsRequest } from "../ApiModels/ConversationRequest";
 import { ConversationMessagesRequest } from "../ApiModels/ConversationMessagesRequest";
 import { ConversationMessagesResponse } from "../ApiModels/ConversationMessagesResponse";
+import { ChatMessage } from "../Data/ChatMessage";
+import { DeleteMessagesRequest } from "../Data/DeleteMessagesRequest";
 
 @Injectable({
   providedIn: 'root'
@@ -57,6 +59,20 @@ export class ApiRequestsBuilder {
           Count: count,
           ConversationID: conversationId,
           MesssagesOffset: offset
+        }),
+      { headers: headers });
+  }
+
+  public DeleteMessages(messages: Array<ChatMessage>, conversationId: number, token: string) : Observable<ServerResponse<string>> {
+    let headers = new HttpHeaders();
+    headers = headers.append('Authorization', 'Bearer ' + token);
+
+    return this.httpClient.post<ServerResponse<string>>(
+      this.baseUrl + 'api/Conversations/DeleteMessages',
+      new DeleteMessagesRequest(
+        {
+          MessagesId: messages.map(x => x.id),
+          ConversationId: conversationId
         }),
       { headers: headers });
   }

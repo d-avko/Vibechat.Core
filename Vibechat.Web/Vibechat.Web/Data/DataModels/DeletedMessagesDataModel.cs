@@ -9,7 +9,9 @@ namespace VibeChat.Web
     {
         [Key]
         //deleted message
-        public int MessageId { get; set; }
+        public int Id { get; set; }
+
+        public MessageDataModel Message { get; set; }
       
         //user that deleted that message
         public string UserId { get; set; } 

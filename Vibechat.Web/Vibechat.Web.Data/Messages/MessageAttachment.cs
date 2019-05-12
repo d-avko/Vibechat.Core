@@ -11,5 +11,9 @@ namespace Vibechat.Web.ChatData.Messages
         public string AttachmentName { get; set; }
 
         public string AttachmentKind { get; set; }
+
+        public int ImageWidth { get; set; }
+
+        public int ImageHeight { get; set; }
     }
 }

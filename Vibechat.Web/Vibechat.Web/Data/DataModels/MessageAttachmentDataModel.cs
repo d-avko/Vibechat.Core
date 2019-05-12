@@ -14,6 +14,10 @@ namespace VibeChat.Web.Data.DataModels
 
         public string Name { get; set; }
 
+        public int ImageWidth { get; set; }
+
+        public int ImageHeight { get; set; }
+
         public AttachmentKindDataModel AttachmentKind { get; set; }
     }
 }

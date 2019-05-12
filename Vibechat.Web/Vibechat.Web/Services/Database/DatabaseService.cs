@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Vibechat.Web.ApiModels;
 using Vibechat.Web.ChatData.Messages;
+using Vibechat.Web.Data.ApiModels.Messages;
 using Vibechat.Web.Services.ChatDataProviders;
 using VibeChat.Web;
 using VibeChat.Web.ApiModels;
@@ -149,7 +150,7 @@ namespace Vibechat.Web.Services
                 User = FoundUser
             }).ConfigureAwait(false);
 
-            await mContext.SaveChangesAsync().ConfigureAwait(false);
+            await mContext.SaveChangesAsync();
         }
 
         public async Task<ConversationInfoResultApiModel> GetConversationInformation(CredentialsForConversationInfoApiModel UserProvided, string whoAccessedId)
@@ -303,45 +304,50 @@ namespace Vibechat.Web.Services
             if (members.Participants.Find(x => x.Id == whoAccessedId) == null)
                 throw unAuthorizedError;
 
-            var messages = mContext.Messages
+            var deletedMessages = mContext
+                .DeletedMessages
+                .Where(msg => msg.Message.ConversationID == convInfo.ConversationID && msg.UserId == whoAccessedId);
+
+            var messages = mContext
+                .Messages
                 .Where(msg => msg.ConversationID == convInfo.ConversationID)
                 .OrderByDescending(x => x.TimeReceived)
                 .Skip(convInfo.MesssagesOffset)
                 .Take(convInfo.Count)
                 .Include(msg => msg.User);
 
-            var MessagesToReturn = (
-
-            from msg in messages
-            where msg.ConversationID == convInfo.ConversationID
-            select new Message()
-            {
-                Id = msg.MessageID,
-                ConversationID = msg.ConversationID,
-                MessageContent = msg.MessageContent,
-                TimeReceived = msg.TimeReceived,
-                User = msg.User == null ? null : new UserInfo()
-                {
-                    Id = msg.User.Id,
-                    LastName = msg.User.LastName,
-                    LastSeen = msg.User.LastSeen,
-                    Name = msg.User.FirstName,
-                    UserName = msg.User.UserName,
-                    ImageUrl = msg.User.ProfilePicImageURL,
-                    IsOnline = msg.User.IsOnline,
-                    ConnectionId = msg.User.ConnectionId
-                },
-                AttachmentInfo = new MessageAttachment()
-                {
-                    AttachmentKind = msg.AttachmentInfo.AttachmentKind.Name,
-                    ContentUrl = msg.AttachmentInfo.ContentUrl,
-                    AttachmentName = msg.AttachmentInfo.Name
-                } 
-            }).ToList();
 
             return new GetMessagesResultApiModel()
             {
-                Messages = MessagesToReturn
+                Messages = (from msg in messages
+                            where !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID)
+                            select new Message()
+                            {
+                                Id = msg.MessageID,
+                                ConversationID = msg.ConversationID,
+                                MessageContent = msg.MessageContent,
+                                TimeReceived = msg.TimeReceived,
+                                User = msg.User == null ? null : new UserInfo()
+                                {
+                                    Id = msg.User.Id,
+                                    LastName = msg.User.LastName,
+                                    LastSeen = msg.User.LastSeen,
+                                    Name = msg.User.FirstName,
+                                    UserName = msg.User.UserName,
+                                    ImageUrl = msg.User.ProfilePicImageURL,
+                                    IsOnline = msg.User.IsOnline,
+                                    ConnectionId = msg.User.ConnectionId
+                                },
+                                AttachmentInfo = msg.AttachmentInfo == null ? null : new MessageAttachment()
+                                {
+                                    AttachmentKind = msg.AttachmentInfo.AttachmentKind.Name,
+                                    ContentUrl = msg.AttachmentInfo.ContentUrl,
+                                    AttachmentName = msg.AttachmentInfo.Name,
+                                    ImageHeight = msg.AttachmentInfo.ImageHeight,
+                                    ImageWidth = msg.AttachmentInfo.ImageWidth
+                                },
+                                IsAttachment = msg.IsAttachment
+                            }).ToList()
             };
 
         }
@@ -410,6 +416,36 @@ namespace Vibechat.Web.Services
             };
 
         }
+
+        public async Task DeleteConversationMessages(DeleteMessagesRequest messagesInfo, string whoAccessedId)
+        {
+            var unAuthorizedError = new UnauthorizedAccessException("You are unauthorized to do such an action.");
+
+            var messagesToDelete = mContext.Messages.Where(x => messagesInfo.MessagesId.Any(y => y == x.MessageID));
+
+            if(!messagesToDelete.All(x => x.ConversationID == messagesInfo.ConversationId))
+            {
+                throw new ArgumentException("All messages must be from same conversation passed as ConversationId parameter.");
+            }
+
+            var conversation = await mContext.UsersConversations
+                .FirstOrDefaultAsync(x => x.User.Id == whoAccessedId && x.Conversation.ConvID == messagesInfo.ConversationId);
+
+            if(conversation == null)
+            {
+                throw unAuthorizedError;
+            }
+
+            await mContext.DeletedMessages.AddRangeAsync(
+                messagesInfo.MessagesId
+                .Select(msgId => new DeletedMessagesDataModel()
+                {
+                    UserId = whoAccessedId,
+                    Message = mContext.Messages.First(msg => msg.MessageID == msgId)
+                }));
+
+            await mContext.SaveChangesAsync();
+        } 
 
         /// <summary>
         /// Helper method used to find user with whom 

@@ -20,9 +20,18 @@ export class ConversationsFormatter{
 
     let user = message.user.id == Cache.UserCache.id ? 'You' : message.user.userName;
 
-    let messageContent = message.messageContent.length <= ConversationsFormatter.messageMaxLength
-      ? message.messageContent
-      : message.messageContent.slice(0, ConversationsFormatter.messageMaxLength) + "...";
+    if (message.isAttachment) {
+      return user + ": " + message.attachmentInfo.contentUrl;
+    }
+
+    let messageContent = '';
+
+    if (message.messageContent.length <= ConversationsFormatter.messageMaxLength) {
+      messageContent = message.messageContent;
+    }
+    else {
+      messageContent = message.messageContent.slice(0, ConversationsFormatter.messageMaxLength) + "...";
+    }
 
     return user + ": " + messageContent;
   }
@@ -33,9 +42,9 @@ export class ConversationsFormatter{
       return '';
     }
 
-    let messageDate = conversation.messages[conversation.messages.length - 1].timeReceived;
+    let message = conversation.messages[conversation.messages.length - 1];
 
-    let daysSinceReceived = (new Date().getTime() - Date.parse(messageDate)) / (1000 * 60 * 60 * 24);
+    let daysSinceReceived = (new Date().getTime() - (<Date>message.timeReceived).getTime()) / (1000 * 60 * 60 * 24);
 
     switch (true) {
       case daysSinceReceived <= 1: {
@@ -52,9 +61,7 @@ export class ConversationsFormatter{
 
   public GetMessagesDateStripFormatted(message: ChatMessage) {
 
-    let messageDate = message.timeReceived;
-
-    let daysSinceReceived = (new Date().getTime() - Date.parse(messageDate)) / (1000 * 60 * 60 * 24);
+    let daysSinceReceived = (new Date().getTime() - (<Date>message.timeReceived).getTime()) / (1000 * 60 * 60 * 24);
 
     switch (true) {
       case daysSinceReceived <= 1: {
@@ -76,7 +83,6 @@ export class ConversationsFormatter{
   }
 
   public GetMessageTimeFormatted(message: ChatMessage) {
-    let dateTime = Date.parse(message.timeReceived);
-    return new Date(dateTime).toLocaleTimeString();
+    return (<Date>message.timeReceived).toLocaleTimeString();
   }
 }

@@ -49,6 +49,7 @@ export class LoginComponent {
 
     if (!result.isSuccessfull) {
       this.snackbar.openSnackBar(result.errorMessage);
+      this.canLogIn = true;
       return;
     }
 
