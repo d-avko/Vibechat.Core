@@ -18,6 +18,7 @@ import { MessageReceivedModel } from "../Shared/MessageReceivedModel";
 import { AddedToGroupModel } from "../Shared/AddedToGroupModel";
 import { RemovedFromGroupModel } from "../Shared/RemovedFromGroupModel";
 import { EmptyModel } from "../Shared/EmptyModel";
+import { FileUploader } from "../Services/FileUploader";
 
 @Component({
   selector: 'chat-root',
@@ -81,7 +82,12 @@ export class ChatComponent implements OnInit {
   @ViewChild(CdkVirtualScrollViewport) viewport: CdkVirtualScrollViewport;
 
 
-  constructor(requestsBuilder: ApiRequestsBuilder, snackbar: MatSnackBar, router: Router, formatter: ConversationsFormatter, connectionManager: ConnectionManager) {
+  constructor(
+    requestsBuilder: ApiRequestsBuilder,
+    snackbar: MatSnackBar,
+    router: Router,
+    formatter: ConversationsFormatter,
+    connectionManager: ConnectionManager) {
 
     this.snackbar = new SnackBarHelper(snackbar);
 
@@ -99,29 +105,53 @@ export class ChatComponent implements OnInit {
 
     if (this.IsAuthenticated) {
 
-      this.UpdateConversations();
-
       this.connectionManager = connectionManager;
 
-      this.connectionManager.OnAddedToGroup.subscribe((res) => this.OnAddedToGroup(res));
-      this.connectionManager.OnConnectingNotify.subscribe((res) => this.OnConnecting(res));
-      this.connectionManager.OnMessageReceived.subscribe((res) => this.OnMessageReceived(res));
-      this.connectionManager.OnRemovedFromGroup.subscribe((res) => this.OnRemovedFromGroup(res));
+      //this.connectionManager.OnAddedToGroup.subscribe((res) => this.OnAddedToGroup(res));
+      //this.connectionManager.OnConnectingNotify.subscribe((res) => this.OnConnecting(res));
+      //this.connectionManager.OnMessageReceived.subscribe((res) => this.OnMessageReceived(res));
+      //this.connectionManager.OnRemovedFromGroup.subscribe((res) => this.OnRemovedFromGroup(res));
     } 
 
   }
   ngOnInit(): void {
     if (this.IsAuthenticated) {
-      this.connectionManager.Start();
+      this.UpdateConversations();
     }
+  }
+
+  public SendMessage(event: any) {
+    if (event.target.value == null || event.target.value == '') {
+      return;
+    }
+
+    this.connectionManager.SendMessage(
+      new ChatMessage(
+        {
+          messageContent: event.target.value,
+          isAttachment: false,
+          user: Cache.UserCache,
+          conversationID: this.CurrentConversation.conversationID
+        }), this.CurrentConversation, Cache.UserCache.id);
+
+    event.target.value = '';
   }
 
   public OnConnecting(data: EmptyModel) {
     this.snackbar.openSnackBar("Connecting...");
   }
 
-  public OnMessageReceived(data: MessageReceivedModel) : void {
+  public OnMessageReceived(data: MessageReceivedModel): void {
+    data.message.timeReceived = new Date(<string>data.message.timeReceived);
 
+    let conversation = this.Conversations
+      .find(x => x.conversationID == data.conversationId);
+
+    let newLength = conversation.messages.push(data.message);
+
+    conversation.messages = [...conversation.messages];
+
+    requestAnimationFrame(() => this.ScrollToMessage(newLength));
   }
 
   public OnAddedToGroup(data: AddedToGroupModel): void {
@@ -195,6 +225,8 @@ export class ChatComponent implements OnInit {
       .messages
       .filter(msg => this.SelectedMessages.findIndex(selected => selected.id == msg.id) == -1);
 
+    this.ScrollToStart();
+
     this.SelectedMessages.splice(0, this.SelectedMessages.length);
   }
 
@@ -210,22 +242,28 @@ export class ChatComponent implements OnInit {
 
   public UpdateConversations() {
     this.requestsBuilder.UpdateConversationsRequest(Cache.JwtToken, Cache.UserCache.id)
-      .subscribe((result) => this.OnConversationsUpdated(result))
-  }
+      .subscribe(
+        (response) => {
 
-  public OnConversationsUpdated(response: ServerResponse<ConversationResponse>): void {
+          if (!response.isSuccessfull) {
+            this.snackbar.openSnackBar("Failed to update conversations. Reason: " + response.errorMessage);
+            return;
+          }
 
-    if (!response.isSuccessfull) {
-      this.snackbar.openSnackBar("Failed to update conversations. Reason: " + response.errorMessage);
-      return;
-    }
+          //parse string date to js Date
 
-    //parse string date to js Date
+          response.response.conversations
+            .forEach((conversation) => conversation.messages.forEach(msg => msg.timeReceived = new Date(<string>msg.timeReceived)))
 
-    response.response.conversations
-    .forEach((conversation) => conversation.messages.forEach(msg => msg.timeReceived = new Date(<string>msg.timeReceived)))
+          this.Conversations = response.response.conversations;
 
-    this.Conversations = response.response.conversations
+          //Initiate signalR group connection
+
+          this.connectionManager.Start(
+            () => this.Conversations.map((x) => x.conversationID),
+            (data) => this.OnMessageReceived(data));
+        }
+      )
   }
 
   public IsCurrentConversation(conversation: ConversationTemplate): boolean {
@@ -300,17 +338,6 @@ export class ChatComponent implements OnInit {
     return Cache.UserCache.imageUrl;
   }
 
-  public SendMessage(event: any) {
-    this.connectionManager.SendMessage(
-      new ChatMessage(
-      {
-        messageContent: event.target.data,
-        isAttachment: false,
-        user: Cache.UserCache,
-        conversationID: this.CurrentConversation.conversationID
-      }), this.CurrentConversation, Cache.UserCache.id);
-  }
-
   public GetCurrentConversationMembersFormatted(): string {
     return this.formatter.GetConversationMembersFormatted(this.CurrentConversation);
   }
@@ -357,8 +384,28 @@ export class ChatComponent implements OnInit {
   }
 
   public UploadFiles(event: any) {
-    let x = 1;
-    return ++x;
+    let conversationToSend = this.CurrentConversation.conversationID;
+
+    this.requestsBuilder.UploadFiles(event.target.files, Cache.JwtToken).subscribe((result) =>
+    {
+      if (!result.isSuccessfull) {
+        this.snackbar.openSnackBar(result.errorMessage);
+        return;
+      }
+
+      result.response.uploadedFiles.forEach(
+        (file) => this.connectionManager.SendMessage(
+          new ChatMessage(
+            {
+              messageContent: event.target.value,
+              isAttachment: true,
+              user: Cache.UserCache,
+              conversationID: conversationToSend,
+              attachmentInfo: file
+            }), this.CurrentConversation, Cache.UserCache.id)
+      )
+    }
+    )
   }
 
   public GetMessagesDateStripFormatted(message: ChatMessage) : string {

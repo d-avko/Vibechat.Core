@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Vibechat.Web.ChatData.Messages;
 
 namespace Vibechat.Web.Data.ApiModels.Files
 {
@@ -9,6 +10,6 @@ namespace Vibechat.Web.Data.ApiModels.Files
         /// <summary>
         /// Relative urls to uploaded files
         /// </summary>
-        public List<string> UploadedFilesUrls { get; set; }
+        public List<MessageAttachment> UploadedFiles { get; set; }
     }
 }

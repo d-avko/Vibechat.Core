@@ -132,14 +132,16 @@ namespace Vibechat.Web.Services
         public async Task AddUserToGroup()
         {
             //TODO
+            //CHECK IF THIS IS EVEN ALLOWED
         }
 
         public async Task RemoveUserFromGroup()
         {
             //TODO
+            //CHECK IF THIS IS EVEN ALLOWED
         }
 
-        public async Task AddMessage(Message message, int groupId, string SenderId)
+        public async Task<MessageDataModel> AddMessage(Message message, int groupId, string SenderId)
         {
             UserInApplication whoSent = await mContext.Users.FindAsync(SenderId).ConfigureAwait(false);
 
@@ -148,7 +150,7 @@ namespace Vibechat.Web.Services
                 throw new FormatException($"Failed to retrieve user with id {SenderId} from database: no such user exists");
             }
 
-            mContext.Messages.Add(new MessageDataModel()
+            var addedMessage = mContext.Messages.Add(new MessageDataModel()
             {
                 ConversationID = groupId,
                 MessageContent = message.MessageContent,
@@ -159,9 +161,11 @@ namespace Vibechat.Web.Services
             });
 
             await mContext.SaveChangesAsync();
+
+            return addedMessage.Entity;
         }
 
-        public async Task AddAttachmentMessage(Message message, int groupId, string SenderId)
+        public async Task<MessageDataModel> AddAttachmentMessage(Message message, int groupId, string SenderId)
         {
             UserInApplication whoSent = await mContext.Users.FindAsync(SenderId).ConfigureAwait(false);
 
@@ -179,7 +183,7 @@ namespace Vibechat.Web.Services
                 AttachmentName = message.AttachmentInfo.AttachmentName
             });
 
-            mContext.Messages.Add(new MessageDataModel()
+            var addedMessage = mContext.Messages.Add(new MessageDataModel()
             {
                 ConversationID = groupId,
                 MessageContent = message.MessageContent,
@@ -190,6 +194,8 @@ namespace Vibechat.Web.Services
             });
 
             await mContext.SaveChangesAsync();
+
+            return addedMessage.Entity;
         }
 
 
@@ -375,6 +381,7 @@ namespace Vibechat.Web.Services
             var messages = mContext
                 .Messages
                 .Where(msg => msg.ConversationID == convInfo.ConversationID)
+                .Where(msg => !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID))
                 .OrderByDescending(x => x.TimeReceived)
                 .Skip(convInfo.MesssagesOffset)
                 .Take(convInfo.Count)
@@ -383,7 +390,6 @@ namespace Vibechat.Web.Services
             return new GetMessagesResultApiModel()
             {
                 Messages = (from msg in messages
-                            where !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID)
                             select new Message()
                             {
                                 Id = msg.MessageID,
