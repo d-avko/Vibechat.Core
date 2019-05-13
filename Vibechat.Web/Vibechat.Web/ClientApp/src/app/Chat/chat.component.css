@@ -63,6 +63,10 @@
   width: 10%;
 }
 
+.message_attachment--image {
+  border-radius: 10px;
+}
+
 .lastmessage_content_lastmessage {
   width: 70%;
   color: gray;
@@ -181,7 +185,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 75%;
+  height: 65%;
 }
 
 .image_attachment{
@@ -221,4 +225,8 @@
   width: 40px;
   cursor: pointer;
   position: absolute;
+}
+
+.chat_misc{
+  height: 10%;
 }

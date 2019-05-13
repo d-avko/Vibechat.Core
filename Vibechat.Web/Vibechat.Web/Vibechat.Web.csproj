@@ -16,6 +16,7 @@
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="2.1.1" />
+    <PackageReference Include="SkiaSharp" Version="1.68.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,12 +39,16 @@
     <None Remove="ClientApp\src\app\Connections\ConnectionManager.ts" />
     <None Remove="ClientApp\src\app\Data\AttachmentKinds.ts" />
     <None Remove="ClientApp\src\app\Data\ChatMessage.ts" />
+    <None Remove="ClientApp\src\app\Data\ConversationIdsFactory.ts" />
     <None Remove="ClientApp\src\app\Data\ConversationsFormatter.ts" />
     <None Remove="ClientApp\src\app\Data\ConversationTemplate.ts" />
     <None Remove="ClientApp\src\app\Data\DeleteMessagesRequest.ts" />
     <None Remove="ClientApp\src\app\Data\MessageAttachment.ts" />
+    <None Remove="ClientApp\src\app\Data\UploadFilesResponse.ts" />
     <None Remove="ClientApp\src\app\Data\UserInfo.ts" />
+    <None Remove="ClientApp\src\app\Delegates\MessageReceivedDelegate.ts" />
     <None Remove="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
+    <None Remove="ClientApp\src\app\Services\FileUploader.ts" />
     <None Remove="ClientApp\src\app\Shared\AddedToGroupModel.ts" />
     <None Remove="ClientApp\src\app\Shared\EmptyModel.ts" />
     <None Remove="ClientApp\src\app\Shared\MessageReceivedModel.ts" />
@@ -58,6 +63,9 @@
     <TypeScriptCompile Include="ClientApp\src\app\Chat\chat.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Connections\ConnectionManager.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\AttachmentKinds.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationIdsFactory.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Data\UploadFilesResponse.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Delegates\MessageReceivedDelegate.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Formatters\ConversationsFormatter.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationTemplate.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ChatMessage.ts" />
@@ -65,6 +73,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\Data\MessageAttachment.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\UserInfo.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Services\FileUploader.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\AddedToGroupModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\EmptyModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\MessageReceivedModel.ts" />
@@ -73,6 +82,7 @@
 
   <ItemGroup>
     <Folder Include="ClientApp\dist\Groups\" />
+    <Folder Include="ClientApp\dist\Uploads\" />
     <Folder Include="ClientApp\dist\Users\" />
   </ItemGroup>
 
@@ -104,5 +114,21 @@
   </Target>
 
   <Import Project="..\Vibechat.Web.Data\Vibechat.Web.Data.projitems" Label="Shared" />
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <TypeScriptTarget>ES2015</TypeScriptTarget>
+    <TypeScriptJSXEmit>React</TypeScriptJSXEmit>
+    <TypeScriptModuleKind>ES6</TypeScriptModuleKind>
+    <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
+    <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
+    <TypeScriptRemoveComments>False</TypeScriptRemoveComments>
+    <TypeScriptOutFile />
+    <TypeScriptOutDir />
+    <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
+    <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
+    <TypeScriptSourceMap>True</TypeScriptSourceMap>
+    <TypeScriptMapRoot />
+    <TypeScriptSourceRoot />
+  </PropertyGroup>
 
 </Project>

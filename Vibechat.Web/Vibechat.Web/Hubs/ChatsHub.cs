@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Vibechat.Web.Services;
 using VibeChat.Web.ChatData;
@@ -83,9 +84,13 @@ namespace VibeChat.Web
         /// <param name="groupId"></param>
         /// <returns></returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task ConnectToGroup(int groupId)
+        public async Task ConnectToGroups(List<int> groupIds)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, groupId.ToString());
+            foreach(var groupId in groupIds)
+            {
+                //CHECK IF THIS IS EVEN ALLOWED
+                await Groups.AddToGroupAsync(Context.ConnectionId, groupId.ToString());
+            }
         }
 
 
@@ -94,16 +99,24 @@ namespace VibeChat.Web
         {
             try
             {
-                await SendMessageToGroup(groupId, SenderId, message, true, true);
+
+                //CAN SEND MESSAGE ONLY IF JOINED
+
+                var created = new MessageDataModel();
 
                 if (message.IsAttachment)
                 {
-                    await dbService.AddAttachmentMessage(message, groupId, SenderId);
+                    created = await dbService.AddAttachmentMessage(message, groupId, SenderId);
                 }
                 else
                 {
-                    await dbService.AddMessage(message, groupId, SenderId);
+                    created = await dbService.AddMessage(message, groupId, SenderId);
                 }
+
+                message.TimeReceived = created.TimeReceived;
+                message.Id = created.MessageID;
+
+                await SendMessageToGroup(groupId, SenderId, message, true, true);
             }
             catch(Exception ex)
             {
@@ -125,16 +138,23 @@ namespace VibeChat.Web
         {
             try
             {
-                await SendMessageToUser(message, SenderId, UserToSendId, conversationId, true, true);
+                //CAN SEND TO ANYONE
+
+                var created = new MessageDataModel();
 
                 if (message.IsAttachment)
                 {
-                    await dbService.AddAttachmentMessage(message, conversationId, SenderId);
+                    created = await dbService.AddAttachmentMessage(message, conversationId, SenderId);
                 }
                 else
                 {
-                    await dbService.AddMessage(message, conversationId, SenderId);
+                    created = await dbService.AddMessage(message, conversationId, SenderId);
                 }
+
+                message.TimeReceived = created.TimeReceived;
+                message.Id = created.MessageID;
+
+                await SendMessageToUser(message, SenderId, UserToSendId, conversationId, true, true);
             }
             catch(Exception ex)
             {

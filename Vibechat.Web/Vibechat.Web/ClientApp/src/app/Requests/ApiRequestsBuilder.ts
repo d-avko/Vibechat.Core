@@ -11,6 +11,7 @@ import { ConversationMessagesRequest } from "../ApiModels/ConversationMessagesRe
 import { ConversationMessagesResponse } from "../ApiModels/ConversationMessagesResponse";
 import { ChatMessage } from "../Data/ChatMessage";
 import { DeleteMessagesRequest } from "../Data/DeleteMessagesRequest";
+import { UploadFilesResponse } from "../Data/UploadFilesResponse";
 
 @Injectable({
   providedIn: 'root'
@@ -74,6 +75,21 @@ export class ApiRequestsBuilder {
           MessagesId: messages.map(x => x.id),
           ConversationId: conversationId
         }),
+      { headers: headers });
+  }
+
+  public UploadFiles(files: FileList, token: string): Observable<ServerResponse<UploadFilesResponse>> {
+    let headers = new HttpHeaders();
+    headers = headers.append('Authorization', 'Bearer ' + token);
+
+    let data = new FormData();
+
+    for (let i = 0; i < files.length; ++i) {
+      data.append('files', files[i]);
+    }
+
+    return this.httpClient.post<ServerResponse<UploadFilesResponse>>("Files/UploadImages",
+      data,
       { headers: headers });
   }
 }
