@@ -36,11 +36,11 @@ namespace Vibechat.Web.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("Files/UploadImages")]
-        public async Task<ResponseApiModel<FilesUploadResponse>> UploadImages(List<IFormFile> files)
+        public async Task<ResponseApiModel<FilesUploadResponse>> UploadImages(List<IFormFile> images)
         {
             var result = new FilesUploadResponse() { UploadedFiles = new List<MessageAttachment>() };
 
-            if(files.Count() == 0)
+            if(images.Count() == 0)
             {
                 return new ResponseApiModel<FilesUploadResponse>()
                 {
@@ -51,7 +51,7 @@ namespace Vibechat.Web.Controllers
             }
             string Errors = string.Empty;
 
-            foreach (var file in files)
+            foreach (var file in images)
             {
                 try
                 {

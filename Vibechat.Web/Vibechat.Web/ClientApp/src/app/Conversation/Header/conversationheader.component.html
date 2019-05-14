@@ -1,0 +1,23 @@
+<div class="messages_wrapper_conversationinfo">
+
+  <div class="conversation-header">
+
+    <button mat-button class="conversation-viewinfoButton">
+
+      <span class="conversation-header-name">
+        {{formatter.GetConversationNameFormatted(Conversation)}}
+      </span>
+
+      <span class="conversation-header-participants" *ngIf="Conversation.isGroup">
+        {{formatter.GetConversationMembersFormatted(Conversation)}}
+      </span>
+
+    </button>
+
+    <button mat-button class="messages_wrapper_optionsbutton">
+      <mat-icon>expand_more</mat-icon>
+    </button>
+
+  </div>
+
+</div>

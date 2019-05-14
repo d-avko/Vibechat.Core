@@ -1,16 +1,12 @@
-import { Component, ViewChildren, QueryList, ElementRef, ViewChild, AfterViewInit, OnInit } from "@angular/core";
+import { Component, ViewChild, OnInit } from "@angular/core";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
-import { ConversationResponse } from "../ApiModels/ConversationResponse";
 import { Cache } from "../Auth/Cache";
 import { ServerResponse } from "../ApiModels/ServerResponse";
 import { MatSnackBar } from "@angular/material";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
 import { Router } from "@angular/router";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
-import { MessageAttachment } from "../Data/MessageAttachment";
-import { AttachmentKinds } from "../Data/AttachmentKinds";
 import { ChatMessage } from "../Data/ChatMessage";
-import { CdkVirtualScrollViewport } from "@angular/cdk/scrolling";
 import { trigger, state, style, transition, animate } from "@angular/animations";
 import { ConversationsFormatter } from "../Formatters/ConversationsFormatter";
 import { ConnectionManager } from "../Connections/ConnectionManager";
@@ -18,7 +14,8 @@ import { MessageReceivedModel } from "../Shared/MessageReceivedModel";
 import { AddedToGroupModel } from "../Shared/AddedToGroupModel";
 import { RemovedFromGroupModel } from "../Shared/RemovedFromGroupModel";
 import { EmptyModel } from "../Shared/EmptyModel";
-import { FileUploader } from "../Services/FileUploader";
+import { MessagesComponent } from "../Conversation/Messages/messages.component";
+import { UserInfo } from "../Data/UserInfo";
 
 @Component({
   selector: 'chat-root',
@@ -47,11 +44,9 @@ export class ChatComponent implements OnInit {
 
   public CurrentConversation: ConversationTemplate;
 
+  public CurrentUser: UserInfo;
+
   //pop-up that will inform user of errors.
-
-  public SelectedMessages: Array<ChatMessage>;
-
-
 
   protected snackbar: SnackBarHelper;
 
@@ -61,13 +56,11 @@ export class ChatComponent implements OnInit {
 
 
 
-  protected requestsBuilder: ApiRequestsBuilder;
+  protected requestsBuilder: ApiRequestsBuilder
 
   public formatter: ConversationsFormatter;
 
   public static MessagesBufferLength: number = 50;
-
-  public static MessagesToScrollForGoBackButtonToShowUp: number = 60;
 
 
 
@@ -77,10 +70,7 @@ export class ChatComponent implements OnInit {
 
   public IsConversationHistoryEnd: boolean = false;
 
-  public IsScrollingAssistNeeded: boolean = false;
-
-  @ViewChild(CdkVirtualScrollViewport) viewport: CdkVirtualScrollViewport;
-
+  @ViewChild(MessagesComponent) messages: MessagesComponent;
 
   constructor(
     requestsBuilder: ApiRequestsBuilder,
@@ -101,11 +91,11 @@ export class ChatComponent implements OnInit {
 
     this.IsAuthenticated = Cache.IsAuthenticated;
 
-    this.SelectedMessages = new Array<ChatMessage>();
-
     if (this.IsAuthenticated) {
 
       this.connectionManager = connectionManager;
+
+      this.CurrentUser = Cache.UserCache;
 
       //this.connectionManager.OnAddedToGroup.subscribe((res) => this.OnAddedToGroup(res));
       //this.connectionManager.OnConnectingNotify.subscribe((res) => this.OnConnecting(res));
@@ -120,21 +110,16 @@ export class ChatComponent implements OnInit {
     }
   }
 
-  public SendMessage(event: any) {
-    if (event.target.value == null || event.target.value == '') {
-      return;
-    }
+  public OnSendMessage(message: string) {
 
     this.connectionManager.SendMessage(
       new ChatMessage(
         {
-          messageContent: event.target.value,
+          messageContent: message,
           isAttachment: false,
-          user: Cache.UserCache,
+          user: this.CurrentUser,
           conversationID: this.CurrentConversation.conversationID
-        }), this.CurrentConversation, Cache.UserCache.id);
-
-    event.target.value = '';
+        }), this.CurrentConversation, this.CurrentUser.id);
   }
 
   public OnConnecting(data: EmptyModel) {
@@ -151,7 +136,7 @@ export class ChatComponent implements OnInit {
 
     conversation.messages = [...conversation.messages];
 
-    requestAnimationFrame(() => this.ScrollToMessage(newLength));
+    this.messages.ScrollToMessage(newLength);
   }
 
   public OnAddedToGroup(data: AddedToGroupModel): void {
@@ -166,13 +151,16 @@ export class ChatComponent implements OnInit {
     this.snackbar.openSnackBar("Disconnected. Retrying...");
   }
 
-  public OnMessagesScrolled(messageIndex: number) {
-    // user scrolled to last loaded message, load more messages
+  public OnUpdateMessages() {
 
-    if (messageIndex == 0 && !this.IsMessagesLoading) {
+    if (!this.IsMessagesLoading && !this.IsConversationHistoryEnd) {
       this.IsMessagesLoading = true;
 
-      this.requestsBuilder.GetConversationMessages(this.CurrentConversation.messages.length, ChatComponent.MessagesBufferLength, this.CurrentConversation.conversationID, Cache.JwtToken)
+      this.requestsBuilder.GetConversationMessages(
+        this.CurrentConversation.messages.length,
+        ChatComponent.MessagesBufferLength,
+        this.CurrentConversation.conversationID, Cache.JwtToken)
+
         .subscribe((result) => {
 
           if (!result) {
@@ -180,6 +168,8 @@ export class ChatComponent implements OnInit {
             this.IsMessagesLoading = false;
             return;
           }
+
+          //server sent zero messages, we reached end of our history.
 
           if (result.response.messages == null || result.response.messages.length == 0) {
             this.IsMessagesLoading = false;
@@ -194,26 +184,20 @@ export class ChatComponent implements OnInit {
           //append old messages to new ones.
           this.CurrentConversation.messages = result.response.messages.concat(this.CurrentConversation.messages);
           this.IsMessagesLoading = false;
-          this.ScrollToMessage(result.response.messages.length);
+
+          this.messages.ScrollToMessage(result.response.messages.length);
         }
       )
     }
 
-    // if user scrolled <see cref="MessagesToScrollForGoBackButtonToShowUp"/> messages, show 'Go to start' button
-
-    if (this.CurrentConversation.messages.length - messageIndex > ChatComponent.MessagesToScrollForGoBackButtonToShowUp) {
-      this.IsScrollingAssistNeeded = true;
-    } else {
-      this.IsScrollingAssistNeeded = false;
-    }
   }
 
-  public DeleteMessages() {
-    this.requestsBuilder.DeleteMessages(this.SelectedMessages, this.CurrentConversation.conversationID, Cache.JwtToken)
-    .subscribe((result) => this.OnMessagesDeleted(result))
+  public OnDeleteMessages(SelectedMessages: Array<ChatMessage>) {
+    this.requestsBuilder.DeleteMessages(SelectedMessages, this.CurrentConversation.conversationID, Cache.JwtToken)
+      .subscribe((result) => this.OnMessagesDeleted(result, SelectedMessages))
   }
 
-  public OnMessagesDeleted(response: ServerResponse<string>) {
+  public OnMessagesDeleted(response: ServerResponse<string>, SelectedMessages: Array<ChatMessage>) {
     if (!response.isSuccessfull) {
       this.snackbar.openSnackBar("Failed to delete messages. Reason: " + response.errorMessage);
       return;
@@ -223,25 +207,15 @@ export class ChatComponent implements OnInit {
 
     this.CurrentConversation.messages = this.CurrentConversation
       .messages
-      .filter(msg => this.SelectedMessages.findIndex(selected => selected.id == msg.id) == -1);
+      .filter(msg => SelectedMessages.findIndex(selected => selected.id == msg.id) == -1);
 
-    this.ScrollToStart();
+    this.messages.ScrollToStart();
 
-    this.SelectedMessages.splice(0, this.SelectedMessages.length);
-  }
-
-  public ScrollToStart(): void {
-    this.ScrollToMessage(this.CurrentConversation.messages.length);
-  }
-
-  public ScrollToMessage(index: number): void {
-    requestAnimationFrame(() => {
-      this.viewport.scrollToIndex(index, 'smooth');
-    });
+    SelectedMessages.splice(0, SelectedMessages.length);
   }
 
   public UpdateConversations() {
-    this.requestsBuilder.UpdateConversationsRequest(Cache.JwtToken, Cache.UserCache.id)
+    this.requestsBuilder.UpdateConversationsRequest(Cache.JwtToken, this.CurrentUser.id)
       .subscribe(
         (response) => {
 
@@ -285,62 +259,11 @@ export class ChatComponent implements OnInit {
     return this.CurrentConversation != null;
   }
 
-  public IsCurrentConversationGroup(): boolean {
-    return this.CurrentConversation.isGroup;
-  }
-
-  public IsText(message: ChatMessage) {
-    return !message.isAttachment;
-  }
-
-  public IsMessageSelected(message: ChatMessage) : boolean {
-    return this.SelectedMessages.find(x => x.id == message.id) != null;
-  }
-
-  public SelectMessage(message: ChatMessage) : void {
-
-    let messageIndex = this.SelectedMessages.findIndex(x => x.id == message.id);
-
-    if (messageIndex == -1) {
-
-      this.SelectedMessages.push(message);
-
-    } else {
-
-      this.SelectedMessages.splice(messageIndex, 1);
-    }
-  }
-
-  public IsImage(message: ChatMessage): boolean {
-
-    if (!message.isAttachment) {
-      return false;
-    }
-
-    return message.attachmentInfo.attachmentKind == AttachmentKinds.Image;
-
-  }
-
-  public IsLastMessage(message: ChatMessage) : boolean {
-    return this.CurrentConversation.messages.findIndex((x) => x.id == message.id) == 0;
-  }
-
-  public GetCurrentConversationName(): string {
-
-    if (this.CurrentConversation.name == '' || this.CurrentConversation.name == null) {
-      return this.CurrentConversation.dialogueUser.userName;
-    }
-
-    return this.CurrentConversation.name;
-  }
 
   public GetThisUserImageUrl(): string {
-    return Cache.UserCache.imageUrl;
+    return this.CurrentUser.imageUrl;
   }
 
-  public GetCurrentConversationMembersFormatted(): string {
-    return this.formatter.GetConversationMembersFormatted(this.CurrentConversation);
-  }
 
   public ChangeConversation(conversation: ConversationTemplate): void {
     if (conversation == this.CurrentConversation) {
@@ -351,42 +274,12 @@ export class ChatComponent implements OnInit {
     this.CurrentConversation = conversation;
 
     this.IsConversationHistoryEnd = false;
-
-    // 1 message is sent by server on first request of UpdateConversatoins() in messages field
-    //should use bool var there instead.
-
-
-    if (conversation.messages.length == 1) {
-      //forcibly update messages
-      this.OnMessagesScrolled(0);
-    }
   }
 
-  public IsFirstMessageInSequence(message: ChatMessage) : boolean {
-    let messageIndex = this.CurrentConversation.messages.findIndex((x) => x.id == message.id);
-
-    if (messageIndex == 0) {
-      return true;
-    }
-
-    return this.CurrentConversation.messages[messageIndex - 1].user.userName != message.user.userName;
-
-  }
-
-  public IsPreviousMessageOnAnotherDay(message: ChatMessage): boolean {
-    let messageIndex = this.CurrentConversation.messages.findIndex((x) => x.id == message.id);
-
-    if (messageIndex == 0) {
-      return true;
-    }
-
-    return (<Date>message.timeReceived).getDay() != (<Date>this.CurrentConversation.messages[messageIndex - 1].timeReceived).getDay();
-  }
-
-  public UploadFiles(event: any) {
+  public OnUploadImages(files: FileList) {
     let conversationToSend = this.CurrentConversation.conversationID;
 
-    this.requestsBuilder.UploadFiles(event.target.files, Cache.JwtToken).subscribe((result) =>
+    this.requestsBuilder.UploadImages(files, Cache.JwtToken).subscribe((result) =>
     {
       if (!result.isSuccessfull) {
         this.snackbar.openSnackBar(result.errorMessage);
@@ -397,30 +290,21 @@ export class ChatComponent implements OnInit {
         (file) => this.connectionManager.SendMessage(
           new ChatMessage(
             {
-              messageContent: event.target.value,
+              messageContent: null,
               isAttachment: true,
-              user: Cache.UserCache,
+              user: this.CurrentUser,
               conversationID: conversationToSend,
               attachmentInfo: file
-            }), this.CurrentConversation, Cache.UserCache.id)
+            }), this.CurrentConversation, this.CurrentUser.id)
       )
     }
     )
   }
 
-  public GetMessagesDateStripFormatted(message: ChatMessage) : string {
-    let messageIndex = this.CurrentConversation.messages.findIndex((x) => x.id == message.id);
-
-    if (messageIndex == 0) {
-      return this.formatter.GetMessagesDateStripFormatted(message)
-    }
-
-    return this.formatter.GetMessagesDateStripFormatted(this.CurrentConversation.messages[messageIndex]);
-  }
-
-  private MessagesSortFunc(left: ChatMessage, right: ChatMessage) : number {
+  private MessagesSortFunc(left: ChatMessage, right: ChatMessage): number {
     if (left.timeReceived < right.timeReceived) return -1;
     if (left.timeReceived > right.timeReceived) return 1;
     return 0;
   }
+
 }

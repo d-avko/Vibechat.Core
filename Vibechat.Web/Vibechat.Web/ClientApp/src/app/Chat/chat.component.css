@@ -6,13 +6,6 @@
   padding: 0 !important;
 }
 
-.chat_wrapper_content {
-  display: flex;
-  flex-direction: row;
-  height: 670px;
-  margin: 0 0 0 0 !important;
-}
-
 .conversations_wrapper {
   display: flex;
   flex-direction:column;
@@ -20,6 +13,19 @@
   height: 100%;
 }
 
+.chat_wrapper_content {
+  display: flex;
+  flex-direction: row;
+  height: 670px;
+  margin: 0 0 0 0 !important;
+}
+
+.messages_wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 70%;
+  height: 100%;
+}
 .conversations_wrapper_searchbar {
   height: 10%;
   padding: 20px;
@@ -30,42 +36,6 @@
   height: 80%;
 }
 
-.messages_wrapper {
-  display:flex;
-  flex-direction:column;
-  width: 70%;
-  height: 100%;
-}
-
-.messages_wrapper_conversationinfo{
-  display:block;
-  height: 8%;
-}
-
-.conversation-header {
-  display: flex;
-  flex-direction: row;
-}
-
-.messages_wrapper_chatmessages {
-  height: 75%;
-}
-
-.messages_wrapper_chat-input{
-  display: flex;
-  flex-direction: row;
-  align-items:center;
-  justify-content:center;
-  height: 17%;
-}
-
-.messages_wrapper_optionsbutton{
-  width: 10%;
-}
-
-.message_attachment--image {
-  border-radius: 10px;
-}
 
 .lastmessage_content_lastmessage {
   width: 70%;
@@ -88,145 +58,14 @@
   color: white;
 }
 
-.conversation-row1{
-  display:flex;
-  flex-direction: row;
-}
-
-
-.conversation-header-name{
-  font-weight: bold;
-  font-size: 15px;
-  width: 30%;
-}
-
-.conversation-header-participants {
-  font-size: 14px;
-  padding-left: 3%;
-  width: 70%;
-}
-
-.messages_wrapper_conversationinfo--activated {
-  background-color: cadetblue;
-  color: white;
-}
-
-.rounded-image {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-}
-
-.rounded-chat-image {
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-}
-
-.messages_datestrip_wrapper .datestrip{
-  font-weight: lighter;
-  font-size: 13px;
-  color: black;
-}
-
-.messages_datestrip_wrapper {
-  display: flex;
-  justify-content: center;
-}
-
-.datestrip_bubble {
-  border-radius: 20px;
-  width: 12.5%;
-  height: 35px;
-  text-align: center;
-  box-shadow: 0 0 3pt 3pt dimgray;
-}
-
-.message_timereceived {
-  color: dimgray;
-  font-size: 12px;
-}
-
-.input_field {
-  width: 300px;
-  padding: 30px;
-}
-
-.conversation-viewinfoButton {
-  display: flex;
-  flex-direction: row;
-  height: 100%;
-  width: 90%;
-}
-
-.messages_message_content {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-}
-
-.messages_message_content .content_messageAndName {
-  display: flex;
-  flex-direction: column;
-  width: 80%;
-}
-
-.message_header{
-  color:cadetblue;
-  font-weight: 600;
-}
-
-.message_text {
-  overflow-wrap: break-word;
-  font-size: 13px;
-}
-
-.messages_main {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 65%;
-}
-
-.image_attachment{
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-}
-
-.selected-message {
-  background-color: #c4dbdc;
-}
-
-.chat_misc{
-  display: flex;
-  flex-direction: row;
-}
-
-
-.marginleft10px {
-  margin-left: 10px;
-}
-
-.load-spinner {
-  margin-left: 45%;
-}
-
-.padding10px{
-  padding: 10px;
-}
-
-.padding20px {
-  padding: 20px;
-}
-
-.button_send-images{
-  opacity: .01;
-  width: 40px;
-  cursor: pointer;
-  position: absolute;
-}
-
-.chat_misc{
+.messages_wrapper_header{
   height: 10%;
+}
+
+.messages_wrapper_input {
+  height: 20%;
+}
+
+.messages_wrapper_messages {
+  height: 70%;
 }
