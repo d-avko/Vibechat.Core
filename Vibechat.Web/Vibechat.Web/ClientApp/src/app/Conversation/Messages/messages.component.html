@@ -47,6 +47,10 @@
           <span class="message_timereceived">{{formatter.GetMessageTimeFormatted(message)}}</span>
         </div>
       </div>
+
+      <div class="padding10px">
+
+      </div>
     </div>
   </cdk-virtual-scroll-viewport>
 
@@ -55,7 +59,13 @@
       <mat-icon>arrow_drop_down_circle</mat-icon>
     </button>
 
-    <button mat-stroked-button color="primary" class="marginleft10px" *ngIf="SelectedMessages.length !== 0" (click)="DeleteMessages()" [@slideIn]>Delete messages</button>
+    <button mat-stroked-button
+            style="overflow-y:visible !important"
+            color="primary"
+            class="marginleft10px"
+            *ngIf="SelectedMessages.length !== 0"
+            (click)="DeleteMessages()"
+            [@slideIn]>Delete messages</button>
   </div>
 
 </div>

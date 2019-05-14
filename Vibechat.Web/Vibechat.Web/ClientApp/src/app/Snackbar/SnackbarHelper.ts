@@ -12,7 +12,7 @@ export class SnackBarHelper {
 
   constructor(private snackBar: MatSnackBar) { }
 
-  public openSnackBar(message: string) {
+  public openSnackBar(message: string, duration : number = this.durationInSeconds) {
     this.snackBar.open(message, null, {
       duration: this.durationInSeconds * 1000,
     });

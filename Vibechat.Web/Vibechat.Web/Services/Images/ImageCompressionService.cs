@@ -7,7 +7,7 @@ using SkiaSharp;
 
 namespace Vibechat.Web.Services.Images
 {
-    public class ImageCompressionService : IImageCompressionService
+    public class ImageCompressionService : IImageCompressionService, IImageScalingService
     {
         public static int MaxImageHeight = 350;
 
@@ -47,7 +47,7 @@ namespace Vibechat.Web.Services.Images
 
             SKBitmap bmp = SKBitmap.Decode(codec, info);
 
-            bmp = bmp.Resize(desired, SKBitmapResizeMethod.Lanczos3);
+            bmp = bmp.Resize(desired, SKFilterQuality.Medium);
 
             using (var image = SKImage.FromBitmap(bmp))
             using (var data = image.Encode(SKEncodedImageFormat.Png, 80))
@@ -57,6 +57,34 @@ namespace Vibechat.Web.Services.Images
                 result.Seek(0, SeekOrigin.Begin);
                 return new ValueTuple<Stream, int, int>(result, bmp.Width, bmp.Height);
             }
+        }
+
+        public ValueTuple<int, int> GetScaledDimensions(MemoryStream image)
+        {
+            SKCodec codec = SKCodec.Create(image);
+
+            SKImageInfo info = codec.Info;
+
+            int resultingWidth, resultingHeight;
+
+            if (info.Width > info.Height)
+            {
+                resultingWidth = MaxImageWidth;
+
+                resultingHeight = (int)(MaxImageWidth * (info.Height / (float)info.Width));
+            }
+            else if (info.Width < info.Height)
+            {
+                resultingHeight = MaxImageHeight;
+
+                resultingWidth = (int)(MaxImageHeight * (info.Width / (float)info.Height));
+            }
+            else
+            {
+                resultingWidth = resultingHeight = MaxImageHeight;
+            }
+
+            return new ValueTuple<int, int>(resultingWidth, resultingHeight);
         }
     }
 }

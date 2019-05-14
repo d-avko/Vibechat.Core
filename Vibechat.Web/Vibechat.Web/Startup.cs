@@ -41,7 +41,6 @@ namespace Vibechat.Web
             services.AddDbContext<ApplicationDbContext>(options =>
               options.UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"]));
 
-
             services.AddIdentity<UserInApplication, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
@@ -126,6 +125,8 @@ namespace Vibechat.Web
 
             services.AddSingleton<IImageCompressionService, ImageCompressionService>();
 
+            services.AddSingleton<IImageScalingService, ImageCompressionService>();
+
             services.AddSingleton<IHexHashingService, Sha256Service>();
 
             services.AddSingleton<UniquePathsProvider, UniquePathsProvider>();
@@ -160,7 +161,6 @@ namespace Vibechat.Web
             {
                 routes.MapHub<ChatsHub>("/hubs/chat");
             });
-
 
             app.UseMvc(routes =>
             {

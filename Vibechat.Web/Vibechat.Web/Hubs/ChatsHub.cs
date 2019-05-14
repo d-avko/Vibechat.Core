@@ -64,13 +64,18 @@ namespace VibeChat.Web
         /// <param name="connectionId"> connection to add</param>
         /// <returns></returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task AddToGroup(string userId, int conversationId, string connectionId)
+        public async Task AddToGroup(string userId, string whoAdded, ConversationTemplate conversation)
         {
             try
             {
-                await dbService.AddUserToGroup();
-                await Groups.AddToGroupAsync(connectionId, conversationId.ToString());
-                await AddedToGroup(userId, conversationId, true);
+                var addedUser = await dbService.AddUserToGroup(userId, conversation.ConversationID);
+
+                if (addedUser.IsOnline)
+                {
+                    await Groups.AddToGroupAsync(addedUser.ConnectionId, conversation.ConversationID.ToString());
+                }
+
+                await AddedToGroup(userId, conversation, true);
             }
             catch(Exception ex)
             {
@@ -174,9 +179,9 @@ namespace VibeChat.Web
             await Clients.Group(conversationId.ToString()).SendAsync("RemovedFromGroup", conversationId, userId);
         }
 
-        private async Task AddedToGroup(string userId, int conversationId, bool x)
+        private async Task AddedToGroup(string userId, ConversationTemplate conversation, bool x)
         {
-            await Clients.Group(conversationId.ToString()).SendAsync("AddedToGroup", conversationId, userId);
+            await Clients.Group(conversation.ToString()).SendAsync("AddedToGroup", conversation, userId);
         }
 
         private async Task SendMessageToGroup(int groupId, string SenderId, Message message, bool y, bool x)

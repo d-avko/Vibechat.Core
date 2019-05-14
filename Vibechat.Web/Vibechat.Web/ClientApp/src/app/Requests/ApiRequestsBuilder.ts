@@ -12,6 +12,7 @@ import { ConversationMessagesResponse } from "../ApiModels/ConversationMessagesR
 import { ChatMessage } from "../Data/ChatMessage";
 import { DeleteMessagesRequest } from "../Data/DeleteMessagesRequest";
 import { UploadFilesResponse } from "../Data/UploadFilesResponse";
+import { ConversationTemplate } from "../Data/ConversationTemplate";
 
 @Injectable({
   providedIn: 'root'
@@ -90,6 +91,24 @@ export class ApiRequestsBuilder {
 
     return this.httpClient.post<ServerResponse<UploadFilesResponse>>("Files/UploadImages",
       data,
+      { headers: headers });
+  }
+
+  public CreateConversation(
+    name: string,
+    whoCreatedId: string,
+    dialogUserId: string,
+    thumbnailUrl: string,
+    isGroup: boolean,
+    token: string)
+  : Observable<ServerResponse<ConversationTemplate>>
+  {
+    let headers = new HttpHeaders();
+    headers = headers.append('Authorization', 'Bearer ' + token);
+
+    return this.httpClient.post<ServerResponse<ConversationTemplate>>(
+      this.baseUrl + 'api/Conversations/CreateConversation',
+      { ConversationName: name, CreatorId: whoCreatedId, DialogUserId: dialogUserId, ImageUrl: thumbnailUrl, IsGroup: isGroup },
       { headers: headers });
   }
 }
