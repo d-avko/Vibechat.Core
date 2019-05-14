@@ -1,0 +1,20 @@
+.selected-conversation {
+  background-color: cadetblue;
+  color: white;
+}
+
+lastmessage_content_lastmessage {
+  width: 70%;
+  color: gray;
+}
+
+.lastmessage_content_lastmessageDate {
+  width: 30%;
+  color: lightgray;
+  padding-left: 5%;
+}
+
+.lastmessage_content {
+  display: flex !important;
+  flex-direction: row;
+}

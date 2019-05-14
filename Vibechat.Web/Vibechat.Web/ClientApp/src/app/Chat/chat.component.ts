@@ -2,7 +2,7 @@ import { Component, ViewChild, OnInit } from "@angular/core";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { Cache } from "../Auth/Cache";
 import { ServerResponse } from "../ApiModels/ServerResponse";
-import { MatSnackBar } from "@angular/material";
+import { MatSnackBar, MatDialog, MatDrawer } from "@angular/material";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
 import { Router } from "@angular/router";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
@@ -16,6 +16,8 @@ import { RemovedFromGroupModel } from "../Shared/RemovedFromGroupModel";
 import { EmptyModel } from "../Shared/EmptyModel";
 import { MessagesComponent } from "../Conversation/Messages/messages.component";
 import { UserInfo } from "../Data/UserInfo";
+import { ConversationsListComponent } from "../Conversation/ConversationsList/conversationslist.component";
+import { AddGroupDialogComponent } from "../Dialogues/AddGroupDialog";
 
 @Component({
   selector: 'chat-root',
@@ -71,13 +73,14 @@ export class ChatComponent implements OnInit {
   public IsConversationHistoryEnd: boolean = false;
 
   @ViewChild(MessagesComponent) messages: MessagesComponent;
+  @ViewChild(MatDrawer) sideDrawer: MatDrawer;
 
   constructor(
+    public dialog: MatDialog,
     requestsBuilder: ApiRequestsBuilder,
     snackbar: MatSnackBar,
     router: Router,
-    formatter: ConversationsFormatter,
-    connectionManager: ConnectionManager) {
+    formatter: ConversationsFormatter) {
 
     this.snackbar = new SnackBarHelper(snackbar);
 
@@ -93,14 +96,13 @@ export class ChatComponent implements OnInit {
 
     if (this.IsAuthenticated) {
 
-      this.connectionManager = connectionManager;
+      this.connectionManager = new ConnectionManager(
+        () => this.Conversations.map((x) => x.conversationID),
+        (data) => this.OnMessageReceived(data),
+        (data) => this.OnAddedToGroup(data)
+        );
 
       this.CurrentUser = Cache.UserCache;
-
-      //this.connectionManager.OnAddedToGroup.subscribe((res) => this.OnAddedToGroup(res));
-      //this.connectionManager.OnConnectingNotify.subscribe((res) => this.OnConnecting(res));
-      //this.connectionManager.OnMessageReceived.subscribe((res) => this.OnMessageReceived(res));
-      //this.connectionManager.OnRemovedFromGroup.subscribe((res) => this.OnRemovedFromGroup(res));
     } 
 
   }
@@ -108,6 +110,40 @@ export class ChatComponent implements OnInit {
     if (this.IsAuthenticated) {
       this.UpdateConversations();
     }
+  }
+
+  public CreateGroup() {
+
+    this.sideDrawer.close();
+
+    const dialogRef = this.dialog.open(AddGroupDialogComponent, {
+      width: '250px',
+      data: { name: '' }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+
+      if (result === '' || result == null) {
+        return;
+      }
+
+      this.requestsBuilder.CreateConversation(result, this.CurrentUser.id, null, null, true, Cache.JwtToken)
+        .subscribe(
+          (result) => {
+
+            if (!result.isSuccessfull) {
+              this.snackbar.openSnackBar(result.errorMessage);
+              return;
+            }
+
+            this.connectionManager.InitiateConnections(new Array<number>(1).fill(result.response.conversationID));
+
+            result.response.messages = new Array<ChatMessage>();
+
+            this.Conversations = [...this.Conversations, result.response];
+          }
+        )
+    });
   }
 
   public OnSendMessage(message: string) {
@@ -141,6 +177,11 @@ export class ChatComponent implements OnInit {
 
   public OnAddedToGroup(data: AddedToGroupModel): void {
 
+    if (data.conversation.messages == null) {
+      data.conversation.messages = new Array<ChatMessage>();
+    }
+
+    this.Conversations = [...this.Conversations, data.conversation];
   }
 
   public OnRemovedFromGroup(data: RemovedFromGroupModel) {
@@ -174,6 +215,7 @@ export class ChatComponent implements OnInit {
           if (result.response.messages == null || result.response.messages.length == 0) {
             this.IsMessagesLoading = false;
             this.IsConversationHistoryEnd = true;
+
             return;
           }
 
@@ -231,37 +273,15 @@ export class ChatComponent implements OnInit {
 
           this.Conversations = response.response.conversations;
 
-          //Initiate signalR group connection
+          //Initiate signalR group connections
 
-          this.connectionManager.Start(
-            () => this.Conversations.map((x) => x.conversationID),
-            (data) => this.OnMessageReceived(data));
+          this.connectionManager.Start();
         }
       )
   }
 
-  public IsCurrentConversation(conversation: ConversationTemplate): boolean {
-    if (this.CurrentConversation == null)
-      return false;
-
-    return this.CurrentConversation.conversationID == conversation.conversationID;
-  }
-
-  public GetCurrentDialogueUserImageUrl() : string {
-    return this.CurrentConversation.dialogueUser.imageUrl;
-  }
-
-  public GetCurrentConversationImageUrl(): string {
-    return this.CurrentConversation.imageUrl;
-  }
-
   public IsConversationSelected(): boolean {
     return this.CurrentConversation != null;
-  }
-
-
-  public GetThisUserImageUrl(): string {
-    return this.CurrentUser.imageUrl;
   }
 
 

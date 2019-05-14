@@ -10,6 +10,7 @@ import { EmptyModel } from "../Shared/EmptyModel";
 import { ConversationIdsFactory } from "../Data/ConversationIdsFactory";
 import { ChatComponent } from "../Chat/chat.component";
 import { MessageReceivedDelegate } from "../Delegates/MessageReceivedDelegate";
+import { AddedToConversationDelegate } from "../Delegates/AddedToConversationDelegate";
 
 @Injectable({
   providedIn: 'root'
@@ -22,35 +23,38 @@ export class ConnectionManager {
 
   private onMessageReceived: MessageReceivedDelegate;
 
-  constructor() {
+  private onAddedToGroup: AddedToConversationDelegate;
 
+  constructor(
+    convIdsFactory: ConversationIdsFactory,
+    onMessageReceived: MessageReceivedDelegate,
+    onAddedToGroup: AddedToConversationDelegate) {
+
+    this.onMessageReceived = onMessageReceived;
+    this.onAddedToGroup = onAddedToGroup;
+    this.convIdsFactory = convIdsFactory;
   }
 
-  public Start(
-    convIdsFactory: ConversationIdsFactory,
-    onMessageReceived: MessageReceivedDelegate): void {
+  public Start(): void {
 
     this.connection = new signalR.HubConnectionBuilder()
       .withUrl("/hubs/chat", { accessTokenFactory: () => Cache.JwtToken })
       .build();
 
-    this.connection.start().then(() => this.InitiateConnections(convIdsFactory()));
-
-    this.onMessageReceived = onMessageReceived;
+    this.connection.start().then(() => this.InitiateConnections(this.convIdsFactory()));
 
    // this.OnConnectingNotify.emit(null);
     
-   // this.connection.onclose(() => this.OnDisconnected());
+    this.connection.onclose(() => this.OnDisconnected());
 
-    this.convIdsFactory = convIdsFactory;
 
     this.connection.on("ReceiveMessage", (senderId: string, message: ChatMessage, conversationId: number) => {
       this.onMessageReceived(new MessageReceivedModel({ senderId: senderId, message: message, conversationId: conversationId }));
     });
 
-    //this.connection.on("AddedToGroup", (conversationId: number, userId: string) => {
-    //  this.OnAddedToGroup.emit(new AddedToGroupModel({ conversationId: conversationId, userId: userId}));
-    //});
+    this.connection.on("AddedToGroup", (conversation: ConversationTemplate, userId: string) => {
+      this.onAddedToGroup(new AddedToGroupModel({ conversation: conversation, userId: userId}));
+    });
 
     //this.connection.on("RemovedFromGroup", (conversationId: number, userId: string) => {
     //  this.OnRemovedFromGroup.emit(new RemovedFromGroupModel({ conversationId: conversationId, userId: userId }));
@@ -62,13 +66,11 @@ export class ConnectionManager {
     this.connection.send("OnConnected");
   }
 
-  //public OnDisconnected(): void {
-  //  this.OnDisconnectedNotify.emit(null);
+  public OnDisconnected(): void {
+    this.connection.send("OnDisconnected");
 
-  //  this.connection.send("OnDisconnected");
-
-  //  this.Start(this.convIdsFactory);
-  //}
+    this.Start();
+  }
 
   public SendMessage(message: ChatMessage, conversation: ConversationTemplate, whoSentId: string) : void {
 
@@ -81,6 +83,10 @@ export class ConnectionManager {
       this.connection.send("SendMessageToUser", message, whoSentId, conversation.dialogueUser.id, conversation.conversationID);
 
     }
+  }
+
+  public AddUserToConversation(userId: string, whoAddsId: string, conversationId: number) {
+    this.connection.send("AddToGroup", userId, whoAddsId, conversationId);
   }
 
   public InitiateConnections(conversationIds: Array<number>) : void {

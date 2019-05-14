@@ -1,0 +1,26 @@
+<mat-action-list class="conversations_wrapper_conversations">
+  <h3 mat-subheader>Conversations</h3>
+
+  <mat-list-item *ngFor="let conversation of Conversations"
+                 (click)="ChangeConversation(conversation)"
+                 [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
+
+    <img matListAvatar *ngIf="conversation.isGroup; else dialogue" src="{{conversation.imageUrl}}" alt="Conversation logo">
+
+    <ng-template #dialogue>
+      <img matListAvatar src="{{conversation.dialogueUser.imageUrl}}" alt="Dialogue logo">
+    </ng-template>
+
+    <h3 matLine [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}"> {{conversation.name}} </h3>
+
+    <div matLine class="lastmessage_content">
+      <span class="lastmessage_content_lastmessage" [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
+        {{formatter.GetLastMessageFormatted(conversation)}}
+      </span>
+      <span class="lastmessage_content_lastmessageDate" [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
+        {{formatter.GetLastMessageDateFormatted(conversation)}}
+      </span>
+    </div>
+  </mat-list-item>
+
+</mat-action-list>

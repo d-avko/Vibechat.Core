@@ -53,7 +53,9 @@
     <None Remove="ClientApp\src\app\Data\MessageAttachment.ts" />
     <None Remove="ClientApp\src\app\Data\UploadFilesResponse.ts" />
     <None Remove="ClientApp\src\app\Data\UserInfo.ts" />
+    <None Remove="ClientApp\src\app\Delegates\AddedToConversationDelegate.ts" />
     <None Remove="ClientApp\src\app\Delegates\MessageReceivedDelegate.ts" />
+    <None Remove="ClientApp\src\app\Dialogues\AddGroupDialog.ts" />
     <None Remove="ClientApp\src\app\Modules\ChatModule.ts" />
     <None Remove="ClientApp\src\app\Modules\LoginModule.ts" />
     <None Remove="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
@@ -73,7 +75,9 @@
     <TypeScriptCompile Include="ClientApp\src\app\Data\AttachmentKinds.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationIdsFactory.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\UploadFilesResponse.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Delegates\AddedToConversationDelegate.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Delegates\MessageReceivedDelegate.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Dialogues\AddGroupDialog.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Formatters\ConversationsFormatter.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationTemplate.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ChatMessage.ts" />

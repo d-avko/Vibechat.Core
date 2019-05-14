@@ -20,17 +20,17 @@ namespace Vibechat.Web.Controllers
 {
     public class FilesController : Controller
     {
-        private IImageCompressionService imageCompression { get; set; }
-
+        private IImageScalingService imageScaling { get; set; }
+        
         private UniquePathsProvider pathsProvider { get; set; }
 
         private static string FilesLocationRelative = "Uploads/";
 
         private static string FilesLocation = "ClientApp/dist/Uploads/";
 
-        public FilesController(IImageCompressionService imageCompression, UniquePathsProvider pathsProvider)
+        public FilesController(IImageScalingService imageScaling, UniquePathsProvider pathsProvider)
         {
-            this.imageCompression = imageCompression;
+            this.imageScaling = imageScaling;
             this.pathsProvider = pathsProvider;
         }
 
@@ -60,8 +60,10 @@ namespace Vibechat.Web.Controllers
                         await file.CopyToAsync(buffer);
 
                         buffer.Seek(0, SeekOrigin.Begin);
+                        
+                        ValueTuple<int, int> resultDimensions = imageScaling.GetScaledDimensions(buffer);
 
-                        ValueTuple<Stream, int, int> resultImage = imageCompression.Resize(buffer);
+                        buffer.Seek(0, SeekOrigin.Begin);
 
                         var uniquePath = pathsProvider.GetUniquePath(file.FileName);
 
@@ -69,7 +71,7 @@ namespace Vibechat.Web.Controllers
 
                         using (var fStream = new FileStream(FilesLocation + uniquePath + file.FileName, FileMode.Create))
                         {
-                            resultImage.Item1.CopyTo(fStream);
+                            buffer.CopyTo(fStream);
                         }
 
                         result.UploadedFiles.Add(new MessageAttachment()
@@ -77,8 +79,8 @@ namespace Vibechat.Web.Controllers
                             AttachmentKind = "img",
                             AttachmentName = file.FileName,
                             ContentUrl = FilesLocationRelative + uniquePath + file.FileName,
-                            ImageHeight = resultImage.Item3,
-                            ImageWidth = resultImage.Item2
+                            ImageHeight = resultDimensions.Item2,
+                            ImageWidth = resultDimensions.Item1
                         });
                     }
                 }

@@ -59,6 +59,7 @@ export class MessagesComponent implements AfterViewInit {
   }
 
   public UpdateMessagesIfNotUpdated() {
+
     if (this.Conversation.messages.length > 1) {
       this.OnUpdateMessages.emit();
     }
@@ -107,7 +108,15 @@ export class MessagesComponent implements AfterViewInit {
   }
 
   public IsPreviousMessageOnAnotherDay(message: ChatMessage): boolean {
+    if (this.Conversation.messages == null) {
+      return false;
+    }
+
     let messageIndex = this.Conversation.messages.findIndex((x) => x.id == message.id);
+
+    if (messageIndex == -1) {
+      return false;
+    }
 
     if (messageIndex == 0) {
       return true;
@@ -117,6 +126,10 @@ export class MessagesComponent implements AfterViewInit {
   }
 
   public IsLastMessage(message: ChatMessage): boolean {
+
+    if (this.Conversation.messages == null)
+      return false;
+
     return this.Conversation.messages.findIndex((x) => x.id == message.id) == 0;
   }
 
@@ -129,6 +142,10 @@ export class MessagesComponent implements AfterViewInit {
 
     if (messageIndex == 0) {
       return true;
+    }
+
+    if (messageIndex == -1) {
+      return false;
     }
 
     return this.Conversation.messages[messageIndex - 1].user.userName != message.user.userName;

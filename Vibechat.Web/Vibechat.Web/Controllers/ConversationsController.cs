@@ -27,22 +27,22 @@ namespace VibeChat.Web.Controllers
         #region Conversations
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/CreateConversation")]
-        public async Task<ResponseApiModel<CreateConversationResultApiModel>> CreateConversation([FromBody] CreateConversationCredentialsApiModel convInfo)
+        public async Task<ResponseApiModel<ConversationTemplate>> CreateConversation([FromBody] CreateConversationCredentialsApiModel convInfo)
         {
             try
             {
-                await mDbService.CreateConversation(convInfo);
+                var result = await mDbService.CreateConversation(convInfo);
 
-                return new ResponseApiModel<CreateConversationResultApiModel>()
+                return new ResponseApiModel<ConversationTemplate>()
                 {
                     IsSuccessfull = true,
                     ErrorMessage = null,
-                    Response = null
+                    Response = result
                 };
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<CreateConversationResultApiModel>()
+                return new ResponseApiModel<ConversationTemplate>()
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,

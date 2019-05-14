@@ -1,61 +1,85 @@
 <mat-card class="chat_wrapper">
 
-  <mat-card-content *ngIf="IsAuthenticated" class="chat_wrapper_content">
+  <mat-drawer-container [hasBackdrop]="true">
 
-    <div class="conversations_wrapper">
-      <div class="conversations_wrapper_searchbar">
-        <mat-form-field appearance="fill">
-          <mat-label>Search</mat-label>
-          <input matInput placeholder="Search..." type="search">
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
+    <!--Actions-->
+
+    <mat-drawer #actionsdrawer [mode]="over">
+      <div class="chatactions_flex">
+
+        <button mat-button>
+          <div class="padding10px flexaligned">
+            <mat-icon>sentiment_satisfied</mat-icon>
+            <span class="padding5px">My profile</span>
+          </div>
+        </button>
+
+        <button mat-button (click)="CreateGroup()">
+          <div class="padding10px flexaligned">
+            <mat-icon>people</mat-icon>
+            <span class="padding5px">Create a group</span>
+          </div>
+        </button>
+
+
+        <button mat-button>
+          <div class="padding10px flexaligned">
+            <mat-icon>cancel</mat-icon>
+            <span class="padding5px">Log out</span>
+          </div>
+        </button>
       </div>
+    </mat-drawer>
 
-        <mat-action-list class="conversations_wrapper_conversations">
-          <h3 mat-subheader>Conversations</h3>
+    <mat-drawer-content>
 
-          <mat-list-item *ngFor="let conversation of Conversations" (click)="ChangeConversation(conversation)" [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
+      <mat-card-content *ngIf="IsAuthenticated" class="chat_wrapper_content">
 
-            <img matListAvatar *ngIf="conversation.isGroup; else dialogue" src="{{conversation.imageUrl}}" alt="Conversation logo">
+        <div class="conversations_wrapper">
+          <div class="conversations_wrapper_searchbar">
 
-            <ng-template #dialogue>
-              <img matListAvatar src="{{conversation.dialogueUser.imageUrl}}" alt="Dialogue logo">
-            </ng-template>
+            <button mat-button (click)="actionsdrawer.toggle()">
+              <mat-icon>more_vert</mat-icon>
+            </button>
 
-            <h3 matLine [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}"> {{conversation.name}} </h3>
+            <mat-form-field style="margin-left: 20%;" appearance="fill">
+              <mat-label>Search</mat-label>
+              <input matInput placeholder="Search..." type="search">
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+          </div>
 
-            <div matLine class="lastmessage_content">
-              <span class="lastmessage_content_lastmessage" [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
-                {{formatter.GetLastMessageFormatted(conversation)}}
-              </span>
-              <span class="lastmessage_content_lastmessageDate" [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
-                {{formatter.GetLastMessageDateFormatted(conversation)}}
-              </span>
-            </div>
-          </mat-list-item>
+          <conversationslist-view [CurrentConversation]="CurrentConversation"
+                                  class="conversations_wrapper_conversations"
+                                  [Conversations]="Conversations"
+                                  (OnSelectedConversationChanged)="ChangeConversation($event)">
 
-        </mat-action-list>
+          </conversationslist-view>
 
-    </div>
+        </div>
 
-    <div *ngIf="IsConversationSelected()" class="messages_wrapper">
+        <div *ngIf="IsConversationSelected()" class="messages_wrapper">
 
-      <conversationHeader-view class="messages_wrapper_header" [Conversation]="CurrentConversation"></conversationHeader-view>
+          <conversationHeader-view class="messages_wrapper_header" [Conversation]="CurrentConversation"></conversationHeader-view>
 
-      <messages-view class="messages_wrapper_messages"
-                     (OnUpdateMessages)="OnUpdateMessages()"
-                     (OnDeleteMessages)="OnDeleteMessages($event)"
-                     [Conversation]="CurrentConversation"
-                     [MessagesLoading]="IsMessagesLoading"></messages-view>
+          <messages-view class="messages_wrapper_messages"
+                         (OnUpdateMessages)="OnUpdateMessages()"
+                         (OnDeleteMessages)="OnDeleteMessages($event)"
+                         [Conversation]="CurrentConversation"
+                         [MessagesLoading]="IsMessagesLoading"></messages-view>
 
 
-      <input-view class="messages_wrapper_input"
-                  [User]="CurrentUser"
-                  (OnSendMessage)="SendMessage($event)"
-                  (OnUploadImages)="OnUploadImages($event)"></input-view>
+          <input-view class="messages_wrapper_input"
+                      [User]="CurrentUser"
+                      (OnSendMessage)="OnSendMessage($event)"
+                      (OnUploadImages)="OnUploadImages($event)"></input-view>
 
-    </div>
+        </div>
 
-  </mat-card-content>
+      </mat-card-content>
+
+    </mat-drawer-content>
+  </mat-drawer-container>
+
   <img *ngIf="! IsAuthenticated" src="/Assets/401.jpg" />
 </mat-card>

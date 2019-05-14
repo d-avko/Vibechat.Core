@@ -7,7 +7,7 @@ import { ReactiveFormsModule } from "@angular/forms";
 import { BrowserModule } from "@angular/platform-browser";
 import { AppRoutersModule } from "../app.routes";
 import { HttpClientModule } from "@angular/common/http";
-import { NoopAnimationsModule } from "@angular/platform-browser/animations";
+import { NoopAnimationsModule, BrowserAnimationsModule } from "@angular/platform-browser/animations";
 
 @NgModule({
   declarations: [
@@ -21,7 +21,7 @@ import { NoopAnimationsModule } from "@angular/platform-browser/animations";
     BrowserModule,
     AppRoutersModule,
     HttpClientModule,
-    NoopAnimationsModule],
+    BrowserAnimationsModule],
   providers: []
 })
 export class LoginModule { }

@@ -34,14 +34,14 @@ namespace Vibechat.Web.Services
 
         #region Conversations
 
-        public async Task<CreateConversationResultApiModel> CreateConversation(CreateConversationCredentialsApiModel convInfo)
+        public async Task<ConversationTemplate> CreateConversation(CreateConversationCredentialsApiModel convInfo)
         {
 
             var defaultError = new FormatException("Error while creating the conversation..");
 
             //if there was no group info or creator info
 
-            if (string.IsNullOrWhiteSpace(convInfo.ConvName) || string.IsNullOrWhiteSpace(convInfo.CreatorId))
+            if (string.IsNullOrWhiteSpace(convInfo.ConversationName) || string.IsNullOrWhiteSpace(convInfo.CreatorId))
             {
                 throw defaultError;
             }
@@ -53,17 +53,17 @@ namespace Vibechat.Web.Services
                 throw defaultError;
             }
 
-            if ((!convInfo.IsGroup) && (convInfo.DialogueUserId == null))
+            if ((!convInfo.IsGroup) && (convInfo.DialogUserId == null))
             {
                 throw new FormatException("No dialogue user was provided...");
             }
 
             UserInApplication SecondDialogueUser = null;
 
-            if (convInfo.DialogueUserId != null)
+            if (convInfo.DialogUserId != null)
             {
                 //if this is a dialogue , find a user with whom to create conversation
-                SecondDialogueUser = await mUserManager.FindByIdAsync(convInfo.DialogueUserId);
+                SecondDialogueUser = await mUserManager.FindByIdAsync(convInfo.DialogUserId);
 
                 if (SecondDialogueUser == null)
                 {
@@ -76,7 +76,7 @@ namespace Vibechat.Web.Services
             var ConversationToAdd = new ConversationDataModel()
             {
                 IsGroup = convInfo.IsGroup,
-                Name = convInfo.IsGroup ? convInfo.ConvName : SecondDialogueUser.UserName,
+                Name = convInfo.IsGroup ? convInfo.ConversationName : SecondDialogueUser.UserName,
                 ImageUrl = convInfo.ImageUrl ?? chatDataProvider.GetGroupPictureUrl()
             };
 
@@ -101,9 +101,7 @@ namespace Vibechat.Web.Services
             //after saving changes we have Id of our 
             //created conversation in ConversationToAdd variable
 
-            return new CreateConversationResultApiModel()
-            {
-                    CreatedConversation = new ConversationTemplate()
+            return  new ConversationTemplate()
                     {
                         ConversationID = ConversationToAdd.ConvID,
                         DialogueUser = (ConversationToAdd.IsGroup) ?
@@ -122,21 +120,35 @@ namespace Vibechat.Web.Services
 
                         ImageUrl = ConversationToAdd.ImageUrl,
                         IsGroup = ConversationToAdd.IsGroup,
-                        Name = ConversationToAdd.Name
-                    }
-            };
-
+                        Name = ConversationToAdd.Name,
+                        Participants = (await GetConversationParticipants(new GetParticipantsApiModel() { ConvId = ConversationToAdd.ConvID })).Participants,
+                        Messages = null
+                    };
 
         }
 
-        public async Task AddUserToGroup()
+        public async Task<UserInfo> AddUserToGroup(string userId, int conversationId)
         {
+            var userToAdd = await mContext.Users.FindAsync(userId);
+
+            return new UserInfo()
+            {
+                Id = userToAdd.Id,
+                Name = userToAdd.FirstName,
+                ImageUrl = userToAdd.ProfilePicImageURL,
+                LastName = userToAdd.LastName,
+                LastSeen = userToAdd.LastSeen,
+                UserName = userToAdd.UserName,
+                ConnectionId = userToAdd.ConnectionId,
+                IsOnline = userToAdd.IsOnline
+            };
             //TODO
             //CHECK IF THIS IS EVEN ALLOWED
         }
 
-        public async Task RemoveUserFromGroup()
+        public async Task<UserInfo> RemoveUserFromGroup()
         {
+            return null;
             //TODO
             //CHECK IF THIS IS EVEN ALLOWED
         }

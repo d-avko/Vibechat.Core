@@ -8,18 +8,22 @@ import { ConnectionManager } from "../Connections/ConnectionManager";
 import { ConversationsFormatter } from "../Formatters/ConversationsFormatter";
 import { MaterialModule } from "../material.module";
 import { CommonModule } from "@angular/common";
-import { ReactiveFormsModule } from "@angular/forms";
+import { ReactiveFormsModule, FormsModule } from "@angular/forms";
 import { BrowserModule } from "@angular/platform-browser";
 import { AppRoutersModule } from "../app.routes";
 import { HttpClientModule } from "@angular/common/http";
-import { NoopAnimationsModule } from "@angular/platform-browser/animations";
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import { ConversationsListComponent } from "../Conversation/ConversationsList/conversationslist.component";
+import { AddGroupDialogComponent } from "../Dialogues/AddGroupDialog";
 
 @NgModule({
   declarations: [
     ChatComponent,
     InputComponent,
     ConversationHeaderComponent,
-    MessagesComponent
+    MessagesComponent,
+    ConversationsListComponent,
+    AddGroupDialogComponent
   ],
   imports: [
     ScrollDispatchModule,
@@ -29,8 +33,11 @@ import { NoopAnimationsModule } from "@angular/platform-browser/animations";
     BrowserModule,
     AppRoutersModule,
     HttpClientModule,
-    NoopAnimationsModule,
+    BrowserAnimationsModule,
+    FormsModule
   ],
+  exports: [AddGroupDialogComponent],
+  entryComponents: [AddGroupDialogComponent],
   providers: [ConnectionManager, ConversationsFormatter]
 })
 export class ChatModule { }
