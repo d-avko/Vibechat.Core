@@ -1,0 +1,33 @@
+.messages_wrapper_conversationinfo {
+  display: block;
+  background-color: cadetblue;
+  color: white;
+}
+
+.messages_wrapper_optionsbutton {
+  width: 10%;
+}
+
+.conversation-header-name {
+  font-weight: bold;
+  font-size: 15px;
+  width: 30%;
+}
+
+.conversation-header-participants {
+  font-size: 14px;
+  padding-left: 3%;
+  width: 70%;
+}
+
+.conversation-header {
+  display: flex;
+  flex-direction: row;
+}
+
+.conversation-viewinfoButton {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 90%;
+}

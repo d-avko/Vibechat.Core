@@ -82,6 +82,15 @@ export class ConversationsFormatter{
     return membersAmount.toString() + " Member(s)";
   }
 
+  public GetConversationNameFormatted(conversation: ConversationTemplate) {
+
+    if (!conversation.isGroup) {
+      return conversation.dialogueUser.userName;
+    }
+
+    return conversation.name;
+  }
+
   public GetMessageTimeFormatted(message: ChatMessage) {
     return (<Date>message.timeReceived).toLocaleTimeString();
   }

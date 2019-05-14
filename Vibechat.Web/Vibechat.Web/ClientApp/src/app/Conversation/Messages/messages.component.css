@@ -1,0 +1,97 @@
+.messages_main {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 85%;
+}
+
+.padding10px {
+  padding: 10px;
+}
+
+.rounded-chat-image {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+}
+
+.load-spinner {
+  margin-left: 45%;
+}
+
+.messages_datestrip_wrapper .datestrip {
+  font-weight: lighter;
+  font-size: 13px;
+  color: black;
+}
+
+.messages_datestrip_wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.datestrip_bubble {
+  border-radius: 20px;
+  width: 12.5%;
+  height: 35px;
+  text-align: center;
+  box-shadow: 0 0 3pt 3pt dimgray;
+}
+
+.messages_message_content {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.messages_message_content .content_messageAndName {
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+}
+
+.selected-message {
+  background-color: #c4dbdc;
+}
+
+.message_header {
+  color: cadetblue;
+  font-weight: 600;
+}
+
+.message_text {
+  overflow-wrap: break-word;
+  font-size: 13px;
+}
+
+.image_attachment {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.message_attachment--image {
+  border-radius: 10px;
+}
+
+.message_timereceived {
+  color: dimgray;
+  font-size: 12px;
+}
+
+.chat_misc {
+  display: flex;
+  flex-direction: row;
+  height: 15%;
+}
+
+.marginleft10px {
+  margin-left: 10px;
+}
+
+.messages_component{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}

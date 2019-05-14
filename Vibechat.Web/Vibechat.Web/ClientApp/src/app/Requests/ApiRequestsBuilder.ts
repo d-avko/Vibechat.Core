@@ -78,14 +78,14 @@ export class ApiRequestsBuilder {
       { headers: headers });
   }
 
-  public UploadFiles(files: FileList, token: string): Observable<ServerResponse<UploadFilesResponse>> {
+  public UploadImages(files: FileList, token: string): Observable<ServerResponse<UploadFilesResponse>> {
     let headers = new HttpHeaders();
     headers = headers.append('Authorization', 'Bearer ' + token);
 
     let data = new FormData();
 
     for (let i = 0; i < files.length; ++i) {
-      data.append('files', files[i]);
+      data.append('images', files[i]);
     }
 
     return this.httpClient.post<ServerResponse<UploadFilesResponse>>("Files/UploadImages",

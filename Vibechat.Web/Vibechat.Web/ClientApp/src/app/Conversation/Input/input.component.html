@@ -1,0 +1,19 @@
+<div class="messages_wrapper_chat-input">
+
+  <img class="rounded-image" src="{{User.imageUrl}}" />
+
+  <div class="padding20px">
+    <!--name must be the same as in UploadFiles method parameter-->
+    <input class="button_send-images" type="file" (change)="UploadImages($event)" multiple="multiple" title="Send file" accept="image/*" name="images">
+    <mat-icon style="color: cadetblue">add_a_photo</mat-icon>
+  </div>
+
+  <mat-form-field class="input_field">
+    <textarea (keydown.control.enter)="SendMessage()" matInput placeholder="Type in your message..."></textarea>
+  </mat-form-field>
+
+  <button mat-button style="color:cadetblue">
+    <mat-icon>send</mat-icon>
+  </button>
+
+</div>

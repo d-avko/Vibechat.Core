@@ -21,8 +21,15 @@
 
   <ItemGroup>
     <!-- Don't publish the SPA source files, but do show them in the project files list -->
+    <Compile Remove="ClientApp\src\app\messaging\**" />
     <Content Remove="$(SpaRoot)**" />
+    <Content Remove="ClientApp\src\app\messaging\**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="ClientApp\src\app\messaging\**" />
+    <None Remove="ClientApp\src\app\messaging\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -47,8 +54,9 @@
     <None Remove="ClientApp\src\app\Data\UploadFilesResponse.ts" />
     <None Remove="ClientApp\src\app\Data\UserInfo.ts" />
     <None Remove="ClientApp\src\app\Delegates\MessageReceivedDelegate.ts" />
+    <None Remove="ClientApp\src\app\Modules\ChatModule.ts" />
+    <None Remove="ClientApp\src\app\Modules\LoginModule.ts" />
     <None Remove="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
-    <None Remove="ClientApp\src\app\Services\FileUploader.ts" />
     <None Remove="ClientApp\src\app\Shared\AddedToGroupModel.ts" />
     <None Remove="ClientApp\src\app\Shared\EmptyModel.ts" />
     <None Remove="ClientApp\src\app\Shared\MessageReceivedModel.ts" />
@@ -72,8 +80,9 @@
     <TypeScriptCompile Include="ClientApp\src\app\Data\DeleteMessagesRequest.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\MessageAttachment.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\UserInfo.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Modules\ChatModule.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Modules\LoginModule.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\Services\FileUploader.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\AddedToGroupModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\EmptyModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\MessageReceivedModel.ts" />
@@ -116,7 +125,7 @@
   <Import Project="..\Vibechat.Web.Data\Vibechat.Web.Data.projitems" Label="Shared" />
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <TypeScriptTarget>ES2015</TypeScriptTarget>
+    <TypeScriptTarget>ES2016</TypeScriptTarget>
     <TypeScriptJSXEmit>React</TypeScriptJSXEmit>
     <TypeScriptModuleKind>ES6</TypeScriptModuleKind>
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
