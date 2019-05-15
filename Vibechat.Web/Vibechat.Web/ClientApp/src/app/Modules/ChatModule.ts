@@ -14,7 +14,8 @@ import { AppRoutersModule } from "../app.routes";
 import { HttpClientModule } from "@angular/common/http";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { ConversationsListComponent } from "../Conversation/ConversationsList/conversationslist.component";
-import { AddGroupDialogComponent } from "../Dialogues/AddGroupDialog";
+import { AddGroupDialogComponent } from "../Dialogs/AddGroupDialog";
+import { FindUsersDialogComponent } from "../Dialogs/FindUsersDialog";
 
 @NgModule({
   declarations: [
@@ -23,7 +24,8 @@ import { AddGroupDialogComponent } from "../Dialogues/AddGroupDialog";
     ConversationHeaderComponent,
     MessagesComponent,
     ConversationsListComponent,
-    AddGroupDialogComponent
+    AddGroupDialogComponent,
+    FindUsersDialogComponent
   ],
   imports: [
     ScrollDispatchModule,
@@ -37,7 +39,7 @@ import { AddGroupDialogComponent } from "../Dialogues/AddGroupDialog";
     FormsModule
   ],
   exports: [AddGroupDialogComponent],
-  entryComponents: [AddGroupDialogComponent],
+  entryComponents: [AddGroupDialogComponent, FindUsersDialogComponent],
   providers: [ConnectionManager, ConversationsFormatter]
 })
 export class ChatModule { }

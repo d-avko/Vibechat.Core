@@ -16,8 +16,8 @@ import { RemovedFromGroupModel } from "../Shared/RemovedFromGroupModel";
 import { EmptyModel } from "../Shared/EmptyModel";
 import { MessagesComponent } from "../Conversation/Messages/messages.component";
 import { UserInfo } from "../Data/UserInfo";
-import { ConversationsListComponent } from "../Conversation/ConversationsList/conversationslist.component";
-import { AddGroupDialogComponent } from "../Dialogues/AddGroupDialog";
+import { FindUsersDialogComponent } from "../Dialogs/FindUsersDialog";
+import { AddGroupDialogComponent } from "../Dialogs/AddGroupDialog";
 
 @Component({
   selector: 'chat-root',

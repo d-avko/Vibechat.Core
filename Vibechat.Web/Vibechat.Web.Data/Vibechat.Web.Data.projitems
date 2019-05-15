@@ -34,7 +34,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Users Info\UsersByNickNameApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Users Info\UsersByNickNameResultApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Conversations\ConversationTemplate.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Finding Users\FoundUser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messages\Message.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messages\MessageAttachment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Users\UserInfo.cs" />

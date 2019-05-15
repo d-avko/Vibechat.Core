@@ -1,6 +1,11 @@
 import { Component, Input } from "@angular/core";
 import { ConversationTemplate } from "../../Data/ConversationTemplate";
 import { ConversationsFormatter } from "../../Formatters/ConversationsFormatter";
+import { MatDialog, MatSnackBar } from "@angular/material";
+import { FindUsersDialogComponent } from "../../Dialogs/FindUsersDialog";
+import { ApiRequestsBuilder } from "../../Requests/ApiRequestsBuilder";
+import { SnackBarHelper } from "../../Snackbar/SnackbarHelper";
+import { Cache } from "../../Auth/Cache";
 
 @Component({
   selector: 'conversationHeader-view',
@@ -9,11 +14,36 @@ import { ConversationsFormatter } from "../../Formatters/ConversationsFormatter"
 })
 export class ConversationHeaderComponent {
 
-  public formatter: ConversationsFormatter
+  protected snackbar: SnackBarHelper;
 
-  constructor(formatter: ConversationsFormatter) {
-    this.formatter = formatter;
+  constructor(
+    public formatter: ConversationsFormatter,
+    public dialog: MatDialog,
+    protected requestsBuilder: ApiRequestsBuilder,
+    snackbar: MatSnackBar) {
+    this.snackbar = new SnackBarHelper(snackbar);
   }
 
   @Input() public Conversation: ConversationTemplate;
+
+  public test() {
+    const dialogRef = this.dialog.open(FindUsersDialogComponent, {
+      width: '350px',
+      data: {
+        conversationId: this.Conversation.conversationID,
+        requestsBuilder: this.requestsBuilder,
+        snackbar: this.snackbar,
+        token: Cache.JwtToken
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+
+      if (result === '' || result == null) {
+        return;
+      }
+
+    });
+  }
+
 }

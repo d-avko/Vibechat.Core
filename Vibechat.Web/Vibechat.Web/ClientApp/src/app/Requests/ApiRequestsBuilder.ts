@@ -13,6 +13,7 @@ import { ChatMessage } from "../Data/ChatMessage";
 import { DeleteMessagesRequest } from "../Data/DeleteMessagesRequest";
 import { UploadFilesResponse } from "../Data/UploadFilesResponse";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
+import { FoundUsersResponse } from "../Data/FoundUsersResponse";
 
 @Injectable({
   providedIn: 'root'
@@ -42,7 +43,7 @@ export class ApiRequestsBuilder {
     headers = headers.append('Authorization', 'Bearer ' + token);
 
     return this.httpClient.post<ServerResponse<ConversationResponse>>(
-      this.baseUrl + 'api/Conversations/GetConversationInfo',
+      this.baseUrl + 'api/Conversations/GetInfo',
       new ConversationsRequest(
         {
           UserId: userId
@@ -55,7 +56,7 @@ export class ApiRequestsBuilder {
     headers = headers.append('Authorization', 'Bearer ' + token);
 
     return this.httpClient.post<ServerResponse<ConversationMessagesResponse>>(
-      this.baseUrl + 'api/Conversations/GetConversationMessages',
+      this.baseUrl + 'api/Conversations/GetMessages',
       new ConversationMessagesRequest(
         {
           Count: count,
@@ -94,6 +95,16 @@ export class ApiRequestsBuilder {
       { headers: headers });
   }
 
+  public FindUsersByUsername(token: string, username: string): Observable<ServerResponse<FoundUsersResponse>> {
+    let headers = new HttpHeaders();
+    headers = headers.append('Authorization', 'Bearer ' + token);
+
+    return this.httpClient.post<ServerResponse<FoundUsersResponse>>(
+      this.baseUrl + 'api/Users/FindByNickname',
+      { UsernameToFind: username },
+      { headers: headers });
+  }
+
   public CreateConversation(
     name: string,
     whoCreatedId: string,
@@ -107,7 +118,7 @@ export class ApiRequestsBuilder {
     headers = headers.append('Authorization', 'Bearer ' + token);
 
     return this.httpClient.post<ServerResponse<ConversationTemplate>>(
-      this.baseUrl + 'api/Conversations/CreateConversation',
+      this.baseUrl + 'api/Conversations/Create',
       { ConversationName: name, CreatorId: whoCreatedId, DialogUserId: dialogUserId, ImageUrl: thumbnailUrl, IsGroup: isGroup },
       { headers: headers });
   }
