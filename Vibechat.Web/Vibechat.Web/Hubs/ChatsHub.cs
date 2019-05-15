@@ -88,7 +88,7 @@ namespace VibeChat.Web
                     await Groups.AddToGroupAsync(addedUser.ConnectionId, conversation.ConversationID.ToString());
                 }
 
-                await AddedToGroup(userId, conversation, true);
+                await AddedToGroup(addedUser, conversation, true);
             }
             catch(Exception ex)
             {
@@ -192,9 +192,9 @@ namespace VibeChat.Web
             await Clients.Group(conversationId.ToString()).SendAsync("RemovedFromGroup", conversationId, userId);
         }
 
-        private async Task AddedToGroup(string userId, ConversationTemplate conversation, bool x)
+        private async Task AddedToGroup(UserInfo user, ConversationTemplate conversation, bool x)
         {
-            await Clients.Group(conversation.ToString()).SendAsync("AddedToGroup", conversation, userId);
+            await Clients.Group(conversation.ToString()).SendAsync("AddedToGroup", conversation, user);
         }
 
         private async Task SendMessageToGroup(int groupId, string SenderId, Message message, bool y, bool x)

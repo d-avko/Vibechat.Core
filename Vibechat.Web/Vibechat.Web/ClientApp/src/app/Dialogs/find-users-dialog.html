@@ -1,5 +1,5 @@
 <h1 mat-dialog-title>Add user to group.</h1>
-<div mat-dialog-content>
+<div mat-dialog-content style="overflow: unset !important">
 
   <div class="find-header">
     <mat-form-field appearance="standard">
@@ -12,7 +12,7 @@
     </button>
   </div>
 
-  <mat-action-list>
+  <mat-action-list style="height: 200px; overflow-y: scroll;">
     <h3 mat-subheader>Found users</h3>
 
     <mat-list-item *ngFor="let user of FoundUsers"
@@ -30,15 +30,21 @@
 
   </mat-action-list>
 
+  <div mat-dialog-actions>
+    <button mat-button [mat-dialog-close]="SelectedUsers" cdkFocusInitial>Invite</button>
+    <button mat-button (click)="onCancelClick()">Cancel</button>
+  </div>
+
   <style>
-    .selected-user{
-      color:white;
-      background-color:cadetblue;
+    .selected-user {
+      color: white;
+      background-color: cadetblue;
     }
-    .find-header{
+
+    .find-header {
       display: flex;
       flex-direction: row;
-      align-items:baseline;
+      align-items: baseline;
     }
   </style>
 

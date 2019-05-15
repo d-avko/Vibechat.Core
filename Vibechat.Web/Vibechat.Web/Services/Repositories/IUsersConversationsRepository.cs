@@ -11,5 +11,7 @@ namespace Vibechat.Web.Services.Repositories
         IQueryable<UserInApplication> GetConversationParticipants(int conversationId);
         IQueryable<ConversationDataModel> GetUserConversations(string userId);
         UserInApplication GetUserInDialog(int convId, string FirstUserInDialogueId);
+
+        Task<bool> Exists(string userId, int conversationId);
     }
 }

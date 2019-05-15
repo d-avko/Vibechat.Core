@@ -112,6 +112,36 @@ export class ChatComponent implements OnInit {
     }
   }
 
+  public OnAddUsersToConversation(users: Array<UserInfo>) {
+
+    if (users == null) {
+      return;
+    }
+
+    users.forEach(
+      (value) => {
+        this.connectionManager.AddUserToConversation(value.id, this.CurrentUser.id, this.CurrentConversation);
+      }
+    )
+
+    //Now add users locally
+
+    users.forEach(
+      (user) => {
+
+        //sort of sanitization of input
+
+        if (user.id == this.CurrentUser.id) {
+          return;
+        }
+
+        this.CurrentConversation.participants.push(user);
+        this.CurrentConversation.participants = [...this.CurrentConversation.participants];
+
+      }
+    )
+  }
+
   public CreateGroup() {
 
     this.sideDrawer.close();
@@ -177,11 +207,21 @@ export class ChatComponent implements OnInit {
 
   public OnAddedToGroup(data: AddedToGroupModel): void {
 
-    if (data.conversation.messages == null) {
-      data.conversation.messages = new Array<ChatMessage>();
-    }
+    //someone invited myself.
 
-    this.Conversations = [...this.Conversations, data.conversation];
+    if (data.user.id == this.CurrentUser.id) {
+
+      if (data.conversation.messages == null) {
+        data.conversation.messages = new Array<ChatMessage>();
+      }
+
+      this.Conversations = [...this.Conversations, data.conversation];
+    } else {
+
+      let conversation = this.Conversations.find(x => x.conversationID == data.conversation.conversationID);
+      conversation.participants.push(data.user);
+      conversation.participants = [...conversation.participants];
+    }
   }
 
   public OnRemovedFromGroup(data: RemovedFromGroupModel) {

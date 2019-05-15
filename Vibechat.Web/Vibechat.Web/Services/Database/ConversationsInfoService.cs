@@ -153,6 +153,11 @@ namespace Vibechat.Web.Services
             if (FoundUser == null)
                 throw defaultError;
 
+            if(await usersConversationsRepository.Exists(FoundUser.Id, FoundConversation.ConvID))
+            {
+                throw new FormatException("User already exists in converation.");
+            }
+
             var addedUser = (await usersConversationsRepository.Add(FoundUser, FoundConversation)).User;
 
             return new UserInfo()
