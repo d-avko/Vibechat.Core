@@ -8,6 +8,7 @@ using Vibechat.Web.ApiModels;
 using Vibechat.Web.AuthHelpers;
 using Vibechat.Web.Data.ApiModels.Tokens;
 using Vibechat.Web.Services;
+using Vibechat.Web.Services.Users;
 using VibeChat.Web;
 
 namespace Vibechat.Web.Controllers
@@ -16,12 +17,12 @@ namespace Vibechat.Web.Controllers
     {
         protected ITokenClaimValidator tokensValidator { get; set; }
 
-        protected DatabaseService dbService { get; set; }
+        protected UsersInfoService userService { get; set; }
 
-        public TokensController(ITokenClaimValidator tokensValidator, DatabaseService dbService)
+        public TokensController(ITokenClaimValidator tokensValidator, UsersInfoService userService)
         {
             this.tokensValidator = tokensValidator;
-            this.dbService = dbService;
+            this.userService = userService;
         }
 
         [Route("api/Tokens/Refresh")]
@@ -48,7 +49,7 @@ namespace Vibechat.Web.Controllers
                 IsSuccessfull = true,
                 Response = new RefreshTokenResponse()
                 {
-                    Token = JwtHelper.GenerateJwtToken(await dbService.GetUserById(tokenInfo.UserId))
+                    Token = JwtHelper.GenerateJwtToken(await userService.GetUserById(tokenInfo.UserId))
                 }
             };
         }

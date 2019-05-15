@@ -16,9 +16,11 @@ using System.Threading.Tasks;
 using Vibechat.Web.AuthHelpers;
 using Vibechat.Web.Services;
 using Vibechat.Web.Services.ChatDataProviders;
+using Vibechat.Web.Services.Extension_methods;
 using Vibechat.Web.Services.Hashing;
 using Vibechat.Web.Services.Images;
 using Vibechat.Web.Services.Paths;
+using Vibechat.Web.Services.Repositories;
 using VibeChat.Web;
 using VibeChat.Web.UserProviders;
 
@@ -113,23 +115,11 @@ namespace Vibechat.Web
 
             services.AddSignalR();
 
-            services.AddScoped<DatabaseService, DatabaseService>();
+            services.AddDefaultServices();
 
-            services.AddSingleton<ICustomHubUserIdProvider, DefaultUserIdProvider>();
+            services.AddDefaultRepositories();
 
-            services.AddScoped<ITokenClaimValidator, JwtTokenClaimValidator>();
-
-            services.AddScoped<JwtSecurityTokenHandler, JwtSecurityTokenHandler>();
-
-            services.AddSingleton<IChatDataProvider, DefaultChatDataProvider>();
-
-            services.AddSingleton<IImageCompressionService, ImageCompressionService>();
-
-            services.AddSingleton<IImageScalingService, ImageCompressionService>();
-
-            services.AddSingleton<IHexHashingService, Sha256Service>();
-
-            services.AddSingleton<UniquePathsProvider, UniquePathsProvider>();
+            services.AddBusinessLogic();
 
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>

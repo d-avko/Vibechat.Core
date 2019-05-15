@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Vibechat.Web.ApiModels;
 using Vibechat.Web.Services;
+using Vibechat.Web.Services.Users;
 using VibeChat.Web.ApiModels;
 using VibeChat.Web.ChatData;
 
@@ -14,11 +15,11 @@ namespace VibeChat.Web.Controllers
 {
     public class UsersController : Controller
     {
-        protected DatabaseService mDbService;
+        protected UsersInfoService mUsersService;
 
-        public UsersController(DatabaseService mDbService)
+        public UsersController(UsersInfoService mDbService)
         {
-            this.mDbService = mDbService;
+            this.mUsersService = mDbService;
         }
 
         #region Users info
@@ -28,7 +29,7 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                var result = await mDbService.GetUserById(userId);
+                var result = await mUsersService.GetUserById(userId);
 
                 return new ResponseApiModel<UserByIdApiResponseModel>()
                 {
@@ -54,7 +55,7 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                var result = await mDbService.FindUsersByNickName(credentials);
+                var result = await mUsersService.FindUsersByNickName(credentials);
 
                 return new ResponseApiModel<UsersByNickNameResultApiModel>()
                 {
