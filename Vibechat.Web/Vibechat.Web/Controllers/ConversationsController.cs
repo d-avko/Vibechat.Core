@@ -26,8 +26,8 @@ namespace VibeChat.Web.Controllers
 
         #region Conversations
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Conversations/CreateConversation")]
-        public async Task<ResponseApiModel<ConversationTemplate>> CreateConversation([FromBody] CreateConversationCredentialsApiModel convInfo)
+        [Route("api/Conversations/Create")]
+        public async Task<ResponseApiModel<ConversationTemplate>> Create([FromBody] CreateConversationCredentialsApiModel convInfo)
         {
             try
             {
@@ -53,8 +53,8 @@ namespace VibeChat.Web.Controllers
 
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Conversations/AddToConversation")]
-        public async Task<ResponseApiModel<string>> AddUserToConversation([FromBody]AddToConversationApiModel UserProvided)
+        [Route("api/Conversations/AddUserTo")]
+        public async Task<ResponseApiModel<string>> AddUserTo([FromBody]AddToConversationApiModel UserProvided)
         {
             try
             {
@@ -80,8 +80,8 @@ namespace VibeChat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Conversations/GetConversationInfo")]
-        public async Task<ResponseApiModel<ConversationInfoResultApiModel>> GetConversationInformation([FromBody] CredentialsForConversationInfoApiModel UserProvided)
+        [Route("api/Conversations/GetInfo")]
+        public async Task<ResponseApiModel<ConversationInfoResultApiModel>> GetInfo([FromBody] CredentialsForConversationInfoApiModel UserProvided)
         {
             try
             {
@@ -110,8 +110,8 @@ namespace VibeChat.Web.Controllers
 
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Conversations/GetConversationParticipants")]
-        public async Task<ResponseApiModel<GetParticipantsResultApiModel>> GetConversationParticipants([FromBody] GetParticipantsApiModel convInfo)
+        [Route("api/Conversations/GetParticipants")]
+        public async Task<ResponseApiModel<GetParticipantsResultApiModel>> GetParticipants([FromBody] GetParticipantsApiModel convInfo)
         {
             try
             {
@@ -137,8 +137,8 @@ namespace VibeChat.Web.Controllers
 
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Conversations/GetConversationMessages")]
-        public async Task<ResponseApiModel<GetMessagesResultApiModel>> GetConversationMessages([FromBody] GetMessagesApiModel convInfo)
+        [Route("api/Conversations/GetMessages")]
+        public async Task<ResponseApiModel<GetMessagesResultApiModel>> GetMessages([FromBody] GetMessagesApiModel convInfo)
         {
             try
             {

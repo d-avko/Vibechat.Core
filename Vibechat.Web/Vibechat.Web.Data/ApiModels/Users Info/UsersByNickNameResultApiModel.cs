@@ -5,6 +5,6 @@ namespace Vibechat.Web.ApiModels
 {
     public class UsersByNickNameResultApiModel
     {
-        public List<FoundUser> UsersFound { get; set; }
+        public List<UserInfo> UsersFound { get; set; }
     }
 }

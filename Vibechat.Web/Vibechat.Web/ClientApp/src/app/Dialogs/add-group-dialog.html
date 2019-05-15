@@ -7,6 +7,11 @@
     <input matInput [(ngModel)]="data.name">
   </mat-form-field>
 
+  <mat-action-list *ngFor="let user of data.foundUsers">
+    <button mat-list-item (click)="save()"> Save </button>
+    <button mat-list-item (click)="undo()"> Undo </button>
+  </mat-action-list>
+
 </div>
 <div mat-dialog-actions>
   <button mat-button [mat-dialog-close]="data.name" cdkFocusInitial>Create</button>

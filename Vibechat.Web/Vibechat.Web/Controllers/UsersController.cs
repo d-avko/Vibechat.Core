@@ -25,7 +25,7 @@ namespace VibeChat.Web.Controllers
         #region Users info
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Users/GetById")]
-        public async Task<ResponseApiModel<UserByIdApiResponseModel>> GetUserById([FromBody]UserByIdApiModel userId)
+        public async Task<ResponseApiModel<UserByIdApiResponseModel>> GetById([FromBody]UserByIdApiModel userId)
         {
             try
             {
@@ -51,7 +51,7 @@ namespace VibeChat.Web.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Users/FindByNickname")]
-        public async Task<ResponseApiModel<UsersByNickNameResultApiModel>> FindUsersByNickName([FromBody]UsersByNickNameApiModel credentials)
+        public async Task<ResponseApiModel<UsersByNickNameResultApiModel>> FindByNickName([FromBody]UsersByNickNameApiModel credentials)
         {
             try
             {

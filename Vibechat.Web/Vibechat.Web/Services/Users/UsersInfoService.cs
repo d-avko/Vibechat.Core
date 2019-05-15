@@ -84,12 +84,16 @@ namespace Vibechat.Web.Services.Users
 
             return new UsersByNickNameResultApiModel()
             {
-                UsersFound = result.Select((FoundUser) => new FoundUser
+                UsersFound = result.Select((FoundUser) => new UserInfo
                 {
-                    ID = FoundUser.Id,
-                    Username = FoundUser.UserName,
-                    FirstName = FoundUser.FirstName,
-                    LastName = FoundUser.LastName
+                    Id = FoundUser.Id,
+                    UserName = FoundUser.UserName,
+                    Name = FoundUser.FirstName,
+                    LastName = FoundUser.LastName,
+                    ConnectionId = FoundUser.ConnectionId,
+                    IsOnline = FoundUser.IsOnline,
+                    ImageUrl = FoundUser.ProfilePicImageURL,
+                    LastSeen = FoundUser.LastSeen
                 }).ToList()
             };
         }

@@ -11,7 +11,15 @@
       <img matListAvatar src="{{conversation.dialogueUser.imageUrl}}" alt="Dialogue logo">
     </ng-template>
 
-    <h3 matLine [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}"> {{conversation.name}} </h3>
+    <h3 matLine
+        *ngIf="conversation.isGroup; else dialogueHeader"
+        [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}"> {{conversation.name}} </h3>
+
+    <ng-template #dialogueHeader>
+      <h3 matLine
+          *ngIf="conversation.isGroup; else dialogueHeader"
+          [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}"> {{conversation.dialogueUser.userName}} </h3>
+    </ng-template>
 
     <div matLine class="lastmessage_content">
       <span class="lastmessage_content_lastmessage" [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
