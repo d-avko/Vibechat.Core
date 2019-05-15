@@ -25,5 +25,6 @@ namespace VibeChat.Web
         /// Indicates if user is online
         /// </summary>
         public bool IsOnline { get; set; }
+
     }
 }

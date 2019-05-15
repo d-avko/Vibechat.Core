@@ -6,17 +6,18 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Vibechat.Web.ApiModels;
 using Vibechat.Web.Services;
+using Vibechat.Web.Services.Login;
 using VibeChat.Web.ApiModels;
 
 namespace VibeChat.Web.Controllers
 {
     public class LoginController : Controller
     {
-        protected DatabaseService mDbService;
+        protected LoginService loginService;
 
-        public LoginController(DatabaseService mDbService)
+        public LoginController(LoginService loginService)
         {
-            this.mDbService = mDbService;
+            this.loginService = loginService;
         }
 
         [Route("api/login")]
@@ -24,7 +25,7 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                var result = await mDbService.LogInAsync(loginCredentials);
+                var result = await loginService.LogInAsync(loginCredentials);
 
                 return new ResponseApiModel<LoginResultApiModel>()
                 {
@@ -47,7 +48,7 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                await mDbService.RegisterNewUserAsync(userToRegister);
+                await loginService.RegisterNewUserAsync(userToRegister);
 
                 return new ResponseApiModel<string>()
                 {

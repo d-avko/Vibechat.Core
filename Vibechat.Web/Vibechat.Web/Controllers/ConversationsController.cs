@@ -17,9 +17,9 @@ namespace VibeChat.Web.Controllers
 {
     public class ConversationsController : Controller
     {
-        protected DatabaseService mDbService;
+        protected ConversationsInfoService mDbService;
 
-        public ConversationsController(DatabaseService mDbService)
+        public ConversationsController(ConversationsInfoService mDbService)
         {
             this.mDbService = mDbService;
         }
