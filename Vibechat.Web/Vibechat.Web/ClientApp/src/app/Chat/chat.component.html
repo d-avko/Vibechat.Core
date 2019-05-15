@@ -60,7 +60,9 @@
 
         <div *ngIf="IsConversationSelected()" class="messages_wrapper">
 
-          <conversationHeader-view class="messages_wrapper_header" [Conversation]="CurrentConversation"></conversationHeader-view>
+          <conversationHeader-view class="messages_wrapper_header"
+                                   (OnAddUsersToConversation)="OnAddUsersToConversation($event)"
+                                   [Conversation]="CurrentConversation"></conversationHeader-view>
 
           <messages-view class="messages_wrapper_messages"
                          (OnUpdateMessages)="OnUpdateMessages()"

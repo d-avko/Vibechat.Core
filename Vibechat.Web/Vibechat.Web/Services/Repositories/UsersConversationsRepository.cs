@@ -64,6 +64,12 @@ namespace Vibechat.Web.Services.Repositories
                 .FirstOrDefaultAsync(x => x.User.Id == userId && x.Conversation.ConvID == conversationId);
         }
 
+        public async Task<bool> Exists(string userId, int conversationId)
+        {
+            return await mContext.UsersConversations
+                .FirstOrDefaultAsync(x => x.Conversation.ConvID == conversationId && x.User.Id == userId) != default(UsersConversationDataModel);
+        }
+
         public async Task<UsersConversationDataModel> Add(UserInApplication user, ConversationDataModel conversation)
         {
             var res = await mContext.UsersConversations.AddAsync(new UsersConversationDataModel()

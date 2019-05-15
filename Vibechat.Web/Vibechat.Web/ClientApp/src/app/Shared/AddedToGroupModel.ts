@@ -1,4 +1,5 @@
 import { ConversationTemplate } from "../Data/ConversationTemplate";
+import { UserInfo } from "../Data/UserInfo";
 
 export class AddedToGroupModel {
   public constructor(init?: Partial<AddedToGroupModel>) {
@@ -6,5 +7,5 @@ export class AddedToGroupModel {
   }
 
   public conversation: ConversationTemplate
-  public userId: string;
+  public user: UserInfo;
 }

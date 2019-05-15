@@ -11,6 +11,7 @@ import { ConversationIdsFactory } from "../Data/ConversationIdsFactory";
 import { ChatComponent } from "../Chat/chat.component";
 import { MessageReceivedDelegate } from "../Delegates/MessageReceivedDelegate";
 import { AddedToConversationDelegate } from "../Delegates/AddedToConversationDelegate";
+import { UserInfo } from "../Data/UserInfo";
 
 @Injectable({
   providedIn: 'root'
@@ -41,10 +42,12 @@ export class ConnectionManager {
       .withUrl("/hubs/chat", { accessTokenFactory: () => Cache.JwtToken })
       .build();
 
-    this.connection.start().then(() => this.InitiateConnections(this.convIdsFactory()));
-
-   // this.OnConnectingNotify.emit(null);
-    
+    this.connection.start().then(
+      () => {
+        this.InitiateConnections(this.convIdsFactory());
+        this.OnConnected();
+      });
+  
     this.connection.onclose(() => this.OnDisconnected());
 
 
@@ -52,8 +55,8 @@ export class ConnectionManager {
       this.onMessageReceived(new MessageReceivedModel({ senderId: senderId, message: message, conversationId: conversationId }));
     });
 
-    this.connection.on("AddedToGroup", (conversation: ConversationTemplate, userId: string) => {
-      this.onAddedToGroup(new AddedToGroupModel({ conversation: conversation, userId: userId}));
+    this.connection.on("AddedToGroup", (conversation: ConversationTemplate, user: UserInfo) => {
+      this.onAddedToGroup(new AddedToGroupModel({ conversation: conversation, user: user}));
     });
 
     //this.connection.on("RemovedFromGroup", (conversationId: number, userId: string) => {
@@ -85,8 +88,8 @@ export class ConnectionManager {
     }
   }
 
-  public AddUserToConversation(userId: string, whoAddsId: string, conversationId: number) {
-    this.connection.send("AddToGroup", userId, whoAddsId, conversationId);
+  public AddUserToConversation(userId: string, whoAddsId: string, conversation: ConversationTemplate) {
+    this.connection.send("AddToGroup", userId, whoAddsId, conversation);
   }
 
   public InitiateConnections(conversationIds: Array<number>) : void {

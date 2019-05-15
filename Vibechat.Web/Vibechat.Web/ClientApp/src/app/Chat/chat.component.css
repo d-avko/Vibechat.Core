@@ -9,6 +9,7 @@
 .conversations_wrapper {
   display: flex;
   flex-direction:column;
+  overflow-y: scroll;
   width: 30%;
   height: 100%;
 }

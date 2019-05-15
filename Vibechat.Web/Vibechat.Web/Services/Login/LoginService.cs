@@ -101,7 +101,7 @@ namespace Vibechat.Web.Services.Login
 
             // if UserName and email are not unique
 
-            if (((await usersRepository.GetByUsername(userToRegister.UserName)) == null) && ((await usersRepository.GetByEmail(userToRegister.Email)) == null))
+            if (((await usersRepository.GetByUsername(userToRegister.UserName)) != null) || ((await usersRepository.GetByEmail(userToRegister.Email)) != null))
             {
                 throw new FormatException("The username or e-mail is not unique.");
             }

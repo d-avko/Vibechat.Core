@@ -79,7 +79,10 @@ namespace Vibechat.Web.Services.Users
 
             if (result.Count() == 0)
             {
-                throw new FormatException("Noone was found.");
+                return new UsersByNickNameResultApiModel()
+                {
+                    UsersFound = null
+                };
             }
 
             return new UsersByNickNameResultApiModel()
