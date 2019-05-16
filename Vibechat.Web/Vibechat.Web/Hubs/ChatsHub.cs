@@ -53,14 +53,17 @@ namespace VibeChat.Web
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task RemoveFromGroup(string userToRemoveId, int conversationId)
         {
+            var whoSentId = userProvider.GetUserId(Context);
+
             try
             {
-                await conversationsService.RemoveUserFromConversation();
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, conversationId.ToString());
+                await conversationsService.RemoveUserFromConversation(userToRemoveId, whoSentId, conversationId);
                 await RemovedFromGroup(userToRemoveId, conversationId, true);
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, conversationId.ToString());
             }
             catch(Exception ex)
             {
+                await SendError(whoSentId, ex.Message);
                 logger.LogError(ex.Message);
             }
         }
@@ -75,6 +78,8 @@ namespace VibeChat.Web
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task AddToGroup(string userId, ConversationTemplate conversation)
         {
+            var whoSentId = userProvider.GetUserId(Context);
+
             try
             {
                 var addedUser = await conversationsService.AddUserToConversation(new AddToConversationApiModel()
@@ -92,6 +97,7 @@ namespace VibeChat.Web
             }
             catch(Exception ex)
             {
+                await SendError(whoSentId, ex.Message);
                 logger.LogError(ex.Message);
             }
         }
@@ -115,9 +121,10 @@ namespace VibeChat.Web
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task SendMessageToGroup(Message message, int groupId)
         {
+            var whoSentId = userProvider.GetUserId(Context);
+
             try
             {
-                var whoSentId = userProvider.GetUserId(Context);
                 //CAN SEND MESSAGE ONLY IF JOINED
 
                 var created = new MessageDataModel();
@@ -138,6 +145,7 @@ namespace VibeChat.Web
             }
             catch(Exception ex)
             {
+                await SendError(whoSentId, ex.Message);
                 logger.LogError(ex.Message);
             }
         }
@@ -154,9 +162,10 @@ namespace VibeChat.Web
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task SendMessageToUser(Message message, string UserToSendId, int conversationId)
         {
+            var whoSentId = userProvider.GetUserId(Context);
+
             try
             {
-                var whoSentId = userProvider.GetUserId(Context);
 
                 //CAN SEND TO ANYONE
 
@@ -178,6 +187,7 @@ namespace VibeChat.Web
             }
             catch(Exception ex)
             {
+                await SendError(whoSentId, ex.Message);
                 logger.LogError(ex.Message);
             }
         }
@@ -191,7 +201,7 @@ namespace VibeChat.Web
         /// <returns></returns>
         private async Task RemovedFromGroup(string userId, int conversationId, bool x)
         {
-            await Clients.Group(conversationId.ToString()).SendAsync("RemovedFromGroup", conversationId, userId);
+            await Clients.Group(conversationId.ToString()).SendAsync("RemovedFromGroup",userId, conversationId);
         }
 
         private async Task AddedToGroup(UserInfo user, ConversationTemplate conversation, bool x)
@@ -207,6 +217,11 @@ namespace VibeChat.Web
         private async Task SendMessageToUser(Message message, string SenderId, string UserToSendId, int conversationId, bool x, bool y)
         {
             await Clients.User(UserToSendId).SendAsync("ReceiveMessage", SenderId, message, conversationId);
+        }
+
+        private async Task SendError(string userid, string error)
+        {
+            await Clients.User(userid).SendAsync("Error", error);
         }
     }
 }

@@ -61,6 +61,8 @@ namespace Vibechat.Web.Services.Repositories
         {
             return await mContext
                 .UsersConversations
+                .Include(x => x.User)
+                .Include(x => x.Conversation)
                 .FirstOrDefaultAsync(x => x.User.Id == userId && x.Conversation.ConvID == conversationId);
         }
 
@@ -68,6 +70,12 @@ namespace Vibechat.Web.Services.Repositories
         {
             return await mContext.UsersConversations
                 .FirstOrDefaultAsync(x => x.Conversation.ConvID == conversationId && x.User.Id == userId) != default(UsersConversationDataModel);
+        }
+
+        public async Task Remove(UsersConversationDataModel entity)
+        {
+            mContext.UsersConversations.Remove(entity);
+            await mContext.SaveChangesAsync();
         }
 
         public async Task<UsersConversationDataModel> Add(UserInApplication user, ConversationDataModel conversation)

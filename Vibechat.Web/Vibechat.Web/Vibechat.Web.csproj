@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
-    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>3.3</TypeScriptToolsVersion>
     <IsPackable>false</IsPackable>
     <SpaRoot>ClientApp\</SpaRoot>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
@@ -58,6 +58,7 @@
     <None Remove="ClientApp\src\app\Delegates\MessageReceivedDelegate.ts" />
     <None Remove="ClientApp\src\app\Dialogs\AddGroupDialog.ts" />
     <None Remove="ClientApp\src\app\Dialogs\FindUsersDialog.ts" />
+    <None Remove="ClientApp\src\app\Dialogs\GroupInfoDialog.ts" />
     <None Remove="ClientApp\src\app\Modules\ChatModule.ts" />
     <None Remove="ClientApp\src\app\Modules\LoginModule.ts" />
     <None Remove="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
@@ -82,6 +83,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\Delegates\MessageReceivedDelegate.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Dialogs\AddGroupDialog.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Dialogs\FindUsersDialog.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Dialogs\GroupInfoDialog.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Formatters\ConversationsFormatter.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationTemplate.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ChatMessage.ts" />
@@ -134,7 +136,7 @@
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <TypeScriptTarget>ES2016</TypeScriptTarget>
-    <TypeScriptJSXEmit>React</TypeScriptJSXEmit>
+    <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
     <TypeScriptModuleKind>ES6</TypeScriptModuleKind>
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
     <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>

@@ -2,11 +2,8 @@ import { Component, Input, Output, EventEmitter } from "@angular/core";
 import { ConversationTemplate } from "../../Data/ConversationTemplate";
 import { ConversationsFormatter } from "../../Formatters/ConversationsFormatter";
 import { MatDialog, MatSnackBar } from "@angular/material";
-import { FindUsersDialogComponent } from "../../Dialogs/FindUsersDialog";
 import { ApiRequestsBuilder } from "../../Requests/ApiRequestsBuilder";
 import { SnackBarHelper } from "../../Snackbar/SnackbarHelper";
-import { Cache } from "../../Auth/Cache";
-import { UserInfo } from "../../Data/UserInfo";
 
 @Component({
   selector: 'conversationHeader-view',
@@ -27,27 +24,9 @@ export class ConversationHeaderComponent {
 
   @Input() public Conversation: ConversationTemplate;
 
-  @Output() public OnAddUsersToConversation = new EventEmitter<Array<UserInfo>>();
+  @Output() public OnViewGroupInfo = new EventEmitter<void>();
 
-  public test() {
-    const dialogRef = this.dialog.open(FindUsersDialogComponent, {
-      width: '350px',
-      data: {
-        conversationId: this.Conversation.conversationID,
-        requestsBuilder: this.requestsBuilder,
-        snackbar: this.snackbar,
-        token: Cache.JwtToken
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-
-      if (result === '' || result == null) {
-        return;
-      }
-
-      this.OnAddUsersToConversation.emit(result);
-    });
+  public ViewGroupInfo() : void{
+    this.OnViewGroupInfo.emit(null);
   }
-
 }

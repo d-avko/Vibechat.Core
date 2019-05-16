@@ -18,6 +18,7 @@ import { MessagesComponent } from "../Conversation/Messages/messages.component";
 import { UserInfo } from "../Data/UserInfo";
 import { FindUsersDialogComponent } from "../Dialogs/FindUsersDialog";
 import { AddGroupDialogComponent } from "../Dialogs/AddGroupDialog";
+import { GroupInfoDialogComponent } from "../Dialogs/GroupInfoDialog";
 
 @Component({
   selector: 'chat-root',
@@ -103,7 +104,9 @@ export class ChatComponent implements OnInit {
     this.connectionManager = new ConnectionManager(
       () => this.Conversations.map((x) => x.conversationID),
       (data) => this.OnMessageReceived(data),
-      (data) => this.OnAddedToGroup(data)
+      (data) => this.OnAddedToGroup(data),
+      (error) => this.OnSignalrError(error),
+      (data) => this.OnRemovedFromGroup(data)
     );
 
     this.IsAuthenticated = Cache.IsAuthenticated;
@@ -122,34 +125,154 @@ export class ChatComponent implements OnInit {
     this.router.navigateByUrl('/login');
   }
 
-  public OnAddUsersToConversation(users: Array<UserInfo>) {
+  public OnSignalrError(error: string) : void{
+    this.snackbar.openSnackBar(error, 2);
+  }
 
-    if (users == null) {
-      return;
-    }
-
-    users.forEach(
-      (value) => {
-        this.connectionManager.AddUserToConversation(value.id, this.CurrentUser.id, this.CurrentConversation);
+  public OnViewGroupInfo(group: ConversationTemplate) {
+    const groupInfoRef = this.dialog.open(GroupInfoDialogComponent, {
+      width: '450px',
+      data: {
+        Conversation: group,
+        user: this.CurrentUser,
+        ExistsInThisGroup: this.Conversations.find(x => x.conversationID == group.conversationID) != null
       }
-    )
+    });
 
-    //Now add users locally
+    groupInfoRef.componentInstance
+    .OnInviteUsers
+    .subscribe(() => this.OnInviteUsersToGroup());
 
-    users.forEach(
-      (user) => {
+    groupInfoRef.componentInstance
+    .OnChangeName
+    .subscribe((name: string) => this.OnChangeConversationName(name));
 
-        //sort of sanitization of input
+    groupInfoRef.componentInstance
+    .OnLeaveGroup
+    .subscribe(() => {
+      this.OnLeaveGroup();
+      groupInfoRef.close();
+    });
 
-        if (user.id == this.CurrentUser.id) {
-          return;
+    groupInfoRef.componentInstance
+    .OnChangeThumbnail
+    .subscribe((file: File) => this.OnChangeGroupThumbnail(file));
+
+    groupInfoRef.componentInstance
+    .OnClearMessages
+    .subscribe(() => {
+      this.OnRemoveAllMessages();
+      groupInfoRef.close();
+    });
+
+    groupInfoRef.componentInstance
+    .OnViewUserInfo
+    .subscribe((user: UserInfo) => this.OnViewUserInfo(user));
+
+    groupInfoRef.componentInstance
+    .OnJoinGroup
+    .subscribe((group: ConversationTemplate) => {
+      this.OnJoinGroup(group);
+      groupInfoRef.close();
+    });
+
+    groupInfoRef.componentInstance.OnKickUser
+    .subscribe((user: UserInfo) => this.OnKickUser(user));
+   
+  }
+
+  public OnKickUser(user: UserInfo){
+
+  }
+
+  public OnJoinGroup(conversation: ConversationTemplate){
+    this.connectionManager.AddUserToConversation(this.CurrentUser.id, this.CurrentUser.id, conversation);
+  }
+
+  public OnViewUserInfo(user: UserInfo){
+
+  }
+
+
+  public OnRemoveAllMessages(){
+    this.requestsBuilder.DeleteMessages(this.CurrentConversation.messages, this.CurrentConversation.conversationID, Cache.JwtToken)
+      .subscribe(
+        (result) => {
+          this.OnMessagesDeleted(result, this.CurrentConversation.messages);
+          this.CurrentConversation = null;
+        } 
+        ,
+        (error) => {
+          if (error.error instanceof ErrorEvent) {
+            this.snackbar.openSnackBar('Network error occurred. Try refreshing the page.', 2);
+          } else {
+            //unauthorized
+            if (error.status == 401) {
+              this.OnTokenExpired();
+            }
+          }
         }
+      )
+  }
 
-        this.CurrentConversation.participants.push(user);
-        this.CurrentConversation.participants = [...this.CurrentConversation.participants];
+  public OnChangeGroupThumbnail(file: File){
 
+  }
+
+  public OnLeaveGroup(){
+    this.connectionManager.RemoveUserFromConversation(this.CurrentUser.id, this.CurrentConversation.conversationID);
+    this.CurrentConversation = null;
+  }
+
+  public OnChangeConversationName(name: string){
+
+  }
+
+  public OnInviteUsersToGroup() {
+
+    const dialogRef = this.dialog.open(FindUsersDialogComponent, {
+      width: '350px',
+      data: {
+        conversationId: this.CurrentConversation.conversationID,
+        requestsBuilder: this.requestsBuilder,
+        snackbar: this.snackbar,
+        token: Cache.JwtToken
       }
-    )
+    });
+
+    dialogRef.afterClosed().subscribe(users => {
+
+      if (users === '' || users == null) {
+        return;
+      }
+
+      if (users == null) {
+        return;
+      }
+
+      users.forEach(
+        (value) => {
+          this.connectionManager.AddUserToConversation(value.id, this.CurrentUser.id, this.CurrentConversation);
+        }
+      )
+
+      //Now add users locally
+
+      users.forEach(
+        (user) => {
+
+          //sort of sanitization of input
+
+          if (user.id == this.CurrentUser.id) {
+            return;
+          }
+
+          this.CurrentConversation.participants.push(user);
+          this.CurrentConversation.participants = [...this.CurrentConversation.participants];
+
+        }
+      )
+    });
   }
 
   public CreateGroup() {
@@ -245,7 +368,17 @@ export class ChatComponent implements OnInit {
   }
 
   public OnRemovedFromGroup(data: RemovedFromGroupModel) {
+    //either this client left or creator removed him.
 
+    if (data.userId == this.CurrentUser.id) {
+
+      this.Conversations.splice(this.Conversations.findIndex(x => x.conversationID == data.conversationId), 1);
+    } else {
+
+      let participants = this.Conversations.find(x => x.conversationID == data.conversationId).participants;
+
+      participants.splice(participants.findIndex(x => x.id == data.userId), 1);
+    }
   }
 
   public OnDisconnected(data: EmptyModel) {

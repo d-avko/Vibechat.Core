@@ -129,11 +129,41 @@ namespace Vibechat.Web.Services
 
         }
 
-        public async Task<UserInfo> RemoveUserFromConversation()
+        public async Task RemoveUserFromConversation(string userId, string whoRemovedId, int conversationId)
         {
-            return null;
-            //TODO
-            //CHECK IF THIS IS EVEN ALLOWED
+            var conversation = conversationRepository.GetById(conversationId);
+
+            if(conversation == null)
+            {
+                throw new FormatException("Wrong conversation.");
+            }
+
+            var userConversation = await usersConversationsRepository.Get(userId, conversationId);
+
+            if (userConversation == null)
+            {
+                throw new FormatException("User is not a part of this conversation.");
+            }
+
+            if(conversation.Creator.Id != whoRemovedId)
+            {
+                throw new FormatException("Only creator can remove users.");
+            }
+
+            // conversation could only exist if there are some users in it.
+
+            if ((await GetConversationParticipants(new GetParticipantsApiModel() { ConvId = conversationId }))
+                .Participants
+                .Count() == 1)
+            {
+                await usersConversationsRepository.Remove(userConversation);
+                conversationRepository.Remove(conversation);
+                return;
+            }
+            else
+            {
+                await usersConversationsRepository.Remove(userConversation);
+            }
         }
 
 
