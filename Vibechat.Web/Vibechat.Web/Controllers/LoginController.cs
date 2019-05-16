@@ -32,6 +32,7 @@ namespace VibeChat.Web.Controllers
                     IsSuccessfull = true,
                     Response = result
                 };
+
             }
             catch (Exception ex)
             {

@@ -122,4 +122,10 @@ export class ApiRequestsBuilder {
       { ConversationName: name, CreatorId: whoCreatedId, DialogUserId: dialogUserId, ImageUrl: thumbnailUrl, IsGroup: isGroup },
       { headers: headers });
   }
+
+  public RefreshJwtToken(oldToken: string, userId: string): Observable<ServerResponse<string>>{
+    return this.httpClient.post<ServerResponse<string>>(
+      this.baseUrl + 'api/Tokens/Refresh',
+      { OldToken: oldToken, UserId: userId });
+  }
 }

@@ -73,7 +73,7 @@ namespace VibeChat.Web
         /// <param name="connectionId"> connection to add</param>
         /// <returns></returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task AddToGroup(string userId, string whoAdded, ConversationTemplate conversation)
+        public async Task AddToGroup(string userId, ConversationTemplate conversation)
         {
             try
             {
@@ -113,28 +113,28 @@ namespace VibeChat.Web
 
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task SendMessageToGroup(Message message, string SenderId, int groupId)
+        public async Task SendMessageToGroup(Message message, int groupId)
         {
             try
             {
-
+                var whoSentId = userProvider.GetUserId(Context);
                 //CAN SEND MESSAGE ONLY IF JOINED
 
                 var created = new MessageDataModel();
 
                 if (message.IsAttachment)
                 {
-                    created = await conversationsService.AddAttachmentMessage(message, groupId, SenderId);
+                    created = await conversationsService.AddAttachmentMessage(message, groupId, whoSentId);
                 }
                 else
                 {
-                    created = await conversationsService.AddMessage(message, groupId, SenderId);
+                    created = await conversationsService.AddMessage(message, groupId, whoSentId);
                 }
 
                 message.TimeReceived = created.TimeReceived;
                 message.Id = created.MessageID;
 
-                await SendMessageToGroup(groupId, SenderId, message, true, true);
+                await SendMessageToGroup(groupId, whoSentId, message, true, true);
             }
             catch(Exception ex)
             {
@@ -152,27 +152,29 @@ namespace VibeChat.Web
         /// <param name="conversationId"></param>
         /// <returns></returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task SendMessageToUser(Message message, string SenderId, string UserToSendId, int conversationId)
+        public async Task SendMessageToUser(Message message, string UserToSendId, int conversationId)
         {
             try
             {
+                var whoSentId = userProvider.GetUserId(Context);
+
                 //CAN SEND TO ANYONE
 
                 var created = new MessageDataModel();
 
                 if (message.IsAttachment)
                 {
-                    created = await conversationsService.AddAttachmentMessage(message, conversationId, SenderId);
+                    created = await conversationsService.AddAttachmentMessage(message, conversationId, whoSentId);
                 }
                 else
                 {
-                    created = await conversationsService.AddMessage(message, conversationId, SenderId);
+                    created = await conversationsService.AddMessage(message, conversationId, whoSentId);
                 }
 
                 message.TimeReceived = created.TimeReceived;
                 message.Id = created.MessageID;
 
-                await SendMessageToUser(message, SenderId, UserToSendId, conversationId, true, true);
+                await SendMessageToUser(message, whoSentId, UserToSendId, conversationId, true, true);
             }
             catch(Exception ex)
             {

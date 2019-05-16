@@ -26,9 +26,9 @@ namespace Vibechat.Web.Controllers
         }
 
         [Route("api/Tokens/Refresh")]
-        public async Task<ResponseApiModel<RefreshTokenResponse>> RefreshToken([FromBody]RefreshTokenApiModel tokenInfo)
+        public async Task<ResponseApiModel<string>> RefreshToken([FromBody]RefreshTokenApiModel tokenInfo)
         {
-            var defaultError = new ResponseApiModel<RefreshTokenResponse>()
+            var defaultError = new ResponseApiModel<string>()
             {
                 IsSuccessfull = false,
                 ErrorMessage = "Wrong user id or token were provided.",
@@ -44,13 +44,10 @@ namespace Vibechat.Web.Controllers
                 return defaultError;
             }
 
-            return new ResponseApiModel<RefreshTokenResponse>()
+            return new ResponseApiModel<string>()
             {
                 IsSuccessfull = true,
-                Response = new RefreshTokenResponse()
-                {
-                    Token = JwtHelper.GenerateJwtToken(await userService.GetUserById(tokenInfo.UserId))
-                }
+                Response = (await userService.GetUserById(tokenInfo.UserId)).GenerateJwtToken()
             };
         }
     }
