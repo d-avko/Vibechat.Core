@@ -12,6 +12,8 @@ import { ChatComponent } from "../Chat/chat.component";
 import { MessageReceivedDelegate } from "../Delegates/MessageReceivedDelegate";
 import { AddedToConversationDelegate } from "../Delegates/AddedToConversationDelegate";
 import { UserInfo } from "../Data/UserInfo";
+import { ErrorDelegate } from "../Delegates/ErrorDelegate";
+import { RemovedFromGroupDelegate } from "../Delegates/RemovedFromGroupDelegate";
 
 @Injectable({
   providedIn: 'root'
@@ -26,14 +28,22 @@ export class ConnectionManager {
 
   private onAddedToGroup: AddedToConversationDelegate;
 
+  private onError: ErrorDelegate;
+
+  private OnRemovedFromGroupDelegate: RemovedFromGroupDelegate;
+
   constructor(
     convIdsFactory: ConversationIdsFactory,
     onMessageReceived: MessageReceivedDelegate,
-    onAddedToGroup: AddedToConversationDelegate) {
+    onAddedToGroup: AddedToConversationDelegate,
+    onError: ErrorDelegate,
+    OnRemovedFromGroupDelegate : RemovedFromGroupDelegate) {
 
     this.onMessageReceived = onMessageReceived;
     this.onAddedToGroup = onAddedToGroup;
     this.convIdsFactory = convIdsFactory;
+    this.onError = onError;
+    this.OnRemovedFromGroupDelegate = OnRemovedFromGroupDelegate;
   }
 
   public Start(): void {
@@ -57,6 +67,14 @@ export class ConnectionManager {
 
     this.connection.on("AddedToGroup", (conversation: ConversationTemplate, user: UserInfo) => {
       this.onAddedToGroup(new AddedToGroupModel({ conversation: conversation, user: user}));
+    });
+
+    this.connection.on("Error", (error: string) => {
+      this.onError(error);
+    });
+
+    this.connection.on("RemovedFromGroup", (userId: string, conversationId: number) => {
+      this.OnRemovedFromGroupDelegate(new RemovedFromGroupModel({ userId: userId, conversationId: conversationId }));
     });
 
     //this.connection.on("RemovedFromGroup", (conversationId: number, userId: string) => {
@@ -90,6 +108,10 @@ export class ConnectionManager {
 
   public AddUserToConversation(userId: string, whoAddsId: string, conversation: ConversationTemplate) {
     this.connection.send("AddToGroup", userId, whoAddsId, conversation);
+  }
+
+  public RemoveUserFromConversation(userId: string, conversationId: number) {
+    this.connection.send("RemoveFromGroup", userId, conversationId);
   }
 
   public InitiateConnections(conversationIds: Array<number>) : void {

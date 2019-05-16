@@ -2,7 +2,7 @@
 
   <div class="conversation-header">
 
-    <button mat-button class="conversation-viewinfoButton">
+    <button mat-button class="conversation-viewinfoButton" (click)="ViewGroupInfo()">
 
       <span class="conversation-header-name">
         {{formatter.GetConversationNameFormatted(Conversation)}}
@@ -12,10 +12,6 @@
         {{formatter.GetConversationMembersFormatted(Conversation)}}
       </span>
 
-    </button>
-
-    <button mat-button class="messages_wrapper_optionsbutton" (click)="test()">
-      <mat-icon>person_add</mat-icon>
     </button>
 
   </div>

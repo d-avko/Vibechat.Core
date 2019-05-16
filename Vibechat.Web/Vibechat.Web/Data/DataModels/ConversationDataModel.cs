@@ -22,5 +22,7 @@ namespace VibeChat.Web
         /// Indicates if this is a group
         /// </summary>
         public bool IsGroup { get; set; }
+
+        public UserInApplication Creator { get; set; }
     }
 }

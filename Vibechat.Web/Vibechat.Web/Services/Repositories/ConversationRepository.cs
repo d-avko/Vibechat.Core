@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,7 +17,16 @@ namespace Vibechat.Web.Services.Repositories
 
         public ConversationDataModel GetById(int id)
         {
-            return mContext.Conversations.FirstOrDefault(x => x.ConvID == id);
+            return mContext
+                .Conversations
+                .Include(x => x.Creator)
+                .FirstOrDefault(x => x.ConvID == id);
+        }
+
+        public void Remove(ConversationDataModel entity)
+        {
+            mContext.Conversations.Remove(entity);
+            mContext.SaveChanges();
         }
 
         public async Task<ConversationDataModel> Add(
