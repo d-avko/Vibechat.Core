@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
@@ -10,19 +9,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System;
-using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Threading.Tasks;
-using Vibechat.Web.AuthHelpers;
-using Vibechat.Web.Services;
-using Vibechat.Web.Services.ChatDataProviders;
 using Vibechat.Web.Services.Extension_methods;
-using Vibechat.Web.Services.Hashing;
-using Vibechat.Web.Services.Images;
-using Vibechat.Web.Services.Paths;
-using Vibechat.Web.Services.Repositories;
 using VibeChat.Web;
-using VibeChat.Web.UserProviders;
 
 namespace Vibechat.Web
 {

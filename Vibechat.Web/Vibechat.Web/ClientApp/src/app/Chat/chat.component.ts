@@ -91,25 +91,35 @@ export class ChatComponent implements OnInit {
     this.Conversations = new Array<ConversationTemplate>();
 
     this.formatter = formatter;
+  
+    if (!Cache.IsAuthenticated) {
+
+      if (!Cache.TryAuthenticate()) {
+        router.navigateByUrl('/login');
+        return;
+      }
+    }
+
+    this.connectionManager = new ConnectionManager(
+      () => this.Conversations.map((x) => x.conversationID),
+      (data) => this.OnMessageReceived(data),
+      (data) => this.OnAddedToGroup(data)
+    );
 
     this.IsAuthenticated = Cache.IsAuthenticated;
 
-    if (this.IsAuthenticated) {
-
-      this.connectionManager = new ConnectionManager(
-        () => this.Conversations.map((x) => x.conversationID),
-        (data) => this.OnMessageReceived(data),
-        (data) => this.OnAddedToGroup(data)
-        );
-
-      this.CurrentUser = Cache.UserCache;
-    } 
+    this.CurrentUser = Cache.UserCache;
 
   }
   ngOnInit(): void {
     if (this.IsAuthenticated) {
       this.UpdateConversations();
     }
+  }
+
+  public OnLogOut() : void {
+    Cache.LogOut();
+    this.router.navigateByUrl('/login');
   }
 
   public OnAddUsersToConversation(users: Array<UserInfo>) {
@@ -171,6 +181,16 @@ export class ChatComponent implements OnInit {
             result.response.messages = new Array<ChatMessage>();
 
             this.Conversations = [...this.Conversations, result.response];
+          },
+          (error) => {
+            if (error.error instanceof ErrorEvent) {
+              this.snackbar.openSnackBar('Network error occurred. Try refreshing the page.', 2);
+            } else {
+              //unauthorized
+              if (error.status == 401) {
+                this.OnTokenExpired();
+              }
+            }
           }
         )
     });
@@ -185,7 +205,7 @@ export class ChatComponent implements OnInit {
           isAttachment: false,
           user: this.CurrentUser,
           conversationID: this.CurrentConversation.conversationID
-        }), this.CurrentConversation, this.CurrentUser.id);
+        }), this.CurrentConversation);
   }
 
   public OnConnecting(data: EmptyModel) {
@@ -268,7 +288,17 @@ export class ChatComponent implements OnInit {
           this.IsMessagesLoading = false;
 
           this.messages.ScrollToMessage(result.response.messages.length);
-        }
+        },
+          (error) => {
+            if (error.error instanceof ErrorEvent) {
+              this.snackbar.openSnackBar('Network error occurred. Try refreshing the page.', 2);
+            } else {
+              //unauthorized
+              if (error.status == 401) {
+                this.OnTokenExpired();
+              }
+            }
+          }
       )
     }
 
@@ -276,7 +306,20 @@ export class ChatComponent implements OnInit {
 
   public OnDeleteMessages(SelectedMessages: Array<ChatMessage>) {
     this.requestsBuilder.DeleteMessages(SelectedMessages, this.CurrentConversation.conversationID, Cache.JwtToken)
-      .subscribe((result) => this.OnMessagesDeleted(result, SelectedMessages))
+      .subscribe(
+        (result) => this.OnMessagesDeleted(result, SelectedMessages)
+        ,
+        (error) => {
+          if (error.error instanceof ErrorEvent) {
+            this.snackbar.openSnackBar('Network error occurred. Try refreshing the page.', 2);
+          } else {
+            //unauthorized
+            if (error.status == 401) {
+              this.OnTokenExpired();
+            }
+          }
+        }
+      )
   }
 
   public OnMessagesDeleted(response: ServerResponse<string>, SelectedMessages: Array<ChatMessage>) {
@@ -316,6 +359,16 @@ export class ChatComponent implements OnInit {
           //Initiate signalR group connections
 
           this.connectionManager.Start();
+        },
+        (error) => {
+          if (error.error instanceof ErrorEvent) {
+            this.snackbar.openSnackBar('Network error occurred. Try refreshing the page.', 2);
+          } else {
+            //unauthorized
+            if (error.status == 401) {
+              this.OnTokenExpired();
+            }
+          }
         }
       )
   }
@@ -339,8 +392,9 @@ export class ChatComponent implements OnInit {
   public OnUploadImages(files: FileList) {
     let conversationToSend = this.CurrentConversation.conversationID;
 
-    this.requestsBuilder.UploadImages(files, Cache.JwtToken).subscribe((result) =>
-    {
+    this.requestsBuilder.UploadImages(files, Cache.JwtToken).subscribe(
+      (result) => {
+
       if (!result.isSuccessfull) {
         this.snackbar.openSnackBar(result.errorMessage);
         return;
@@ -355,10 +409,40 @@ export class ChatComponent implements OnInit {
               user: this.CurrentUser,
               conversationID: conversationToSend,
               attachmentInfo: file
-            }), this.CurrentConversation, this.CurrentUser.id)
-      )
-    }
+            }), this.CurrentConversation)
+        )
+      },
+      (error) => {
+        if (error.error instanceof ErrorEvent) {
+          this.snackbar.openSnackBar('Network error occurred. Try refreshing the page.', 2);
+        } else {
+          //unauthorized
+          if (error.status == 401) {
+            this.OnTokenExpired();
+          }
+        }
+      }
     )
+  }
+
+  private OnTokenExpired() {
+    this.requestsBuilder.RefreshJwtToken(Cache.JwtToken, Cache.UserCache.id)
+      .subscribe(
+        (result) => {
+
+          if (!result.isSuccessfull) {
+            this.snackbar.openSnackBar(result.errorMessage, 2);
+            return;
+          }
+
+          Cache.JwtToken = result.response;
+          this.snackbar.openSnackBar('Your token expired and was updated. Please try that again.', 2);
+        },
+        (error) => {
+          this.router.navigateByUrl('/login');
+          return;
+        }
+      );
   }
 
   private MessagesSortFunc(left: ChatMessage, right: ChatMessage): number {

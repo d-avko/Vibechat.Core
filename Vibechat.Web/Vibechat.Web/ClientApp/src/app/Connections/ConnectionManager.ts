@@ -75,15 +75,15 @@ export class ConnectionManager {
     this.Start();
   }
 
-  public SendMessage(message: ChatMessage, conversation: ConversationTemplate, whoSentId: string) : void {
+  public SendMessage(message: ChatMessage, conversation: ConversationTemplate) : void {
 
     if (conversation.isGroup) {
 
-      this.connection.send("SendMessageToGroup", message, whoSentId, conversation.conversationID);
+      this.connection.send("SendMessageToGroup", message, conversation.conversationID);
 
     } else {
 
-      this.connection.send("SendMessageToUser", message, whoSentId, conversation.dialogueUser.id, conversation.conversationID);
+      this.connection.send("SendMessageToUser", message, conversation.dialogueUser.id, conversation.conversationID);
 
     }
   }
