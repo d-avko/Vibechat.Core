@@ -2,13 +2,11 @@ import * as signalR from "@aspnet/signalr";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { ChatMessage } from "../Data/ChatMessage";
 import { Cache } from "../Auth/Cache";
-import { Injectable, EventEmitter } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { MessageReceivedModel } from "../Shared/MessageReceivedModel";
 import { AddedToGroupModel } from "../Shared/AddedToGroupModel";
 import { RemovedFromGroupModel } from "../Shared/RemovedFromGroupModel";
-import { EmptyModel } from "../Shared/EmptyModel";
 import { ConversationIdsFactory } from "../Data/ConversationIdsFactory";
-import { ChatComponent } from "../Chat/chat.component";
 import { MessageReceivedDelegate } from "../Delegates/MessageReceivedDelegate";
 import { AddedToConversationDelegate } from "../Delegates/AddedToConversationDelegate";
 import { UserInfo } from "../Data/UserInfo";
@@ -89,7 +87,6 @@ export class ConnectionManager {
 
   public OnDisconnected(): void {
     this.connection.send("OnDisconnected");
-
     this.Start();
   }
 

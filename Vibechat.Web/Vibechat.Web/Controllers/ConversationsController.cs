@@ -1,15 +1,21 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Vibechat.Web.ApiModels;
+using Vibechat.Web.Controllers;
 using Vibechat.Web.Data.ApiModels.Messages;
 using Vibechat.Web.Services;
+using Vibechat.Web.Services.FileSystem;
+using Vibechat.Web.Services.Images;
+using Vibechat.Web.Services.Paths;
 using VibeChat.Web.ApiModels;
 using VibeChat.Web.ChatData;
 
@@ -19,9 +25,16 @@ namespace VibeChat.Web.Controllers
     {
         protected ConversationsInfoService mDbService;
 
-        public ConversationsController(ConversationsInfoService mDbService)
+        private const int MaxThumbnailLengthMB = 5;
+
+        public ImagesService ImagesService { get; }
+
+        public ConversationsController(
+            ConversationsInfoService mDbService,
+            ImagesService imagesService)
         {
             this.mDbService = mDbService;
+            ImagesService = imagesService;
         }
 
         #region Conversations
@@ -226,6 +239,34 @@ namespace VibeChat.Web.Controllers
         }
 
         #endregion
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("Conversations/UpdateThumbnail")]
+        public async Task<ResponseApiModel<string>> UploadProfileOrGroupThumbnail(IFormFile thumbnail)
+        {
+            if (thumbnail.Length > MaxThumbnailLengthMB)
+            {
+                return new ResponseApiModel<string>()
+                {
+                    ErrorMessage = $"Thumbnail was larger than {MaxThumbnailLengthMB}",
+                    IsSuccessfull = false
+                };
+            }
+            try
+            {
+                using (var buffer = new MemoryStream())
+                {
+                    await thumbnail.CopyToAsync(buffer);
+                    buffer.Seek(0, SeekOrigin.Begin);
+                    ImagesService.UpdateConversationThumbnail()
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
 
     }
 }

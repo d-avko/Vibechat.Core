@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Vibechat.Web.AuthHelpers;
 using Vibechat.Web.Services.ChatDataProviders;
+using Vibechat.Web.Services.FileSystem;
 using Vibechat.Web.Services.Hashing;
 using Vibechat.Web.Services.Images;
 using Vibechat.Web.Services.Login;
@@ -46,6 +47,7 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddSingleton<IImageScalingService, ImageCompressionService>();
             services.AddSingleton<IHexHashingService, Sha256Service>();
             services.AddSingleton<UniquePathsProvider, UniquePathsProvider>();
+            services.AddScoped<ImagesService, ImagesService>();
         }
     }
 }

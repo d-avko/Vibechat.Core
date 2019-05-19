@@ -9,16 +9,12 @@ namespace Vibechat.Web.Services.Images
 {
     public class ImageCompressionService : IImageCompressionService, IImageScalingService
     {
-        public static int MaxImageHeight = 350;
-
-        public static int MaxImageWidth = 350;
-
         /// <summary>
         /// Resize an image
         /// </summary>
         /// <param name="imageBytes"></param>
         /// <returns>Image, its width and height</returns>
-        public ValueTuple<Stream, int, int> Resize(MemoryStream imageBytes)
+        public Stream Resize(MemoryStream imageBytes, int scaleWidth, int scaleHeight)
         {
             SKCodec codec = SKCodec.Create(imageBytes);
 
@@ -28,24 +24,24 @@ namespace Vibechat.Web.Services.Images
             
             if(info.Width > info.Height)
             {
-                resultingWidth = MaxImageWidth;
+                resultingWidth = scaleWidth;
 
-                resultingHeight = (int)(MaxImageWidth * (info.Height / (float)info.Width));
+                resultingHeight = (int)(scaleWidth * (info.Height / (float)info.Width));
             }
             else if(info.Width < info.Height)
             {
-                resultingHeight = MaxImageHeight;
+                resultingHeight = scaleHeight;
 
-                resultingWidth = (int)(MaxImageHeight * (info.Width / (float)info.Height));
+                resultingWidth = (int)(scaleHeight * (info.Width / (float)info.Height));
             }
             else
             {
-                resultingWidth = resultingHeight = MaxImageHeight;
+                resultingWidth = resultingHeight = scaleHeight;
             }
 
             SKImageInfo desired = new SKImageInfo(resultingWidth, resultingHeight);
 
-            SKBitmap bmp = SKBitmap.Decode(codec, info);
+            SKBitmap bmp = SKBitmap.Decode(codec, new SKImageInfo(resultingWidth, resultingHeight));
 
             bmp = bmp.Resize(desired, SKFilterQuality.Medium);
 
@@ -55,11 +51,11 @@ namespace Vibechat.Web.Services.Images
                 var result = new MemoryStream();
                 data.SaveTo(result);
                 result.Seek(0, SeekOrigin.Begin);
-                return new ValueTuple<Stream, int, int>(result, bmp.Width, bmp.Height);
+                return result;
             }
         }
 
-        public ValueTuple<int, int> GetScaledDimensions(MemoryStream image)
+        public ValueTuple<int, int> GetScaledDimensions(MemoryStream image, int maxWidth, int maxHeight)
         {
             SKCodec codec = SKCodec.Create(image);
 
@@ -69,19 +65,19 @@ namespace Vibechat.Web.Services.Images
 
             if (info.Width > info.Height)
             {
-                resultingWidth = MaxImageWidth;
+                resultingWidth = maxWidth;
 
-                resultingHeight = (int)(MaxImageWidth * (info.Height / (float)info.Width));
+                resultingHeight = (int)(maxWidth * (info.Height / (float)info.Width));
             }
             else if (info.Width < info.Height)
             {
-                resultingHeight = MaxImageHeight;
+                resultingHeight = maxHeight;
 
-                resultingWidth = (int)(MaxImageHeight * (info.Width / (float)info.Height));
+                resultingWidth = (int)(maxHeight * (info.Width / (float)info.Height));
             }
             else
             {
-                resultingWidth = resultingHeight = MaxImageHeight;
+                resultingWidth = resultingHeight = maxHeight;
             }
 
             return new ValueTuple<int, int>(resultingWidth, resultingHeight);

@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Vibechat.Web.ApiModels;
 using Vibechat.Web.ChatData.Messages;
 using Vibechat.Web.Data.ApiModels.Files;
+using Vibechat.Web.Services.FileSystem;
 using Vibechat.Web.Services.Hashing;
 using Vibechat.Web.Services.Images;
 using Vibechat.Web.Services.Paths;
@@ -20,18 +21,13 @@ namespace Vibechat.Web.Controllers
 {
     public class FilesController : Controller
     {
-        private IImageScalingService imageScaling { get; set; }
-        
-        private UniquePathsProvider pathsProvider { get; set; }
+        public ImagesService ImagesService { get; }
 
-        private static string FilesLocationRelative = "Uploads/";
+        public static int MaxFileLengthMB = 5;
 
-        private static string FilesLocation = "ClientApp/dist/Uploads/";
-
-        public FilesController(IImageScalingService imageScaling, UniquePathsProvider pathsProvider)
+        public FilesController(ImagesService imagesService)
         {
-            this.imageScaling = imageScaling;
-            this.pathsProvider = pathsProvider;
+            ImagesService = imagesService;
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -40,7 +36,7 @@ namespace Vibechat.Web.Controllers
         {
             var result = new FilesUploadResponse() { UploadedFiles = new List<MessageAttachment>() };
 
-            if(images.Count() == 0)
+            if (images.Count() == 0)
             {
                 return new ResponseApiModel<FilesUploadResponse>()
                 {
@@ -49,6 +45,19 @@ namespace Vibechat.Web.Controllers
                     Response = null
                 };
             }
+
+            foreach (var image in images)
+            {
+                if(image.Length > MaxFileLengthMB)
+                {
+                    return new ResponseApiModel<FilesUploadResponse>()
+                    {
+                        ErrorMessage = $"Some of the files was larger than {MaxFileLengthMB}",
+                        IsSuccessfull = false
+                    };
+                }
+            }
+
             string Errors = string.Empty;
 
             foreach (var file in images)
@@ -58,30 +67,9 @@ namespace Vibechat.Web.Controllers
                     using (var buffer = new MemoryStream())
                     {
                         await file.CopyToAsync(buffer);
-
-                        buffer.Seek(0, SeekOrigin.Begin);
-                        
-                        ValueTuple<int, int> resultDimensions = imageScaling.GetScaledDimensions(buffer);
-
                         buffer.Seek(0, SeekOrigin.Begin);
 
-                        var uniquePath = pathsProvider.GetUniquePath(file.FileName);
-
-                        Directory.CreateDirectory(FilesLocation + uniquePath);
-
-                        using (var fStream = new FileStream(FilesLocation + uniquePath + file.FileName, FileMode.Create))
-                        {
-                            buffer.CopyTo(fStream);
-                        }
-
-                        result.UploadedFiles.Add(new MessageAttachment()
-                        {
-                            AttachmentKind = "img",
-                            AttachmentName = file.FileName,
-                            ContentUrl = FilesLocationRelative + uniquePath + file.FileName,
-                            ImageHeight = resultDimensions.Item2,
-                            ImageWidth = resultDimensions.Item1
-                        });
+                        result.UploadedFiles.Add(ImagesService.GetImageAsAttachment(buffer, file.FileName));
                     }
                 }
                 catch(Exception ex)
@@ -97,5 +85,6 @@ namespace Vibechat.Web.Controllers
                 Response = result
             };
         }
+
     }
 }

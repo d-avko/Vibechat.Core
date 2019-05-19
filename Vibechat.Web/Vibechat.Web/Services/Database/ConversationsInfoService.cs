@@ -120,7 +120,8 @@ namespace Vibechat.Web.Services
                               IsOnline = SecondDialogueUser.IsOnline
                           },
 
-                        ImageUrl = ConversationToAdd.ImageUrl,
+                        ThumbnailUrl = ConversationToAdd.ThumbnailUrl,
+                        FullImageUrl = ConversationToAdd.FullImageUrl,
                         IsGroup = ConversationToAdd.IsGroup,
                         Name = ConversationToAdd.Name,
                         Participants = (await GetConversationParticipants(new GetParticipantsApiModel() { ConvId = ConversationToAdd.ConvID })).Participants,
@@ -255,7 +256,8 @@ namespace Vibechat.Web.Services
                                 ConnectionId = DialogueUser.ConnectionId
                             },
                             IsGroup = conversation.IsGroup,
-                            ImageUrl = conversation.ImageUrl,
+                            ThumbnailUrl = conversation.ThumbnailUrl,
+                            FullImageUrl = conversation.FullImageUrl,
                             Participants = (await GetConversationParticipants(new GetParticipantsApiModel() { ConvId = conversation.ConvID })).Participants,
 
                             //only get last message here, client should fetch messages after he opened the conversation.
@@ -431,7 +433,8 @@ namespace Vibechat.Web.Services
                         IsOnline = user.IsOnline,
                         ConnectionId = user.ConnectionId
                     },
-                    ImageUrl = conversation.ImageUrl,
+                    ThumbnailUrl = conversation.ThumbnailUrl,
+                    FullImageUrl = conversation.FullImageUrl,
                     IsGroup = conversation.IsGroup,
                     Name = conversation.Name
                 }

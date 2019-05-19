@@ -14,6 +14,6 @@ namespace Vibechat.Web.Services.Images
         /// </summary>
         /// <param name="imageBytes"></param>
         /// <returns>Image, its width and height</returns>
-        ValueTuple<Stream, int, int> Resize(MemoryStream imageBytes);
+        Stream Resize(MemoryStream imageBytes, int scaleWidth, int scaleHeight);
     }
 }
