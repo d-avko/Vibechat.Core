@@ -14,11 +14,14 @@ import { DeleteMessagesRequest } from "../Data/DeleteMessagesRequest";
 import { UploadFilesResponse } from "../Data/UploadFilesResponse";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { FoundUsersResponse } from "../Data/FoundUsersResponse";
+import { forEach } from "@angular/router/src/utils/collection";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiRequestsBuilder {
+
+  public static maxUploadImageSizeMb: number = 5;
 
   private baseUrl: string;
 
@@ -91,6 +94,18 @@ export class ApiRequestsBuilder {
     }
 
     return this.httpClient.post<ServerResponse<UploadFilesResponse>>("Files/UploadImages",
+      data,
+      { headers: headers });
+  }
+
+  public UploadConversationThumbnail(thumbnail: File, token: string): Observable<ServerResponse<string>> {
+    let headers = new HttpHeaders();
+    headers = headers.append('Authorization', 'Bearer ' + token);
+
+    let data = new FormData();
+    data.append('thumbnail', thumbnail);
+
+    return this.httpClient.post<ServerResponse<string>>("Conversations/UpdateThumbnail",
       data,
       { headers: headers });
   }

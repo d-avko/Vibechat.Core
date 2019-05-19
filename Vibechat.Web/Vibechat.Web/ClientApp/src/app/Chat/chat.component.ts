@@ -86,7 +86,7 @@ export class ChatComponent implements OnInit {
     this.snackbar = new SnackBarHelper(snackbar);
 
     this.router = router;
-
+    
     this.requestsBuilder = requestsBuilder;
 
     this.Conversations = new Array<ConversationTemplate>();
@@ -94,7 +94,6 @@ export class ChatComponent implements OnInit {
     this.formatter = formatter;
   
     if (!Cache.IsAuthenticated) {
-
       if (!Cache.TryAuthenticate()) {
         router.navigateByUrl('/login');
         return;
@@ -110,7 +109,6 @@ export class ChatComponent implements OnInit {
     );
 
     this.IsAuthenticated = Cache.IsAuthenticated;
-
     this.CurrentUser = Cache.UserCache;
 
   }
@@ -215,8 +213,17 @@ export class ChatComponent implements OnInit {
       )
   }
 
-  public OnChangeGroupThumbnail(file: File){
+  public OnChangeGroupThumbnail(file: File) : void{
+    this.requestsBuilder.UploadConversationThumbnail(file, Cache.JwtToken)
+      .subscribe((result) => {
 
+        if (!result.isSuccessfull) {
+          this.snackbar.openSnackBar(result.errorMessage);
+          return;
+        }
+
+        this.CurrentConversation.imageUrl = result.response;
+      });
   }
 
   public OnLeaveGroup(){
@@ -524,6 +531,13 @@ export class ChatComponent implements OnInit {
 
   public OnUploadImages(files: FileList) {
     let conversationToSend = this.CurrentConversation.conversationID;
+
+    for (let i = 0; i < files.length; ++i) {
+      if (((files[i].size / 1024) / 1024) > ApiRequestsBuilder.maxUploadImageSizeMb) {
+        this.snackbar.openSnackBar("Some of the files was larger than " + ApiRequestsBuilder.maxUploadImageSizeMb + "MB");
+        return;
+      }
+    }
 
     this.requestsBuilder.UploadImages(files, Cache.JwtToken).subscribe(
       (result) => {

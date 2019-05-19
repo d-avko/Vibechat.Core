@@ -13,10 +13,9 @@ namespace VibeChat.Web
         public string Name { get; set; }
 
 
-        /// <summary>
-        /// if the image is set, this points to url where the image is.
-        /// </summary>
-        public string ImageUrl { get; set; }
+        public string ThumbnailUrl { get; set; }
+
+        public string FullImageUrl { get; set; }
 
         /// <summary>
         /// Indicates if this is a group
