@@ -230,7 +230,7 @@ namespace VibeChat.Web.Controllers
         #endregion
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("Conversations/UpdateThumbnail")]
+        [Route("api/Conversations/UpdateThumbnail")]
         public async Task<ResponseApiModel<UpdateThumbnailResponse>> UploadProfileOrGroupThumbnail([FromForm]UpdateThumbnailRequest updateThumbnail)
         {
             try
@@ -245,6 +245,29 @@ namespace VibeChat.Web.Controllers
             catch (Exception ex)
             {
                 return new ResponseApiModel<UpdateThumbnailResponse>()
+                {
+                    ErrorMessage = ex.Message,
+                    IsSuccessfull = false
+                };
+            }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Conversations/ChangeName")]
+        public async Task<ResponseApiModel<bool>> ChangeName([FromBody] ChangeConversationNameRequest request)
+        {
+            try
+            {
+                await mConversationService.ChangeName(request.ConversationId, request.Name);
+
+                return new ResponseApiModel<bool>()
+                {
+                    IsSuccessfull = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<bool>()
                 {
                     ErrorMessage = ex.Message,
                     IsSuccessfull = false

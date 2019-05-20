@@ -1,9 +1,10 @@
 import { Component, Inject, EventEmitter } from "@angular/core";
-import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material";
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from "@angular/material";
 import { ChatComponent } from "../Chat/chat.component";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { UserInfo } from "../Data/UserInfo";
 import { ConversationsFormatter } from "../Formatters/ConversationsFormatter";
+import { ChangeNameDialogComponent } from "./ChangeNameDialog";
 
 export interface  GroupInfoData {
   Conversation: ConversationTemplate;
@@ -35,7 +36,7 @@ export class GroupInfoDialogComponent {
 
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: GroupInfoData, public formatter: ConversationsFormatter) { }
+    @Inject(MAT_DIALOG_DATA) public data: GroupInfoData, public formatter: ConversationsFormatter, public ChangeNameDialog: MatDialog) { }
 
   onNoClick(): void {
     this.dialogRef.close();
@@ -66,7 +67,20 @@ export class GroupInfoDialogComponent {
   }
 
   public ChangeName() {
-    this.OnChangeName.emit(null);
+
+    const groupInfoRef = this.ChangeNameDialog.open(ChangeNameDialogComponent, {
+      width: '450px'
+    });
+
+    groupInfoRef.afterClosed().subscribe(
+      (name) => {
+        if (name == null || name == '') {
+          return;
+        }
+
+        this.OnChangeName.emit(name);
+      }
+    )
   }
 
   public InviteUsers() {

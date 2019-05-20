@@ -61,6 +61,8 @@ namespace Vibechat.Web.Services
 
         private const int MaxThumbnailLengthMB = 5;
 
+        private const int MaxNameLength = 200;
+
         protected readonly ImagesService ImagesService;
 
         #region Conversations
@@ -168,6 +170,23 @@ namespace Vibechat.Web.Services
                 ThumbnailUrl = conversation.ThumbnailUrl,
                 FullImageUrl = conversation.FullImageUrl
             };
+        }
+
+        public async Task ChangeName (int conversationId, string name)
+        {
+            if(name.Length > MaxNameLength)
+            {
+                throw new InvalidDataException($"Name length couldn't be more than {MaxNameLength}.");
+            }
+
+            var conversation = conversationRepository.GetById(conversationId);
+
+            if (conversation == null)
+            {
+                throw new InvalidDataException($"Wrong conversation id was provided.");
+            }
+
+            conversationRepository.ChangeName(conversation, name);
         }
 
         public async Task RemoveUserFromConversation(string userId, string whoRemovedId, int conversationId)

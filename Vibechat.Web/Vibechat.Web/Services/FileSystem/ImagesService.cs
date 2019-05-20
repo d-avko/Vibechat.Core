@@ -22,9 +22,9 @@ namespace Vibechat.Web.Services.FileSystem
 
         private static int MessageImageMaxHeight = 350;
 
-        private static int ThumbnailHeight = 180;
+        private static int ThumbnailHeight = 140;
 
-        private static int ThumbnailWidth = 180;
+        private static int ThumbnailWidth = 140;
 
         private static string FullSized = "full";
 

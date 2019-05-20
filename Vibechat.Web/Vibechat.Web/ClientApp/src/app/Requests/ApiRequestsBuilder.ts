@@ -107,7 +107,7 @@ export class ApiRequestsBuilder {
     data.append('thumbnail', thumbnail);
     data.append('conversationId', conversationId.toString());
 
-    return this.httpClient.post<ServerResponse<UpdateThumbnailResponse>>("Conversations/UpdateThumbnail",
+    return this.httpClient.post<ServerResponse<UpdateThumbnailResponse>>("api/Conversations/UpdateThumbnail",
       data,
       { headers: headers });
   }
@@ -137,6 +137,16 @@ export class ApiRequestsBuilder {
     return this.httpClient.post<ServerResponse<ConversationTemplate>>(
       this.baseUrl + 'api/Conversations/Create',
       { ConversationName: name, CreatorId: whoCreatedId, DialogUserId: dialogUserId, ImageUrl: thumbnailUrl, IsGroup: isGroup },
+      { headers: headers });
+  }
+
+  public ChangeConversationName(newName: string, conversationId: number, token: string) : Observable<ServerResponse<boolean>> {
+    let headers = new HttpHeaders();
+    headers = headers.append('Authorization', 'Bearer ' + token);
+
+    return this.httpClient.post<ServerResponse<boolean>>(
+      this.baseUrl + 'api/Conversations/ChangeName',
+      { ConversationId: conversationId, Name: newName},
       { headers: headers });
   }
 

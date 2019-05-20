@@ -11,5 +11,7 @@ namespace Vibechat.Web.Services.Repositories
         void Remove(ConversationDataModel entity);
 
         void UpdateThumbnail(string thumbnailUrl, string fullimageUrl, ConversationDataModel entity);
+
+        void ChangeName(ConversationDataModel entity, string name);
     }
 }

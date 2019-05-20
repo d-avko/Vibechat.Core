@@ -19,6 +19,7 @@ import { UserInfo } from "../Data/UserInfo";
 import { FindUsersDialogComponent } from "../Dialogs/FindUsersDialog";
 import { AddGroupDialogComponent } from "../Dialogs/AddGroupDialog";
 import { GroupInfoDialogComponent } from "../Dialogs/GroupInfoDialog";
+import { resetCompiledComponents } from "@angular/core/src/render3/jit/module";
 
 @Component({
   selector: 'chat-root',
@@ -192,11 +193,13 @@ export class ChatComponent implements OnInit {
   }
 
 
-  public OnRemoveAllMessages(){
+  public OnRemoveAllMessages() {
+    let currentConversationId = this.CurrentConversation.conversationID;
+
     this.requestsBuilder.DeleteMessages(this.CurrentConversation.messages, this.CurrentConversation.conversationID, Cache.JwtToken)
       .subscribe(
         (result) => {
-          this.OnMessagesDeleted(result, this.CurrentConversation.messages);
+          this.OnMessagesDeleted(result, this.CurrentConversation.messages, currentConversationId);
           this.CurrentConversation = null;
         } 
         ,
@@ -214,6 +217,9 @@ export class ChatComponent implements OnInit {
   }
 
   public OnChangeGroupThumbnail(file: File): void{
+
+    let currentConversationId = this.CurrentConversation.conversationID;
+
     this.requestsBuilder.UploadConversationThumbnail(file, this.CurrentConversation.conversationID, Cache.JwtToken)
       .subscribe((result) => {
 
@@ -222,8 +228,10 @@ export class ChatComponent implements OnInit {
           return;
         }
 
-        this.CurrentConversation.thumbnailUrl = result.response.thumbnailUrl;
-        this.CurrentConversation.fullImageUrl = result.response.fullImageUrl;
+        let conversation = this.Conversations.find(x => x.conversationID == currentConversationId);
+
+        conversation.thumbnailUrl = result.response.thumbnailUrl;
+        conversation.fullImageUrl = result.response.fullImageUrl;
       });
   }
 
@@ -232,8 +240,22 @@ export class ChatComponent implements OnInit {
     this.CurrentConversation = null;
   }
 
-  public OnChangeConversationName(name: string){
+  public OnChangeConversationName(name: string) {
+    let currentConversationId = this.CurrentConversation.conversationID;
 
+    this.requestsBuilder.ChangeConversationName(name, this.CurrentConversation.conversationID, Cache.JwtToken)
+      .subscribe(
+        (result) => {
+
+          if (!result.isSuccessfull) {
+            this.snackbar.openSnackBar(result.errorMessage);
+            return;
+          }
+
+          this.Conversations.find(x => x.conversationID == currentConversationId).name = name;
+
+        }
+    )
   }
 
   public OnInviteUsersToGroup() {
@@ -450,9 +472,12 @@ export class ChatComponent implements OnInit {
   }
 
   public OnDeleteMessages(SelectedMessages: Array<ChatMessage>) {
+
+    let currentConversationId = this.CurrentConversation.conversationID;
+
     this.requestsBuilder.DeleteMessages(SelectedMessages, this.CurrentConversation.conversationID, Cache.JwtToken)
       .subscribe(
-        (result) => this.OnMessagesDeleted(result, SelectedMessages)
+        (result) => this.OnMessagesDeleted(result, SelectedMessages, currentConversationId)
         ,
         (error) => {
           if (error.error instanceof ErrorEvent) {
@@ -467,7 +492,7 @@ export class ChatComponent implements OnInit {
       )
   }
 
-  public OnMessagesDeleted(response: ServerResponse<string>, SelectedMessages: Array<ChatMessage>) {
+  public OnMessagesDeleted(response: ServerResponse<string>, SelectedMessages: Array<ChatMessage>, conversationId: number) {
     if (!response.isSuccessfull) {
       this.snackbar.openSnackBar("Failed to delete messages. Reason: " + response.errorMessage);
       return;
@@ -475,7 +500,9 @@ export class ChatComponent implements OnInit {
 
     //delete messages locally
 
-    this.CurrentConversation.messages = this.CurrentConversation
+    let conversation = this.Conversations.find(x => x.conversationID == conversationId);
+
+    conversation.messages = conversation
       .messages
       .filter(msg => SelectedMessages.findIndex(selected => selected.id == msg.id) == -1);
 
