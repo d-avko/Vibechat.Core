@@ -17,6 +17,7 @@ import { ConversationsListComponent } from "../Conversation/ConversationsList/co
 import { AddGroupDialogComponent } from "../Dialogs/AddGroupDialog";
 import { FindUsersDialogComponent } from "../Dialogs/FindUsersDialog";
 import { GroupInfoDialogComponent } from "../Dialogs/GroupInfoDialog";
+import { ChangeNameDialogComponent } from "../Dialogs/ChangeNameDialog";
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import { GroupInfoDialogComponent } from "../Dialogs/GroupInfoDialog";
     ConversationsListComponent,
     AddGroupDialogComponent,
     FindUsersDialogComponent,
-    GroupInfoDialogComponent
+    GroupInfoDialogComponent,
+    ChangeNameDialogComponent
   ],
   imports: [
     ScrollDispatchModule,
@@ -41,7 +43,7 @@ import { GroupInfoDialogComponent } from "../Dialogs/GroupInfoDialog";
     FormsModule
   ],
   exports: [AddGroupDialogComponent],
-  entryComponents: [AddGroupDialogComponent, FindUsersDialogComponent, GroupInfoDialogComponent],
+  entryComponents: [AddGroupDialogComponent, FindUsersDialogComponent, GroupInfoDialogComponent, ChangeNameDialogComponent],
   providers: [ConnectionManager, ConversationsFormatter]
 })
 export class ChatModule { }

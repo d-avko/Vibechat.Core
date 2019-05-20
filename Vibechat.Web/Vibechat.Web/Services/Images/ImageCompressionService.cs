@@ -20,26 +20,7 @@ namespace Vibechat.Web.Services.Images
 
             SKImageInfo info = codec.Info;
 
-            int resultingWidth, resultingHeight;
-            
-            if(info.Width > info.Height)
-            {
-                resultingWidth = scaleWidth;
-
-                resultingHeight = (int)(scaleWidth * (info.Height / (float)info.Width));
-            }
-            else if(info.Width < info.Height)
-            {
-                resultingHeight = scaleHeight;
-
-                resultingWidth = (int)(scaleHeight * (info.Width / (float)info.Height));
-            }
-            else
-            {
-                resultingWidth = resultingHeight = scaleHeight;
-            }
-
-            SKImageInfo desired = new SKImageInfo(resultingWidth, resultingHeight);
+            SKImageInfo desired = new SKImageInfo(scaleWidth, scaleHeight);
 
             SKBitmap bmp = SKBitmap.Decode(codec, info);
 

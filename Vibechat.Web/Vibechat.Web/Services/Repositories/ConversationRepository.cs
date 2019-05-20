@@ -30,6 +30,12 @@ namespace Vibechat.Web.Services.Repositories
             mContext.SaveChanges();
         }
 
+        public void ChangeName(ConversationDataModel entity, string name)
+        {
+            entity.Name = name;
+            mContext.SaveChanges();
+        }
+
         public void Remove(ConversationDataModel entity)
         {
             mContext.Conversations.Remove(entity);
