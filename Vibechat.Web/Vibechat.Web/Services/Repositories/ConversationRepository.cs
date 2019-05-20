@@ -23,6 +23,13 @@ namespace Vibechat.Web.Services.Repositories
                 .FirstOrDefault(x => x.ConvID == id);
         }
 
+        public void UpdateThumbnail(string thumbnailUrl, string fullimageUrl, ConversationDataModel entity)
+        {
+            entity.ThumbnailUrl = thumbnailUrl;
+            entity.FullImageUrl = fullimageUrl;
+            mContext.SaveChanges();
+        }
+
         public void Remove(ConversationDataModel entity)
         {
             mContext.Conversations.Remove(entity);
@@ -38,7 +45,8 @@ namespace Vibechat.Web.Services.Repositories
             {
                 IsGroup = IsGroup,
                 Name = name,
-                ImageUrl = imageUrl
+                FullImageUrl = imageUrl,
+                ThumbnailUrl = imageUrl
             };
 
             await mContext.Conversations.AddAsync(ConversationToAdd);

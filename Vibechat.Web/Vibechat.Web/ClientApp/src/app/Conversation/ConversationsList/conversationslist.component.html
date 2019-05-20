@@ -5,7 +5,7 @@
                  (click)="ChangeConversation(conversation)"
                  [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
 
-    <img matListAvatar *ngIf="conversation.isGroup; else dialogue" src="{{conversation.imageUrl}}" alt="Conversation logo">
+    <img matListAvatar *ngIf="conversation.isGroup; else dialogue" src="{{conversation.thumbnailUrl}}" alt="Conversation logo">
 
     <ng-template #dialogue>
       <img matListAvatar src="{{conversation.dialogueUser.imageUrl}}" alt="Dialogue logo">

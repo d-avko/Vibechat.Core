@@ -60,6 +60,11 @@ export class MessagesComponent implements AfterViewInit {
 
   public UpdateMessagesIfNotUpdated() {
 
+    if (this.Conversation.messages == null) {
+      return;
+    }
+      
+
     if (this.Conversation.messages.length > 1) {
       this.OnUpdateMessages.emit();
     }
@@ -77,6 +82,10 @@ export class MessagesComponent implements AfterViewInit {
 
   public OnMessagesScrolled(messageIndex: number): void {
     // user scrolled to last loaded message, load more messages
+
+    if (this.Conversation.messages == null) {
+      return;
+    }
 
     if (messageIndex == 0) {
       this.OnUpdateMessages.emit();

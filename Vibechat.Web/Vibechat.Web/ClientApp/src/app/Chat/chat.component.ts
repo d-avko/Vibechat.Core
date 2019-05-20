@@ -213,8 +213,8 @@ export class ChatComponent implements OnInit {
       )
   }
 
-  public OnChangeGroupThumbnail(file: File) : void{
-    this.requestsBuilder.UploadConversationThumbnail(file, Cache.JwtToken)
+  public OnChangeGroupThumbnail(file: File): void{
+    this.requestsBuilder.UploadConversationThumbnail(file, this.CurrentConversation.conversationID, Cache.JwtToken)
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
@@ -222,7 +222,8 @@ export class ChatComponent implements OnInit {
           return;
         }
 
-        this.CurrentConversation.imageUrl = result.response;
+        this.CurrentConversation.thumbnailUrl = result.response.thumbnailUrl;
+        this.CurrentConversation.fullImageUrl = result.response.fullImageUrl;
       });
   }
 
@@ -397,6 +398,10 @@ export class ChatComponent implements OnInit {
     if (!this.IsMessagesLoading && !this.IsConversationHistoryEnd) {
       this.IsMessagesLoading = true;
 
+      if (this.CurrentConversation.messages == null) {
+        return;
+      }
+
       this.requestsBuilder.GetConversationMessages(
         this.CurrentConversation.messages.length,
         ChatComponent.MessagesBufferLength,
@@ -489,12 +494,26 @@ export class ChatComponent implements OnInit {
             return;
           }
 
-          //parse string date to js Date
+          if (response.response.conversations != null) {
 
-          response.response.conversations
-            .forEach((conversation) => conversation.messages.forEach(msg => msg.timeReceived = new Date(<string>msg.timeReceived)))
+            //parse string date to js Date
 
-          this.Conversations = response.response.conversations;
+            response.response.conversations
+              .forEach((conversation) => {
+
+                if (conversation.messages != null) {
+                  conversation.messages.forEach(msg => msg.timeReceived = new Date(<string>msg.timeReceived))
+                } else {
+                  conversation.messages = new Array<ChatMessage>();
+                }
+
+              })
+
+            this.Conversations = response.response.conversations;
+
+          } else {
+            this.Conversations = new Array<ConversationTemplate>();
+          }
 
           //Initiate signalR group connections
 
