@@ -1,21 +1,16 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Vibechat.Web.ApiModels;
-using Vibechat.Web.Controllers;
+using Vibechat.Web.Data.ApiModels.Conversation;
 using Vibechat.Web.Data.ApiModels.Messages;
 using Vibechat.Web.Services;
 using Vibechat.Web.Services.FileSystem;
-using Vibechat.Web.Services.Images;
-using Vibechat.Web.Services.Paths;
 using VibeChat.Web.ApiModels;
 using VibeChat.Web.ChatData;
 
@@ -23,18 +18,12 @@ namespace VibeChat.Web.Controllers
 {
     public class ConversationsController : Controller
     {
-        protected ConversationsInfoService mDbService;
-
-        private const int MaxThumbnailLengthMB = 5;
-
-        public ImagesService ImagesService { get; }
+        protected ConversationsInfoService mConversationService;
 
         public ConversationsController(
-            ConversationsInfoService mDbService,
-            ImagesService imagesService)
+            ConversationsInfoService mDbService)
         {
-            this.mDbService = mDbService;
-            ImagesService = imagesService;
+            this.mConversationService = mDbService;
         }
 
         #region Conversations
@@ -44,7 +33,7 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                var result = await mDbService.CreateConversation(convInfo);
+                var result = await mConversationService.CreateConversation(convInfo);
 
                 return new ResponseApiModel<ConversationTemplate>()
                 {
@@ -71,7 +60,7 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                await mDbService.AddUserToConversation(UserProvided);
+                await mConversationService.AddUserToConversation(UserProvided);
 
                 return new ResponseApiModel<string>()
                 {
@@ -98,7 +87,7 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                var result = await mDbService.GetConversationInformation(
+                var result = await mConversationService.GetConversationInformation(
                     UserProvided, 
                     User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
                     .Value);
@@ -128,7 +117,7 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                var result = await mDbService.GetConversationParticipants(convInfo);
+                var result = await mConversationService.GetConversationParticipants(convInfo);
 
                 return new ResponseApiModel<GetParticipantsResultApiModel>()
                 {
@@ -155,7 +144,7 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                var result = await mDbService.GetConversationMessages(
+                var result = await mConversationService.GetConversationMessages(
                     convInfo,
                     User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
                     .Value);
@@ -185,7 +174,7 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                await mDbService.DeleteConversationMessages(
+                await mConversationService.DeleteConversationMessages(
                     messagesInfo,
                     User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
                     .Value);
@@ -214,7 +203,7 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                var result = await mDbService.GetConversationById(
+                var result = await mConversationService.GetConversationById(
                     convInfo,
                     User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
                     .Value);
@@ -242,29 +231,24 @@ namespace VibeChat.Web.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("Conversations/UpdateThumbnail")]
-        public async Task<ResponseApiModel<string>> UploadProfileOrGroupThumbnail(IFormFile thumbnail)
+        public async Task<ResponseApiModel<UpdateThumbnailResponse>> UploadProfileOrGroupThumbnail([FromForm]UpdateThumbnailRequest updateThumbnail)
         {
-            if (thumbnail.Length > MaxThumbnailLengthMB)
-            {
-                return new ResponseApiModel<string>()
-                {
-                    ErrorMessage = $"Thumbnail was larger than {MaxThumbnailLengthMB}",
-                    IsSuccessfull = false
-                };
-            }
             try
             {
-                using (var buffer = new MemoryStream())
+                var result = await mConversationService.UpdateThumbnail(updateThumbnail.conversationId, updateThumbnail.thumbnail);
+                return new ResponseApiModel<UpdateThumbnailResponse>()
                 {
-                    await thumbnail.CopyToAsync(buffer);
-                    buffer.Seek(0, SeekOrigin.Begin);
-                    ImagesService.UpdateConversationThumbnail()
-                }
+                    IsSuccessfull = true,
+                    Response = result
+                };
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                return new ResponseApiModel<UpdateThumbnailResponse>()
+                {
+                    ErrorMessage = ex.Message,
+                    IsSuccessfull = false
+                };
             }
         }
 

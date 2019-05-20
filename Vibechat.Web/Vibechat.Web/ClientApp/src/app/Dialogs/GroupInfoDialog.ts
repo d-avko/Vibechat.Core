@@ -62,7 +62,7 @@ export class GroupInfoDialogComponent {
   }
 
   public UpdateThumbnail(event: any) {
-    return event.target.Files[0];
+    this.OnChangeThumbnail.emit(event.target.files[0]);
   }
 
   public ChangeName() {

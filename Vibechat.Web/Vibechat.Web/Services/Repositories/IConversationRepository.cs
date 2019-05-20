@@ -9,5 +9,7 @@ namespace Vibechat.Web.Services.Repositories
         ConversationDataModel GetById(int id);
 
         void Remove(ConversationDataModel entity);
+
+        void UpdateThumbnail(string thumbnailUrl, string fullimageUrl, ConversationDataModel entity);
     }
 }

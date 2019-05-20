@@ -41,6 +41,7 @@
     <None Remove="ClientApp\src\app\ApiModels\ConversationMessagesResponse.ts" />
     <None Remove="ClientApp\src\app\ApiModels\ConversationRequest.ts" />
     <None Remove="ClientApp\src\app\ApiModels\ConversationResponse.ts" />
+    <None Remove="ClientApp\src\app\ApiModels\UpdateThumbnailResponse.ts" />
     <None Remove="ClientApp\src\app\Auth\Cache.ts" />
     <None Remove="ClientApp\src\app\Chat\chat.component.ts" />
     <None Remove="ClientApp\src\app\Connections\ConnectionManager.ts" />
@@ -72,6 +73,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\ApiModels\ConversationMessagesResponse.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\ApiModels\ConversationRequest.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\ApiModels\ConversationResponse.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\ApiModels\UpdateThumbnailResponse.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Auth\Cache.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Chat\chat.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Connections\ConnectionManager.ts" />
@@ -148,6 +150,10 @@
     <TypeScriptSourceMap>True</TypeScriptSourceMap>
     <TypeScriptMapRoot />
     <TypeScriptSourceRoot />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>false</Optimize>
   </PropertyGroup>
 
 </Project>

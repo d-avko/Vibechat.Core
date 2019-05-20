@@ -1,16 +1,20 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Vibechat.Web.ApiModels;
 using Vibechat.Web.ChatData.Messages;
+using Vibechat.Web.Data.ApiModels.Conversation;
 using Vibechat.Web.Data.ApiModels.Messages;
 using Vibechat.Web.Services.ChatDataProviders;
+using Vibechat.Web.Services.FileSystem;
 using Vibechat.Web.Services.Repositories;
 using VibeChat.Web;
 using VibeChat.Web.ApiModels;
@@ -28,7 +32,8 @@ namespace Vibechat.Web.Services
             IAttachmentRepository attachmentRepository,
             IAttachmentKindsRepository attachmentKindsRepository,
             IUsersConversationsRepository usersConversationsRepository,
-            IConversationRepository conversationRepository)
+            IConversationRepository conversationRepository,
+            ImagesService imagesService)
         {
             this.chatDataProvider = chatDataProvider;
             this.usersRepository = usersRepository;
@@ -37,6 +42,7 @@ namespace Vibechat.Web.Services
             this.attachmentKindsRepository = attachmentKindsRepository;
             this.usersConversationsRepository = usersConversationsRepository;
             this.conversationRepository = conversationRepository;
+            ImagesService = imagesService;
         }
 
         protected readonly IChatDataProvider chatDataProvider;
@@ -52,6 +58,10 @@ namespace Vibechat.Web.Services
         protected readonly IUsersConversationsRepository usersConversationsRepository;
 
         protected readonly IConversationRepository conversationRepository;
+
+        private const int MaxThumbnailLengthMB = 5;
+
+        protected readonly ImagesService ImagesService;
 
         #region Conversations
 
@@ -128,6 +138,36 @@ namespace Vibechat.Web.Services
                         Messages = null
                     };
 
+        }
+
+        public async Task<UpdateThumbnailResponse> UpdateThumbnail(int conversationId, IFormFile image)
+        {
+            if ((image.Length / (1024 * 1024)) > MaxThumbnailLengthMB)
+            {
+                throw new InvalidDataException($"Thumbnail was larger than {MaxThumbnailLengthMB}");
+            }
+
+            ConversationDataModel conversation = conversationRepository.GetById(conversationId);
+
+            if(conversation == null)
+            {
+                throw new InvalidDataException($"Wrong conversation id was provided.");
+            }
+
+            using (var buffer = new MemoryStream())
+            {
+                image.CopyTo(buffer);
+                buffer.Seek(0, SeekOrigin.Begin);
+                var thumbnailFull = ImagesService.UpdateConversationThumbnail(buffer, image.FileName);
+
+                conversationRepository.UpdateThumbnail(thumbnailFull.Item1, thumbnailFull.Item2, conversation);
+            }
+
+            return new UpdateThumbnailResponse()
+            {
+                ThumbnailUrl = conversation.ThumbnailUrl,
+                FullImageUrl = conversation.FullImageUrl
+            };
         }
 
         public async Task RemoveUserFromConversation(string userId, string whoRemovedId, int conversationId)

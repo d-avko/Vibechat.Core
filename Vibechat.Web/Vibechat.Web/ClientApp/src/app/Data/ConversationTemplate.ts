@@ -10,7 +10,9 @@ export class ConversationTemplate {
 
   public name: string;
 
-  public imageUrl: string;
+  public thumbnailUrl: string;
+
+  public fullImageUrl: string;
 
   public isGroup: boolean;
 

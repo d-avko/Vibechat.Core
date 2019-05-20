@@ -15,6 +15,7 @@ import { UploadFilesResponse } from "../Data/UploadFilesResponse";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { FoundUsersResponse } from "../Data/FoundUsersResponse";
 import { forEach } from "@angular/router/src/utils/collection";
+import { UpdateThumbnailResponse } from "../ApiModels/UpdateThumbnailResponse";
 
 @Injectable({
   providedIn: 'root'
@@ -98,14 +99,15 @@ export class ApiRequestsBuilder {
       { headers: headers });
   }
 
-  public UploadConversationThumbnail(thumbnail: File, token: string): Observable<ServerResponse<string>> {
+  public UploadConversationThumbnail(thumbnail: File, conversationId: number, token: string): Observable<ServerResponse<UpdateThumbnailResponse>> {
     let headers = new HttpHeaders();
     headers = headers.append('Authorization', 'Bearer ' + token);
 
     let data = new FormData();
     data.append('thumbnail', thumbnail);
+    data.append('conversationId', conversationId.toString());
 
-    return this.httpClient.post<ServerResponse<string>>("Conversations/UpdateThumbnail",
+    return this.httpClient.post<ServerResponse<UpdateThumbnailResponse>>("Conversations/UpdateThumbnail",
       data,
       { headers: headers });
   }

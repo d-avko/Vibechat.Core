@@ -41,7 +41,7 @@ namespace Vibechat.Web.Services.Images
 
             SKImageInfo desired = new SKImageInfo(resultingWidth, resultingHeight);
 
-            SKBitmap bmp = SKBitmap.Decode(codec, new SKImageInfo(resultingWidth, resultingHeight));
+            SKBitmap bmp = SKBitmap.Decode(codec, info);
 
             bmp = bmp.Resize(desired, SKFilterQuality.Medium);
 

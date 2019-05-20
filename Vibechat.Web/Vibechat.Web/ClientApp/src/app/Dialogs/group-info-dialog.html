@@ -3,8 +3,8 @@
 
   <div class="groupinfo_header">
 
-    <img src="{{data.Conversation.imageUrl}}" class="group_thumbnail" />
-    <input type="file" (onchange)="UpdateThumbnail($event)" accept="image/*" class="thumbnail-input" name="thumbnail" />
+    <img src="{{data.Conversation.thumbnailUrl}}" class="group_thumbnail" />
+    <input type="file" (change)="UpdateThumbnail($event)" accept="image/*" class="thumbnail-input" name="thumbnail" />
 
     <div class="groupinfo_info">
       <p class="subHeader">{{data.Conversation.name}}</p>
@@ -102,6 +102,8 @@
     }
 
     .thumbnail-input{
+      cursor: pointer;
+      position:absolute;
       width: 80px;
       height: 80px;
       opacity: .01;
