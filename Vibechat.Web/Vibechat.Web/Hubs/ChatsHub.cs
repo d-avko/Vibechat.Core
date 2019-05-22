@@ -40,14 +40,16 @@ namespace VibeChat.Web
             this.logger = logger;
         }
 
-        public async Task OnConnected()
+        public override async Task OnConnectedAsync()
         {
             await userService.MakeUserOnline(userProvider.GetUserId(Context), Context.ConnectionId);
+            await base.OnConnectedAsync();
         }
 
-        public async Task OnDisconnected()
+        public override async Task OnDisconnectedAsync(Exception ex)
         {
-            await userService.MakeUserOffline(userProvider.GetUserId(Context));       
+            await userService.MakeUserOffline(userProvider.GetUserId(Context));
+            await base.OnDisconnectedAsync(ex);
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
