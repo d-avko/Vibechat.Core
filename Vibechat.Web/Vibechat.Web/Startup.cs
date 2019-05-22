@@ -37,6 +37,8 @@ namespace Vibechat.Web
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+            //set usermanager explicitly, to prevent SignalR hub methods from not being executed correctly.
+
             services.AddScoped<UserManager<UserInApplication>>();
 
             services.Configure<IdentityOptions>(options =>

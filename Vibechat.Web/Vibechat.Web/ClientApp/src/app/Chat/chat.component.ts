@@ -112,7 +112,6 @@ export class ChatComponent implements OnInit {
 
     this.IsAuthenticated = Cache.IsAuthenticated;
     this.CurrentUser = Cache.UserCache;
-
   }
   ngOnInit(): void {
     if (this.IsAuthenticated) {
@@ -185,8 +184,13 @@ export class ChatComponent implements OnInit {
    
   }
 
-  public OnKickUser(user: UserInfo){
+  public OnKickUser(user: UserInfo) {
+    if (user.id == this.CurrentUser.id) {
+      this.snackbar.openSnackBar("Couldn't kick yourself.");
+      return;
+    }
 
+    this.connectionManager.RemoveUserFromConversation(user.id, this.CurrentConversation.conversationID, false);
   }
 
   public OnJoinGroup(conversation: ConversationTemplate){
@@ -241,7 +245,7 @@ export class ChatComponent implements OnInit {
   }
 
   public OnLeaveGroup(){
-    this.connectionManager.RemoveUserFromConversation(this.CurrentUser.id, this.CurrentConversation.conversationID);
+    this.connectionManager.RemoveUserFromConversation(this.CurrentUser.id, this.CurrentConversation.conversationID, true);
     this.CurrentConversation = null;
   }
 

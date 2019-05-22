@@ -62,6 +62,14 @@ export class GroupInfoDialogComponent {
     this.OnLeaveGroup.emit(null);
   }
 
+  public KickUser(user: UserInfo) {
+    this.OnKickUser.emit(user);
+  }
+
+  public IsCurrentUserCreatorOfConversation() {
+    return this.data.user.id == this.data.Conversation.creator.id;
+  }
+
   public UpdateThumbnail(event: any) {
     this.OnChangeThumbnail.emit(event.target.files[0]);
   }

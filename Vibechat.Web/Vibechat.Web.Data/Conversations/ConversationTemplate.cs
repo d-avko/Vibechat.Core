@@ -27,6 +27,8 @@ namespace VibeChat.Web.ChatData
 
         public string FullImageUrl { get; set; }
 
+        public UserInfo Creator { get; set; }
+
         /// <summary>
         /// Indicates if this is a group
         /// </summary>

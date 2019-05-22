@@ -78,10 +78,6 @@ export class ConnectionManager {
       this.OnRemovedFromGroupDelegate(new RemovedFromGroupModel({ userId: userId, conversationId: conversationId }));
     });
 
-    //this.connection.on("RemovedFromGroup", (conversationId: number, userId: string) => {
-    //  this.OnRemovedFromGroup.emit(new RemovedFromGroupModel({ conversationId: conversationId, userId: userId }));
-    //});
-
   }
 
   public SendMessage(message: ChatMessage, conversation: ConversationTemplate) : void {
@@ -101,8 +97,8 @@ export class ConnectionManager {
     this.connection.send("AddToGroup", userId, whoAddsId, conversation);
   }
 
-  public RemoveUserFromConversation(userId: string, conversationId: number) {
-    this.connection.send("RemoveFromGroup", userId, conversationId);
+  public RemoveUserFromConversation(userId: string, conversationId: number, IsSelf: boolean) {
+    this.connection.send("RemoveFromGroup", userId, conversationId, IsSelf);
   }
 
   public InitiateConnections(conversationIds: Array<number>) : void {

@@ -5,7 +5,7 @@ import { RegisterComponent } from './registration/register.component';
 import { ChatComponent } from './Chat/chat.component';
 
 const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: '/login'},
+  { path: '', pathMatch: 'full', redirectTo: '/chat'},
   { path: 'login', component: LoginComponent, data: { animation: 'LoginPage' } },
   { path: 'register', component: RegisterComponent, data: { animation: 'RegisterPage' } },
   { path: 'chat', component: ChatComponent, data: { animation: 'ChatPage' } }
