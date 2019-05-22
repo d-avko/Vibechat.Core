@@ -45,14 +45,16 @@ namespace Vibechat.Web.Services.Repositories
         public async Task<ConversationDataModel> Add(
             bool IsGroup,
             string name,
-            string imageUrl)
+            string imageUrl,
+            UserInApplication creator)
         {
             var ConversationToAdd = new ConversationDataModel()
             {
                 IsGroup = IsGroup,
                 Name = name,
                 FullImageUrl = imageUrl,
-                ThumbnailUrl = imageUrl
+                ThumbnailUrl = imageUrl,
+                Creator = creator
             };
 
             await mContext.Conversations.AddAsync(ConversationToAdd);

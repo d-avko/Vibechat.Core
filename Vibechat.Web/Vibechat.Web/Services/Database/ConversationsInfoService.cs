@@ -107,7 +107,8 @@ namespace Vibechat.Web.Services
             ConversationDataModel ConversationToAdd = await conversationRepository.Add(
                 convInfo.IsGroup,
                 convInfo.IsGroup ? convInfo.ConversationName : null,
-                convInfo.ImageUrl ?? chatDataProvider.GetGroupPictureUrl()
+                convInfo.ImageUrl ?? chatDataProvider.GetGroupPictureUrl(),
+                user
                 );
 
             await usersConversationsRepository.Add(user, ConversationToAdd);
@@ -137,7 +138,18 @@ namespace Vibechat.Web.Services
                         IsGroup = ConversationToAdd.IsGroup,
                         Name = ConversationToAdd.Name,
                         Participants = (await GetConversationParticipants(new GetParticipantsApiModel() { ConvId = ConversationToAdd.ConvID })).Participants,
-                        Messages = null
+                        Messages = null,
+                        Creator = new UserInfo()
+                        {
+                            Id = ConversationToAdd.Creator.Id,
+                            Name = ConversationToAdd.Creator.FirstName,
+                            ImageUrl = ConversationToAdd.Creator.ProfilePicImageURL,
+                            LastName = ConversationToAdd.Creator.LastName,
+                            LastSeen = ConversationToAdd.Creator.LastSeen,
+                            UserName = ConversationToAdd.Creator.UserName,
+                            ConnectionId = ConversationToAdd.Creator.ConnectionId,
+                            IsOnline = ConversationToAdd.Creator.IsOnline
+                        }
                     };
 
         }
@@ -189,8 +201,13 @@ namespace Vibechat.Web.Services
             conversationRepository.ChangeName(conversation, name);
         }
 
-        public async Task RemoveUserFromConversation(string userId, string whoRemovedId, int conversationId)
+        public async Task RemoveUserFromConversation(string userId, string whoRemovedId, int conversationId, bool IsSelf)
         {
+            if(!IsSelf && userId == whoRemovedId)
+            {
+                throw new FormatException("Couldn't remove yourself from conversation.");
+            }
+
             var conversation = conversationRepository.GetById(conversationId);
 
             if(conversation == null)
@@ -321,7 +338,18 @@ namespace Vibechat.Web.Services
 
                             //only get last message here, client should fetch messages after he opened the conversation.
 
-                            Messages = (await GetConversationMessages(new GetMessagesApiModel() { ConversationID = conversation.ConvID, Count = 1, MesssagesOffset = 0 }, whoAccessedId)).Messages
+                            Messages = (await GetConversationMessages(new GetMessagesApiModel() { ConversationID = conversation.ConvID, Count = 1, MesssagesOffset = 0 }, whoAccessedId)).Messages,
+                            Creator = new UserInfo()
+                            {
+                                Id = conversation.Creator.Id,
+                                Name = conversation.Creator.FirstName,
+                                ImageUrl = conversation.Creator.ProfilePicImageURL,
+                                LastName = conversation.Creator.LastName,
+                                LastSeen = conversation.Creator.LastSeen,
+                                UserName = conversation.Creator.UserName,
+                                ConnectionId = conversation.Creator.ConnectionId,
+                                IsOnline = conversation.Creator.IsOnline
+                            }
                         }
                     );
             }
@@ -495,7 +523,18 @@ namespace Vibechat.Web.Services
                     ThumbnailUrl = conversation.ThumbnailUrl,
                     FullImageUrl = conversation.FullImageUrl,
                     IsGroup = conversation.IsGroup,
-                    Name = conversation.Name
+                    Name = conversation.Name,
+                    Creator = new UserInfo()
+                    {
+                        Id = conversation.Creator.Id,
+                        Name = conversation.Creator.FirstName,
+                        ImageUrl = conversation.Creator.ProfilePicImageURL,
+                        LastName = conversation.Creator.LastName,
+                        LastSeen = conversation.Creator.LastSeen,
+                        UserName = conversation.Creator.UserName,
+                        ConnectionId = conversation.Creator.ConnectionId,
+                        IsOnline = conversation.Creator.IsOnline
+                    }
                 }
 
             };

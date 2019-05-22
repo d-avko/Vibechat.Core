@@ -53,13 +53,13 @@ namespace VibeChat.Web
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task RemoveFromGroup(string userToRemoveId, int conversationId)
+        public async Task RemoveFromGroup(string userToRemoveId, int conversationId, bool IsSelf)
         {
             var whoSentId = userProvider.GetUserId(Context);
 
             try
             {
-                await conversationsService.RemoveUserFromConversation(userToRemoveId, whoSentId, conversationId);
+                await conversationsService.RemoveUserFromConversation(userToRemoveId, whoSentId, conversationId, IsSelf);
                 await RemovedFromGroup(userToRemoveId, conversationId, true);
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, conversationId.ToString());
             }

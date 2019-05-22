@@ -16,6 +16,8 @@ export class ConversationTemplate {
 
   public isGroup: boolean;
 
+  public creator: UserInfo;
+
   public messages: Array<ChatMessage>;
 
   public participants: Array<UserInfo>;

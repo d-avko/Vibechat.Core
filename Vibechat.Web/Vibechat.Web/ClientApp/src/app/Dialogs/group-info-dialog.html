@@ -64,6 +64,8 @@
         {{user.userName}}
       </h3>
 
+      <button class="kickButton" *ngIf="IsCurrentUserCreatorOfConversation()" (click)="KickUser(user)" mat-button>Kick</button>
+
     </mat-list-item>
 
   </mat-action-list>
@@ -75,6 +77,10 @@
       height: 80px;
       width: 80px;
       border-radius: 40px;
+    }
+
+    .kickButton{
+      color:indianred;
     }
 
     .groupinfo_info {

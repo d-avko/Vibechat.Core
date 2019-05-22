@@ -5,7 +5,7 @@ namespace Vibechat.Web.Services.Repositories
 {
     public interface IConversationRepository
     {
-        Task<ConversationDataModel> Add(bool IsGroup, string name, string imageUrl);
+        Task<ConversationDataModel> Add(bool IsGroup, string name, string imageUrl, UserInApplication user);
         ConversationDataModel GetById(int id);
 
         void Remove(ConversationDataModel entity);
