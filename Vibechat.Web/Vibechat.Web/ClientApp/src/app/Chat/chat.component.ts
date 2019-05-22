@@ -106,7 +106,8 @@ export class ChatComponent implements OnInit {
       (data) => this.OnMessageReceived(data),
       (data) => this.OnAddedToGroup(data),
       (error) => this.OnSignalrError(error),
-      (data) => this.OnRemovedFromGroup(data)
+      (data) => this.OnRemovedFromGroup(data),
+      () => this.OnDisconnected()
     );
 
     this.IsAuthenticated = Cache.IsAuthenticated;
@@ -117,6 +118,10 @@ export class ChatComponent implements OnInit {
     if (this.IsAuthenticated) {
       this.UpdateConversations();
     }
+  }
+
+  public OnDisconnected(): void {
+    this.snackbar.openSnackBar("Disconnected...");
   }
 
   public OnLogOut() : void {
@@ -409,10 +414,6 @@ export class ChatComponent implements OnInit {
 
       participants.splice(participants.findIndex(x => x.id == data.userId), 1);
     }
-  }
-
-  public OnDisconnected(data: EmptyModel) {
-    this.snackbar.openSnackBar("Disconnected. Retrying...");
   }
 
   public OnUpdateMessages() {

@@ -30,18 +30,22 @@ export class ConnectionManager {
 
   private OnRemovedFromGroupDelegate: RemovedFromGroupDelegate;
 
+  private OnDisconnected: () => void;
+
   constructor(
     convIdsFactory: ConversationIdsFactory,
     onMessageReceived: MessageReceivedDelegate,
     onAddedToGroup: AddedToConversationDelegate,
     onError: ErrorDelegate,
-    OnRemovedFromGroupDelegate : RemovedFromGroupDelegate) {
+    OnRemovedFromGroupDelegate: RemovedFromGroupDelegate,
+    OnDisconnected: () => void) {
 
     this.onMessageReceived = onMessageReceived;
     this.onAddedToGroup = onAddedToGroup;
     this.convIdsFactory = convIdsFactory;
     this.onError = onError;
     this.OnRemovedFromGroupDelegate = OnRemovedFromGroupDelegate;
+    this.OnDisconnected = OnDisconnected;
   }
 
   public Start(): void {
@@ -53,7 +57,6 @@ export class ConnectionManager {
     this.connection.start().then(
       () => {
         this.InitiateConnections(this.convIdsFactory());
-        this.OnConnected();
       });
   
     this.connection.onclose(() => this.OnDisconnected());
@@ -79,15 +82,6 @@ export class ConnectionManager {
     //  this.OnRemovedFromGroup.emit(new RemovedFromGroupModel({ conversationId: conversationId, userId: userId }));
     //});
 
-  }
-
-  public OnConnected() : void {
-    this.connection.send("OnConnected");
-  }
-
-  public OnDisconnected(): void {
-    this.connection.send("OnDisconnected");
-    this.Start();
   }
 
   public SendMessage(message: ChatMessage, conversation: ConversationTemplate) : void {
