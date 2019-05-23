@@ -44,12 +44,22 @@
 
             <mat-form-field style="margin-left: 20%;" appearance="fill">
               <mat-label>Search</mat-label>
-              <input matInput placeholder="Search..." type="search">
+              <input matInput placeholder="Search..." type="search" [(ngModel)]="SearchString" (keydown.enter)="Search()" >
               <mat-icon matSuffix>search</mat-icon>
             </mat-form-field>
           </div>
 
-          <conversationslist-view [CurrentConversation]="CurrentConversation"
+          <searchlist-view *ngIf="SearchString != null && SearchString !== ''"
+                           (OnViewUser)="OnViewUserInfo($event)"
+                           (OnViewConversation)="OnViewGroupInfo($event)"
+                           (OnApiError)="OnApiError($event)"
+                           (OnError)="OnError($event)"
+                           [SearchString]="SearchString">
+
+          </searchlist-view>
+
+          <conversationslist-view *ngIf="SearchString == null || SearchString === ''"
+                                  [CurrentConversation]="CurrentConversation"
                                   class="conversations_wrapper_conversations"
                                   [Conversations]="Conversations"
                                   (OnSelectedConversationChanged)="ChangeConversation($event)">

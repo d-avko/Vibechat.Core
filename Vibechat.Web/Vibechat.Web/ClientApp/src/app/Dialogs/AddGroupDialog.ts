@@ -1,10 +1,6 @@
-import { Component, Inject } from "@angular/core";
-import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material";
+import { Component, ViewChild } from "@angular/core";
+import { MatDialogRef, MatCheckbox } from "@angular/material";
 import { ChatComponent } from "../Chat/chat.component";
-
-export interface CreateGroupData {
-  name: string;
-}
 
 @Component({
   selector: 'add-group-dialog',
@@ -12,12 +8,19 @@ export interface CreateGroupData {
 })
 export class AddGroupDialogComponent {
 
+  public GroupName: string;
+
+  @ViewChild(MatCheckbox) public IsPublic: MatCheckbox;
+
   constructor(
-    public dialogRef: MatDialogRef<ChatComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: CreateGroupData) { }
+    public dialogRef: MatDialogRef<ChatComponent>) { }
 
   onNoClick(): void {
     this.dialogRef.close();
+  }
+
+  public CreateGroup() {
+    this.dialogRef.close({ name: this.GroupName, isPublic: this.IsPublic.checked });
   }
 
 }

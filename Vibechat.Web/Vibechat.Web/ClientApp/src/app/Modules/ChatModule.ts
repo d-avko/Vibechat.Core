@@ -18,6 +18,7 @@ import { AddGroupDialogComponent } from "../Dialogs/AddGroupDialog";
 import { FindUsersDialogComponent } from "../Dialogs/FindUsersDialog";
 import { GroupInfoDialogComponent } from "../Dialogs/GroupInfoDialog";
 import { ChangeNameDialogComponent } from "../Dialogs/ChangeNameDialog";
+import { SearchListComponent } from "../Search/searchlist.component";
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { ChangeNameDialogComponent } from "../Dialogs/ChangeNameDialog";
     AddGroupDialogComponent,
     FindUsersDialogComponent,
     GroupInfoDialogComponent,
-    ChangeNameDialogComponent
+    ChangeNameDialogComponent,
+    SearchListComponent
   ],
   imports: [
     ScrollDispatchModule,

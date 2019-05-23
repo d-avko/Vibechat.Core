@@ -16,6 +16,7 @@ import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { FoundUsersResponse } from "../Data/FoundUsersResponse";
 import { forEach } from "@angular/router/src/utils/collection";
 import { UpdateThumbnailResponse } from "../ApiModels/UpdateThumbnailResponse";
+import { UserInfo } from "../Data/UserInfo";
 
 @Injectable({
   providedIn: 'root'
@@ -128,7 +129,8 @@ export class ApiRequestsBuilder {
     dialogUserId: string,
     thumbnailUrl: string,
     isGroup: boolean,
-    token: string)
+    token: string,
+    isPublic: boolean)
   : Observable<ServerResponse<ConversationTemplate>>
   {
     let headers = new HttpHeaders();
@@ -136,7 +138,14 @@ export class ApiRequestsBuilder {
 
     return this.httpClient.post<ServerResponse<ConversationTemplate>>(
       this.baseUrl + 'api/Conversations/Create',
-      { ConversationName: name, CreatorId: whoCreatedId, DialogUserId: dialogUserId, ImageUrl: thumbnailUrl, IsGroup: isGroup },
+      {
+        ConversationName: name,
+        CreatorId: whoCreatedId,
+        DialogUserId: dialogUserId,
+        ImageUrl: thumbnailUrl,
+        IsGroup: isGroup,
+        IsPublic: isPublic
+      },
       { headers: headers });
   }
 
@@ -155,4 +164,16 @@ export class ApiRequestsBuilder {
       this.baseUrl + 'api/Tokens/Refresh',
       { OldToken: oldToken, UserId: userId });
   }
+
+  public SearchForGroups(token: string, searchstring: string): Observable<ServerResponse<Array<ConversationTemplate>>>{
+    let headers = new HttpHeaders();
+    headers = headers.append('Authorization', 'Bearer ' + token);
+
+    return this.httpClient.post<ServerResponse<Array<ConversationTemplate>>>(
+      this.baseUrl + 'api/Conversations/SearchGroups',
+      { SearchString: searchstring },
+      { headers: headers });
+  }
+
+
 }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using VibeChat.Web;
 
@@ -70,7 +71,9 @@ namespace Vibechat.Web.Services.Repositories
 
         public async Task<IQueryable<UserInApplication>> FindByUsername(string username)
         {
-            return mUserManager.Users.Where(user => user.UserName.Contains(username));
+            return mUserManager
+                .Users
+                .Where(user => user.UserName.StartsWith(username, StringComparison.InvariantCultureIgnoreCase));
         }
     }
 }
