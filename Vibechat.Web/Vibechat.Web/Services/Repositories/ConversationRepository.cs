@@ -36,6 +36,14 @@ namespace Vibechat.Web.Services.Repositories
             mContext.SaveChanges();
         }
 
+        public async Task<IQueryable<ConversationDataModel>> SearchByName(string name)
+        {
+            return mContext
+                .Conversations
+                .Where(conv => conv.IsPublic)
+                .Where(conv => conv.Name.StartsWith(name, StringComparison.InvariantCultureIgnoreCase));
+        }
+
         public void Remove(ConversationDataModel entity)
         {
             mContext.Conversations.Remove(entity);
@@ -46,7 +54,8 @@ namespace Vibechat.Web.Services.Repositories
             bool IsGroup,
             string name,
             string imageUrl,
-            UserInApplication creator)
+            UserInApplication creator,
+            bool IsPublic)
         {
             var ConversationToAdd = new ConversationDataModel()
             {
@@ -54,7 +63,8 @@ namespace Vibechat.Web.Services.Repositories
                 Name = name,
                 FullImageUrl = imageUrl,
                 ThumbnailUrl = imageUrl,
-                Creator = creator
+                Creator = creator,
+                IsPublic = IsPublic
             };
 
             await mContext.Conversations.AddAsync(ConversationToAdd);

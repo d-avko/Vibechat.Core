@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,7 +27,6 @@ namespace VibeChat.Web.Controllers
             this.mConversationService = mDbService;
         }
 
-        #region Conversations
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/Create")]
         public async Task<ResponseApiModel<ConversationTemplate>> Create([FromBody] CreateConversationCredentialsApiModel convInfo)
@@ -227,7 +227,6 @@ namespace VibeChat.Web.Controllers
 
         }
 
-        #endregion
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/UpdateThumbnail")]
@@ -275,5 +274,30 @@ namespace VibeChat.Web.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Conversations/SearchGroups")]
+        public async Task<ResponseApiModel<List<ConversationTemplate>>> SearchGroups([FromBody] SearchRequest request)
+        {
+            try
+            {
+                var result = await mConversationService.SearchForGroups(request.SearchString, 
+                    User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
+                    .Value);
+
+                return new ResponseApiModel<List<ConversationTemplate>>()
+                {
+                    IsSuccessfull = true,
+                    Response = result
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<List<ConversationTemplate>>()
+                {
+                    ErrorMessage = ex.Message,
+                    IsSuccessfull = false
+                };
+            }
+        }
     }
 }

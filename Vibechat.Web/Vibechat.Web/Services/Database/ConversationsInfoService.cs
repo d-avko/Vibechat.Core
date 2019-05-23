@@ -108,7 +108,8 @@ namespace Vibechat.Web.Services
                 convInfo.IsGroup,
                 convInfo.IsGroup ? convInfo.ConversationName : null,
                 convInfo.ImageUrl ?? chatDataProvider.GetGroupPictureUrl(),
-                user
+                user,
+                convInfo.IsPublic
                 );
 
             await usersConversationsRepository.Add(user, ConversationToAdd);
@@ -201,6 +202,57 @@ namespace Vibechat.Web.Services
             conversationRepository.ChangeName(conversation, name);
         }
 
+        public async Task<List<ConversationTemplate>> SearchForGroups(string name, string whoAccessedId)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                throw new InvalidDataException($"Search string coudn't be null.");
+            }
+
+            var groups = await conversationRepository.SearchByName(name);
+
+            if(groups == null)
+            {
+                return null;
+            }
+
+            var result = new List<ConversationTemplate>();
+
+            foreach (var conversation in groups)
+            {
+                result.Add(
+                    new ConversationTemplate()
+                    {
+                        Name = conversation.Name,
+                        ConversationID = conversation.ConvID,
+                        DialogueUser = null,
+                        IsGroup = conversation.IsGroup,
+                        ThumbnailUrl = conversation.ThumbnailUrl,
+                        FullImageUrl = conversation.FullImageUrl,
+                        Participants = (await GetConversationParticipants(new GetParticipantsApiModel() { ConvId = conversation.ConvID })).Participants,
+
+                        //only get last message here, client should fetch messages after he opened the conversation.
+
+                        Messages = (await GetConversationMessages(new GetMessagesApiModel() { ConversationID = conversation.ConvID, Count = 1, MesssagesOffset = 0 }, whoAccessedId)).Messages,
+                        Creator = new UserInfo()
+                        {
+                            Id = conversation.Creator.Id,
+                            Name = conversation.Creator.FirstName,
+                            ImageUrl = conversation.Creator.ProfilePicImageURL,
+                            LastName = conversation.Creator.LastName,
+                            LastSeen = conversation.Creator.LastSeen,
+                            UserName = conversation.Creator.UserName,
+                            ConnectionId = conversation.Creator.ConnectionId,
+                            IsOnline = conversation.Creator.IsOnline
+                        }
+                    }
+                    );
+            }
+
+            return result;
+        }
+
+
         public async Task RemoveUserFromConversation(string userId, string whoRemovedId, int conversationId, bool IsSelf)
         {
             if(!IsSelf && userId == whoRemovedId)
@@ -222,7 +274,7 @@ namespace Vibechat.Web.Services
                 throw new FormatException("User is not a part of this conversation.");
             }
 
-            if(conversation.Creator.Id != whoRemovedId)
+            if(conversation.Creator.Id != whoRemovedId && !IsSelf)
             {
                 throw new FormatException("Only creator can remove users.");
             }
@@ -419,9 +471,9 @@ namespace Vibechat.Web.Services
 
             var members = usersConversationsRepository.GetConversationParticipants(convInfo.ConversationID);
 
-            //only member of conversation could request messages (there should exist other calls for non-members).
+            //only member of conversation could request messages of non-public conversation.
 
-            if (members.FirstOrDefault(x => x.Id == whoAccessedId) == null)
+            if (members.FirstOrDefault(x => x.Id == whoAccessedId) == null && !conversation.IsPublic)
                 throw unAuthorizedError;
 
             var messages = messagesRepository.GetMessagesForConversation(

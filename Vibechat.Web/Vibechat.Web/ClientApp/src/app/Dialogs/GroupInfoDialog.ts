@@ -20,15 +20,15 @@ export class GroupInfoDialogComponent {
 
   public OnKickUser = new EventEmitter<UserInfo>();
 
-  public OnClearMessages = new EventEmitter<void>();
+  public OnClearMessages = new EventEmitter<ConversationTemplate>();
 
   public OnChangeName = new EventEmitter<string>();
 
   public OnChangeThumbnail = new EventEmitter<File>();
 
-  public OnLeaveGroup = new EventEmitter<void>();
+  public OnLeaveGroup = new EventEmitter<ConversationTemplate>();
 
-  public OnInviteUsers = new EventEmitter<void>();
+  public OnInviteUsers = new EventEmitter<ConversationTemplate>();
 
   public OnViewUserInfo = new EventEmitter<UserInfo>();
 
@@ -51,15 +51,15 @@ export class GroupInfoDialogComponent {
   }
 
   public ClearMessages(){
-    this.OnClearMessages.emit(null);
+    this.OnClearMessages.emit(this.data.Conversation);
   }
 
   public JoinGroup() {
-    this.OnJoinGroup.emit(null);
+    this.OnJoinGroup.emit(this.data.Conversation);
   }
 
   public LeaveGroup() {
-    this.OnLeaveGroup.emit(null);
+    this.OnLeaveGroup.emit(this.data.Conversation);
   }
 
   public KickUser(user: UserInfo) {
@@ -92,7 +92,7 @@ export class GroupInfoDialogComponent {
   }
 
   public InviteUsers() {
-    this.OnInviteUsers.emit(null);
+    this.OnInviteUsers.emit(this.data.Conversation);
   }
 
 }

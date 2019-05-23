@@ -22,6 +22,8 @@ namespace VibeChat.Web
         /// </summary>
         public bool IsGroup { get; set; }
 
+        public bool IsPublic { get; set; }
+
         public UserInApplication Creator { get; set; }
     }
 }

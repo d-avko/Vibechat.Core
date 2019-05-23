@@ -20,6 +20,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\GetConversationByIdResultApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\GetParticipantsApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\GetParticipantsResultApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\SearchRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\UpdateThumbnailRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\UpdateThumbnailResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Files\FilesUploadResponse.cs" />

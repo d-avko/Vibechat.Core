@@ -1,4 +1,4 @@
-import { Component, ViewChild, OnInit } from "@angular/core";
+import { Component, ViewChild, OnInit, Type } from "@angular/core";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { Cache } from "../Auth/Cache";
 import { ServerResponse } from "../ApiModels/ServerResponse";
@@ -20,6 +20,7 @@ import { FindUsersDialogComponent } from "../Dialogs/FindUsersDialog";
 import { AddGroupDialogComponent } from "../Dialogs/AddGroupDialog";
 import { GroupInfoDialogComponent } from "../Dialogs/GroupInfoDialog";
 import { resetCompiledComponents } from "@angular/core/src/render3/jit/module";
+import { SearchListComponent } from "../Search/searchlist.component";
 
 @Component({
   selector: 'chat-root',
@@ -74,8 +75,11 @@ export class ChatComponent implements OnInit {
 
   public IsConversationHistoryEnd: boolean = false;
 
+  public SearchString: string;
+
   @ViewChild(MessagesComponent) messages: MessagesComponent;
   @ViewChild(MatDrawer) sideDrawer: MatDrawer;
+  @ViewChild(SearchListComponent) searchList: SearchListComponent;
 
   constructor(
     public dialog: MatDialog,
@@ -105,7 +109,7 @@ export class ChatComponent implements OnInit {
       () => this.Conversations.map((x) => x.conversationID),
       (data) => this.OnMessageReceived(data),
       (data) => this.OnAddedToGroup(data),
-      (error) => this.OnSignalrError(error),
+      (error) => this.OnError(error),
       (data) => this.OnRemovedFromGroup(data),
       () => this.OnDisconnected()
     );
@@ -128,7 +132,7 @@ export class ChatComponent implements OnInit {
     this.router.navigateByUrl('/login');
   }
 
-  public OnSignalrError(error: string) : void{
+  public OnError(error: string) : void{
     this.snackbar.openSnackBar(error, 2);
   }
 
@@ -144,7 +148,7 @@ export class ChatComponent implements OnInit {
 
     groupInfoRef.componentInstance
     .OnInviteUsers
-    .subscribe(() => this.OnInviteUsersToGroup());
+      .subscribe((group: ConversationTemplate) => this.OnInviteUsersToGroup(group));
 
     groupInfoRef.componentInstance
     .OnChangeName
@@ -152,8 +156,8 @@ export class ChatComponent implements OnInit {
 
     groupInfoRef.componentInstance
     .OnLeaveGroup
-    .subscribe(() => {
-      this.OnLeaveGroup();
+    .subscribe((group: ConversationTemplate) => {
+      this.OnLeaveGroup(group);
       groupInfoRef.close();
     });
 
@@ -163,10 +167,10 @@ export class ChatComponent implements OnInit {
 
     groupInfoRef.componentInstance
     .OnClearMessages
-    .subscribe(() => {
-      this.OnRemoveAllMessages();
-      groupInfoRef.close();
-    });
+      .subscribe(((group: ConversationTemplate) => {
+        this.OnRemoveAllMessages(group);
+        groupInfoRef.close();
+    }));
 
     groupInfoRef.componentInstance
     .OnViewUserInfo
@@ -175,8 +179,8 @@ export class ChatComponent implements OnInit {
     groupInfoRef.componentInstance
     .OnJoinGroup
     .subscribe((group: ConversationTemplate) => {
-      this.OnJoinGroup(group);
       groupInfoRef.close();
+      this.OnJoinGroup(group);
     });
 
     groupInfoRef.componentInstance.OnKickUser
@@ -193,8 +197,9 @@ export class ChatComponent implements OnInit {
     this.connectionManager.RemoveUserFromConversation(user.id, this.CurrentConversation.conversationID, false);
   }
 
-  public OnJoinGroup(conversation: ConversationTemplate){
-    this.connectionManager.AddUserToConversation(this.CurrentUser.id, this.CurrentUser.id, conversation);
+  public OnJoinGroup(conversation: ConversationTemplate) {
+    this.SearchString = '';
+    this.connectionManager.AddUserToConversation(this.CurrentUser.id, conversation);
   }
 
   public OnViewUserInfo(user: UserInfo){
@@ -202,27 +207,35 @@ export class ChatComponent implements OnInit {
   }
 
 
-  public OnRemoveAllMessages() {
-    let currentConversationId = this.CurrentConversation.conversationID;
-
-    this.requestsBuilder.DeleteMessages(this.CurrentConversation.messages, this.CurrentConversation.conversationID, Cache.JwtToken)
+  public OnRemoveAllMessages(group: ConversationTemplate) {
+    this.requestsBuilder.DeleteMessages(group.messages, group.conversationID, Cache.JwtToken)
       .subscribe(
         (result) => {
-          this.OnMessagesDeleted(result, this.CurrentConversation.messages, currentConversationId);
+          this.OnMessagesDeleted(result, this.CurrentConversation.messages, group.conversationID);
           this.CurrentConversation = null;
         } 
         ,
-        (error) => {
-          if (error.error instanceof ErrorEvent) {
-            this.snackbar.openSnackBar('Network error occurred. Try refreshing the page.', 2);
-          } else {
-            //unauthorized
-            if (error.status == 401) {
-              this.OnTokenExpired();
-            }
-          }
-        }
+        (error) => this.OnApiError(error)
       )
+  }
+
+  public OnApiError(error: any) {
+    if (error.error instanceof ErrorEvent) {
+      this.snackbar.openSnackBar('Network error occurred. Try refreshing the page.', 2);
+    } else {
+      //unauthorized
+      if (error.status == 401) {
+        this.OnTokenExpired();
+      }
+    }
+  }
+
+  public Search() {
+    if (this.SearchString == null || this.SearchString == '') {
+      return;
+    }
+
+    this.searchList.Search();
   }
 
   public OnChangeGroupThumbnail(file: File): void{
@@ -244,8 +257,8 @@ export class ChatComponent implements OnInit {
       });
   }
 
-  public OnLeaveGroup(){
-    this.connectionManager.RemoveUserFromConversation(this.CurrentUser.id, this.CurrentConversation.conversationID, true);
+  public OnLeaveGroup(conversation: ConversationTemplate){
+    this.connectionManager.RemoveUserFromConversation(this.CurrentUser.id, conversation.conversationID, true);
     this.CurrentConversation = null;
   }
 
@@ -267,12 +280,12 @@ export class ChatComponent implements OnInit {
     )
   }
 
-  public OnInviteUsersToGroup() {
+  public OnInviteUsersToGroup(group: ConversationTemplate) {
 
     const dialogRef = this.dialog.open(FindUsersDialogComponent, {
       width: '350px',
       data: {
-        conversationId: this.CurrentConversation.conversationID,
+        conversationId: group.conversationID,
         requestsBuilder: this.requestsBuilder,
         snackbar: this.snackbar,
         token: Cache.JwtToken
@@ -291,7 +304,7 @@ export class ChatComponent implements OnInit {
 
       users.forEach(
         (value) => {
-          this.connectionManager.AddUserToConversation(value.id, this.CurrentUser.id, this.CurrentConversation);
+          this.connectionManager.AddUserToConversation(value.id, group);
         }
       )
 
@@ -306,8 +319,8 @@ export class ChatComponent implements OnInit {
             return;
           }
 
-          this.CurrentConversation.participants.push(user);
-          this.CurrentConversation.participants = [...this.CurrentConversation.participants];
+          group.participants.push(user);
+          group.participants = [...group.participants];
 
         }
       )
@@ -319,17 +332,17 @@ export class ChatComponent implements OnInit {
     this.sideDrawer.close();
 
     const dialogRef = this.dialog.open(AddGroupDialogComponent, {
-      width: '250px',
-      data: { name: '' }
+      width: '250px'
     });
 
+    
     dialogRef.afterClosed().subscribe(result => {
 
-      if (result === '' || result == null) {
+      if (result.name === '' || result.name == null) {
         return;
       }
 
-      this.requestsBuilder.CreateConversation(result, this.CurrentUser.id, null, null, true, Cache.JwtToken)
+      this.requestsBuilder.CreateConversation(result.name, this.CurrentUser.id, null, null, true, Cache.JwtToken, result.isPublic)
         .subscribe(
           (result) => {
 
@@ -344,16 +357,7 @@ export class ChatComponent implements OnInit {
 
             this.Conversations = [...this.Conversations, result.response];
           },
-          (error) => {
-            if (error.error instanceof ErrorEvent) {
-              this.snackbar.openSnackBar('Network error occurred. Try refreshing the page.', 2);
-            } else {
-              //unauthorized
-              if (error.status == 401) {
-                this.OnTokenExpired();
-              }
-            }
-          }
+          (error) => this.OnApiError(error)
         )
     });
   }
@@ -384,10 +388,18 @@ export class ChatComponent implements OnInit {
 
     conversation.messages = [...conversation.messages];
 
+    if (this.messages == undefined) {
+      return;
+    }
+
     this.messages.ScrollToMessage(newLength);
   }
 
   public OnAddedToGroup(data: AddedToGroupModel): void {
+    //c# date -> ts date
+    if (data.conversation.messages != null) {
+      data.conversation.messages.forEach((x) => x.timeReceived = new Date(<string>x.timeReceived));
+    }
 
     //someone invited myself.
 
@@ -461,16 +473,7 @@ export class ChatComponent implements OnInit {
 
           this.messages.ScrollToMessage(result.response.messages.length);
         },
-          (error) => {
-            if (error.error instanceof ErrorEvent) {
-              this.snackbar.openSnackBar('Network error occurred. Try refreshing the page.', 2);
-            } else {
-              //unauthorized
-              if (error.status == 401) {
-                this.OnTokenExpired();
-              }
-            }
-          }
+          (error) => this.OnApiError(error)
       )
     }
 
@@ -484,16 +487,7 @@ export class ChatComponent implements OnInit {
       .subscribe(
         (result) => this.OnMessagesDeleted(result, SelectedMessages, currentConversationId)
         ,
-        (error) => {
-          if (error.error instanceof ErrorEvent) {
-            this.snackbar.openSnackBar('Network error occurred. Try refreshing the page.', 2);
-          } else {
-            //unauthorized
-            if (error.status == 401) {
-              this.OnTokenExpired();
-            }
-          }
-        }
+        (error) => this.OnApiError(error)
       )
   }
 
@@ -551,16 +545,7 @@ export class ChatComponent implements OnInit {
 
           this.connectionManager.Start();
         },
-        (error) => {
-          if (error.error instanceof ErrorEvent) {
-            this.snackbar.openSnackBar('Network error occurred. Try refreshing the page.', 2);
-          } else {
-            //unauthorized
-            if (error.status == 401) {
-              this.OnTokenExpired();
-            }
-          }
-        }
+        (error) => this.OnApiError(error)
       )
   }
 
@@ -610,16 +595,7 @@ export class ChatComponent implements OnInit {
             }), this.CurrentConversation)
         )
       },
-      (error) => {
-        if (error.error instanceof ErrorEvent) {
-          this.snackbar.openSnackBar('Network error occurred. Try refreshing the page.', 2);
-        } else {
-          //unauthorized
-          if (error.status == 401) {
-            this.OnTokenExpired();
-          }
-        }
-      }
+      (error) => this.OnApiError(error)
     )
   }
 

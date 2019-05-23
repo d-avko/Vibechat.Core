@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
-    <TypeScriptToolsVersion>3.3</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>3.4</TypeScriptToolsVersion>
     <IsPackable>false</IsPackable>
     <SpaRoot>ClientApp\</SpaRoot>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
@@ -64,6 +64,7 @@
     <None Remove="ClientApp\src\app\Modules\ChatModule.ts" />
     <None Remove="ClientApp\src\app\Modules\LoginModule.ts" />
     <None Remove="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
+    <None Remove="ClientApp\src\app\Search\searchlist.component.ts" />
     <None Remove="ClientApp\src\app\Shared\AddedToGroupModel.ts" />
     <None Remove="ClientApp\src\app\Shared\EmptyModel.ts" />
     <None Remove="ClientApp\src\app\Shared\MessageReceivedModel.ts" />
@@ -97,6 +98,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\Modules\ChatModule.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Modules\LoginModule.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Search\searchlist.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\AddedToGroupModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\EmptyModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\MessageReceivedModel.ts" />

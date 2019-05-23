@@ -3,17 +3,22 @@
 
   <h3 style="font: 400 15px/28px Roboto,'Helvetica Neue',sans-serif" >Group name:</h3>
 
-  <mat-form-field>
-    <input matInput [(ngModel)]="data.name">
-  </mat-form-field>
-
-  <mat-action-list *ngFor="let user of data.foundUsers">
-    <button mat-list-item (click)="save()"> Save </button>
-    <button mat-list-item (click)="undo()"> Undo </button>
-  </mat-action-list>
+  <div class="flexrow">
+    <mat-form-field>
+      <input matInput [(ngModel)]="GroupName">
+    </mat-form-field>
+    <mat-checkbox>Public group?</mat-checkbox>
+  </div>
 
 </div>
 <div mat-dialog-actions>
-  <button mat-button [mat-dialog-close]="data.name" cdkFocusInitial>Create</button>
+  <button mat-button (click)="CreateGroup()" cdkFocusInitial>Create</button>
   <button mat-button (click)="onNoClick()">Cancel</button>
 </div>
+
+<style>
+  .flexcolumn{
+    display:flex;
+    flex-direction:column;
+  }
+</style>

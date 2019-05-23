@@ -14,5 +14,7 @@
         public string ImageUrl { get; set; }
 
         public bool IsGroup { get; set; }
+
+        public bool IsPublic { get; set; }
     }
 }

@@ -93,8 +93,8 @@ export class ConnectionManager {
     }
   }
 
-  public AddUserToConversation(userId: string, whoAddsId: string, conversation: ConversationTemplate) {
-    this.connection.send("AddToGroup", userId, whoAddsId, conversation);
+  public AddUserToConversation(userId: string, conversation: ConversationTemplate) {
+    this.connection.send("AddToGroup", userId, conversation);
   }
 
   public RemoveUserFromConversation(userId: string, conversationId: number, IsSelf: boolean) {

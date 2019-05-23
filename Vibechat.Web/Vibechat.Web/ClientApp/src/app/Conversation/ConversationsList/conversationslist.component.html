@@ -17,7 +17,6 @@
 
     <ng-template #dialogueHeader>
       <h3 matLine
-          *ngIf="conversation.isGroup; else dialogueHeader"
           [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}"> {{conversation.dialogueUser.userName}} </h3>
     </ng-template>
 
