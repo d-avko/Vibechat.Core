@@ -4,7 +4,7 @@
   <div class="find-header">
     <mat-form-field appearance="standard">
       <mat-label>Type in username...</mat-label>
-      <input matInput (keydown.control.enter)="OnFindUsers()" [(ngModel)]="usernameToFind">
+      <input matInput (keydown.enter)="OnFindUsers()" [(ngModel)]="usernameToFind">
     </mat-form-field>
 
     <button mat-button (click)="OnFindUsers()">

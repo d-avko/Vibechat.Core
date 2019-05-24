@@ -1,12 +1,12 @@
 <div class="messages_component">
 
   <cdk-virtual-scroll-viewport (scrolledIndexChange)="OnMessagesScrolled($event)"
-                               minBufferPx="1200"
-                               maxBufferPx="2500"
+                               minBufferPx="120000"
+                               maxBufferPx="250000"
                                itemSize="50"
                                class="messages_main">
 
-    <div *cdkVirtualFor="let message of Conversation.messages;">
+    <div *cdkVirtualFor= "let message of Conversation.messages;">
 
       <div (click)="SelectMessage(message)">
 
@@ -19,9 +19,7 @@
         </div>
 
         <div *ngIf="IsPreviousMessageOnAnotherDay(message)" class="messages_datestrip_wrapper padding10px">
-          <div class="datestrip_bubble">
-            <span class="datestrip">{{formatter.GetMessagesDateStripFormatted(message)}}</span>
-          </div>
+            <span class="datestrip_text">{{formatter.GetMessagesDateStripFormatted(message)}}</span>
         </div>
 
         <div class="messages_message_content" [ngClass]="{'selected-message': IsMessageSelected(message)}">
@@ -55,9 +53,10 @@
   </cdk-virtual-scroll-viewport>
 
   <div class="chat_misc">
-    <button mat-fab color="primary" (click)="ScrollToStart()" *ngIf="IsScrollingAssistNeeded" [@slideIn]>
-      <mat-icon>arrow_drop_down_circle</mat-icon>
-    </button>
+    <div (click)="ScrollToStart()" class="chat_misc_backtonow" *ngIf="IsScrollingAssistNeeded" [@slideIn]>
+      <mat-icon>keyboard_arrow_down</mat-icon>
+      <span>Back to now</span>
+    </div>
 
     <button mat-stroked-button
             style="overflow-y:visible !important"
@@ -70,3 +69,24 @@
 
 </div>
 
+<style>
+  .chat_misc_backtonow{
+    display: flex;
+    flex-direction:row;
+    margin-left: 43%;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 1px 3px 0 rgba(0,0,0,.1);
+    border-radius: 10px;
+    border: solid 1px #cfd9e1;
+    padding: 4px 4px 4px 4px;
+    color: cadetblue;
+    height: 20px;
+    transition: all 0.3s ease 0s;
+    cursor:pointer;
+  }
+  .chat_misc_backtonow:hover{
+    transition: all 0.3s ease 0s;
+    background-color: #f0f6f6;
+  }
+</style>

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Vibechat.Web.Data.DataModels;
 using VibeChat.Web.Data;
 using VibeChat.Web.Data.DataModels;
 
@@ -21,7 +22,8 @@ namespace VibeChat.Web
         public DbSet<AttachmentKindDataModel> AttachmentKinds { get; set; }
 
         public DbSet<MessageAttachmentDataModel> Attachments { get; set; }
-             
+
+        public DbSet<BansDatamodel> Bans { get; set; }
 
         #region Constructor
 
