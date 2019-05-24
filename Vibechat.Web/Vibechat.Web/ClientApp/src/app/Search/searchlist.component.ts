@@ -9,7 +9,9 @@ import { Cache } from "../Auth/Cache";
   templateUrl: './searchlist.component.html'
 })
 export class SearchListComponent {
-  public Conversations: Array<ConversationTemplate>;
+  public GlobalConversations: Array<ConversationTemplate>;
+
+  public FoundLocalConversations: Array<ConversationTemplate>;
 
   public Users: Array<UserInfo>;
 
@@ -17,18 +19,40 @@ export class SearchListComponent {
 
   @Output() public OnViewUser = new EventEmitter<UserInfo>();
   @Output() public OnViewConversation = new EventEmitter<ConversationTemplate>();
+  @Output() public OnViewLocalConversation = new EventEmitter<ConversationTemplate>();
   @Output() public OnApiError = new EventEmitter<any>();
   @Output() public OnError = new EventEmitter<string>();
   @Input() public SearchString: string;
+  @Input() public LocalConversations: Array<ConversationTemplate>;
 
   private IsSearchingForGroups: boolean;
   private IsSearchingForUsers: boolean;
 
   constructor(requestsBuilder: ApiRequestsBuilder) {
-    this.requestsBuilder = requestsBuilder;    
+    this.requestsBuilder = requestsBuilder;
+    this.FoundLocalConversations = new Array<ConversationTemplate>();
   }
 
   public Search() {
+
+    while (this.FoundLocalConversations.length != 0) {
+      this.FoundLocalConversations.pop();
+    }
+
+    this.LocalConversations.forEach(
+      (conversation) => {
+
+        if (conversation.isGroup) {
+          if (conversation.name.toUpperCase().startsWith(this.SearchString.toUpperCase())) {
+            this.FoundLocalConversations.push(conversation);
+          }
+        } else {
+          if (conversation.dialogueUser.userName.toUpperCase().startsWith(this.SearchString.toUpperCase())) {
+            this.FoundLocalConversations.push(conversation);
+          }
+        }
+
+      });
 
     if (this.IsSearchingForUsers) {
       return;
@@ -74,13 +98,17 @@ export class SearchListComponent {
             return;
           }
 
-          this.Conversations = [...result.response];
+          this.GlobalConversations = [...result.response];
         },
         (error) => {
           this.IsSearchingForGroups = false;
           this.OnApiError.emit(error);
         }
       );
+  }
+
+  public ViewLocalConversation(conversation: ConversationTemplate): void {
+    this.OnViewLocalConversation.emit(conversation);
   }
 
   public ViewConversation(conversation: ConversationTemplate): void {

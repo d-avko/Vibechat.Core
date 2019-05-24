@@ -36,12 +36,27 @@ namespace Vibechat.Web.Services.Repositories
             mContext.SaveChanges();
         }
 
-        public async Task<IQueryable<ConversationDataModel>> SearchByName(string name)
+        public async Task<IQueryable<ConversationDataModel>> SearchByName(string name, UserInApplication whoSearches, IUsersConversationsRepository participantsProvider)
         {
-            return mContext
+            var result = mContext
                 .Conversations
                 .Where(conv => conv.IsPublic)
                 .Where(conv => conv.Name.StartsWith(name, StringComparison.InvariantCultureIgnoreCase));
+
+            var finalResult = new List<ConversationDataModel>();
+
+            foreach(var conversation in result)
+            {
+                // search only for conversations where 'whoSearches' doesn't exist.
+                if (participantsProvider
+                .GetConversationParticipants(conversation.ConvID)
+                .FirstOrDefault(x => x.Id == whoSearches.Id) == default(UserInApplication))
+                {
+                    finalResult.Add(conversation);
+                }
+            }
+
+            return finalResult.AsQueryable();
         }
 
         public void Remove(ConversationDataModel entity)

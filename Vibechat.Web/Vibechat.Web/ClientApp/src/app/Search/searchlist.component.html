@@ -1,17 +1,31 @@
 <div class="searchlist">
 
+  <mat-action-list class="searchlist_local">
+    <mat-list-item *ngFor="let conversation of FoundLocalConversations"
+                   (click)="ViewLocalConversation(conversation)">
+
+      <img matListAvatar src="{{conversation.thumbnailUrl}}" alt="Conversation logo">
+
+      <h3 matLine>
+        {{conversation.name}}
+      </h3>
+    </mat-list-item>
+
+  </mat-action-list>
+
   <mat-progress-spinner *ngIf="IsSearchingForConversations"
                         class="load-spinner"
-                        diameter="60"
+                        diameter="40"
                         color="Primary"
                         mode="indeterminate">
   </mat-progress-spinner>
 
 
   <mat-action-list class="searchlist_conversations">
+    <h3 mat-subheader>Global search</h3>
     <h3 mat-subheader>Conversations</h3>
 
-    <mat-list-item *ngFor="let conversation of Conversations"
+    <mat-list-item *ngFor="let conversation of GlobalConversations"
                    (click)="ViewConversation(conversation)">
 
       <img matListAvatar src="{{conversation.thumbnailUrl}}" alt="Conversation logo">
@@ -25,7 +39,7 @@
 
   <mat-progress-spinner *ngIf="IsSearchingForUsers"
                         class="load-spinner"
-                        diameter="60"
+                        diameter="40"
                         color="Primary"
                         mode="indeterminate">
   </mat-progress-spinner>
