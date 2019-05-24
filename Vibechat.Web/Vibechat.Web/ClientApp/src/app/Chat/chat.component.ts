@@ -19,7 +19,6 @@ import { UserInfo } from "../Data/UserInfo";
 import { FindUsersDialogComponent } from "../Dialogs/FindUsersDialog";
 import { AddGroupDialogComponent } from "../Dialogs/AddGroupDialog";
 import { GroupInfoDialogComponent } from "../Dialogs/GroupInfoDialog";
-import { resetCompiledComponents } from "@angular/core/src/render3/jit/module";
 import { SearchListComponent } from "../Search/searchlist.component";
 
 @Component({
@@ -186,6 +185,10 @@ export class ChatComponent implements OnInit {
     groupInfoRef.componentInstance.OnKickUser
     .subscribe((user: UserInfo) => this.OnKickUser(user));
    
+  }
+
+  public OnViewLocalConversation(conversation: ConversationTemplate) : void{
+  
   }
 
   public OnKickUser(user: UserInfo) {
@@ -555,6 +558,10 @@ export class ChatComponent implements OnInit {
 
 
   public ChangeConversation(conversation: ConversationTemplate): void {
+    //if we were on search screen, we should hide it
+
+      this.SearchString = '';
+
     if (conversation == this.CurrentConversation) {
       this.CurrentConversation = null;
       return;

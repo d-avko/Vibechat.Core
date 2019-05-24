@@ -209,7 +209,9 @@ namespace Vibechat.Web.Services
                 throw new InvalidDataException($"Search string coudn't be null.");
             }
 
-            var groups = await conversationRepository.SearchByName(name);
+            var whoSearches = await usersRepository.GetById(whoAccessedId);
+
+            var groups = await conversationRepository.SearchByName(name, whoSearches, usersConversationsRepository);
 
             if(groups == null)
             {
