@@ -32,6 +32,7 @@
     "cookie-parser": "1.4.4",
     "core-js": "2.6.5",
     "hammerjs": "^2.0.8",
+    "ngx-ui-scroll": "^1.1.0-beta.1",
     "reflect-metadata": "0.1.13",
     "rxjs": "6.5.1",
     "rxjs-tslint": "0.1.7",

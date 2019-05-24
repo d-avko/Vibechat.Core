@@ -21,7 +21,7 @@ export class ConversationsFormatter{
     let user = message.user.id == Cache.UserCache.id ? 'You' : message.user.userName;
 
     if (message.isAttachment) {
-      return user + ": " + message.attachmentInfo.contentUrl;
+      return user + ": " + this.GetFormattedAttachmentName(message.attachmentInfo.attachmentKind);
     }
 
     let messageContent = '';
@@ -34,6 +34,17 @@ export class ConversationsFormatter{
     }
 
     return user + ": " + messageContent;
+  }
+
+  public GetFormattedAttachmentName(name: string) : string {
+    switch (name) {
+      case "img": {
+        return "Image"
+      }
+      default: {
+        return "Unknown attachment"
+      }
+    }
   }
 
   public GetLastMessageDateFormatted(conversation: ConversationTemplate) {

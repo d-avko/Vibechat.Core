@@ -48,11 +48,11 @@ namespace Vibechat.Web.Controllers
 
             foreach (var image in images)
             {
-                if(image.Length > MaxFileLengthMB)
+                if(image.Length > 1024 * 1024 * MaxFileLengthMB)
                 {
                     return new ResponseApiModel<FilesUploadResponse>()
                     {
-                        ErrorMessage = $"Some of the files was larger than {MaxFileLengthMB}",
+                        ErrorMessage = $"Some of the files was larger than {MaxFileLengthMB} Mb",
                         IsSuccessfull = false
                     };
                 }

@@ -63,7 +63,7 @@ export class MessagesComponent implements AfterViewInit {
     if (this.Conversation.messages == null) {
       return;
     }
-      
+    
 
     if (this.Conversation.messages.length > 1) {
       this.OnUpdateMessages.emit();
@@ -76,7 +76,14 @@ export class MessagesComponent implements AfterViewInit {
 
   public ScrollToMessage(scrollToMessageIndex: number) {
     requestAnimationFrame(() => {
-      this.viewport.scrollToIndex(scrollToMessageIndex, 'smooth');
+      
+      let messages = this.viewport.elementRef.nativeElement.children.item(0).children;
+      let offset = 0;
+      for (let i = 0; i < scrollToMessageIndex; ++i) {
+        offset += messages.item(i).clientHeight;
+      }
+
+      this.viewport.scrollToOffset(offset, 'smooth');
     });
   }
 
