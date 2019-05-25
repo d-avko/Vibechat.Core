@@ -112,7 +112,8 @@ namespace Vibechat.Web.Services.Login
                 Email = userToRegister.Email,
                 FirstName = userToRegister.FirstName,
                 LastName = userToRegister.LastName,
-                ProfilePicImageURL = chatDataProvider.GetProfilePictureUrl()
+                ProfilePicImageURL = chatDataProvider.GetProfilePictureUrl(),
+                IsPublic = true
             };
 
 
