@@ -74,6 +74,34 @@ namespace VibeChat.Web.Controllers
                 };
             }
         }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Users/ChangePublicState")]
+        public async Task<ResponseApiModel<bool>> ChangeUserIsPublicState(string userId)
+        {
+            try
+            {
+               await mUsersService.ChangeUserIsPublicState(userId, 
+                    User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
+                    .Value);
+
+                return new ResponseApiModel<bool>()
+                {
+                    IsSuccessfull = true,
+                    ErrorMessage = null,
+                    Response = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<bool>()
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message,
+                    Response = false
+                };
+            }
+        }
         #endregion
     }
 }

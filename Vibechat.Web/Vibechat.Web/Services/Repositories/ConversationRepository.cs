@@ -59,6 +59,13 @@ namespace Vibechat.Web.Services.Repositories
             return finalResult.AsQueryable();
         }
 
+        public async Task ChangePublicState(int conversationId)
+        {
+            var conversation = GetById(conversationId);
+            conversation.IsPublic = !conversation.IsPublic;
+            await mContext.SaveChangesAsync();
+        }
+
         public void Remove(ConversationDataModel entity)
         {
             mContext.Conversations.Remove(entity);

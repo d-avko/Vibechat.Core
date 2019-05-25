@@ -254,7 +254,17 @@ namespace Vibechat.Web.Services
             return result;
         }
 
+        public async Task ChangePublicState(int conversationId, string whoAccessedId)
+        {
+            var conversation = conversationRepository.GetById(conversationId);
 
+            if(conversation.Creator.Id != whoAccessedId)
+            {
+                throw new FormatException("This method is only allowed to group creator.");
+            }
+
+            await conversationRepository.ChangePublicState(conversationId);
+        }
         public async Task RemoveUserFromConversation(string userId, string whoRemovedId, int conversationId, bool IsSelf)
         {
             if(!IsSelf && userId == whoRemovedId)

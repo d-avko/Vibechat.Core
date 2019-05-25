@@ -101,6 +101,16 @@ namespace Vibechat.Web.Services.Users
             };
         }
 
+        public async Task ChangeUserIsPublicState(string userId, string whoAccessedId)
+        {
+            if(whoAccessedId != userId)
+            {
+                throw new FormatException("Can only call this method for yourself.");
+            }
+
+            await usersRepository.ChangeUserPublicState(userId);
+        }
+
         public async Task MakeUserOnline(string userId, string signalRConnectionId)
         {
             await usersRepository.MakeUserOnline(userId, signalRConnectionId);

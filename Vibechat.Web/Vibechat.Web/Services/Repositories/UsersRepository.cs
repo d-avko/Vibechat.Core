@@ -73,7 +73,15 @@ namespace Vibechat.Web.Services.Repositories
         {
             return mUserManager
                 .Users
+                .Where(user => user.IsPublic)
                 .Where(user => user.UserName.StartsWith(username, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        public async Task ChangeUserPublicState(string userId)
+        {
+            var user = await GetById(userId);
+            user.IsPublic = !user.IsPublic;
+            await mContext.SaveChangesAsync();
         }
     }
 }

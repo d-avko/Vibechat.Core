@@ -26,5 +26,7 @@ namespace VibeChat.Web
         /// </summary>
         public bool IsOnline { get; set; }
 
+        public bool IsPublic { get; set; }
+
     }
 }
