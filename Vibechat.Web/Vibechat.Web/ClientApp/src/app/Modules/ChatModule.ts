@@ -19,6 +19,7 @@ import { FindUsersDialogComponent } from "../Dialogs/FindUsersDialog";
 import { GroupInfoDialogComponent } from "../Dialogs/GroupInfoDialog";
 import { ChangeNameDialogComponent } from "../Dialogs/ChangeNameDialog";
 import { SearchListComponent } from "../Search/searchlist.component";
+import { UserInfoDialogComponent } from "../Dialogs/UserInfoDialog";
 
 @NgModule({
   declarations: [
@@ -31,6 +32,7 @@ import { SearchListComponent } from "../Search/searchlist.component";
     FindUsersDialogComponent,
     GroupInfoDialogComponent,
     ChangeNameDialogComponent,
+    UserInfoDialogComponent,
     SearchListComponent
   ],
   imports: [
@@ -45,7 +47,7 @@ import { SearchListComponent } from "../Search/searchlist.component";
     FormsModule
   ],
   exports: [AddGroupDialogComponent],
-  entryComponents: [AddGroupDialogComponent, FindUsersDialogComponent, GroupInfoDialogComponent, ChangeNameDialogComponent],
+  entryComponents: [AddGroupDialogComponent, FindUsersDialogComponent, GroupInfoDialogComponent, ChangeNameDialogComponent, UserInfoDialogComponent],
   providers: [ConnectionManager, ConversationsFormatter]
 })
 export class ChatModule { }

@@ -20,6 +20,7 @@ import { FindUsersDialogComponent } from "../Dialogs/FindUsersDialog";
 import { AddGroupDialogComponent } from "../Dialogs/AddGroupDialog";
 import { GroupInfoDialogComponent } from "../Dialogs/GroupInfoDialog";
 import { SearchListComponent } from "../Search/searchlist.component";
+import { UserInfoDialogComponent } from "../Dialogs/UserInfoDialog";
 
 @Component({
   selector: 'chat-root',
@@ -136,6 +137,12 @@ export class ChatComponent implements OnInit {
   }
 
   public OnViewGroupInfo(group: ConversationTemplate) {
+
+    if (!group.isGroup) {
+      this.OnViewUserInfo(group.dialogueUser);
+      return;
+    }
+
     const groupInfoRef = this.dialog.open(GroupInfoDialogComponent, {
       width: '450px',
       data: {
@@ -187,10 +194,6 @@ export class ChatComponent implements OnInit {
    
   }
 
-  public OnViewLocalConversation(conversation: ConversationTemplate) : void{
-  
-  }
-
   public OnKickUser(user: UserInfo) {
     if (user.id == this.CurrentUser.id) {
       this.snackbar.openSnackBar("Couldn't kick yourself.");
@@ -205,8 +208,14 @@ export class ChatComponent implements OnInit {
     this.connectionManager.AddUserToConversation(this.CurrentUser.id, conversation);
   }
 
-  public OnViewUserInfo(user: UserInfo){
-
+  public OnViewUserInfo(user: UserInfo) {
+    const userInfoRef = this.dialog.open(UserInfoDialogComponent, {
+      width: '450px',
+      data: {
+        user: user,
+        currentUser: this.CurrentUser
+      }
+    });
   }
 
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Vibechat.Web.ApiModels;
+using Vibechat.Web.Extensions;
 using Vibechat.Web.Services.ChatDataProviders;
 using Vibechat.Web.Services.Repositories;
 using VibeChat.Web;
@@ -60,15 +61,7 @@ namespace Vibechat.Web.Services.Login
 
             return new LoginResultApiModel()
             {
-                Info = new UserInfo()
-                {
-                    Name = user.FirstName,
-                    LastSeen = user.LastSeen,
-                    ImageUrl = user.ProfilePicImageURL,
-                    LastName = user.LastName,
-                    UserName = user.UserName,
-                    Id = user.Id
-                },
+                Info = user.ToUserInfo(),
                 Token = user.GenerateJwtToken(),
             };
         }

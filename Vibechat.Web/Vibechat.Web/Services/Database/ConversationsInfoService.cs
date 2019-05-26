@@ -13,6 +13,7 @@ using Vibechat.Web.ApiModels;
 using Vibechat.Web.ChatData.Messages;
 using Vibechat.Web.Data.ApiModels.Conversation;
 using Vibechat.Web.Data.ApiModels.Messages;
+using Vibechat.Web.Extensions;
 using Vibechat.Web.Services.ChatDataProviders;
 using Vibechat.Web.Services.FileSystem;
 using Vibechat.Web.Services.Repositories;
@@ -116,43 +117,11 @@ namespace Vibechat.Web.Services
 
             //after saving changes we have Id of our 
             //created conversation in ConversationToAdd variable
-
-            return  new ConversationTemplate()
-                    {
-                        ConversationID = ConversationToAdd.ConvID,
-                        DialogueUser = (ConversationToAdd.IsGroup) ?
-                          null :
-                          new UserInfo()
-                          {
-                              Id = SecondDialogueUser.Id,
-                              Name = SecondDialogueUser.FirstName,
-                              ImageUrl = SecondDialogueUser.ProfilePicImageURL,
-                              LastName = SecondDialogueUser.LastName,
-                              LastSeen = SecondDialogueUser.LastSeen,
-                              UserName = SecondDialogueUser.UserName,
-                              ConnectionId = SecondDialogueUser.ConnectionId,
-                              IsOnline = SecondDialogueUser.IsOnline
-                          },
-
-                        ThumbnailUrl = ConversationToAdd.ThumbnailUrl,
-                        FullImageUrl = ConversationToAdd.FullImageUrl,
-                        IsGroup = ConversationToAdd.IsGroup,
-                        Name = ConversationToAdd.Name,
-                        Participants = (await GetConversationParticipants(new GetParticipantsApiModel() { ConvId = ConversationToAdd.ConvID })).Participants,
-                        Messages = null,
-                        Creator = new UserInfo()
-                        {
-                            Id = ConversationToAdd.Creator.Id,
-                            Name = ConversationToAdd.Creator.FirstName,
-                            ImageUrl = ConversationToAdd.Creator.ProfilePicImageURL,
-                            LastName = ConversationToAdd.Creator.LastName,
-                            LastSeen = ConversationToAdd.Creator.LastSeen,
-                            UserName = ConversationToAdd.Creator.UserName,
-                            ConnectionId = ConversationToAdd.Creator.ConnectionId,
-                            IsOnline = ConversationToAdd.Creator.IsOnline
-                        }
-                    };
-
+            return ConversationToAdd.ToConversationTemplate(
+                (await GetConversationParticipants(new GetParticipantsApiModel() { ConvId = ConversationToAdd.ConvID })).Participants,
+                null,
+                SecondDialogueUser
+                );
         }
 
         public async Task<UpdateThumbnailResponse> UpdateThumbnail(int conversationId, IFormFile image)
@@ -223,32 +192,11 @@ namespace Vibechat.Web.Services
             foreach (var conversation in groups)
             {
                 result.Add(
-                    new ConversationTemplate()
-                    {
-                        Name = conversation.Name,
-                        ConversationID = conversation.ConvID,
-                        DialogueUser = null,
-                        IsGroup = conversation.IsGroup,
-                        ThumbnailUrl = conversation.ThumbnailUrl,
-                        FullImageUrl = conversation.FullImageUrl,
-                        Participants = (await GetConversationParticipants(new GetParticipantsApiModel() { ConvId = conversation.ConvID })).Participants,
-
-                        //only get last message here, client should fetch messages after he opened the conversation.
-
-                        Messages = (await GetConversationMessages(new GetMessagesApiModel() { ConversationID = conversation.ConvID, Count = 1, MesssagesOffset = 0 }, whoAccessedId)).Messages,
-                        Creator = new UserInfo()
-                        {
-                            Id = conversation.Creator.Id,
-                            Name = conversation.Creator.FirstName,
-                            ImageUrl = conversation.Creator.ProfilePicImageURL,
-                            LastName = conversation.Creator.LastName,
-                            LastSeen = conversation.Creator.LastSeen,
-                            UserName = conversation.Creator.UserName,
-                            ConnectionId = conversation.Creator.ConnectionId,
-                            IsOnline = conversation.Creator.IsOnline
-                        }
-                    }
-                    );
+                    conversation.ToConversationTemplate(
+                        (await GetConversationParticipants(new GetParticipantsApiModel() { ConvId = conversation.ConvID })).Participants,
+                        (await GetConversationMessages(new GetMessagesApiModel() { ConversationID = conversation.ConvID, Count = 1, MesssagesOffset = 0 }, whoAccessedId)).Messages,
+                        null
+                    ));
             }
 
             return result;
@@ -331,17 +279,7 @@ namespace Vibechat.Web.Services
 
             var addedUser = (await usersConversationsRepository.Add(FoundUser, FoundConversation)).User;
 
-            return new UserInfo()
-            {
-                Id = addedUser.Id,
-                Name = addedUser.FirstName,
-                ImageUrl = addedUser.ProfilePicImageURL,
-                LastName = addedUser.LastName,
-                LastSeen = addedUser.LastSeen,
-                UserName = addedUser.UserName,
-                ConnectionId = addedUser.ConnectionId,
-                IsOnline = addedUser.IsOnline
-            };
+            return addedUser.ToUserInfo();
         }
 
         public async Task<ConversationInfoResultApiModel> GetConversationInformation(CredentialsForConversationInfoApiModel UserProvided, string whoAccessedId)
@@ -373,48 +311,15 @@ namespace Vibechat.Web.Services
 
             foreach (ConversationDataModel conversation in conversations)
             {
-                UserInApplication DialogueUser = conversation.IsGroup ? null : usersConversationsRepository.GetUserInDialog(conversation.ConvID, UserProvided.UserId);
+                UserInApplication DialogUser = conversation.IsGroup ? null : usersConversationsRepository.GetUserInDialog(conversation.ConvID, UserProvided.UserId);
 
                 returnData.Add
                     (
-                        new ConversationTemplate()
-                        {
-                            Name = conversation.IsGroup ? conversation.Name : DialogueUser.UserName,
-                            ConversationID = conversation.ConvID,
-                            DialogueUser = DialogueUser == null ?
-                            null
-                            :
-                            new UserInfo()
-                            {
-                                Id = DialogueUser.Id,
-                                Name = DialogueUser.FirstName,
-                                LastName = DialogueUser.LastName,
-                                LastSeen = DialogueUser.LastSeen,
-                                UserName = DialogueUser.UserName,
-                                ImageUrl = DialogueUser.ProfilePicImageURL,
-                                IsOnline = DialogueUser.IsOnline,
-                                ConnectionId = DialogueUser.ConnectionId
-                            },
-                            IsGroup = conversation.IsGroup,
-                            ThumbnailUrl = conversation.ThumbnailUrl,
-                            FullImageUrl = conversation.FullImageUrl,
-                            Participants = (await GetConversationParticipants(new GetParticipantsApiModel() { ConvId = conversation.ConvID })).Participants,
-
-                            //only get last message here, client should fetch messages after he opened the conversation.
-
-                            Messages = (await GetConversationMessages(new GetMessagesApiModel() { ConversationID = conversation.ConvID, Count = 1, MesssagesOffset = 0 }, whoAccessedId)).Messages,
-                            Creator = new UserInfo()
-                            {
-                                Id = conversation.Creator.Id,
-                                Name = conversation.Creator.FirstName,
-                                ImageUrl = conversation.Creator.ProfilePicImageURL,
-                                LastName = conversation.Creator.LastName,
-                                LastSeen = conversation.Creator.LastSeen,
-                                UserName = conversation.Creator.UserName,
-                                ConnectionId = conversation.Creator.ConnectionId,
-                                IsOnline = conversation.Creator.IsOnline
-                            }
-                        }
+                    conversation.ToConversationTemplate(
+                         (await GetConversationParticipants(new GetParticipantsApiModel() { ConvId = conversation.ConvID })).Participants,
+                         //only get last message here, client should fetch messages after he opened the conversation.
+                         (await GetConversationMessages(new GetMessagesApiModel() { ConversationID = conversation.ConvID, Count = 1, MesssagesOffset = 0 }, whoAccessedId)).Messages,
+                         DialogUser)
                     );
             }
 
@@ -443,17 +348,8 @@ namespace Vibechat.Web.Services
             return new GetParticipantsResultApiModel()
             {
                 Participants = (from participant in participants
-                               select new UserInfo()
-                               {
-                                   Id = participant.Id,
-                                   LastName = participant.LastName,
-                                   LastSeen = participant.LastSeen,
-                                   Name = participant.FirstName,
-                                   UserName = participant.UserName,
-                                   ImageUrl = participant.ProfilePicImageURL,
-                                   ConnectionId = participant.ConnectionId,
-                                   IsOnline = participant.IsOnline
-                               }).ToList()
+                               select participant.ToUserInfo()
+                               ).ToList()
              };
 
         }
@@ -497,33 +393,7 @@ namespace Vibechat.Web.Services
             return new GetMessagesResultApiModel()
             {
                 Messages = (from msg in messages
-                            select new Message()
-                            {
-                                Id = msg.MessageID,
-                                ConversationID = msg.ConversationID,
-                                MessageContent = msg.MessageContent,
-                                TimeReceived = msg.TimeReceived,
-                                User = msg.User == null ? null : new UserInfo()
-                                {
-                                    Id = msg.User.Id,
-                                    LastName = msg.User.LastName,
-                                    LastSeen = msg.User.LastSeen,
-                                    Name = msg.User.FirstName,
-                                    UserName = msg.User.UserName,
-                                    ImageUrl = msg.User.ProfilePicImageURL,
-                                    IsOnline = msg.User.IsOnline,
-                                    ConnectionId = msg.User.ConnectionId
-                                },
-                                AttachmentInfo = msg.AttachmentInfo == null ? null : new MessageAttachment()
-                                {
-                                    AttachmentKind = msg.AttachmentInfo.AttachmentKind.Name,
-                                    ContentUrl = msg.AttachmentInfo.ContentUrl,
-                                    AttachmentName = msg.AttachmentInfo.AttachmentName,
-                                    ImageHeight = msg.AttachmentInfo.ImageHeight,
-                                    ImageWidth = msg.AttachmentInfo.ImageWidth
-                                },
-                                IsAttachment = msg.IsAttachment
-                            }).ToList()
+                            select msg.ToMessage()).ToList()
             };
 
         }
@@ -570,37 +440,7 @@ namespace Vibechat.Web.Services
 
             return new GetConversationByIdResultApiModel()
             {
-                Conversation = new ConversationTemplate()
-                {
-                    ConversationID = conversation.ConvID,
-                    DialogueUser = (conversation.IsGroup) ? null : new UserInfo()
-                    {
-                        Id = user.Id,
-                        Name = user.FirstName,
-                        ImageUrl = user.ProfilePicImageURL,
-                        LastName = user.LastName,
-                        LastSeen = user.LastSeen,
-                        UserName = user.UserName,
-                        IsOnline = user.IsOnline,
-                        ConnectionId = user.ConnectionId
-                    },
-                    ThumbnailUrl = conversation.ThumbnailUrl,
-                    FullImageUrl = conversation.FullImageUrl,
-                    IsGroup = conversation.IsGroup,
-                    Name = conversation.Name,
-                    Creator = new UserInfo()
-                    {
-                        Id = conversation.Creator.Id,
-                        Name = conversation.Creator.FirstName,
-                        ImageUrl = conversation.Creator.ProfilePicImageURL,
-                        LastName = conversation.Creator.LastName,
-                        LastSeen = conversation.Creator.LastSeen,
-                        UserName = conversation.Creator.UserName,
-                        ConnectionId = conversation.Creator.ConnectionId,
-                        IsOnline = conversation.Creator.IsOnline
-                    }
-                }
-
+                Conversation = conversation.ToConversationTemplate(null, null, user)
             };
 
         }
