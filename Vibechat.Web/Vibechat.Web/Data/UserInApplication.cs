@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System;
+using VibeChat.Web.ChatData;
 
 namespace VibeChat.Web
 {
@@ -27,6 +28,7 @@ namespace VibeChat.Web
         public bool IsOnline { get; set; }
 
         public bool IsPublic { get; set; }
+
 
     }
 }

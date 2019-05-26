@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Vibechat.Web.ApiModels;
+using Vibechat.Web.Extensions;
 using Vibechat.Web.Services.Repositories;
 using VibeChat.Web;
 using VibeChat.Web.ApiModels;
@@ -36,17 +37,7 @@ namespace Vibechat.Web.Services.Users
 
             return new UserByIdApiResponseModel()
             {
-                User = new UserInfo()
-                {
-                    Id = FoundUser.Id,
-                    ImageUrl = FoundUser.ProfilePicImageURL,
-                    LastName = FoundUser.LastName,
-                    LastSeen = FoundUser.LastSeen,
-                    Name = FoundUser.FirstName,
-                    UserName = FoundUser.UserName,
-                    ConnectionId = FoundUser.ConnectionId,
-                    IsOnline = FoundUser.IsOnline
-                }
+                User = FoundUser.ToUserInfo()
             };
 
         }
@@ -87,17 +78,9 @@ namespace Vibechat.Web.Services.Users
 
             return new UsersByNickNameResultApiModel()
             {
-                UsersFound = result.Select((FoundUser) => new UserInfo
-                {
-                    Id = FoundUser.Id,
-                    UserName = FoundUser.UserName,
-                    Name = FoundUser.FirstName,
-                    LastName = FoundUser.LastName,
-                    ConnectionId = FoundUser.ConnectionId,
-                    IsOnline = FoundUser.IsOnline,
-                    ImageUrl = FoundUser.ProfilePicImageURL,
-                    LastSeen = FoundUser.LastSeen
-                }).ToList()
+                UsersFound = result.Select((FoundUser) => 
+                FoundUser.ToUserInfo()
+                ).ToList()
             };
         }
 

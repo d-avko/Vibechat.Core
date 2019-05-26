@@ -93,6 +93,45 @@ export class ConversationsFormatter{
     return membersAmount.toString() + " Member(s)";
   }
 
+  public GetLastSeenFormatted(dateString: string) {
+    let date = new Date(dateString);
+
+    let daysSinceOnline = (new Date().getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
+
+    let result = "Last seen: ";
+
+    switch (true) {
+      case daysSinceOnline <= 1: {
+
+        let hoursSinceOnline = (new Date().getTime() - date.getTime()) / (1000 * 60 * 60);
+
+        switch (true) {
+          case hoursSinceOnline <= 1: {
+            let minutesSinceOnline = (new Date().getTime() - date.getTime()) / (1000 * 60);
+
+            if (minutesSinceOnline <= 5) {
+              return result + " less than 5 minutes ago";
+            }
+
+            return result + minutesSinceOnline.toPrecision(1) + " minutes ago";
+          }
+          default: {
+
+            return result + hoursSinceOnline.toPrecision(1) + " hours ago";
+
+          }
+        }
+
+      }
+      case daysSinceOnline <= 2: {
+        return result + "Yesterday";
+      }
+      case daysSinceOnline > 2: {
+        return result + daysSinceOnline.toPrecision(1) + " days ago";
+      }
+    }
+  }
+
   public GetConversationNameFormatted(conversation: ConversationTemplate) {
 
     if (!conversation.isGroup) {

@@ -41,5 +41,7 @@ namespace VibeChat.Web.ChatData
         /// Indicates if user is online
         /// </summary>
         public bool IsOnline { get; set; }
+
+        public bool IsPublic { get; set; }
     }
 }

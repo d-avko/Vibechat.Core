@@ -52,13 +52,13 @@
 
   </mat-action-list>
 
-  <mat-action-list style="height: 200px; overflow-y: scroll;">
+  <mat-action-list class="users_in_Conversation_list">
     <h3 mat-subheader>Users in group</h3>
 
     <mat-list-item *ngFor="let user of data.Conversation.participants"
                    (click)="ViewUserInfo(user)">
 
-      <img matListAvatar src="{{user.imageUrl}}" alt="Dialogue logo">
+      <img matListAvatar src="{{user.imageUrl}}" alt="user profile picture">
 
       <h3 matLine>
         {{user.userName}}
@@ -81,6 +81,11 @@
 
     .kickButton{
       color:indianred;
+    }
+
+    .users_in_Conversation_list{
+      height: 200px;
+      overflow-y: scroll;
     }
 
     .groupinfo_info {

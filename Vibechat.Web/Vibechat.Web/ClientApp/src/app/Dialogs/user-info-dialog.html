@@ -1,0 +1,186 @@
+<h1 mat-dialog-title>User info</h1>
+<div mat-dialog-content style="overflow: unset !important">
+
+  <!--This user-->
+
+  <div *ngIf="data.user.id == data.currentUser.id">
+
+    <div class="userinfo_header">
+
+      <img src="{{data.user.imageUrl}}" class="user_thumbnail" />
+
+      <div class="userinfo_info">
+
+        <div class="flexrow centered">
+          <mat-icon class="cadetBlue">info</mat-icon>
+          <p class="subHeader firstname-lastname">{{data.user.name}}</p>
+          <p class="subHeader firstname-lastname">{{data.user.lastName}}</p>
+        </div>
+
+        <div class="flexrow centered">
+          <mat-icon class="cadetBlue">alternate_email</mat-icon>
+          <p class="subHeader cadetBlue username">{{data.user.userName}}</p>
+        </div>
+
+        <p class="subHeader last-seen">{{formatter.GetLastSeenFormatted(data.currentUser.lastSeen)}}</p>
+      </div>
+
+    </div>
+
+    <mat-action-list>
+
+      <mat-list-item (click)="ChangeName()">
+
+        <mat-icon class="cadetBlue">edit</mat-icon>
+
+        <h3 matLine>Change first name</h3>
+      </mat-list-item>
+
+      <mat-list-item (click)="ChangeLastname()">
+
+        <h3 matLine>Change last name</h3>
+      </mat-list-item>
+
+      <mat-list-item>
+        <mat-icon class="cadetBlue">add_photo_alternate</mat-icon>
+        <h3 matLine>Change profile picture </h3>
+        <input type="file" (change)="UpdateThumbnail($event)" accept="image/*" class="thumbnail-input" name="thumbnail" />
+      </mat-list-item>
+
+    </mat-action-list>
+
+  </div>
+    <!--Foreign user-->
+
+  <div *ngIf="data.user.id != data.currentUser.id">
+
+    <div class="userinfo_header">
+
+
+      <img src="{{data.user.imageUrl}}" class="user_thumbnail" />
+
+      <div class="userinfo_info">
+
+        <div class="flexrow centered">
+          <mat-icon class="cadetBlue">info</mat-icon>
+          <p class="subHeader firstname-lastname">{{data.user.name}}</p>
+          <p class="subHeader firstname-lastname">{{data.user.lastName}}</p>
+        </div>
+
+        <div class="flexrow centered">
+          <mat-icon class="cadetBlue">alternate_email</mat-icon>
+          <p class="subHeader cadetBlue username">{{data.user.userName}}</p>
+        </div>
+
+        <p class="subHeader last-seen">{{formatter.GetLastSeenFormatted(data.user.lastSeen)}}</p>
+      </div>
+
+    </div>
+
+    <mat-action-list>
+
+      <mat-list-item *ngIf="!HasConversationWith()" (click)="CreateDialog()">
+
+        <mat-icon class="cadetBlue">person_add</mat-icon>
+
+        <h3 matLine>Start chatting</h3>
+      </mat-list-item>
+
+      <mat-list-item *ngIf="HasConversationWith()" (click)="Block()">
+
+        <mat-icon class="cadetBlue">voice_over_off</mat-icon>
+
+        <h3 matLine>Block this user</h3>
+      </mat-list-item>
+
+      <mat-list-item *ngIf="HasConversationWith()" (click)="DeleteConversation()">
+
+        <mat-icon class="cadetBlue">clear</mat-icon>
+
+        <h3 matLine>Delete conversation</h3>
+      </mat-list-item>
+
+      <mat-list-item *ngIf="HasConversationWith()" (click)="ClearMessages()">
+
+        <mat-icon class="cadetBlue">
+          remove_circle
+        </mat-icon>
+
+        <h3 matLine>Clear messages</h3>
+      </mat-list-item>
+
+    </mat-action-list>
+  </div>
+
+</div>
+
+  <style>
+    .user_thumbnail {
+      cursor: pointer;
+      background-size: cover;
+      height: 80px;
+      width: 80px;
+      border-radius: 40px;
+    }
+
+    .flexrow{
+      display: flex;
+      flex-direction: row;
+    }
+
+    .centered{
+      align-items: center;
+    }
+
+    .kickButton{
+      color:indianred;
+    }
+
+    .firstname-lastname{
+      margin-left: 10px;
+    }
+
+    .username{
+      margin-left: 10px;
+    }
+
+    .users_in_Conversation_list{
+      height: 200px;
+      overflow-y: scroll;
+    }
+
+    .userinfo_info {
+      display: flex;
+      flex-direction: column;
+      margin-left: 5%;
+    }
+
+    .last-seen{
+      color:dimgray;
+    }
+
+    .userinfo_header {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      color:black;
+    }
+
+    .defaultFont{
+      font: 500 20px/32px Roboto,"Helvetica Neue",sans-serif;
+    }
+
+    .subHeader{
+      font: 400 15px/20px Roboto,"Helvetica Neue",sans-serif;
+    }
+
+    .cadetBlue{
+      color:cadetblue;
+    }
+
+    .thumbnail-input{
+      cursor: pointer;
+      position:absolute;
+      opacity: .01;
+    }
+  </style>

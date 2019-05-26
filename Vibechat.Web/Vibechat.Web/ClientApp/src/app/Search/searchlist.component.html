@@ -48,7 +48,7 @@
     <h3 mat-subheader>Users</h3>
 
     <mat-list-item *ngFor="let user of Users"
-                   (click)="ViewUser(conversation)">
+                   (click)="ViewUser(user)">
 
       <img matListAvatar src="{{user.imageUrl}}" alt="Conversation logo">
 
