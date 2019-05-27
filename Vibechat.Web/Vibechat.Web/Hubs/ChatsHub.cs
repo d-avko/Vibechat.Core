@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Vibechat.Web.Services;
+using Vibechat.Web.Services.Bans;
 using Vibechat.Web.Services.Users;
 using VibeChat.Web.ApiModels;
 using VibeChat.Web.ChatData;
@@ -24,7 +25,7 @@ namespace VibeChat.Web
         private UsersInfoService userService { get; set; }
 
         private ConversationsInfoService conversationsService { get; set; }
-
+        public BansService BansService { get; }
         private ILogger<ChatsHub> logger { get; set; }
 
 
@@ -32,11 +33,13 @@ namespace VibeChat.Web
             ICustomHubUserIdProvider userProvider, 
             UsersInfoService userService,
             ConversationsInfoService conversationsService,
+            BansService bansService,
             ILogger<ChatsHub> logger)
         { 
             this.userProvider = userProvider;
             this.userService = userService;
             this.conversationsService = conversationsService;
+            BansService = bansService;
             this.logger = logger;
         }
 
@@ -62,6 +65,38 @@ namespace VibeChat.Web
                 await conversationsService.RemoveUserFromConversation(userToRemoveId, whoSentId, conversationId, IsSelf);
                 await RemovedFromGroup(userToRemoveId, conversationId, true);
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, conversationId.ToString());
+            }
+            catch(Exception ex)
+            {
+                await SendError(whoSentId, ex.Message);
+                logger.LogError(ex.Message);
+            }
+        }
+
+        public async Task BlockUser(string userId)
+        {
+            var whoSentId = userProvider.GetUserId(Context);
+
+            try
+            {
+                await BansService.BanUser(userId, whoSentId);
+                await BannedFromMessagingWithUser(userId, whoSentId);
+            }
+            catch (Exception ex)
+            {
+                await SendError(whoSentId, ex.Message);
+                logger.LogError(ex.Message);
+            }
+        }
+
+        public async Task BanUserFromConversation(string userId, int conversationId)
+        {
+            var whoSentId = userProvider.GetUserId(Context);
+
+            try
+            {
+                await BansService.BanUserFromConversation(conversationId, userId, whoSentId);
+                await BannedFromConversation(userId, conversationId);
             }
             catch(Exception ex)
             {
@@ -226,6 +261,16 @@ namespace VibeChat.Web
         private async Task SendError(string userid, string error)
         {
             await Clients.User(userid).SendAsync("Error", error);
+        }
+
+        private async Task BannedFromConversation(string who, int conversation)
+        {
+            await Clients.User(who).SendAsync("BannedFromConversation", conversation);
+        }
+
+        private async Task BannedFromMessagingWithUser(string userId, string withWhom)
+        {
+            await Clients.User(userId).SendAsync("BannedFromMessagingWithUser", withWhom);
         }
     }
 }

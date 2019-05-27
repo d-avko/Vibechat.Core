@@ -34,6 +34,8 @@ export class GroupInfoDialogComponent {
 
   public OnJoinGroup = new EventEmitter<ConversationTemplate>();
 
+  public OnBanUser = new EventEmitter<UserInfo>();
+
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
     @Inject(MAT_DIALOG_DATA) public data: GroupInfoData, public formatter: ConversationsFormatter, public ChangeNameDialog: MatDialog) { }
@@ -64,6 +66,10 @@ export class GroupInfoDialogComponent {
 
   public KickUser(user: UserInfo) {
     this.OnKickUser.emit(user);
+  }
+
+  public BanUser(user: UserInfo) {
+    this.OnBanUser.emit(user);
   }
 
   public IsCurrentUserCreatorOfConversation() {

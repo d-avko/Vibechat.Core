@@ -14,20 +14,20 @@
 
   <mat-action-list>
 
-    <mat-list-item *ngIf="IsJoined()" (click)="InviteUsers()">
+    <mat-list-item *ngIf="IsJoined() && !data.Conversation.isMessagingRestricted" (click)="InviteUsers()">
       <mat-icon  class="cadetBlue">person_add</mat-icon>
 
       <h3 matLine>Invite users</h3>
     </mat-list-item>
 
-    <mat-list-item *ngIf="IsJoined()" (click)="ChangeName()">
+    <mat-list-item *ngIf="IsJoined() && !data.Conversation.isMessagingRestricted" (click)="ChangeName()">
 
       <mat-icon  class="cadetBlue">create</mat-icon>
 
       <h3 matLine>Change name</h3>
     </mat-list-item>
 
-    <mat-list-item *ngIf="!IsJoined()" (click)="JoinGroup()">
+    <mat-list-item *ngIf="!IsJoined() && !data.Conversation.isMessagingRestricted" (click)="JoinGroup()">
 
       <mat-icon  class="cadetBlue">person</mat-icon>
 
@@ -41,7 +41,7 @@
       <h3 matLine>Leave</h3>
     </mat-list-item>
 
-    <mat-list-item *ngIf="IsJoined()" (click)="ClearMessages()">
+    <mat-list-item *ngIf="IsJoined() && !data.Conversation.isMessagingRestricted" (click)="ClearMessages()">
 
       <mat-icon class="cadetBlue">
         remove_circle
@@ -65,6 +65,7 @@
       </h3>
 
       <button class="kickButton" *ngIf="IsCurrentUserCreatorOfConversation()" (click)="KickUser(user)" mat-button>Kick</button>
+      <button class="banButon" *ngIf="IsCurrentUserCreatorOfConversation()" (click)="BanUser(user)" mat-button>Ban</button>
 
     </mat-list-item>
 
@@ -79,6 +80,7 @@
       border-radius: 40px;
     }
 
+    .banButon,
     .kickButton{
       color:indianred;
     }

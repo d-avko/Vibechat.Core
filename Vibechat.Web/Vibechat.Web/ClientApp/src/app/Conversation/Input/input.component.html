@@ -1,4 +1,4 @@
-<div class="messages_wrapper_chat-input">
+<div *ngIf="! Conversation.isMessagingRestricted" class="messages_wrapper_chat-input">
 
   <img class="rounded-image" src="{{User.imageUrl}}" />
 
@@ -17,3 +17,9 @@
   </button>
 
 </div>
+
+<div *ngIf="Conversation.isMessagingRestricted" class="banned-input">
+  <mat-icon style="color: indianred">report_problem</mat-icon>
+  <p class="banned-text">You were banned from writing in this conversation.</p>
+</div>
+

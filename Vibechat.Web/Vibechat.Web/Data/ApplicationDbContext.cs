@@ -23,7 +23,9 @@ namespace VibeChat.Web
 
         public DbSet<MessageAttachmentDataModel> Attachments { get; set; }
 
-        public DbSet<BansDatamodel> Bans { get; set; }
+        public DbSet<ConversationsBansDataModel> ConversationsBans { get; set; }
+
+        public DbSet<UsersBansDatamodel> UsersBans { get; set; }
 
         #region Constructor
 
@@ -43,7 +45,6 @@ namespace VibeChat.Web
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<SettingsDataModel>().HasIndex(a => a.Name);
-                
         }
     }
 }

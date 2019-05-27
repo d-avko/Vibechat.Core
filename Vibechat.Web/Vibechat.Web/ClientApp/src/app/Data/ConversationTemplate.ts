@@ -22,4 +22,5 @@ export class ConversationTemplate {
 
   public participants: Array<UserInfo>;
 
+  public isMessagingRestricted: boolean;
 }

@@ -111,7 +111,9 @@ export class ChatComponent implements OnInit {
       (data) => this.OnAddedToGroup(data),
       (error) => this.OnError(error),
       (data) => this.OnRemovedFromGroup(data),
-      () => this.OnDisconnected()
+      () => this.OnDisconnected(),
+      (x) => this.OnBannedFromConversation(x),
+      (y) => this.OnBannedFromUser(y)
     );
 
     this.IsAuthenticated = Cache.IsAuthenticated;
@@ -120,6 +122,18 @@ export class ChatComponent implements OnInit {
   ngOnInit(): void {
     if (this.IsAuthenticated) {
       this.UpdateConversations();
+    }
+  }
+
+  public OnBannedFromConversation(conversationId: number): void {
+    this.Conversations.find(x => x.conversationID == conversationId).isMessagingRestricted = true;
+  }
+
+  public OnBannedFromUser(userId: string) : void {
+    let conversationWithUser = this.Conversations.find(x => !x.isGroup && x.dialogueUser.id == userId);
+
+    if (conversationWithUser != null) {
+      conversationWithUser.isMessagingRestricted = true;
     }
   }
 
@@ -191,7 +205,9 @@ export class ChatComponent implements OnInit {
 
     groupInfoRef.componentInstance.OnKickUser
     .subscribe((user: UserInfo) => this.OnKickUser(user));
-   
+
+    groupInfoRef.componentInstance.OnBanUser
+      .subscribe((user: UserInfo) => this.BanFromConversation(user));
   }
 
   public OnKickUser(user: UserInfo) {
@@ -203,19 +219,74 @@ export class ChatComponent implements OnInit {
     this.connectionManager.RemoveUserFromConversation(user.id, this.CurrentConversation.conversationID, false);
   }
 
+  public BanFromConversation(userToBan: UserInfo) {
+    this.connectionManager.BanUserFromConversation(userToBan.id, this.CurrentConversation.conversationID);
+  }
+
+  public BanFromMessaging(userToBan: UserInfo) {
+    this.connectionManager.BlockUser(userToBan.id);
+
+    let dialog = this.Conversations.find(x => !x.isGroup && x.dialogueUser.id == userToBan.id);
+
+    if (dialog != null) {
+      this.connectionManager.BanUserFromConversation(userToBan.id, dialog.conversationID);
+    }
+  }
+
   public OnJoinGroup(conversation: ConversationTemplate) {
     this.SearchString = '';
     this.connectionManager.AddUserToConversation(this.CurrentUser.id, conversation);
   }
 
   public OnViewUserInfo(user: UserInfo) {
-    const userInfoRef = this.dialog.open(UserInfoDialogComponent, {
-      width: '450px',
-      data: {
-        user: user,
-        currentUser: this.CurrentUser
-      }
-    });
+
+    this.requestsBuilder.IsUserBlocked(Cache.JwtToken, user.id)
+      .subscribe((result) => {
+
+        if (!result.isSuccessfull) {
+          this.snackbar.openSnackBar(result.errorMessage);
+          return;
+        }
+
+        user.isMessagingRestricted = result.response;
+
+        const userInfoRef = this.dialog.open(UserInfoDialogComponent, {
+          width: '450px',
+          data: {
+            user: user,
+            currentUser: this.CurrentUser
+          }
+        });
+
+        userInfoRef.componentInstance.OnBlockUser
+          .subscribe((user: UserInfo) => {
+            this.BanFromMessaging(user);
+          });
+
+        userInfoRef.componentInstance.OnChangeLastname
+          .subscribe((lastName: string) => {
+          });
+
+        userInfoRef.componentInstance.OnChangeName
+          .subscribe((name: string) => {
+          });
+
+        userInfoRef.componentInstance.OnCreateDialogWith
+          .subscribe((user: UserInfo) => {
+
+          });
+
+        userInfoRef.componentInstance.OnRemoveDialogWith
+          .subscribe((user: UserInfo) => {
+
+          });
+
+        userInfoRef.componentInstance.OnUpdateProfilePicture
+          .subscribe((file: File) => {
+
+          });
+
+      })
   }
 
 
@@ -428,6 +499,17 @@ export class ChatComponent implements OnInit {
       conversation.participants.push(data.user);
       conversation.participants = [...conversation.participants];
     }
+
+    this.requestsBuilder.IsConversationsBanned(Cache.JwtToken, new Array<number>(1).fill(data.conversation.conversationID))
+      .subscribe((result) => {
+
+        if (!result.isSuccessfull) {
+          this.snackbar.openSnackBar(result.errorMessage);
+          return;
+        }
+
+        data.conversation.isMessagingRestricted = result.response[0];
+      })
   }
 
   public OnRemovedFromGroup(data: RemovedFromGroupModel) {
@@ -547,6 +629,11 @@ export class ChatComponent implements OnInit {
 
               })
 
+            //fetch 'IsBannedFrom' status for all conversations
+
+            this.UpdateConversationsIsBannedState(response.response.conversations.map(x => x.conversationID));
+              
+
             this.Conversations = response.response.conversations;
 
           } else {
@@ -565,6 +652,21 @@ export class ChatComponent implements OnInit {
     return this.CurrentConversation != null;
   }
 
+  public UpdateConversationsIsBannedState(conversationIds: number[]) {
+    this.requestsBuilder.IsConversationsBanned(Cache.JwtToken, conversationIds)
+      .subscribe((isBannedResponse) => {
+
+        if (!isBannedResponse.isSuccessfull) {
+          this.snackbar.openSnackBar("Failed to update conversations information. Reason: " + isBannedResponse.errorMessage);
+          return;
+        }
+
+        for (let i = 0; i < isBannedResponse.response.length; ++i) {
+          this.Conversations[i].isMessagingRestricted = isBannedResponse.response[i];
+        }
+
+      });
+  }
 
   public ChangeConversation(conversation: ConversationTemplate): void {
     //if we were on search screen, we should hide it

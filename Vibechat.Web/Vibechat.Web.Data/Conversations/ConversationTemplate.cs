@@ -44,5 +44,10 @@ namespace VibeChat.Web.ChatData
         /// </summary>
         public List<UserInfo> Participants { get; set; }
 
+        /// <summary>
+        /// Client-side field, untouched by server
+        /// </summary>
+        public bool IsMessagingRestricted { get; set; }
+
     }
 }

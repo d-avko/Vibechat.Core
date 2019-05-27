@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Vibechat.Web.ApiModels;
 using Vibechat.Web.Services;
+using Vibechat.Web.Services.Bans;
 using Vibechat.Web.Services.Users;
 using VibeChat.Web.ApiModels;
 using VibeChat.Web.ChatData;
@@ -17,12 +18,14 @@ namespace VibeChat.Web.Controllers
     {
         protected UsersInfoService mUsersService;
 
-        public UsersController(UsersInfoService mDbService)
+        public BansService BansService { get; }
+
+        public UsersController(UsersInfoService mDbService, BansService bansService)
         {
             this.mUsersService = mDbService;
+            BansService = bansService;
         }
 
-        #region Users info
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Users/GetById")]
         public async Task<ResponseApiModel<UserByIdApiResponseModel>> GetById([FromBody]UserByIdApiModel userId)
@@ -75,13 +78,19 @@ namespace VibeChat.Web.Controllers
             }
         }
 
+        public class ChangeUserIsPublicStateRequest
+        {
+            public string userId { get; set; }
+        }
+
+
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Users/ChangePublicState")]
-        public async Task<ResponseApiModel<bool>> ChangeUserIsPublicState(string userId)
+        public async Task<ResponseApiModel<bool>> ChangeUserIsPublicState([FromBody]ChangeUserIsPublicStateRequest request)
         {
             try
             {
-               await mUsersService.ChangeUserIsPublicState(userId, 
+               await mUsersService.ChangeUserIsPublicState(request.userId, 
                     User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
                     .Value);
 
@@ -102,6 +111,37 @@ namespace VibeChat.Web.Controllers
                 };
             }
         }
-        #endregion
+
+        public class IsBannedRequest
+        {
+            public string userid { get; set; }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Users/isBanned")]
+        public async Task<ResponseApiModel<bool>> IsBanned([FromBody]IsBannedRequest request)
+        {
+            try
+            {
+                var result = BansService.IsBannedFromMessagingWith(
+                     User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
+                     .Value,
+                     request.userid);
+
+                return new ResponseApiModel<bool>()
+                {
+                    IsSuccessfull = true,
+                    Response = result
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<bool>()
+                {
+                    ErrorMessage = ex.Message,
+                    IsSuccessfull = false
+                };
+            }
+        }
     }
 }

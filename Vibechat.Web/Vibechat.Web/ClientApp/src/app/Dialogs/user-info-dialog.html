@@ -77,7 +77,7 @@
 
     </div>
 
-    <mat-action-list>
+    <mat-action-list *ngIf="!data.user.isMessagingRestricted">
 
       <mat-list-item *ngIf="!HasConversationWith()" (click)="CreateDialog()">
 
@@ -86,7 +86,7 @@
         <h3 matLine>Start chatting</h3>
       </mat-list-item>
 
-      <mat-list-item *ngIf="HasConversationWith()" (click)="Block()">
+      <mat-list-item (click)="Block()">
 
         <mat-icon class="cadetBlue">voice_over_off</mat-icon>
 
@@ -110,6 +110,8 @@
       </mat-list-item>
 
     </mat-action-list>
+
+    <p *ngIf="data.user.isMessagingRestricted" class="subHeader flexrow centered blocked">You were blocked from talking with this user. Actions unavailable.</p>
   </div>
 
 </div>
@@ -126,6 +128,10 @@
     .flexrow{
       display: flex;
       flex-direction: row;
+    }
+
+    .blocked{
+      color:indianred;
     }
 
     .centered{

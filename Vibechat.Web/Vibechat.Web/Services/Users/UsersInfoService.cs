@@ -15,7 +15,8 @@ namespace Vibechat.Web.Services.Users
     {
         private readonly IUsersRepository usersRepository;
 
-        public UsersInfoService(IUsersRepository usersRepository)
+        public UsersInfoService(
+            IUsersRepository usersRepository)
         {
             this.usersRepository = usersRepository;
         }
@@ -103,6 +104,8 @@ namespace Vibechat.Web.Services.Users
         {
             await usersRepository.MakeUserOffline(userId);
         }
+
+
 
     }
 }
