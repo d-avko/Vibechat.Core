@@ -10,14 +10,14 @@ using VibeChat.Web;
 namespace Vibechat.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20190516131201_1")]
-    partial class _1
+    [Migration("20190527154700_Initial1")]
+    partial class Initial1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.8-servicing-32085")
+                .HasAnnotation("ProductVersion", "2.1.11-servicing-32099")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -139,11 +139,15 @@ namespace Vibechat.Web.Migrations
 
                     b.Property<string>("CreatorId");
 
-                    b.Property<string>("ImageUrl");
+                    b.Property<string>("FullImageUrl");
 
                     b.Property<bool>("IsGroup");
 
+                    b.Property<bool>("IsPublic");
+
                     b.Property<string>("Name");
+
+                    b.Property<string>("ThumbnailUrl");
 
                     b.HasKey("ConvID");
 
@@ -160,6 +164,25 @@ namespace Vibechat.Web.Migrations
                     b.HasKey("Name");
 
                     b.ToTable("AttachmentKinds");
+                });
+
+            modelBuilder.Entity("Vibechat.Web.Data.DataModels.ConversationsBansDataModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("BannedUserId");
+
+                    b.Property<int?>("ConversationConvID");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BannedUserId");
+
+                    b.HasIndex("ConversationConvID");
+
+                    b.ToTable("ConversationsBans");
                 });
 
             modelBuilder.Entity("VibeChat.Web.Data.DataModels.MessageAttachmentDataModel", b =>
@@ -183,6 +206,25 @@ namespace Vibechat.Web.Migrations
                     b.HasIndex("AttachmentKindName");
 
                     b.ToTable("Attachments");
+                });
+
+            modelBuilder.Entity("Vibechat.Web.Data.DataModels.UsersBansDatamodel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("BannedById");
+
+                    b.Property<string>("BannedUserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BannedById");
+
+                    b.HasIndex("BannedUserId");
+
+                    b.ToTable("UsersBans");
                 });
 
             modelBuilder.Entity("VibeChat.Web.Data.SettingsDataModel", b =>
@@ -269,6 +311,8 @@ namespace Vibechat.Web.Migrations
                     b.Property<string>("FirstName");
 
                     b.Property<bool>("IsOnline");
+
+                    b.Property<bool>("IsPublic");
 
                     b.Property<string>("LastName");
 
@@ -383,11 +427,33 @@ namespace Vibechat.Web.Migrations
                         .HasForeignKey("CreatorId");
                 });
 
+            modelBuilder.Entity("Vibechat.Web.Data.DataModels.ConversationsBansDataModel", b =>
+                {
+                    b.HasOne("VibeChat.Web.UserInApplication", "BannedUser")
+                        .WithMany()
+                        .HasForeignKey("BannedUserId");
+
+                    b.HasOne("VibeChat.Web.ConversationDataModel", "Conversation")
+                        .WithMany()
+                        .HasForeignKey("ConversationConvID");
+                });
+
             modelBuilder.Entity("VibeChat.Web.Data.DataModels.MessageAttachmentDataModel", b =>
                 {
                     b.HasOne("VibeChat.Web.Data.DataModels.AttachmentKindDataModel", "AttachmentKind")
                         .WithMany()
                         .HasForeignKey("AttachmentKindName");
+                });
+
+            modelBuilder.Entity("Vibechat.Web.Data.DataModels.UsersBansDatamodel", b =>
+                {
+                    b.HasOne("VibeChat.Web.UserInApplication", "BannedBy")
+                        .WithMany()
+                        .HasForeignKey("BannedById");
+
+                    b.HasOne("VibeChat.Web.UserInApplication", "BannedUser")
+                        .WithMany()
+                        .HasForeignKey("BannedUserId");
                 });
 
             modelBuilder.Entity("VibeChat.Web.DeletedMessagesDataModel", b =>

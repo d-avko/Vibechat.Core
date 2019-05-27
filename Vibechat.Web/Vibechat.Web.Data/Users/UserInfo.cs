@@ -43,5 +43,11 @@ namespace VibeChat.Web.ChatData
         public bool IsOnline { get; set; }
 
         public bool IsPublic { get; set; }
+
+        /// <summary>
+        /// Field indicates if user who is querying the data was banned by this user.
+        /// This field is filled automatically.
+        /// </summary>
+        public bool IsMessagingRestricted { get; set; }
     }
 }

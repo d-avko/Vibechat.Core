@@ -175,5 +175,25 @@ export class ApiRequestsBuilder {
       { headers: headers });
   }
 
+  public IsConversationsBanned(token: string, conversationids: Array<number>): Observable<ServerResponse<Array<boolean>>> {
+    let headers = new HttpHeaders();
+    headers = headers.append('Authorization', 'Bearer ' + token);
+
+    return this.httpClient.post<ServerResponse<Array<boolean>>>(
+      this.baseUrl + 'api/Conversations/isBannedFrom',
+      { conversationIds: conversationids },
+      { headers: headers });
+  }
+
+  public IsUserBlocked(token: string, userId: string): Observable<ServerResponse<boolean>> {
+    let headers = new HttpHeaders();
+    headers = headers.append('Authorization', 'Bearer ' + token);
+
+    return this.httpClient.post<ServerResponse<boolean>>(
+      this.baseUrl + 'api/Users/isBanned',
+      { userId: userId },
+      { headers: headers });
+  }
+
 
 }

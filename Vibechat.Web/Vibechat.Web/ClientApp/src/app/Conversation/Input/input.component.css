@@ -27,3 +27,17 @@
   justify-content: center;
   height: 17%;
 }
+
+.banned-input {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  height: 17%;
+}
+
+.banned-text {
+  margin-left: 10px;
+  color: dimgray;
+  font: 500 16px/25px Roboto,"Helvetica Neue",sans-serif;
+}

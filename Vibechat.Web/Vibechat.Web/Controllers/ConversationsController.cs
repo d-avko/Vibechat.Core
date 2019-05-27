@@ -11,6 +11,7 @@ using Vibechat.Web.ApiModels;
 using Vibechat.Web.Data.ApiModels.Conversation;
 using Vibechat.Web.Data.ApiModels.Messages;
 using Vibechat.Web.Services;
+using Vibechat.Web.Services.Bans;
 using Vibechat.Web.Services.FileSystem;
 using VibeChat.Web.ApiModels;
 using VibeChat.Web.ChatData;
@@ -21,10 +22,14 @@ namespace VibeChat.Web.Controllers
     {
         protected ConversationsInfoService mConversationService;
 
+        public BansService BansService { get; }
+
         public ConversationsController(
-            ConversationsInfoService mDbService)
+            ConversationsInfoService mDbService,
+            BansService bansService)
         {
             this.mConversationService = mDbService;
+            BansService = bansService;
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -300,13 +305,18 @@ namespace VibeChat.Web.Controllers
             }
         }
 
+        public class ChangeConversationPublicStateRequest
+        {
+            public int conversationId{ get; set; }
+        }
+
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/ChangePublicState")]
-        public async Task<ResponseApiModel<bool>> ChangeConversationPublicState(int conversationId)
+        public async Task<ResponseApiModel<bool>> ChangeConversationPublicState([FromBody]ChangeConversationPublicStateRequest request)
         { 
             try
             {
-               await mConversationService.ChangePublicState(conversationId,
+               await mConversationService.ChangePublicState(request.conversationId,
                     User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
                     .Value);
 
@@ -319,6 +329,37 @@ namespace VibeChat.Web.Controllers
             catch (Exception ex)
             {
                 return new ResponseApiModel<bool>()
+                {
+                    ErrorMessage = ex.Message,
+                    IsSuccessfull = false
+                };
+            }
+        }
+
+        public class IsBannedFromRequest
+        {
+            public int[] conversationIds{ get; set; }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Conversations/isBannedFrom")]
+        public async Task<ResponseApiModel<bool[]>> IsBannedFrom([FromBody]IsBannedFromRequest request)
+        {
+            try
+            {
+                var result = await BansService.IsBannedFromConversations(request.conversationIds,
+                     User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
+                     .Value);
+
+                return new ResponseApiModel<bool[]>()
+                {
+                    IsSuccessfull = true,
+                    Response = result
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<bool[]>()
                 {
                     ErrorMessage = ex.Message,
                     IsSuccessfull = false

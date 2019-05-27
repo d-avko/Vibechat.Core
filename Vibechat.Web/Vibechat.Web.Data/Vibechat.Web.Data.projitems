@@ -9,6 +9,7 @@
     <Import_RootNamespace>Vibechat.Web.Data</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Bans\BanUserRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\AddToConversationApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\AddToConversationResultApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\ChangeConversationNameRequest.cs" />

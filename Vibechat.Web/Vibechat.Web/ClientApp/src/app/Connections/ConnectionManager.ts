@@ -32,13 +32,19 @@ export class ConnectionManager {
 
   private OnDisconnected: () => void;
 
+  private OnBannedFromConversation: (conversationId: number) => void;
+
+  private OnBannedFromMessagingWithUser: (userId: string) => void;
+
   constructor(
     convIdsFactory: ConversationIdsFactory,
     onMessageReceived: MessageReceivedDelegate,
     onAddedToGroup: AddedToConversationDelegate,
     onError: ErrorDelegate,
     OnRemovedFromGroupDelegate: RemovedFromGroupDelegate,
-    OnDisconnected: () => void) {
+    OnDisconnected: () => void,
+    OnBannedFromConversation: (conversationId: number) => void,
+    OnBannedFromMessagingWithUser: (userId: string) => void) {
 
     this.onMessageReceived = onMessageReceived;
     this.onAddedToGroup = onAddedToGroup;
@@ -46,6 +52,8 @@ export class ConnectionManager {
     this.onError = onError;
     this.OnRemovedFromGroupDelegate = OnRemovedFromGroupDelegate;
     this.OnDisconnected = OnDisconnected;
+    this.OnBannedFromConversation = OnBannedFromConversation;
+    this.OnBannedFromMessagingWithUser = OnBannedFromMessagingWithUser;
   }
 
   public Start(): void {
@@ -78,6 +86,14 @@ export class ConnectionManager {
       this.OnRemovedFromGroupDelegate(new RemovedFromGroupModel({ userId: userId, conversationId: conversationId }));
     });
 
+    this.connection.on("BannedFromConversation", (conversationId: number) => {
+      this.OnBannedFromConversation(conversationId);
+    });
+
+    this.connection.on("BannedFromMessagingWithUser", (userId: string) => {
+      this.OnBannedFromMessagingWithUser(userId);
+    });
+
   }
 
   public SendMessage(message: ChatMessage, conversation: ConversationTemplate) : void {
@@ -91,6 +107,14 @@ export class ConnectionManager {
       this.connection.send("SendMessageToUser", message, conversation.dialogueUser.id, conversation.conversationID);
 
     }
+  }
+
+  public BlockUser(userId: string) {
+    this.connection.send("BlockUser", userId);
+  }
+
+  public BanUserFromConversation(userId: string, conversationId: number) {
+    this.connection.send("BanUserFromConversation", userId, conversationId);
   }
 
   public AddUserToConversation(userId: string, conversation: ConversationTemplate) {

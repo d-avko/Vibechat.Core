@@ -5,6 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using Vibechat.Web.AuthHelpers;
+using Vibechat.Web.Services.Bans;
 using Vibechat.Web.Services.ChatDataProviders;
 using Vibechat.Web.Services.FileSystem;
 using Vibechat.Web.Services.Hashing;
@@ -35,6 +36,8 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddScoped<IAttachmentKindsRepository, AttachmentKindsRepository>();
             services.AddScoped<IUsersConversationsRepository, UsersConversationsRepository>();
             services.AddScoped<IConversationRepository, ConversationsRepository>();
+            services.AddScoped<IConversationsBansRepository, ConversationsBansRepository>();
+            services.AddScoped<IUsersBansRepository, UsersBansRepository>();
         }
 
         public static void AddBusinessLogic(this IServiceCollection services)
@@ -48,6 +51,7 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddSingleton<IHexHashingService, Sha256Service>();
             services.AddSingleton<UniquePathsProvider, UniquePathsProvider>();
             services.AddScoped<ImagesService, ImagesService>();
+            services.AddScoped<BansService, BansService>();
         }
     }
 }

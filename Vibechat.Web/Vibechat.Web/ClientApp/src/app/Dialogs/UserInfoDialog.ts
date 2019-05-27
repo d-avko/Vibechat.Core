@@ -19,17 +19,17 @@ export class UserInfoDialogComponent {
 
   @Input() public Conversations: Array<ConversationTemplate>;
 
-  @Output() public OnRemoveConversation = new EventEmitter<void>();
+  public OnRemoveDialogWith = new EventEmitter<UserInfo>();
 
-  @Output() public OnCreateDialog = new EventEmitter<UserInfo>();
+  public OnCreateDialogWith = new EventEmitter<UserInfo>();
 
-  @Output() public OnBlockUser = new EventEmitter<UserInfo>();
+  public OnBlockUser = new EventEmitter<UserInfo>();
 
-  @Output() public OnUpdateProfilePicture = new EventEmitter<File>();
+  public OnUpdateProfilePicture = new EventEmitter<File>();
 
-  @Output() public OnChangeName = new EventEmitter<string>();
+  public OnChangeName = new EventEmitter<string>();
 
-  @Output() public OnChangeLastname = new EventEmitter<string>();
+  public OnChangeLastname = new EventEmitter<string>();
 
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
@@ -44,11 +44,11 @@ export class UserInfoDialogComponent {
   }
 
   public DeleteConversation() : void {
-    this.OnRemoveConversation.emit();
+    this.OnRemoveDialogWith.emit(this.data.user);
   }
 
   public CreateDialog(): void {
-    this.OnCreateDialog.emit(this.data.user);
+    this.OnCreateDialogWith.emit(this.data.user);
   }
 
   public Block(): void {
