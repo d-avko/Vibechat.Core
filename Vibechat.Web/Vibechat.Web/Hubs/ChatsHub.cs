@@ -73,38 +73,6 @@ namespace VibeChat.Web
             }
         }
 
-        public async Task BlockUser(string userId)
-        {
-            var whoSentId = userProvider.GetUserId(Context);
-
-            try
-            {
-                await BansService.BanUser(userId, whoSentId);
-                await BannedFromMessagingWithUser(userId, whoSentId);
-            }
-            catch (Exception ex)
-            {
-                await SendError(whoSentId, ex.Message);
-                logger.LogError(ex.Message);
-            }
-        }
-
-        public async Task BanUserFromConversation(string userId, int conversationId)
-        {
-            var whoSentId = userProvider.GetUserId(Context);
-
-            try
-            {
-                await BansService.BanUserFromConversation(conversationId, userId, whoSentId);
-                await BannedFromConversation(userId, conversationId);
-            }
-            catch(Exception ex)
-            {
-                await SendError(whoSentId, ex.Message);
-                logger.LogError(ex.Message);
-            }
-        }
-
         /// <summary>
         /// Used to add user to specified group
         /// </summary>
@@ -261,16 +229,6 @@ namespace VibeChat.Web
         private async Task SendError(string userid, string error)
         {
             await Clients.User(userid).SendAsync("Error", error);
-        }
-
-        private async Task BannedFromConversation(string who, int conversation)
-        {
-            await Clients.User(who).SendAsync("BannedFromConversation", conversation);
-        }
-
-        private async Task BannedFromMessagingWithUser(string userId, string withWhom)
-        {
-            await Clients.User(userId).SendAsync("BannedFromMessagingWithUser", withWhom);
         }
     }
 }

@@ -17,4 +17,6 @@ export class UserInfo {
   public isOnline: boolean;
 
   public isMessagingRestricted: boolean;
+
+  public isBlocked: boolean;
 }

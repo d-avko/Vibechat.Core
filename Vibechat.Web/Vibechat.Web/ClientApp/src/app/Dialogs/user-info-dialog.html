@@ -86,13 +86,6 @@
         <h3 matLine>Start chatting</h3>
       </mat-list-item>
 
-      <mat-list-item (click)="Block()">
-
-        <mat-icon class="cadetBlue">voice_over_off</mat-icon>
-
-        <h3 matLine>Block this user</h3>
-      </mat-list-item>
-
       <mat-list-item *ngIf="HasConversationWith()" (click)="DeleteConversation()">
 
         <mat-icon class="cadetBlue">clear</mat-icon>
@@ -111,7 +104,28 @@
 
     </mat-action-list>
 
-    <p *ngIf="data.user.isMessagingRestricted" class="subHeader flexrow centered blocked">You were blocked from talking with this user. Actions unavailable.</p>
+    <mat-action-list>
+
+      <mat-list-item *ngIf="!data.user.isBlocked" (click)="Block()">
+
+        <mat-icon class="cadetBlue">voice_over_off</mat-icon>
+
+        <h3 matLine>Block this user</h3>
+
+      </mat-list-item>
+
+      <mat-list-item *ngIf="data.user.isBlocked" (click)="UnBlock()">
+
+        <mat-icon class="cadetBlue">voice_over_off</mat-icon>
+
+        <h3 matLine>Unblock this user</h3>
+      </mat-list-item>
+
+    </mat-action-list>
+
+    <p *ngIf="data.user.isMessagingRestricted" class="subHeader flexrow centered blocked">
+    You were blocked from talking with this user. Actions unavailable.
+    </p>
   </div>
 
 </div>

@@ -93,9 +93,8 @@ namespace VibeChat.Web.Controllers
             try
             {
                 var result = await mConversationService.GetConversationInformation(
-                    UserProvided, 
-                    User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
-                    .Value);
+                    UserProvided,
+                    JwtHelper.GetNamedClaim(User.Claims));
 
                 return new ResponseApiModel<ConversationInfoResultApiModel>()
                 {
@@ -151,8 +150,7 @@ namespace VibeChat.Web.Controllers
             {
                 var result = await mConversationService.GetConversationMessages(
                     convInfo,
-                    User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
-                    .Value);
+                     JwtHelper.GetNamedClaim(User.Claims));
 
                 return new ResponseApiModel<GetMessagesResultApiModel>()
                 {
@@ -181,8 +179,7 @@ namespace VibeChat.Web.Controllers
             {
                 await mConversationService.DeleteConversationMessages(
                     messagesInfo,
-                    User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
-                    .Value);
+                     JwtHelper.GetNamedClaim(User.Claims));
 
                 return new ResponseApiModel<string>()
                 {
@@ -210,8 +207,7 @@ namespace VibeChat.Web.Controllers
             {
                 var result = await mConversationService.GetConversationById(
                     convInfo,
-                    User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
-                    .Value);
+                     JwtHelper.GetNamedClaim(User.Claims));
 
                 return new ResponseApiModel<GetConversationByIdResultApiModel>()
                 {
@@ -279,15 +275,22 @@ namespace VibeChat.Web.Controllers
             }
         }
 
+        public class BanRequest
+        {
+            public string userId { get; set; }
+
+            public int conversationId { get; set; }
+        }
+
+
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/SearchGroups")]
         public async Task<ResponseApiModel<List<ConversationTemplate>>> SearchGroups([FromBody] SearchRequest request)
         {
             try
             {
-                var result = await mConversationService.SearchForGroups(request.SearchString, 
-                    User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
-                    .Value);
+                var result = await mConversationService.SearchForGroups(request.SearchString,
+                     JwtHelper.GetNamedClaim(User.Claims));
 
                 return new ResponseApiModel<List<ConversationTemplate>>()
                 {
@@ -317,8 +320,34 @@ namespace VibeChat.Web.Controllers
             try
             {
                await mConversationService.ChangePublicState(request.conversationId,
-                    User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
-                    .Value);
+                     JwtHelper.GetNamedClaim(User.Claims));
+
+                return new ResponseApiModel<bool>()
+                {
+                    IsSuccessfull = true,
+                    Response = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<bool>()
+                {
+                    ErrorMessage = ex.Message,
+                    IsSuccessfull = false
+                };
+            }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Conversations/BanFrom")]
+        public async Task<ResponseApiModel<bool>> BanFrom([FromBody] BanRequest request)
+        {
+            try
+            {
+                await BansService.BanUserFromConversation(
+                    request.conversationId,
+                    request.userId,
+                    JwtHelper.GetNamedClaim(User.Claims));
 
                 return new ResponseApiModel<bool>()
                 {
@@ -348,8 +377,7 @@ namespace VibeChat.Web.Controllers
             try
             {
                 var result = await BansService.IsBannedFromConversations(request.conversationIds,
-                     User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
-                     .Value);
+                      JwtHelper.GetNamedClaim(User.Claims));
 
                 return new ResponseApiModel<bool[]>()
                 {

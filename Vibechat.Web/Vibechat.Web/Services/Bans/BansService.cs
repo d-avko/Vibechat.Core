@@ -100,9 +100,22 @@ namespace Vibechat.Web.Services.Bans
                    select ConversationsBansRepository.IsBanned(who, id)).ToArray();
         }
 
-        public bool IsBannedFromMessagingWith(string whoAccessed, string targetId)
+        public bool IsBannedFromMessagingWith(string who, string byWho)
         {
-            return UsersBansRepository.IsBanned(whoAccessed, targetId);
+            // check if allowed
+            return UsersBansRepository.IsBanned(who, byWho);
+        }
+
+        public async Task Unban(string userId, string whoUnbans)
+        {
+            try
+            {
+                UsersBansRepository.UnbanUser(userId, whoUnbans);
+            }
+            catch
+            {
+                throw new FormatException("Wrong id of a person to unban.");
+            }
         }
     }
 }

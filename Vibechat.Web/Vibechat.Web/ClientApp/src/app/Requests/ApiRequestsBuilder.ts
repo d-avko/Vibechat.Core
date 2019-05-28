@@ -35,92 +35,87 @@ export class ApiRequestsBuilder {
   }
 
   public LoginRequest(credentials: LoginRequest): Observable<ServerResponse<LoginResponse>>{
-    return this.httpClient.post<ServerResponse<LoginResponse>>(this.baseUrl + "api/login", credentials);
+    return this.MakeNonAuthorizedCall<LoginResponse>(
+      credentials,
+      'api/login'
+    );
   }
 
   public RegisterRequest(credentials: RegisterRequest): Observable<ServerResponse<string>> {
-    return this.httpClient.post<ServerResponse<string>>(this.baseUrl + "api/register", credentials);
+    return this.MakeNonAuthorizedCall<string>(
+      credentials,
+      'api/register'
+    );
   }
 
   public UpdateConversationsRequest(token: string, userId: string): Observable<ServerResponse<ConversationResponse>> {
 
-    let headers = new HttpHeaders();
-    headers = headers.append('Authorization', 'Bearer ' + token);
-
-    return this.httpClient.post<ServerResponse<ConversationResponse>>(
-      this.baseUrl + 'api/Conversations/GetInfo',
-      new ConversationsRequest(
-        {
-          UserId: userId
-        }),
-      { headers: headers });
+    return this.MakeAuthorizedCall<ConversationResponse>(
+      token,
+      {
+        UserId: userId
+      },
+      'api/Conversations/GetInfo'
+    );
   }
 
   public GetConversationMessages(offset: number, count: number, conversationId: number, token: string): Observable<ServerResponse<ConversationMessagesResponse>> {
-    let headers = new HttpHeaders();
-    headers = headers.append('Authorization', 'Bearer ' + token);
 
-    return this.httpClient.post<ServerResponse<ConversationMessagesResponse>>(
-      this.baseUrl + 'api/Conversations/GetMessages',
-      new ConversationMessagesRequest(
+    return this.MakeAuthorizedCall<ConversationMessagesResponse>(
+      token,
         {
           Count: count,
           ConversationID: conversationId,
           MesssagesOffset: offset
-        }),
-      { headers: headers });
+        },
+      'api/Conversations/GetMessages'
+    );
   }
 
   public DeleteMessages(messages: Array<ChatMessage>, conversationId: number, token: string) : Observable<ServerResponse<string>> {
-    let headers = new HttpHeaders();
-    headers = headers.append('Authorization', 'Bearer ' + token);
 
-    return this.httpClient.post<ServerResponse<string>>(
-      this.baseUrl + 'api/Conversations/DeleteMessages',
-      new DeleteMessagesRequest(
+    return this.MakeAuthorizedCall<string>(
+      token,
         {
           MessagesId: messages.map(x => x.id),
           ConversationId: conversationId
-        }),
-      { headers: headers });
+        },
+      'api/Conversations/DeleteMessages'
+    );
+
   }
 
   public UploadImages(files: FileList, token: string): Observable<ServerResponse<UploadFilesResponse>> {
-    let headers = new HttpHeaders();
-    headers = headers.append('Authorization', 'Bearer ' + token);
-
     let data = new FormData();
-
     for (let i = 0; i < files.length; ++i) {
       data.append('images', files[i]);
     }
 
-    return this.httpClient.post<ServerResponse<UploadFilesResponse>>("Files/UploadImages",
+    return this.MakeAuthorizedCall<UploadFilesResponse>(
+      token,
       data,
-      { headers: headers });
+      'Files/UploadImages'
+    );
   }
 
   public UploadConversationThumbnail(thumbnail: File, conversationId: number, token: string): Observable<ServerResponse<UpdateThumbnailResponse>> {
-    let headers = new HttpHeaders();
-    headers = headers.append('Authorization', 'Bearer ' + token);
-
     let data = new FormData();
     data.append('thumbnail', thumbnail);
     data.append('conversationId', conversationId.toString());
 
-    return this.httpClient.post<ServerResponse<UpdateThumbnailResponse>>("api/Conversations/UpdateThumbnail",
+    return this.MakeAuthorizedCall<UpdateThumbnailResponse>(
+      token,
       data,
-      { headers: headers });
+      'api/Conversations/UpdateThumbnail'
+    );
   }
 
   public FindUsersByUsername(token: string, username: string): Observable<ServerResponse<FoundUsersResponse>> {
-    let headers = new HttpHeaders();
-    headers = headers.append('Authorization', 'Bearer ' + token);
-
-    return this.httpClient.post<ServerResponse<FoundUsersResponse>>(
-      this.baseUrl + 'api/Users/FindByNickname',
+    return this.MakeAuthorizedCall<FoundUsersResponse>(
+      token,
       { UsernameToFind: username },
-      { headers: headers });
+      'api/Users/FindByNickname'
+    );
   }
 
   public CreateConversation(
@@ -133,11 +128,8 @@ export class ApiRequestsBuilder {
     isPublic: boolean)
   : Observable<ServerResponse<ConversationTemplate>>
   {
-    let headers = new HttpHeaders();
-    headers = headers.append('Authorization', 'Bearer ' + token);
-
-    return this.httpClient.post<ServerResponse<ConversationTemplate>>(
-      this.baseUrl + 'api/Conversations/Create',
+    return this.MakeAuthorizedCall<ConversationTemplate>(
+      token,
       {
         ConversationName: name,
         CreatorId: whoCreatedId,
@@ -146,54 +138,98 @@ export class ApiRequestsBuilder {
         IsGroup: isGroup,
         IsPublic: isPublic
       },
-      { headers: headers });
+      'api/Conversations/Create'
+    );
+
   }
 
-  public ChangeConversationName(newName: string, conversationId: number, token: string) : Observable<ServerResponse<boolean>> {
-    let headers = new HttpHeaders();
-    headers = headers.append('Authorization', 'Bearer ' + token);
+  public ChangeConversationName(newName: string, conversationId: number, token: string): Observable<ServerResponse<boolean>> {
 
-    return this.httpClient.post<ServerResponse<boolean>>(
-      this.baseUrl + 'api/Conversations/ChangeName',
-      { ConversationId: conversationId, Name: newName},
-      { headers: headers });
+    return this.MakeAuthorizedCall<boolean>(
+      token,
+      { ConversationId: conversationId, Name: newName },
+      'api/Conversations/ChangeName'
+    );
+
   }
 
   public RefreshJwtToken(oldToken: string, userId: string): Observable<ServerResponse<string>>{
-    return this.httpClient.post<ServerResponse<string>>(
-      this.baseUrl + 'api/Tokens/Refresh',
-      { OldToken: oldToken, UserId: userId });
+    return this.MakeNonAuthorizedCall<string>(
+      { OldToken: oldToken, UserId: userId },
+      'api/Tokens/Refresh'
+    );
   }
 
   public SearchForGroups(token: string, searchstring: string): Observable<ServerResponse<Array<ConversationTemplate>>>{
-    let headers = new HttpHeaders();
-    headers = headers.append('Authorization', 'Bearer ' + token);
 
-    return this.httpClient.post<ServerResponse<Array<ConversationTemplate>>>(
-      this.baseUrl + 'api/Conversations/SearchGroups',
+    return this.MakeAuthorizedCall<Array<ConversationTemplate>>(
+      token,
       { SearchString: searchstring },
-      { headers: headers });
+      'api/Conversations/SearchGroups'
+    );
+
   }
 
   public IsConversationsBanned(token: string, conversationids: Array<number>): Observable<ServerResponse<Array<boolean>>> {
-    let headers = new HttpHeaders();
-    headers = headers.append('Authorization', 'Bearer ' + token);
 
-    return this.httpClient.post<ServerResponse<Array<boolean>>>(
-      this.baseUrl + 'api/Conversations/isBannedFrom',
+    return this.MakeAuthorizedCall<Array<boolean>>(
+      token,
       { conversationIds: conversationids },
-      { headers: headers });
+      'api/Conversations/isBannedFrom'
+    );
+
   }
 
-  public IsUserBlocked(token: string, userId: string): Observable<ServerResponse<boolean>> {
+  public IsUserBlocked(token: string, userId: string, byWhom: string): Observable<ServerResponse<boolean>> {
+
+    return this.MakeAuthorizedCall<boolean>(
+      token,
+      { userId: userId, byWhom: byWhom },
+      'api/Users/isBanned'
+    );
+
+  }
+
+  public UnbanUser(token: string, userId: string): Observable<ServerResponse<boolean>> {
+
+    return this.MakeAuthorizedCall<boolean>(
+      token,
+      { userId: userId },
+      'api/Users/Unban'
+    );
+
+  }
+
+  public BanUser(token: string, userId: string): Observable<ServerResponse<boolean>> {
+    return this.MakeAuthorizedCall<boolean>(
+      token,
+      { userId: userId },
+      'api/Users/Block'
+    );
+  }
+
+  public BanFromConversation(token: string, userId: string, conversationId: number): Observable<ServerResponse<boolean>> {
+    return this.MakeAuthorizedCall<boolean>(
+      token,
+      { userId: userId, conversationId: conversationId },
+      'api/Conversations/BanFrom'
+    );
+  }
+
+  private MakeAuthorizedCall<T>(token: string, data: any, url: string): Observable<ServerResponse<T>> {
     let headers = new HttpHeaders();
     headers = headers.append('Authorization', 'Bearer ' + token);
 
-    return this.httpClient.post<ServerResponse<boolean>>(
-      this.baseUrl + 'api/Users/isBanned',
-      { userId: userId },
+    return this.httpClient.post<ServerResponse<T>>(
+      this.baseUrl + url,
+      data,
       { headers: headers });
   }
 
+  private MakeNonAuthorizedCall<T>(data: any, url: string): Observable<ServerResponse<T>> {
+    return this.httpClient.post<ServerResponse<T>>(
+      this.baseUrl + url,
+      data);
+  }
 
 }
