@@ -68,7 +68,7 @@ namespace Vibechat.Web.Extensions
                 MessageContent = value.MessageContent,
                 TimeReceived = value.TimeReceived,
                 User = value.User?.ToUserInfo(),
-                AttachmentInfo = value.AttachmentInfo == null ? null : value.ToMessageAttachment(),
+                AttachmentInfo = value?.ToMessageAttachment(),
                 IsAttachment = value.IsAttachment
             };
         }

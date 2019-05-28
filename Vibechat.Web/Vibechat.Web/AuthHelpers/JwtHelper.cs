@@ -1,6 +1,8 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 
@@ -8,7 +10,7 @@ namespace VibeChat.Web
 {
     public static class JwtHelper
     {
-        public static string JwtUserIdClaimName => "UserId";
+        public const string JwtUserIdClaimName = "UserId";
         /// <summary>
         /// Generates jwt token and returns it as string
         /// </summary>
@@ -38,6 +40,11 @@ namespace VibeChat.Web
                 );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public static string GetNamedClaim(IEnumerable<Claim> claims, string name = JwtUserIdClaimName)
+        {
+            return claims.FirstOrDefault(x => x.Type == name)?.Value;
         }
     }
 }

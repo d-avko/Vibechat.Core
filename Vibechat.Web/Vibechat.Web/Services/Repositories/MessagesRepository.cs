@@ -88,7 +88,7 @@ namespace Vibechat.Web.Services.Repositories
             .DeletedMessages
             .Where(msg => msg.Message.ConversationID == conversationId && msg.UserId == userId);
 
-            return mContext
+           return mContext
                 .Messages
                 .Where(msg => msg.ConversationID == conversationId)
                 .Where(msg => !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID))

@@ -111,9 +111,7 @@ export class ChatComponent implements OnInit {
       (data) => this.OnAddedToGroup(data),
       (error) => this.OnError(error),
       (data) => this.OnRemovedFromGroup(data),
-      () => this.OnDisconnected(),
-      (x) => this.OnBannedFromConversation(x),
-      (y) => this.OnBannedFromUser(y)
+      () => this.OnDisconnected()
     );
 
     this.IsAuthenticated = Cache.IsAuthenticated;
@@ -122,18 +120,6 @@ export class ChatComponent implements OnInit {
   ngOnInit(): void {
     if (this.IsAuthenticated) {
       this.UpdateConversations();
-    }
-  }
-
-  public OnBannedFromConversation(conversationId: number): void {
-    this.Conversations.find(x => x.conversationID == conversationId).isMessagingRestricted = true;
-  }
-
-  public OnBannedFromUser(userId: string) : void {
-    let conversationWithUser = this.Conversations.find(x => !x.isGroup && x.dialogueUser.id == userId);
-
-    if (conversationWithUser != null) {
-      conversationWithUser.isMessagingRestricted = true;
     }
   }
 
@@ -220,17 +206,28 @@ export class ChatComponent implements OnInit {
   }
 
   public BanFromConversation(userToBan: UserInfo) {
-    this.connectionManager.BanUserFromConversation(userToBan.id, this.CurrentConversation.conversationID);
+    this.requestsBuilder.BanFromConversation(Cache.JwtToken, userToBan.id, this.CurrentConversation.conversationID)
+      .subscribe((result) => {
+        if (!result.isSuccessfull) {
+          this.snackbar.openSnackBar(result.errorMessage);
+          return;
+        }
+
+        //should mark some flag there that user was banned successfully.
+      });
   }
 
   public BanFromMessaging(userToBan: UserInfo) {
-    this.connectionManager.BlockUser(userToBan.id);
+    this.requestsBuilder.BanUser(Cache.JwtToken, userToBan.id)
+      .subscribe((result) => {
 
-    let dialog = this.Conversations.find(x => !x.isGroup && x.dialogueUser.id == userToBan.id);
+        if (!result.isSuccessfull) {
+          this.snackbar.openSnackBar(result.errorMessage);
+          return;
+        }
 
-    if (dialog != null) {
-      this.connectionManager.BanUserFromConversation(userToBan.id, dialog.conversationID);
-    }
+        userToBan.isBlocked = true;
+      });
   }
 
   public OnJoinGroup(conversation: ConversationTemplate) {
@@ -240,7 +237,7 @@ export class ChatComponent implements OnInit {
 
   public OnViewUserInfo(user: UserInfo) {
 
-    this.requestsBuilder.IsUserBlocked(Cache.JwtToken, user.id)
+    this.requestsBuilder.IsUserBlocked(Cache.JwtToken, this.CurrentUser.id, user.id)
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
@@ -250,45 +247,73 @@ export class ChatComponent implements OnInit {
 
         user.isMessagingRestricted = result.response;
 
-        const userInfoRef = this.dialog.open(UserInfoDialogComponent, {
-          width: '450px',
-          data: {
-            user: user,
-            currentUser: this.CurrentUser
-          }
-        });
+        this.requestsBuilder.IsUserBlocked(Cache.JwtToken, user.id, this.CurrentUser.id)
+          .subscribe((result) => {
 
-        userInfoRef.componentInstance.OnBlockUser
-          .subscribe((user: UserInfo) => {
-            this.BanFromMessaging(user);
-          });
+            if (!result.isSuccessfull) {
+              this.snackbar.openSnackBar(result.errorMessage);
+              return;
+            }
 
-        userInfoRef.componentInstance.OnChangeLastname
-          .subscribe((lastName: string) => {
-          });
+            user.isBlocked = result.response;
 
-        userInfoRef.componentInstance.OnChangeName
-          .subscribe((name: string) => {
-          });
+            const userInfoRef = this.dialog.open(UserInfoDialogComponent, {
+              width: '450px',
+              data: {
+                user: user,
+                currentUser: this.CurrentUser
+              }
+            });
 
-        userInfoRef.componentInstance.OnCreateDialogWith
-          .subscribe((user: UserInfo) => {
+            userInfoRef.componentInstance.OnBlockUser
+              .subscribe((user: UserInfo) => {
+                this.BanFromMessaging(user);
+              });
 
-          });
+            userInfoRef.componentInstance.OnUnblockUser
+              .subscribe((user: UserInfo) => {
+                this.OnUnblockUser(user);
+              });
 
-        userInfoRef.componentInstance.OnRemoveDialogWith
-          .subscribe((user: UserInfo) => {
+            userInfoRef.componentInstance.OnChangeLastname
+              .subscribe((lastName: string) => {
+              });
 
-          });
+            userInfoRef.componentInstance.OnChangeName
+              .subscribe((name: string) => {
+              });
 
-        userInfoRef.componentInstance.OnUpdateProfilePicture
-          .subscribe((file: File) => {
+            userInfoRef.componentInstance.OnCreateDialogWith
+              .subscribe((user: UserInfo) => {
 
+              });
+
+            userInfoRef.componentInstance.OnRemoveDialogWith
+              .subscribe((user: UserInfo) => {
+
+              });
+
+            userInfoRef.componentInstance.OnUpdateProfilePicture
+              .subscribe((file: File) => {
+
+              });
           });
 
       })
   }
 
+  public OnUnblockUser(user: UserInfo) {
+    this.requestsBuilder.UnbanUser(Cache.JwtToken, user.id)
+      .subscribe((result) => {
+
+        if (!result.isSuccessfull) {
+          this.snackbar.openSnackBar(result.errorMessage);
+          return;
+        }
+
+        user.isBlocked = false;
+      });
+  } 
 
   public OnRemoveAllMessages(group: ConversationTemplate) {
     this.requestsBuilder.DeleteMessages(group.messages, group.conversationID, Cache.JwtToken)
@@ -296,8 +321,7 @@ export class ChatComponent implements OnInit {
         (result) => {
           this.OnMessagesDeleted(result, this.CurrentConversation.messages, group.conversationID);
           this.CurrentConversation = null;
-        } 
-        ,
+        },
         (error) => this.OnApiError(error)
       )
   }
@@ -457,7 +481,7 @@ export class ChatComponent implements OnInit {
         }), this.CurrentConversation);
   }
 
-  public OnConnecting(data: EmptyModel) {
+  public OnConnecting() {
     this.snackbar.openSnackBar("Connecting...");
   }
 
@@ -633,7 +657,6 @@ export class ChatComponent implements OnInit {
 
             this.UpdateConversationsIsBannedState(response.response.conversations.map(x => x.conversationID));
               
-
             this.Conversations = response.response.conversations;
 
           } else {

@@ -31,9 +31,13 @@ export class UserInfoDialogComponent {
 
   public OnChangeLastname = new EventEmitter<string>();
 
+  public OnUnblockUser = new EventEmitter<UserInfo>();
+
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: UserInfoData, public ChangeNameDialog: MatDialog, public formatter: ConversationsFormatter) { }
+    @Inject(MAT_DIALOG_DATA) public data: UserInfoData,
+    public ChangeNameDialog: MatDialog,
+    public formatter: ConversationsFormatter) { }
 
   public HasConversationWith() : boolean {
     if (this.Conversations == null) {
@@ -53,6 +57,10 @@ export class UserInfoDialogComponent {
 
   public Block(): void {
     this.OnBlockUser.emit(this.data.user);
+  }
+
+  public UnBlock(): void {
+    this.OnUnblockUser.emit(this.data.user);
   }
 
   public UpdateThumbnail(event: any): void {

@@ -49,5 +49,7 @@ namespace VibeChat.Web.ChatData
         /// This field is filled automatically.
         /// </summary>
         public bool IsMessagingRestricted { get; set; }
+
+        public bool IsBlocked { get; set; }
     }
 }

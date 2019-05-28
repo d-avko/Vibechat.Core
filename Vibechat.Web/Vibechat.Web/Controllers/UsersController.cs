@@ -90,9 +90,40 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-               await mUsersService.ChangeUserIsPublicState(request.userId, 
-                    User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
-                    .Value);
+               await mUsersService.ChangeUserIsPublicState(
+                   request.userId, 
+                   JwtHelper.GetNamedClaim(User.Claims));
+
+                return new ResponseApiModel<bool>()
+                {
+                    IsSuccessfull = true,
+                    ErrorMessage = null,
+                    Response = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<bool>()
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message,
+                    Response = false
+                };
+            }
+        }
+
+        public class BlockRequest
+        {
+            public string userId { get; set; }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Users/Block")]
+        public async Task<ResponseApiModel<bool>> Block([FromBody]BlockRequest request)
+        {
+            try
+            {
+                await BansService.BanUser(request.userId, JwtHelper.GetNamedClaim(User.Claims));
 
                 return new ResponseApiModel<bool>()
                 {
@@ -115,6 +146,8 @@ namespace VibeChat.Web.Controllers
         public class IsBannedRequest
         {
             public string userid { get; set; }
+
+            public string byWhom { get; set; }
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -124,14 +157,47 @@ namespace VibeChat.Web.Controllers
             try
             {
                 var result = BansService.IsBannedFromMessagingWith(
-                     User.Claims.FirstOrDefault(x => x.Type == JwtHelper.JwtUserIdClaimName)
-                     .Value,
-                     request.userid);
+                     request.userid,
+                     request.byWhom);
 
                 return new ResponseApiModel<bool>()
                 {
                     IsSuccessfull = true,
                     Response = result
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<bool>()
+                {
+                    ErrorMessage = ex.Message,
+                    IsSuccessfull = false
+                };
+            }
+        }
+
+        public class UnbanRequest
+        {
+            /// <summary>
+            /// user to unban
+            /// </summary>
+            public string userId { get; set; }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Users/Unban")]
+        public async Task<ResponseApiModel<bool>> Unban([FromBody]UnbanRequest request)
+        {
+            try
+            {
+                await BansService.Unban(
+                    request.userId,
+                    JwtHelper.GetNamedClaim(User.Claims));
+
+                return new ResponseApiModel<bool>()
+                {
+                    IsSuccessfull = true,
+                    Response = true
                 };
             }
             catch (Exception ex)

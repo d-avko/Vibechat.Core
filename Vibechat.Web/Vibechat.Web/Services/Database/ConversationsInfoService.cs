@@ -393,7 +393,33 @@ namespace Vibechat.Web.Services
             return new GetMessagesResultApiModel()
             {
                 Messages = (from msg in messages
-                            select msg.ToMessage()).ToList()
+                            select new Message()
+                            {
+                                Id = msg.MessageID,
+                                ConversationID = msg.ConversationID,
+                                MessageContent = msg.MessageContent,
+                                TimeReceived = msg.TimeReceived,
+                                User = msg.User == null ? null : new UserInfo()
+                                {
+                                    Id = msg.User.Id,
+                                    LastName = msg.User.LastName,
+                                    LastSeen = msg.User.LastSeen,
+                                    Name = msg.User.FirstName,
+                                    UserName = msg.User.UserName,
+                                    ImageUrl = msg.User.ProfilePicImageURL,
+                                    IsOnline = msg.User.IsOnline,
+                                    ConnectionId = msg.User.ConnectionId
+                                },
+                                AttachmentInfo = msg.AttachmentInfo == null ? null : new MessageAttachment()
+                                {
+                                    AttachmentKind = msg.AttachmentInfo.AttachmentKind.Name,
+                                    ContentUrl = msg.AttachmentInfo.ContentUrl,
+                                    AttachmentName = msg.AttachmentInfo.AttachmentName,
+                                    ImageHeight = msg.AttachmentInfo.ImageHeight,
+                                    ImageWidth = msg.AttachmentInfo.ImageWidth
+                                },
+                                IsAttachment = msg.IsAttachment
+                            }).ToList()
             };
 
         }

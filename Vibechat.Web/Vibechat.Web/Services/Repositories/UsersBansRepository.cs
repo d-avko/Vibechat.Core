@@ -21,6 +21,18 @@ namespace Vibechat.Web.Services.Repositories
             mContext.UsersBans.Add(new UsersBansDatamodel() { BannedBy = bannedBy, BannedUser = banned });
             mContext.SaveChanges();
         }
+
+        public void UnbanUser(string userId, string whoUnbansId)
+        {          
+            mContext.UsersBans.Remove(Get(userId, whoUnbansId));
+            mContext.SaveChanges();
+        }
+
+        public UsersBansDatamodel Get(string userId, string whoUnbansId)
+        {
+            return mContext.UsersBans.FirstOrDefault(x => x.BannedBy.Id == whoUnbansId && x.BannedUser.Id == userId);
+        }
+
         public bool IsBanned(string whoId, string byWhomId)
         {
             return mContext.UsersBans.Any(x => x.BannedUser.Id == whoId && x.BannedBy.Id == byWhomId);

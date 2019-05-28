@@ -6,5 +6,7 @@ namespace Vibechat.Web.Services.Repositories
     {
         void BanUser(UserInApplication banned, UserInApplication bannedBy);
         bool IsBanned(string whoId, string byWhomId);
+
+        void UnbanUser(string userId, string whoUnbansId);
     }
 }
