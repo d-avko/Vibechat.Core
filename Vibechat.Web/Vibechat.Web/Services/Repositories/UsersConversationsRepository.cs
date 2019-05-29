@@ -90,5 +90,33 @@ namespace Vibechat.Web.Services.Repositories
 
             return res.Entity;
         }
+
+        public async Task<bool> Exists(UserInApplication user, ConversationDataModel conversation)
+        {
+            return await mContext
+                .UsersConversations
+                .FirstOrDefaultAsync(x => x.Conversation.ConvID == conversation.ConvID && x.User.Id == user.Id) != default(UsersConversationDataModel);
+        }
+
+        public async Task<bool> DialogExists(string firstUserId, string secondUserId)
+        {
+            IQueryable<UsersConversationDataModel> firstUserConversations = mContext
+               .UsersConversations
+               .Where(x => x.User.Id == firstUserId && !x.Conversation.IsGroup)
+               .Include(x => x.Conversation)
+               .Include(x => x.User);
+
+            foreach(UsersConversationDataModel conversation in firstUserConversations)
+            {
+                if(await mContext
+                    .UsersConversations
+                    .AnyAsync(x => x.Conversation.ConvID == conversation.Conversation.ConvID && x.User.Id == secondUserId))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

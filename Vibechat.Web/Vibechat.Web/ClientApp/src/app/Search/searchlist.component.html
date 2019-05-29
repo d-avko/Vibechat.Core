@@ -1,17 +1,29 @@
 <div class="searchlist">
 
-  <mat-action-list class="searchlist_local">
+  <mat-action-list>
     <mat-list-item *ngFor="let conversation of FoundLocalConversations"
                    (click)="ViewLocalConversation(conversation)">
 
-      <img matListAvatar src="{{conversation.thumbnailUrl}}" alt="Conversation logo">
+      <img matListAvatar *ngIf="conversation.isGroup; else dialogue" src="{{conversation.thumbnailUrl}}" alt="Conversation logo">
 
-      <h3 matLine>
+      <ng-template #dialogue>
+        <img matListAvatar src="{{conversation.dialogueUser.imageUrl}}" alt="Dialogue logo">
+      </ng-template>
+
+      <h3 matLine
+          *ngIf="conversation.isGroup; else dialogueHeader">
         {{conversation.name}}
       </h3>
-    </mat-list-item>
 
+      <ng-template #dialogueHeader>
+        <h3 matLine>
+          {{conversation.dialogueUser.userName}}
+        </h3>
+      </ng-template>
+
+    </mat-list-item>
   </mat-action-list>
+
 
   <mat-progress-spinner *ngIf="IsSearchingForConversations"
                         class="load-spinner"

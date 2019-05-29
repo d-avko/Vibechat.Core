@@ -32,14 +32,19 @@ export class ConnectionManager {
 
   private OnDisconnected: () => void;
 
+  private OnConnecting: () => void;
+
+  private OnConnected: () => void;
+
   constructor(
     convIdsFactory: ConversationIdsFactory,
     onMessageReceived: MessageReceivedDelegate,
     onAddedToGroup: AddedToConversationDelegate,
     onError: ErrorDelegate,
     OnRemovedFromGroupDelegate: RemovedFromGroupDelegate,
-    OnDisconnected: () => void
-) {
+    OnDisconnected: () => void,
+    OnConnecting: () => void,
+    OnConnected: () => void) {
 
     this.onMessageReceived = onMessageReceived;
     this.onAddedToGroup = onAddedToGroup;
@@ -47,6 +52,8 @@ export class ConnectionManager {
     this.onError = onError;
     this.OnRemovedFromGroupDelegate = OnRemovedFromGroupDelegate;
     this.OnDisconnected = OnDisconnected;
+    this.OnConnecting = OnConnecting;
+    this.OnConnected = OnConnected;
   }
 
   public Start(): void {
@@ -55,9 +62,12 @@ export class ConnectionManager {
       .withUrl("/hubs/chat", { accessTokenFactory: () => Cache.JwtToken })
       .build();
 
+    this.OnConnecting();
+
     this.connection.start().then(
       () => {
         this.InitiateConnections(this.convIdsFactory());
+        this.OnConnected();
       });
   
     this.connection.onclose(() => this.OnDisconnected());
@@ -98,8 +108,16 @@ export class ConnectionManager {
     this.connection.send("AddToGroup", userId, conversation);
   }
 
+  public RemoveConversation(conversation: ConversationTemplate) {
+    this.connection.send("RemoveConversation", conversation);
+  }
+
   public RemoveUserFromConversation(userId: string, conversationId: number, IsSelf: boolean) {
     this.connection.send("RemoveFromGroup", userId, conversationId, IsSelf);
+  }
+
+  public CreateDialog(user: UserInfo) {
+    this.connection.send("CreateDialog", user);
   }
 
   public InitiateConnections(conversationIds: Array<number>) : void {

@@ -9,6 +9,7 @@ import { ChangeNameDialogComponent } from "./ChangeNameDialog";
 export interface UserInfoData {
   user: UserInfo;
   currentUser: UserInfo;
+  Conversations: Array<ConversationTemplate>;
 }
 
 @Component({
@@ -16,8 +17,6 @@ export interface UserInfoData {
   templateUrl: 'user-info-dialog.html',
 })
 export class UserInfoDialogComponent {
-
-  @Input() public Conversations: Array<ConversationTemplate>;
 
   public OnRemoveDialogWith = new EventEmitter<UserInfo>();
 
@@ -40,11 +39,11 @@ export class UserInfoDialogComponent {
     public formatter: ConversationsFormatter) { }
 
   public HasConversationWith() : boolean {
-    if (this.Conversations == null) {
+    if (this.data.Conversations == null) {
       return false;
     }
 
-    return this.Conversations.find(x => !x.isGroup && x.dialogueUser.id == this.data.user.id) != null;
+    return this.data.Conversations.find(x => !x.isGroup && x.dialogueUser.id == this.data.user.id) != null;
   }
 
   public DeleteConversation() : void {

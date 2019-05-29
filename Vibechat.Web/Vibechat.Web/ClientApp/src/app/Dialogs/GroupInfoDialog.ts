@@ -36,6 +36,8 @@ export class GroupInfoDialogComponent {
 
   public OnBanUser = new EventEmitter<UserInfo>();
 
+  public OnRemoveGroup = new EventEmitter<ConversationTemplate>();
+
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
     @Inject(MAT_DIALOG_DATA) public data: GroupInfoData, public formatter: ConversationsFormatter, public ChangeNameDialog: MatDialog) { }
@@ -54,6 +56,10 @@ export class GroupInfoDialogComponent {
 
   public ClearMessages(){
     this.OnClearMessages.emit(this.data.Conversation);
+  }
+
+  public RemoveGroup() {
+    this.OnRemoveGroup.emit(this.data.Conversation);
   }
 
   public JoinGroup() {

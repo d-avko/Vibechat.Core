@@ -28,5 +28,10 @@ namespace Vibechat.Web.Services.Repositories
                 AttachmentName = message.AttachmentInfo.AttachmentName
             })).Entity;
         }
+
+        public async Task Remove(List<MessageAttachmentDataModel> attachments)
+        {
+            attachments.ForEach((a) => mContext.Remove(a));
+        }
     }
 }

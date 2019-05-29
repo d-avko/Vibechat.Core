@@ -200,10 +200,10 @@ export class ApiRequestsBuilder {
 
   }
 
-  public BanUser(token: string, userId: string): Observable<ServerResponse<boolean>> {
+  public BanUser(token: string, userId: string, conversationId: number): Observable<ServerResponse<boolean>> {
     return this.MakeAuthorizedCall<boolean>(
       token,
-      { userId: userId },
+      { userId: userId, conversationId: conversationId == 0 ? null : conversationId },
       'api/Users/Block'
     );
   }

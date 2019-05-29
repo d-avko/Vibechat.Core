@@ -4,7 +4,6 @@
   <div class="groupinfo_header">
 
     <img src="{{data.Conversation.thumbnailUrl}}" class="group_thumbnail" />
-    <input type="file" (change)="UpdateThumbnail($event)" accept="image/*" class="thumbnail-input" name="thumbnail" />
 
     <div class="groupinfo_info">
       <p class="subHeader">{{data.Conversation.name}}</p>
@@ -15,21 +14,21 @@
   <mat-action-list>
 
     <mat-list-item *ngIf="IsJoined() && !data.Conversation.isMessagingRestricted" (click)="InviteUsers()">
-      <mat-icon  class="cadetBlue">person_add</mat-icon>
+      <mat-icon class="cadetBlue">person_add</mat-icon>
 
       <h3 matLine>Invite users</h3>
     </mat-list-item>
 
     <mat-list-item *ngIf="IsJoined() && !data.Conversation.isMessagingRestricted" (click)="ChangeName()">
 
-      <mat-icon  class="cadetBlue">create</mat-icon>
+      <mat-icon class="cadetBlue">create</mat-icon>
 
       <h3 matLine>Change name</h3>
     </mat-list-item>
 
     <mat-list-item *ngIf="!IsJoined() && !data.Conversation.isMessagingRestricted" (click)="JoinGroup()">
 
-      <mat-icon  class="cadetBlue">person</mat-icon>
+      <mat-icon class="cadetBlue">person</mat-icon>
 
       <h3 matLine>Join</h3>
     </mat-list-item>
@@ -44,15 +43,30 @@
     <mat-list-item *ngIf="IsJoined() && !data.Conversation.isMessagingRestricted" (click)="ClearMessages()">
 
       <mat-icon class="cadetBlue">
-        remove_circle
+        delete_sweep
       </mat-icon>
 
       <h3 matLine>Clear messages</h3>
     </mat-list-item>
 
+    <mat-list-item *ngIf="IsJoined() && IsCurrentUserCreatorOfConversation()" (click)="RemoveGroup()">
+
+      <mat-icon class="cadetBlue">
+        remove_circle
+      </mat-icon>
+
+      <h3 matLine>Remove group</h3>
+    </mat-list-item>
+
+    <mat-list-item>
+      <mat-icon class="cadetBlue">add_photo_alternate</mat-icon>
+      <h3 matLine>Change group picture </h3>
+      <input *ngIf="!data.Conversation.isMessagingRestricted" type="file" (change)="UpdateThumbnail($event)" accept="image/*" class="thumbnail-input" name="thumbnail" />
+    </mat-list-item>
+
   </mat-action-list>
 
-  <mat-action-list class="users_in_Conversation_list">
+  <mat-action-list *ngIf="!data.Conversation.isMessagingRestricted" class="users_in_Conversation_list">
     <h3 mat-subheader>Users in group</h3>
 
     <mat-list-item *ngFor="let user of data.Conversation.participants"
@@ -71,6 +85,11 @@
 
   </mat-action-list>
 
+  <div *ngIf="data.Conversation.isMessagingRestricted" class="banned-text_wrapper">
+    <mat-icon class="bannedicon">report_problem</mat-icon>
+    <p class="banned-text subHeader">You were banned from this group.</p>
+  </div>
+
   <style>
     .group_thumbnail {
       cursor: pointer;
@@ -78,11 +97,6 @@
       height: 80px;
       width: 80px;
       border-radius: 40px;
-    }
-
-    .banButon,
-    .kickButton{
-      color:indianred;
     }
 
     .users_in_Conversation_list{
@@ -101,6 +115,25 @@
       flex-direction: row;
       align-items: center;
       color:black;
+    }
+
+    .banned-text_wrapper {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content:center;
+      color:black;
+    }
+
+    .banned-text,
+    .banButon,
+    .bannedicon,
+    .kickButton{
+      color:indianred;
+    }
+
+    .banned-text{
+      margin-left:10px;
     }
 
     .defaultFont{

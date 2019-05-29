@@ -92,7 +92,7 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                var result = await mConversationService.GetConversationInformation(
+                var result = await mConversationService.GetConversations(
                     UserProvided,
                     JwtHelper.GetNamedClaim(User.Claims));
 
@@ -121,7 +121,7 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                var result = await mConversationService.GetConversationParticipants(convInfo);
+                var result = await mConversationService.GetParticipants(convInfo);
 
                 return new ResponseApiModel<GetParticipantsResultApiModel>()
                 {
@@ -148,7 +148,7 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                var result = await mConversationService.GetConversationMessages(
+                var result = await mConversationService.GetMessages(
                     convInfo,
                      JwtHelper.GetNamedClaim(User.Claims));
 
@@ -205,7 +205,7 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                var result = await mConversationService.GetConversationById(
+                var result = await mConversationService.GetById(
                     convInfo,
                      JwtHelper.GetNamedClaim(User.Claims));
 

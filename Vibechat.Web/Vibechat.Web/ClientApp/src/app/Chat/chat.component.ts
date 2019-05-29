@@ -21,6 +21,7 @@ import { AddGroupDialogComponent } from "../Dialogs/AddGroupDialog";
 import { GroupInfoDialogComponent } from "../Dialogs/GroupInfoDialog";
 import { SearchListComponent } from "../Search/searchlist.component";
 import { UserInfoDialogComponent } from "../Dialogs/UserInfoDialog";
+import { identity } from "rxjs";
 
 @Component({
   selector: 'chat-root',
@@ -111,7 +112,9 @@ export class ChatComponent implements OnInit {
       (data) => this.OnAddedToGroup(data),
       (error) => this.OnError(error),
       (data) => this.OnRemovedFromGroup(data),
-      () => this.OnDisconnected()
+      () => this.OnDisconnected(),
+      () => this.OnConnecting(),
+      () => this.OnConnected()
     );
 
     this.IsAuthenticated = Cache.IsAuthenticated;
@@ -123,8 +126,16 @@ export class ChatComponent implements OnInit {
     }
   }
 
+  public OnConnected(): void {
+    this.snackbar.openSnackBar("Connected.", 1);
+  }
+
   public OnDisconnected(): void {
-    this.snackbar.openSnackBar("Disconnected...");
+    this.snackbar.openSnackBar("Disconnected...", 1.5);
+  }
+
+  public OnConnecting() {
+    this.snackbar.openSnackBar("Connecting...", 1.5);
   }
 
   public OnLogOut() : void {
@@ -143,57 +154,75 @@ export class ChatComponent implements OnInit {
       return;
     }
 
-    const groupInfoRef = this.dialog.open(GroupInfoDialogComponent, {
-      width: '450px',
-      data: {
-        Conversation: group,
-        user: this.CurrentUser,
-        ExistsInThisGroup: this.Conversations.find(x => x.conversationID == group.conversationID) != null
-      }
-    });
+    this.requestsBuilder.IsConversationsBanned(Cache.JwtToken, new Array<number>(1).fill(group.conversationID))
+      .subscribe((result) => {
 
-    groupInfoRef.componentInstance
-    .OnInviteUsers
-      .subscribe((group: ConversationTemplate) => this.OnInviteUsersToGroup(group));
+        if (!result.isSuccessfull) {
+          this.snackbar.openSnackBar(result.errorMessage);
+          return;
+        }
 
-    groupInfoRef.componentInstance
-    .OnChangeName
-    .subscribe((name: string) => this.OnChangeConversationName(name));
+        group.isMessagingRestricted = result.response[0];
 
-    groupInfoRef.componentInstance
-    .OnLeaveGroup
-    .subscribe((group: ConversationTemplate) => {
-      this.OnLeaveGroup(group);
-      groupInfoRef.close();
-    });
+        const groupInfoRef = this.dialog.open(GroupInfoDialogComponent, {
+          width: '450px',
+          data: {
+            Conversation: group,
+            user: this.CurrentUser,
+            ExistsInThisGroup: this.Conversations.find(x => x.conversationID == group.conversationID) != null
+          }
+        });
 
-    groupInfoRef.componentInstance
-    .OnChangeThumbnail
-    .subscribe((file: File) => this.OnChangeGroupThumbnail(file));
+        groupInfoRef.componentInstance
+          .OnInviteUsers
+          .subscribe((group: ConversationTemplate) => this.OnInviteUsersToGroup(group));
 
-    groupInfoRef.componentInstance
-    .OnClearMessages
-      .subscribe(((group: ConversationTemplate) => {
-        this.OnRemoveAllMessages(group);
-        groupInfoRef.close();
-    }));
+        groupInfoRef.componentInstance
+          .OnChangeName
+          .subscribe((name: string) => this.OnChangeConversationName(name));
 
-    groupInfoRef.componentInstance
-    .OnViewUserInfo
-    .subscribe((user: UserInfo) => this.OnViewUserInfo(user));
+        groupInfoRef.componentInstance
+          .OnLeaveGroup
+          .subscribe((group: ConversationTemplate) => {
+            this.OnLeaveGroup(group);
+            groupInfoRef.close();
+          });
 
-    groupInfoRef.componentInstance
-    .OnJoinGroup
-    .subscribe((group: ConversationTemplate) => {
-      groupInfoRef.close();
-      this.OnJoinGroup(group);
-    });
+        groupInfoRef.componentInstance
+          .OnChangeThumbnail
+          .subscribe((file: File) => this.OnChangeGroupThumbnail(file));
 
-    groupInfoRef.componentInstance.OnKickUser
-    .subscribe((user: UserInfo) => this.OnKickUser(user));
+        groupInfoRef.componentInstance
+          .OnClearMessages
+          .subscribe(((group: ConversationTemplate) => {
+            this.OnRemoveAllMessages(group);
+            groupInfoRef.close();
+          }));
 
-    groupInfoRef.componentInstance.OnBanUser
-      .subscribe((user: UserInfo) => this.BanFromConversation(user));
+        groupInfoRef.componentInstance
+          .OnViewUserInfo
+          .subscribe((user: UserInfo) => this.OnViewUserInfo(user));
+
+        groupInfoRef.componentInstance
+          .OnJoinGroup
+          .subscribe((group: ConversationTemplate) => {
+            groupInfoRef.close();
+            this.OnJoinGroup(group);
+          });
+
+        groupInfoRef.componentInstance.OnKickUser
+          .subscribe((user: UserInfo) => this.OnKickUser(user));
+
+        groupInfoRef.componentInstance.OnBanUser
+          .subscribe((user: UserInfo) => this.BanFromConversation(user));
+
+        groupInfoRef.componentInstance.OnRemoveGroup
+          .subscribe((group: ConversationTemplate) => {
+            this.connectionManager.RemoveConversation(group);
+          });
+      })
+
+  
   }
 
   public OnKickUser(user: UserInfo) {
@@ -208,6 +237,7 @@ export class ChatComponent implements OnInit {
   public BanFromConversation(userToBan: UserInfo) {
     this.requestsBuilder.BanFromConversation(Cache.JwtToken, userToBan.id, this.CurrentConversation.conversationID)
       .subscribe((result) => {
+
         if (!result.isSuccessfull) {
           this.snackbar.openSnackBar(result.errorMessage);
           return;
@@ -218,7 +248,10 @@ export class ChatComponent implements OnInit {
   }
 
   public BanFromMessaging(userToBan: UserInfo) {
-    this.requestsBuilder.BanUser(Cache.JwtToken, userToBan.id)
+
+    let conversationToBan = this.Conversations.find(x => !x.isGroup && x.dialogueUser.id == userToBan.id);
+
+    this.requestsBuilder.BanUser(Cache.JwtToken, userToBan.id, conversationToBan == null ? 0 : conversationToBan.conversationID)
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
@@ -261,7 +294,8 @@ export class ChatComponent implements OnInit {
               width: '450px',
               data: {
                 user: user,
-                currentUser: this.CurrentUser
+                currentUser: this.CurrentUser,
+                Conversations: this.Conversations
               }
             });
 
@@ -285,12 +319,14 @@ export class ChatComponent implements OnInit {
 
             userInfoRef.componentInstance.OnCreateDialogWith
               .subscribe((user: UserInfo) => {
-
+                this.connectionManager.CreateDialog(user);
               });
 
             userInfoRef.componentInstance.OnRemoveDialogWith
               .subscribe((user: UserInfo) => {
-
+                this.connectionManager.RemoveConversation(this.Conversations.find(x => !x.isGroup && x.dialogueUser.id == user.id));
+                this.CurrentConversation = null;
+                userInfoRef.close();    
               });
 
             userInfoRef.componentInstance.OnUpdateProfilePicture
@@ -481,9 +517,6 @@ export class ChatComponent implements OnInit {
         }), this.CurrentConversation);
   }
 
-  public OnConnecting() {
-    this.snackbar.openSnackBar("Connecting...");
-  }
 
   public OnMessageReceived(data: MessageReceivedModel): void {
     data.message.timeReceived = new Date(<string>data.message.timeReceived);
@@ -507,8 +540,6 @@ export class ChatComponent implements OnInit {
     if (data.conversation.messages != null) {
       data.conversation.messages.forEach((x) => x.timeReceived = new Date(<string>x.timeReceived));
     }
-
-    //someone invited myself.
 
     if (data.user.id == this.CurrentUser.id) {
 
@@ -658,6 +689,13 @@ export class ChatComponent implements OnInit {
             this.UpdateConversationsIsBannedState(response.response.conversations.map(x => x.conversationID));
               
             this.Conversations = response.response.conversations;
+
+            this.Conversations.forEach((x) => {
+
+              if (!x.isGroup) {
+                x.isMessagingRestricted = x.dialogueUser.isMessagingRestricted;
+              }
+            });
 
           } else {
             this.Conversations = new Array<ConversationTemplate>();
