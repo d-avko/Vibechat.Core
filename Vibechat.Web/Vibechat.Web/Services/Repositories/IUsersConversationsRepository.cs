@@ -15,5 +15,7 @@ namespace Vibechat.Web.Services.Repositories
         Task<bool> Exists(string userId, int conversationId);
 
         Task Remove(UsersConversationDataModel entity);
+
+        Task<bool> DialogExists(string firstUserId, string secondUserId);
     }
 }

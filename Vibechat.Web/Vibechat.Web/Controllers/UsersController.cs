@@ -115,6 +115,8 @@ namespace VibeChat.Web.Controllers
         public class BlockRequest
         {
             public string userId { get; set; }
+
+            public int? conversationId { get; set; }
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -123,7 +125,7 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                await BansService.BanUser(request.userId, JwtHelper.GetNamedClaim(User.Claims));
+                await BansService.BanUser(request.userId, request.conversationId, JwtHelper.GetNamedClaim(User.Claims));
 
                 return new ResponseApiModel<bool>()
                 {

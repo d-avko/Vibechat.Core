@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Vibechat.Web.Data.DataModels;
 
 namespace VibeChat.Web
 { 

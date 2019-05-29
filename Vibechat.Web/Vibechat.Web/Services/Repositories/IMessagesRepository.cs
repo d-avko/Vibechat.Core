@@ -14,7 +14,7 @@ namespace Vibechat.Web.Services.Repositories
         Task<MessageDataModel> AddAttachment(UserInApplication whoSent, MessageAttachmentDataModel attachment, Message message, int groupId, string SenderId);
         bool Empty();
         IQueryable<MessageDataModel> GetMessagesByIds(List<int> ids);
-        IIncludableQueryable<MessageDataModel, MessageAttachmentDataModel> GetMessagesForConversation(string userId, int conversationId, int offset, int count);
+        IIncludableQueryable<MessageDataModel, MessageAttachmentDataModel> GetMessagesForConversation(string userId, int conversationId, bool AllMessages = false, int offset = 0, int count = 0);
         Task Remove(List<int> messagesIds, string whoRemovedId);
     }
 }

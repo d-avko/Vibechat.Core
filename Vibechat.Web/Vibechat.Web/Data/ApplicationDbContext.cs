@@ -45,6 +45,7 @@ namespace VibeChat.Web
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<SettingsDataModel>().HasIndex(a => a.Name);
+
         }
     }
 }

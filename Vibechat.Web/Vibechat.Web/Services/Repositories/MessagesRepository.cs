@@ -14,6 +14,7 @@ namespace Vibechat.Web.Services.Repositories
     {
         private ApplicationDbContext mContext { get; set; }
 
+        private const long MaxMessages = 8192000000;
 
         public MessagesRepository(ApplicationDbContext dbContext)
         {
@@ -81,13 +82,22 @@ namespace Vibechat.Web.Services.Repositories
         public IIncludableQueryable<MessageDataModel, MessageAttachmentDataModel> GetMessagesForConversation(
             string userId,
             int conversationId,
-            int offset,
-            int count)
+            bool AllMessages = false, int offset = 0, int count = 0)
         {
             var deletedMessages = mContext
             .DeletedMessages
             .Where(msg => msg.Message.ConversationID == conversationId && msg.UserId == userId);
 
+            if (AllMessages)
+            {
+                return mContext
+                       .Messages
+                       .Where(msg => msg.ConversationID == conversationId)
+                       .Where(msg => !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID))
+                       .Include(msg => msg.User)
+                       .Include(msg => msg.AttachmentInfo);
+            }
+                    
            return mContext
                 .Messages
                 .Where(msg => msg.ConversationID == conversationId)
