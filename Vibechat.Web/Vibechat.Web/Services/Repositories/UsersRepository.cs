@@ -83,5 +83,27 @@ namespace Vibechat.Web.Services.Repositories
             user.IsPublic = !user.IsPublic;
             await mContext.SaveChangesAsync();
         }
+
+        public async Task ChangeName(string newName, string userId)
+        {
+            var user = await GetById(userId);
+            user.FirstName = newName;
+            await mContext.SaveChangesAsync();
+        }
+
+        public async Task ChangeLastName(string newName, string userId)
+        {
+            var user = await GetById(userId);
+            user.LastName = newName;
+            await mContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateThumbnail(string thumbnail, string fullSized, string userId)
+        {
+            var user = await GetById(userId);
+            user.ProfilePicImageURL = thumbnail;
+            user.FullImageUrl = fullSized;
+            await mContext.SaveChangesAsync();
+        }
     }
 }

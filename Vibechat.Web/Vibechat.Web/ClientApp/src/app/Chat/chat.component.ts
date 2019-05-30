@@ -22,6 +22,7 @@ import { GroupInfoDialogComponent } from "../Dialogs/GroupInfoDialog";
 import { SearchListComponent } from "../Search/searchlist.component";
 import { UserInfoDialogComponent } from "../Dialogs/UserInfoDialog";
 import { identity } from "rxjs";
+import { resetCompiledComponents } from "@angular/core/src/render3/jit/module";
 
 @Component({
   selector: 'chat-root',
@@ -123,6 +124,17 @@ export class ChatComponent implements OnInit {
   ngOnInit(): void {
     if (this.IsAuthenticated) {
       this.UpdateConversations();
+
+      this.requestsBuilder.GetUserById(Cache.JwtToken,this.CurrentUser.id)
+        .subscribe((result) => {
+
+          if (!result.isSuccessfull) {
+            this.snackbar.openSnackBar(result.errorMessage);
+            return;
+          }
+
+          this.CurrentUser = result.response;
+        })
     }
   }
 
@@ -154,7 +166,7 @@ export class ChatComponent implements OnInit {
       return;
     }
 
-    this.requestsBuilder.IsConversationsBanned(Cache.JwtToken, new Array<number>(1).fill(group.conversationID))
+    this.requestsBuilder.GetConversationById(Cache.JwtToken, group.conversationID)
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
@@ -162,7 +174,7 @@ export class ChatComponent implements OnInit {
           return;
         }
 
-        group.isMessagingRestricted = result.response[0];
+        group = result.response;
 
         const groupInfoRef = this.dialog.open(GroupInfoDialogComponent, {
           width: '450px',
@@ -270,7 +282,7 @@ export class ChatComponent implements OnInit {
 
   public OnViewUserInfo(user: UserInfo) {
 
-    this.requestsBuilder.IsUserBlocked(Cache.JwtToken, this.CurrentUser.id, user.id)
+    this.requestsBuilder.GetUserById(Cache.JwtToken, user.id)
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
@@ -278,61 +290,85 @@ export class ChatComponent implements OnInit {
           return;
         }
 
-        user.isMessagingRestricted = result.response;
+        user = result.response;
 
-        this.requestsBuilder.IsUserBlocked(Cache.JwtToken, user.id, this.CurrentUser.id)
-          .subscribe((result) => {
+        const userInfoRef = this.dialog.open(UserInfoDialogComponent, {
+          width: '450px',
+          data: {
+            user: user,
+            currentUser: this.CurrentUser,
+            Conversations: this.Conversations
+          }
+        });
 
-            if (!result.isSuccessfull) {
-              this.snackbar.openSnackBar(result.errorMessage);
-              return;
-            }
+        userInfoRef.componentInstance.OnBlockUser
+          .subscribe((user: UserInfo) => {
+            this.BanFromMessaging(user);
+          });
 
-            user.isBlocked = result.response;
+        userInfoRef.componentInstance.OnUnblockUser
+          .subscribe((user: UserInfo) => {
+            this.OnUnblockUser(user);
+          });
 
-            const userInfoRef = this.dialog.open(UserInfoDialogComponent, {
-              width: '450px',
-              data: {
-                user: user,
-                currentUser: this.CurrentUser,
-                Conversations: this.Conversations
-              }
-            });
+        userInfoRef.componentInstance.OnChangeLastname
+          .subscribe((lastName: string) => {
 
-            userInfoRef.componentInstance.OnBlockUser
-              .subscribe((user: UserInfo) => {
-                this.BanFromMessaging(user);
+            this.requestsBuilder.ChangeCurrentUserLastName(Cache.JwtToken, lastName)
+              .subscribe((result) => {
+
+                if (!result.isSuccessfull) {
+                  this.snackbar.openSnackBar(result.errorMessage);
+                  return;
+                }
+
+                this.CurrentUser.lastName = lastName;
               });
 
-            userInfoRef.componentInstance.OnUnblockUser
-              .subscribe((user: UserInfo) => {
-                this.OnUnblockUser(user);
+          });
+
+        userInfoRef.componentInstance.OnChangeName
+          .subscribe((name: string) => {
+
+            this.requestsBuilder.ChangeCurrentUserName(Cache.JwtToken, name)
+              .subscribe((result) => {
+
+                if (!result.isSuccessfull) {
+                  this.snackbar.openSnackBar(result.errorMessage);
+                  return;
+                }
+
+                this.CurrentUser.name = name;
+              });
+          });
+
+        userInfoRef.componentInstance.OnCreateDialogWith
+          .subscribe((user: UserInfo) => {
+            this.connectionManager.CreateDialog(user);
+          });
+
+        userInfoRef.componentInstance.OnRemoveDialogWith
+          .subscribe((user: UserInfo) => {
+            this.connectionManager.RemoveConversation(this.Conversations.find(x => !x.isGroup && x.dialogueUser.id == user.id));
+            this.CurrentConversation = null;
+            userInfoRef.close();
+          });
+
+        userInfoRef.componentInstance.OnUpdateProfilePicture
+          .subscribe((file: File) => {
+
+            this.requestsBuilder.UploadUserProfilePicture(file, Cache.JwtToken)
+              .subscribe((result) => {
+
+                if (!result.isSuccessfull) {
+                  this.snackbar.openSnackBar(result.errorMessage);
+                  return;
+                }
+
+                this.CurrentUser.imageUrl = result.response.thumbnailUrl;
+                this.CurrentUser.fullImageUrl = result.response.fullImageUrl;
               });
 
-            userInfoRef.componentInstance.OnChangeLastname
-              .subscribe((lastName: string) => {
-              });
-
-            userInfoRef.componentInstance.OnChangeName
-              .subscribe((name: string) => {
-              });
-
-            userInfoRef.componentInstance.OnCreateDialogWith
-              .subscribe((user: UserInfo) => {
-                this.connectionManager.CreateDialog(user);
-              });
-
-            userInfoRef.componentInstance.OnRemoveDialogWith
-              .subscribe((user: UserInfo) => {
-                this.connectionManager.RemoveConversation(this.Conversations.find(x => !x.isGroup && x.dialogueUser.id == user.id));
-                this.CurrentConversation = null;
-                userInfoRef.close();    
-              });
-
-            userInfoRef.componentInstance.OnUpdateProfilePicture
-              .subscribe((file: File) => {
-
-              });
           });
 
       })
@@ -541,21 +577,50 @@ export class ChatComponent implements OnInit {
       data.conversation.messages.forEach((x) => x.timeReceived = new Date(<string>x.timeReceived));
     }
 
-    if (data.user.id == this.CurrentUser.id) {
+    if (data.conversation.isGroup) {
 
-      if (data.conversation.messages == null) {
-        data.conversation.messages = new Array<ChatMessage>();
+      //we created new group.
+
+      if (data.user.id == this.CurrentUser.id) {
+
+        if (data.conversation.messages == null) {
+          data.conversation.messages = new Array<ChatMessage>();
+        }
+
+        this.Conversations = [...this.Conversations, data.conversation];
+      } else {
+
+        //someone added new user to existing group
+
+        let conversation = this.Conversations.find(x => x.conversationID == data.conversation.conversationID);
+        conversation.participants.push(data.user);
+        conversation.participants = [...conversation.participants];
       }
-
-      this.Conversations = [...this.Conversations, data.conversation];
     } else {
 
-      let conversation = this.Conversations.find(x => x.conversationID == data.conversation.conversationID);
-      conversation.participants.push(data.user);
-      conversation.participants = [...conversation.participants];
+      //we created dialog with someone;
+
+      if (data.user.id == this.CurrentUser.id) {
+
+        if (data.conversation.messages == null) {
+          data.conversation.messages = new Array<ChatMessage>();
+        }
+
+        this.Conversations = [...this.Conversations, data.conversation];
+
+      } else {
+
+        //someone created dialog with us.
+
+        data.conversation.dialogueUser = data.user;
+        this.Conversations = [...this.Conversations, data.conversation];
+      }
+
     }
 
-    this.requestsBuilder.IsConversationsBanned(Cache.JwtToken, new Array<number>(1).fill(data.conversation.conversationID))
+    //update data about this conversation.
+
+    this.requestsBuilder.GetConversationById(Cache.JwtToken, data.conversation.conversationID)
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
@@ -563,7 +628,7 @@ export class ChatComponent implements OnInit {
           return;
         }
 
-        data.conversation.isMessagingRestricted = result.response[0];
+        data.conversation = result.response;
       })
   }
 
@@ -660,7 +725,7 @@ export class ChatComponent implements OnInit {
   }
 
   public UpdateConversations() {
-    this.requestsBuilder.UpdateConversationsRequest(Cache.JwtToken, this.CurrentUser.id)
+    this.requestsBuilder.UpdateConversationsRequest(Cache.JwtToken)
       .subscribe(
         (response) => {
 
@@ -669,11 +734,11 @@ export class ChatComponent implements OnInit {
             return;
           }
 
-          if (response.response.conversations != null) {
+          if (response.response != null) {
 
             //parse string date to js Date
 
-            response.response.conversations
+            response.response
               .forEach((conversation) => {
 
                 if (conversation.messages != null) {
@@ -684,11 +749,8 @@ export class ChatComponent implements OnInit {
 
               })
 
-            //fetch 'IsBannedFrom' status for all conversations
-
-            this.UpdateConversationsIsBannedState(response.response.conversations.map(x => x.conversationID));
               
-            this.Conversations = response.response.conversations;
+            this.Conversations = response.response;
 
             this.Conversations.forEach((x) => {
 
@@ -713,22 +775,6 @@ export class ChatComponent implements OnInit {
     return this.CurrentConversation != null;
   }
 
-  public UpdateConversationsIsBannedState(conversationIds: number[]) {
-    this.requestsBuilder.IsConversationsBanned(Cache.JwtToken, conversationIds)
-      .subscribe((isBannedResponse) => {
-
-        if (!isBannedResponse.isSuccessfull) {
-          this.snackbar.openSnackBar("Failed to update conversations information. Reason: " + isBannedResponse.errorMessage);
-          return;
-        }
-
-        for (let i = 0; i < isBannedResponse.response.length; ++i) {
-          this.Conversations[i].isMessagingRestricted = isBannedResponse.response[i];
-        }
-
-      });
-  }
-
   public ChangeConversation(conversation: ConversationTemplate): void {
     //if we were on search screen, we should hide it
 
@@ -740,6 +786,17 @@ export class ChatComponent implements OnInit {
     }
 
     this.CurrentConversation = conversation;
+
+    this.requestsBuilder.GetConversationById(Cache.JwtToken,conversation.conversationID)
+      .subscribe((result) => {
+
+        if (!result.isSuccessfull) {
+          this.snackbar.openSnackBar('Failed to update some conversation info. Reason: ' + result.errorMessage);
+          return;
+        }
+
+        this.CurrentConversation = result.response;
+      });
 
     this.IsConversationHistoryEnd = false;
   }

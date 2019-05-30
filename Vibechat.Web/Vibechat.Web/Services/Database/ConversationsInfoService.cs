@@ -161,7 +161,7 @@ namespace Vibechat.Web.Services
             {
                 image.CopyTo(buffer);
                 buffer.Seek(0, SeekOrigin.Begin);
-                var thumbnailFull = ImagesService.UpdateConversationThumbnail(buffer, image.FileName);
+                var thumbnailFull = ImagesService.SaveImage(buffer, image.FileName);
 
                 conversationRepository.UpdateThumbnail(thumbnailFull.Item1, thumbnailFull.Item2, conversation);
             }
@@ -236,16 +236,16 @@ namespace Vibechat.Web.Services
 
         public async Task RemoveUserFromConversation(string userId, string whoRemovedId, int conversationId, bool IsSelf)
         {
-            if(!IsSelf && userId == whoRemovedId)
-            {
-                throw new FormatException("Couldn't remove yourself from conversation.");
-            }
-
             var conversation = conversationRepository.GetById(conversationId);
 
-            if(conversation == null)
+            if (conversation == null)
             {
                 throw new FormatException("Wrong conversation.");
+            }
+
+            if (!IsSelf && userId == whoRemovedId && conversation.IsGroup)
+            {
+                throw new FormatException("Couldn't remove yourself from group.");
             }
 
             var userConversation = await usersConversationsRepository.Get(userId, conversationId);
@@ -255,21 +255,33 @@ namespace Vibechat.Web.Services
                 throw new FormatException("User is not a part of this conversation.");
             }
 
-            if(conversation.Creator.Id != whoRemovedId && !IsSelf)
+            if(conversation.Creator.Id != whoRemovedId && !IsSelf && !conversation.IsGroup)
             {
-                throw new FormatException("Only creator can remove users.");
+                throw new FormatException("Only creator can remove users in group.");
             }
 
             await usersConversationsRepository.Remove(userConversation);
+
+            //if last user LEAVES the group, remove conversation
+
+            if(IsSelf && usersConversationsRepository.GetConversationParticipants(conversationId).Count().Equals(0))
+            {
+                conversationRepository.Remove(conversation);
+            }
         }
 
         public async Task RemoveConversation(ConversationTemplate Conversation, string whoRemoves)
         {
             ConversationDataModel conversation = conversationRepository.GetById(Conversation.ConversationID);
 
-            if (conversation.Creator.Id != whoRemoves)
+            if(conversation == null)
             {
-                throw new FormatException("Only creator can remove conversation.");
+                throw new FormatException("Wrong conversation to remove.");
+            }
+
+            if (conversation.Creator.Id != whoRemoves && conversation.IsGroup)
+            {
+                throw new FormatException("Only creator can remove group.");
             }
 
             if (conversation.IsGroup)
@@ -285,7 +297,7 @@ namespace Vibechat.Web.Services
             else
             {
                 await RemoveUserFromConversation(Conversation.DialogueUser.Id, whoRemoves, conversation.ConvID, false);
-                await RemoveUserFromConversation(whoRemoves, whoRemoves, conversation.ConvID, true);
+                await RemoveUserFromConversation(whoRemoves, whoRemoves, conversation.ConvID, false);
 
                 var messages = messagesRepository.GetMessagesForConversation(whoRemoves, conversation.ConvID, true);
 
@@ -325,36 +337,28 @@ namespace Vibechat.Web.Services
             return addedUser.ToUserInfo();
         }
 
-        public async Task<ConversationInfoResultApiModel> GetConversations(CredentialsForConversationInfoApiModel UserProvided, string whoAccessedId)
+        public async Task<List<ConversationTemplate>> GetConversations(string whoAccessedId)
         {
             var defaultError = new FormatException("User info provided was not correct.");
 
             var unAuthorizedError = new UnauthorizedAccessException("You are unauthorized to do such an action.");
 
-            if (UserProvided.UserId != whoAccessedId)
-            {
-                throw unAuthorizedError;
-            }
-
-            if (UserProvided == null)
+            if (whoAccessedId == null)
                 throw defaultError;
 
-            if (UserProvided.UserId == null)
-                throw defaultError;
-
-            var user = await usersRepository.GetById(UserProvided.UserId).ConfigureAwait(false);
+            var user = await usersRepository.GetById(whoAccessedId).ConfigureAwait(false);
 
             if (user == null)
                 throw defaultError;
 
 
-            IQueryable<ConversationDataModel> conversations = usersConversationsRepository.GetUserConversations(UserProvided.UserId);
+            IQueryable<ConversationDataModel> conversations = usersConversationsRepository.GetUserConversations(whoAccessedId);
 
             var returnData = new List<ConversationTemplate>();
 
             foreach (ConversationDataModel conversation in conversations)
             {
-                UserInApplication DialogUser = conversation.IsGroup ? null : usersConversationsRepository.GetUserInDialog(conversation.ConvID, UserProvided.UserId);
+                UserInApplication DialogUser = conversation.IsGroup ? null : usersConversationsRepository.GetUserInDialog(conversation.ConvID, whoAccessedId);
 
                 returnData.Add
                     (
@@ -366,10 +370,7 @@ namespace Vibechat.Web.Services
                     );
             }
 
-            return new ConversationInfoResultApiModel()
-            {
-                Conversations = returnData
-            };
+            return returnData;
 
         }
 
@@ -468,50 +469,42 @@ namespace Vibechat.Web.Services
 
         }
 
-
-        public async Task<GetConversationByIdResultApiModel> GetById(GetConversationByIdApiModel convInfo, string whoAccessedId)
+        public async Task<bool> ExistsInConversation(int conversationsId, string userId)
         {
+            return await usersConversationsRepository.Exists(userId, conversationsId);
+        }
 
-            ConversationDataModel conversation = conversationRepository.GetById(convInfo.ConversationId);
-
-            var unAuthorizedError = new UnauthorizedAccessException("You are unauthorized to do such an action.");
-
-            var user = new UserInApplication();
-
-            if (conversation.IsGroup)
-            {
-                user = await usersRepository.GetById(whoAccessedId).ConfigureAwait(false);
-            }
-
+        public async Task<ConversationTemplate> GetById(int conversationId, string whoAccessedId)
+        {
+             
+            ConversationDataModel conversation = conversationRepository.GetById(conversationId);
 
             if (conversation == null)
             {
                 throw new FormatException("No such conversation was found.");
             }
 
-            var members = usersConversationsRepository.GetConversationParticipants(convInfo.ConversationId);
+            var dialogUser = new UserInApplication();
+            var members = new List<UserInfo>();
+            var messages = new List<Message>();
 
-            //only member of conversation could request messages (there should exist other calls for non-members).
-
-            if (members.FirstOrDefault(x => x.UserName == whoAccessedId) == null)
-                throw unAuthorizedError;
-
-            if (conversation.IsGroup && user == null)
+            if (conversation.IsGroup)
             {
-                throw new FormatException("User with such id was not found.");
+                members = usersConversationsRepository.GetConversationParticipants(conversationId)
+                .Select(x => x.ToUserInfo())
+                .ToList();
+            }
+            else
+            {
+                dialogUser = usersConversationsRepository.GetUserInDialog(conversationId,whoAccessedId);
+
+                if (dialogUser == null)
+                {
+                    throw new FormatException("Unexpected error: no corresponding user in dialogue.");
+                }
             }
 
-            user = usersConversationsRepository.GetUserInDialog(convInfo.ConversationId, user.Id);
-
-            if (user == null)
-            {
-                throw new FormatException("Unexpected error: no corresponding user in dialogue.");
-            }
-
-            return new GetConversationByIdResultApiModel()
-            {
-                Conversation = conversation.ToConversationTemplate(null, null, user)
-            };
+            return conversation.ToConversationTemplate(members, null, dialogUser);
 
         }
 

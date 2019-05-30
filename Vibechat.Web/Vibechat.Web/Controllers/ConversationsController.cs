@@ -87,16 +87,18 @@ namespace VibeChat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Conversations/GetInfo")]
-        public async Task<ResponseApiModel<ConversationInfoResultApiModel>> GetInfo([FromBody] CredentialsForConversationInfoApiModel UserProvided)
+        [Route("api/Conversations/GetAll")]
+        public async Task<ResponseApiModel<List<ConversationTemplate>>> GetAll()
         {
             try
             {
-                var result = await mConversationService.GetConversations(
-                    UserProvided,
-                    JwtHelper.GetNamedClaim(User.Claims));
+                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
-                return new ResponseApiModel<ConversationInfoResultApiModel>()
+                List<ConversationTemplate> result = await mConversationService.GetConversations(thisUserId);
+
+                result.ForEach(async x => x.IsMessagingRestricted = await BansService.IsBannedFromConversation(x.ConversationID, thisUserId));
+
+                return new ResponseApiModel<List<ConversationTemplate>>()
                 {
                     IsSuccessfull = true,
                     ErrorMessage = null,
@@ -105,7 +107,42 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<ConversationInfoResultApiModel>()
+                return new ResponseApiModel<List<ConversationTemplate>>()
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message,
+                    Response = null
+                };
+            }
+        }
+
+        public class GetByIdRequest
+        {
+            public int conversationId { get; set; }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Conversations/GetById")]
+        public async Task<ResponseApiModel<ConversationTemplate>> GetById([FromBody]GetByIdRequest request)
+        {
+            try
+            {
+                string thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+
+                ConversationTemplate result = await mConversationService.GetById(request.conversationId, thisUserId).ConfigureAwait(false);
+
+                result.IsMessagingRestricted = await BansService.IsBannedFromConversation(request.conversationId, thisUserId).ConfigureAwait(false);
+
+                return new ResponseApiModel<ConversationTemplate>()
+                {
+                    IsSuccessfull = true,
+                    ErrorMessage = null,
+                    Response = result
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<ConversationTemplate>()
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
@@ -150,7 +187,7 @@ namespace VibeChat.Web.Controllers
             {
                 var result = await mConversationService.GetMessages(
                     convInfo,
-                     JwtHelper.GetNamedClaim(User.Claims));
+                     JwtHelper.GetNamedClaimValue(User.Claims));
 
                 return new ResponseApiModel<GetMessagesResultApiModel>()
                 {
@@ -179,7 +216,7 @@ namespace VibeChat.Web.Controllers
             {
                 await mConversationService.DeleteConversationMessages(
                     messagesInfo,
-                     JwtHelper.GetNamedClaim(User.Claims));
+                     JwtHelper.GetNamedClaimValue(User.Claims));
 
                 return new ResponseApiModel<string>()
                 {
@@ -197,41 +234,12 @@ namespace VibeChat.Web.Controllers
                     Response = null
                 };
             }
-        }
-            
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Conversations/GetConversationInfoById")]
-        public async Task<ResponseApiModel<GetConversationByIdResultApiModel>> GetConversationById([FromBody] GetConversationByIdApiModel convInfo)
-        {
-            try
-            {
-                var result = await mConversationService.GetById(
-                    convInfo,
-                     JwtHelper.GetNamedClaim(User.Claims));
-
-                return new ResponseApiModel<GetConversationByIdResultApiModel>()
-                {
-                    IsSuccessfull = true,
-                    ErrorMessage = null,
-                    Response = result
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ResponseApiModel<GetConversationByIdResultApiModel>()
-                {
-                    IsSuccessfull = false,
-                    ErrorMessage = ex.Message,
-                    Response = null
-                };
-            }
-
         }
 
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/UpdateThumbnail")]
-        public async Task<ResponseApiModel<UpdateThumbnailResponse>> UploadProfileOrGroupThumbnail([FromForm]UpdateThumbnailRequest updateThumbnail)
+        public async Task<ResponseApiModel<UpdateThumbnailResponse>> UpdateThumbnail([FromForm]UpdateThumbnailRequest updateThumbnail)
         {
             try
             {
@@ -290,7 +298,7 @@ namespace VibeChat.Web.Controllers
             try
             {
                 var result = await mConversationService.SearchForGroups(request.SearchString,
-                     JwtHelper.GetNamedClaim(User.Claims));
+                     JwtHelper.GetNamedClaimValue(User.Claims));
 
                 return new ResponseApiModel<List<ConversationTemplate>>()
                 {
@@ -320,7 +328,7 @@ namespace VibeChat.Web.Controllers
             try
             {
                await mConversationService.ChangePublicState(request.conversationId,
-                     JwtHelper.GetNamedClaim(User.Claims));
+                     JwtHelper.GetNamedClaimValue(User.Claims));
 
                 return new ResponseApiModel<bool>()
                 {
@@ -347,7 +355,7 @@ namespace VibeChat.Web.Controllers
                 await BansService.BanUserFromConversation(
                     request.conversationId,
                     request.userId,
-                    JwtHelper.GetNamedClaim(User.Claims));
+                    JwtHelper.GetNamedClaimValue(User.Claims));
 
                 return new ResponseApiModel<bool>()
                 {
@@ -365,34 +373,34 @@ namespace VibeChat.Web.Controllers
             }
         }
 
-        public class IsBannedFromRequest
-        {
-            public int[] conversationIds{ get; set; }
-        }
+        //public class IsBannedFromRequest
+        //{
+        //    public int[] conversationIds{ get; set; }
+        //}
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Conversations/isBannedFrom")]
-        public async Task<ResponseApiModel<bool[]>> IsBannedFrom([FromBody]IsBannedFromRequest request)
-        {
-            try
-            {
-                var result = await BansService.IsBannedFromConversations(request.conversationIds,
-                      JwtHelper.GetNamedClaim(User.Claims));
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        //[Route("api/Conversations/isBannedFrom")]
+        //public async Task<ResponseApiModel<bool[]>> IsBannedFrom([FromBody]IsBannedFromRequest request)
+        //{
+        //    try
+        //    {
+        //        var result = await BansService.IsBannedFromConversations(request.conversationIds,
+        //              JwtHelper.GetNamedClaim(User.Claims));
 
-                return new ResponseApiModel<bool[]>()
-                {
-                    IsSuccessfull = true,
-                    Response = result
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ResponseApiModel<bool[]>()
-                {
-                    ErrorMessage = ex.Message,
-                    IsSuccessfull = false
-                };
-            }
-        }
+        //        return new ResponseApiModel<bool[]>()
+        //        {
+        //            IsSuccessfull = true,
+        //            Response = result
+        //        };
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return new ResponseApiModel<bool[]>()
+        //        {
+        //            ErrorMessage = ex.Message,
+        //            IsSuccessfull = false
+        //        };
+        //    }
+        //}
     }
 }

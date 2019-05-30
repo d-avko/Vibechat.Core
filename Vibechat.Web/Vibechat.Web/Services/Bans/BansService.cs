@@ -99,7 +99,7 @@ namespace Vibechat.Web.Services.Bans
             }
         }
 
-        public async Task<bool[]> IsBannedFromConversations(int[] conversationIds, string Who)
+        public async Task<bool> IsBannedFromConversation(int conversationId, string Who)
         {
             var who = await UsersRepository.GetById(Who);
 
@@ -108,8 +108,7 @@ namespace Vibechat.Web.Services.Bans
                 throw new FormatException("Wrong id of a person to check.");
             }
 
-            return (from id in conversationIds
-                   select ConversationsBansRepository.IsBanned(who, id)).ToArray();
+            return ConversationsBansRepository.IsBanned(who, conversationId);
         }
 
         public bool IsBannedFromMessagingWith(string who, string byWho)

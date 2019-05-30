@@ -7,7 +7,7 @@
     <mat-drawer #actionsdrawer [mode]="over">
       <div class="chatactions_flex">
 
-        <button mat-button>
+        <button mat-button (click)="OnViewUserInfo(this.CurrentUser)">
           <div class="padding10px flexaligned">
             <mat-icon>sentiment_satisfied</mat-icon>
             <span class="padding5px">My profile</span>

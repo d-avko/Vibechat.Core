@@ -48,6 +48,6 @@ namespace VibeChat.Web.ChatData
         /// Client-side field, untouched by server
         /// </summary>
         public bool IsMessagingRestricted { get; set; }
-
+        public bool IsBlocked { get; internal set; }
     }
 }
