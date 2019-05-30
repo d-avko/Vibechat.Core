@@ -291,6 +291,7 @@ export class ChatComponent implements OnInit {
         }
 
         user = result.response;
+        this.CurrentUser = result.response;
 
         const userInfoRef = this.dialog.open(UserInfoDialogComponent, {
           width: '450px',
