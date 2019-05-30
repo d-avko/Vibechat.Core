@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Vibechat.Web.Extensions;
 using Vibechat.Web.Services;
 using Vibechat.Web.Services.Bans;
 using Vibechat.Web.Services.Users;
@@ -15,9 +16,6 @@ using VibeChat.Web.UserProviders;
 
 namespace VibeChat.Web
 {
-    /// <summary>
-    /// SignalR main hub
-    /// </summary>
     public class ChatsHub : Hub
     {
         private ICustomHubUserIdProvider userProvider { get; set; }
@@ -25,7 +23,7 @@ namespace VibeChat.Web
         private UsersInfoService userService { get; set; }
 
         private ConversationsInfoService conversationsService { get; set; }
-        public BansService BansService { get; }
+        public BansService bansService { get; }
         private ILogger<ChatsHub> logger { get; set; }
 
 
@@ -39,7 +37,7 @@ namespace VibeChat.Web
             this.userProvider = userProvider;
             this.userService = userService;
             this.conversationsService = conversationsService;
-            BansService = bansService;
+            this.bansService = bansService;
             this.logger = logger;
         }
 
@@ -73,13 +71,6 @@ namespace VibeChat.Web
             }
         }
 
-        /// <summary>
-        /// Used to add user to specified group
-        /// </summary>
-        /// <param name="userId">id of a user</param>
-        /// <param name="conversationId">conversation to add to</param>
-        /// <param name="connectionId"> connection to add</param>
-        /// <returns></returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task AddToGroup(string userId, ConversationTemplate conversation)
         {
@@ -87,6 +78,14 @@ namespace VibeChat.Web
 
             try
             {
+                var isBanned = await bansService.IsBannedFromConversation(conversation.ConversationID, userId);
+
+                if (isBanned)
+                {
+                    await SendError(whoSent.ConnectionId, "You were banned from this group. Couldn't join it.");
+                    return;
+                }
+
                 var addedUser = await conversationsService.AddUserToConversation(new AddToConversationApiModel()
                 {
                     ConvId = conversation.ConversationID,
@@ -116,8 +115,6 @@ namespace VibeChat.Web
 
             try
             {
-                await conversationsService.RemoveConversation(conversation, whoSent.Id);
-
                 if (conversation.IsGroup)
                 {
                     await RemovedFromGroup(conversation.DialogueUser.Id, conversation.ConversationID);
@@ -125,7 +122,10 @@ namespace VibeChat.Web
                 }
                 else
                 {
-                    foreach(UserInfo user in conversation.Participants)
+                    List<UserInfo> participants = (await conversationsService
+                        .GetParticipants(new GetParticipantsApiModel() { ConvId = conversation.ConversationID })).Participants;
+
+                    foreach(UserInfo user in participants)
                     {
                         UserInApplication userToSend = await userService.GetUserById(user.Id).ConfigureAwait(false);
 
@@ -135,6 +135,8 @@ namespace VibeChat.Web
                         }
                     }
                 }
+
+                await conversationsService.RemoveConversation(conversation, whoSent.Id);
             }
             catch (Exception ex)
             {
@@ -150,6 +152,12 @@ namespace VibeChat.Web
 
             try
             {
+                if (bansService.IsBannedFromMessagingWith(whoSent.Id, user.Id))
+                {
+                    await SendError(whoSent.ConnectionId, "You were blocked by this user. Couldn't create dialog.");
+                    return;
+                }
+
                 ConversationTemplate created = await conversationsService.CreateConversation(new CreateConversationCredentialsApiModel()
                 {
                     IsGroup = false,
@@ -177,18 +185,20 @@ namespace VibeChat.Web
             }
         }
 
-        /// <summary>
-        /// Used to connect to a group to start chatting
-        /// </summary>
-        /// <param name="groupId"></param>
-        /// <returns></returns>
+
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task ConnectToGroups(List<int> groupIds)
         {
-            foreach(var groupId in groupIds)
+            UserInApplication whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
+
+            foreach (var groupId in groupIds)
             {
-                //CHECK IF THIS IS EVEN ALLOWED
-                await Groups.AddToGroupAsync(Context.ConnectionId, groupId.ToString());
+                //establish connections only with groups where user exists.
+
+                if (await conversationsService.ExistsInConversation(groupId, whoSent.Id))
+                {
+                    await Groups.AddToGroupAsync(Context.ConnectionId, groupId.ToString());
+                }
             }
         }
 
@@ -200,8 +210,22 @@ namespace VibeChat.Web
 
             try
             {
-                //CAN SEND MESSAGE ONLY IF JOINED
+                if(!await conversationsService.ExistsInConversation(groupId, whoSent.Id))
+                {
+                    await SendError(whoSent.ConnectionId, "You must join this group to send messages.");
+                    return;
+                }
 
+                if(await bansService.IsBannedFromConversation(groupId , whoSent.Id))
+                {
+                    await SendError(whoSent.ConnectionId, "You were banned in this group.");
+                    return;
+                }
+
+                //we can't trust user on what's in user field
+
+                message.User = whoSent.ToUserInfo();
+                
                 var created = new MessageDataModel();
 
                 if (message.IsAttachment)
@@ -225,15 +249,7 @@ namespace VibeChat.Web
             }
         }
 
-        /// <summary>
-        /// Method to send a message.
-        /// Using overrided user string (defined as DefaultUserProvider)
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="SenderId"></param>
-        /// <param name="UserToSendId"></param>
-        /// <param name="conversationId"></param>
-        /// <returns></returns>
+
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task SendMessageToUser(Message message, string UserToSendId, int conversationId)
         {
@@ -241,8 +257,15 @@ namespace VibeChat.Web
 
             try
             {
+                if (bansService.IsBannedFromMessagingWith(whoSent.Id, UserToSendId))
+                {
+                    await SendError(whoSent.ConnectionId, "You were blocked by this user. Couldn't send message.");
+                    return;
+                }
 
-                //CAN SEND TO ANYONE
+                //we can't trust user on what's in user field
+
+                message.User = whoSent.ToUserInfo();
 
                 var created = new MessageDataModel();
 
@@ -277,13 +300,7 @@ namespace VibeChat.Web
             }
         }
 
-        /// <summary>
-        /// Used to notify users of leaving of specified member.
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="conversationId"></param>
-        /// <param name="x"></param>
-        /// <returns></returns>
+
         private async Task RemovedFromGroup(string userId, int conversationId)
         {
             await Clients.Group(conversationId.ToString()).SendAsync("RemovedFromGroup",userId, conversationId);
@@ -313,9 +330,9 @@ namespace VibeChat.Web
             await Clients.Client(UserToSendConnectionId).SendAsync("ReceiveMessage", SenderId, message, conversationId);
         }
 
-        private async Task SendError(string userid, string error)
+        private async Task SendError(string connectionId, string error)
         {
-            await Clients.Client(userid).SendAsync("Error", error);
+            await Clients.Client(connectionId).SendAsync("Error", error);
         }
     }
 }

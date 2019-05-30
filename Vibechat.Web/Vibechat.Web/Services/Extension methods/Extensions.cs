@@ -18,6 +18,7 @@ namespace Vibechat.Web.Extensions
                 Id = user.Id,
                 Name = user.FirstName,
                 ImageUrl = user.ProfilePicImageURL,
+                FullImageUrl = user.FullImageUrl,
                 LastName = user.LastName,
                 LastSeen = user.LastSeen,
                 UserName = user.UserName,

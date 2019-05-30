@@ -42,7 +42,7 @@ namespace VibeChat.Web
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public static string GetNamedClaim(IEnumerable<Claim> claims, string name = JwtUserIdClaimName)
+        public static string GetNamedClaimValue(IEnumerable<Claim> claims, string name = JwtUserIdClaimName)
         {
             return claims.FirstOrDefault(x => x.Type == name)?.Value;
         }

@@ -38,13 +38,15 @@
 
       <mat-list-item (click)="ChangeLastname()">
 
+        <mat-icon class="cadetBlue">edit</mat-icon>
+
         <h3 matLine>Change last name</h3>
       </mat-list-item>
 
       <mat-list-item>
         <mat-icon class="cadetBlue">add_photo_alternate</mat-icon>
         <h3 matLine>Change profile picture </h3>
-        <input type="file" (change)="UpdateThumbnail($event)" accept="image/*" class="thumbnail-input" name="thumbnail" />
+        <input type="file" (change)="UpdateThumbnail($event)" accept="image/*" class="thumbnail-input" name="picture" />
       </mat-list-item>
 
     </mat-action-list>

@@ -48,14 +48,12 @@ export class ApiRequestsBuilder {
     );
   }
 
-  public UpdateConversationsRequest(token: string, userId: string): Observable<ServerResponse<ConversationResponse>> {
+  public UpdateConversationsRequest(token: string): Observable<ServerResponse<Array<ConversationTemplate>>> {
 
-    return this.MakeAuthorizedCall<ConversationResponse>(
+    return this.MakeAuthorizedCall<Array<ConversationTemplate>>(
       token,
-      {
-        UserId: userId
-      },
-      'api/Conversations/GetInfo'
+      null,
+      'api/Conversations/GetAll'
     );
   }
 
@@ -107,6 +105,49 @@ export class ApiRequestsBuilder {
       token,
       data,
       'api/Conversations/UpdateThumbnail'
+    );
+  }
+
+  public UploadUserProfilePicture(picture: File, token: string): Observable<ServerResponse<UpdateThumbnailResponse>> {
+    let data = new FormData();
+    data.append('picture', picture);
+
+    return this.MakeAuthorizedCall<UpdateThumbnailResponse>(
+      token,
+      data,
+      'api/Users/UpdateProfilePicture'
+    );
+  }
+
+  public GetUserById(token: string, userId: string): Observable<ServerResponse<UserInfo>> {
+    return this.MakeAuthorizedCall<UserInfo>(
+      token,
+      { Id: userId },
+      'api/Users/GetById'
+    );
+  }
+
+  public GetConversationById(token: string, conversationId: number): Observable<ServerResponse<ConversationTemplate>> {
+    return this.MakeAuthorizedCall<ConversationTemplate>(
+      token,
+      { conversationId: conversationId },
+      'api/Conversations/GetById'
+    );
+  }
+
+  public ChangeCurrentUserName(token: string, newName: string): Observable<ServerResponse<boolean>> {
+    return this.MakeAuthorizedCall<boolean>(
+      token,
+      { newName: newName },
+      'api/Users/ChangeName'
+    );
+  }
+
+  public ChangeCurrentUserLastName(token: string, newName: string): Observable<ServerResponse<boolean>> {
+    return this.MakeAuthorizedCall<boolean>(
+      token,
+      { newName: newName },
+      'api/Users/ChangeLastName'
     );
   }
 
@@ -166,26 +207,6 @@ export class ApiRequestsBuilder {
       token,
       { SearchString: searchstring },
       'api/Conversations/SearchGroups'
-    );
-
-  }
-
-  public IsConversationsBanned(token: string, conversationids: Array<number>): Observable<ServerResponse<Array<boolean>>> {
-
-    return this.MakeAuthorizedCall<Array<boolean>>(
-      token,
-      { conversationIds: conversationids },
-      'api/Conversations/isBannedFrom'
-    );
-
-  }
-
-  public IsUserBlocked(token: string, userId: string, byWhom: string): Observable<ServerResponse<boolean>> {
-
-    return this.MakeAuthorizedCall<boolean>(
-      token,
-      { userId: userId, byWhom: byWhom },
-      'api/Users/isBanned'
     );
 
   }

@@ -17,5 +17,11 @@ namespace Vibechat.Web.Services.Repositories
         Task MakeUserOffline(string userId);
         Task MakeUserOnline(string userId, string signalRConnectionId);
         Task ChangeUserPublicState(string userId);
+
+        Task UpdateThumbnail(string thumbnail, string fullSized, string userId);
+
+        Task ChangeLastName(string newName, string userId);
+
+        Task ChangeName(string newName, string userId);
     }
 }

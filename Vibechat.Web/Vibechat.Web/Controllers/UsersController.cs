@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -26,28 +27,88 @@ namespace VibeChat.Web.Controllers
             BansService = bansService;
         }
 
+
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Users/GetById")]
-        public async Task<ResponseApiModel<UserByIdApiResponseModel>> GetById([FromBody]UserByIdApiModel userId)
+        public async Task<ResponseApiModel<UserInfo>> GetById([FromBody]UserByIdApiModel request)
         {
             try
             {
-                var result = await mUsersService.GetUserById(userId);
+                UserInfo user = await mUsersService.GetUserById(request);
 
-                return new ResponseApiModel<UserByIdApiResponseModel>()
+                user.IsMessagingRestricted = BansService.IsBannedFromMessagingWith(JwtHelper.GetNamedClaimValue(User.Claims), request.Id);
+
+                user.IsBlocked = BansService.IsBannedFromMessagingWith(request.Id, JwtHelper.GetNamedClaimValue(User.Claims));
+
+                return new ResponseApiModel<UserInfo>()
                 {
                     IsSuccessfull = true,
                     ErrorMessage = null,
-                    Response = result
+                    Response = user
                 };
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<UserByIdApiResponseModel>()
+                return new ResponseApiModel<UserInfo>()
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
                     Response = null
+                };
+            }
+        }
+
+        public class ChangeNameRequest
+        {
+            public string newName { get; set; }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Users/ChangeName")]
+        public async Task<ResponseApiModel<bool>> ChangeName([FromBody] ChangeNameRequest request)
+        {
+            try
+            {
+                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+
+                await mUsersService.ChangeName(request.newName, thisUserId);
+
+                return new ResponseApiModel<bool>()
+                {
+                    IsSuccessfull = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<bool>()
+                {
+                    ErrorMessage = ex.Message,
+                    IsSuccessfull = false
+                };
+            }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Users/ChangeLastName")]
+        public async Task<ResponseApiModel<bool>> ChangeLastName([FromBody] ChangeNameRequest request)
+        {
+            try
+            {
+                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+
+                await mUsersService.ChangeLastName(request.newName, thisUserId);
+
+                return new ResponseApiModel<bool>()
+                {
+                    IsSuccessfull = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<bool>()
+                {
+                    ErrorMessage = ex.Message,
+                    IsSuccessfull = false
                 };
             }
         }
@@ -92,7 +153,7 @@ namespace VibeChat.Web.Controllers
             {
                await mUsersService.ChangeUserIsPublicState(
                    request.userId, 
-                   JwtHelper.GetNamedClaim(User.Claims));
+                   JwtHelper.GetNamedClaimValue(User.Claims));
 
                 return new ResponseApiModel<bool>()
                 {
@@ -125,7 +186,7 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                await BansService.BanUser(request.userId, request.conversationId, JwtHelper.GetNamedClaim(User.Claims));
+                await BansService.BanUser(request.userId, request.conversationId, JwtHelper.GetNamedClaimValue(User.Claims));
 
                 return new ResponseApiModel<bool>()
                 {
@@ -144,6 +205,49 @@ namespace VibeChat.Web.Controllers
                 };
             }
         }
+
+        public class UpdateProfilePictureResponse
+        {
+            public string ThumbnailUrl { get; set; }
+
+            public string FullImageUrl { get; set; }
+        }
+
+        public class UpdateProfilePictureRequest
+        {
+            [FromForm(Name = "picture")]
+            public IFormFile picture { get; set; }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Users/UpdateProfilePicture")]
+        public async Task<ResponseApiModel<UpdateProfilePictureResponse>> UpdateProfilePicture([FromForm]UpdateProfilePictureRequest request)
+        {
+            try
+            {
+                var result = await mUsersService.UpdateThumbnail(request.picture, JwtHelper.GetNamedClaimValue(User.Claims));
+
+                return new ResponseApiModel<UpdateProfilePictureResponse>()
+                {
+                    IsSuccessfull = true,
+                    Response = result
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<UpdateProfilePictureResponse>()
+                {
+                    ErrorMessage = ex.Message,
+                    IsSuccessfull = false
+                };
+            }
+        }
+
+        public class UserInfoRequest
+        {
+            public string userId { get; set; }
+        }
+
 
         public class IsBannedRequest
         {
@@ -194,7 +298,7 @@ namespace VibeChat.Web.Controllers
             {
                 await BansService.Unban(
                     request.userId,
-                    JwtHelper.GetNamedClaim(User.Claims));
+                    JwtHelper.GetNamedClaimValue(User.Claims));
 
                 return new ResponseApiModel<bool>()
                 {

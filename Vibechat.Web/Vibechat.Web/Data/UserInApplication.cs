@@ -17,6 +17,8 @@ namespace VibeChat.Web
         /// </summary>
         public string ProfilePicImageURL { get; set; }
 
+        public string FullImageUrl { get; set; }
+
         /// <summary>
         /// Connection id needed for signalR
         /// </summary>

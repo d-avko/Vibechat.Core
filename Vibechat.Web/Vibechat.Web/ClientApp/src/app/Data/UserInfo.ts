@@ -12,6 +12,8 @@ export class UserInfo {
 
   public imageUrl: string;
 
+  public fullImageUrl: string;
+
   public connectionId: string;
 
   public isOnline: boolean;

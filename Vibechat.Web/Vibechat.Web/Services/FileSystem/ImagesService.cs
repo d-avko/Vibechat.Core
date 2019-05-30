@@ -83,7 +83,7 @@ namespace Vibechat.Web.Services.FileSystem
         /// <param name="image"></param>
         /// <param name="imageName"></param>
         /// <returns></returns>
-        public Tuple<string,string> UpdateConversationThumbnail(MemoryStream image, string imageName)
+        public Tuple<string,string> SaveImage(MemoryStream image, string imageName)
         {
             var resized = ImageCompression.Resize(image, ThumbnailWidth, ThumbnailHeight);
             image.Seek(0, SeekOrigin.Begin);
