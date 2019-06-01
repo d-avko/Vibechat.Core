@@ -27,6 +27,7 @@ import { HttpResponse } from "@angular/common/http";
 import { UploadFilesResponse } from "../Data/UploadFilesResponse";
 import { retry } from "rxjs/operators";
 import { AnimationGroupPlayer } from "@angular/animations/src/players/animation_group_player";
+import { ViewAttachmentsDialogComponent } from "../Dialogs/ViewAttachmentsDialog";
 
 @Component({
   selector: 'chat-root',
@@ -236,6 +237,11 @@ export class ChatComponent implements OnInit {
           .subscribe((group: ConversationTemplate) => {
             this.connectionManager.RemoveConversation(group);
           });
+
+        groupInfoRef.componentInstance.OnViewAttachments
+          .subscribe((group: ConversationTemplate) => {
+            this.ViewAttachments(group);
+          });
       })
 
   
@@ -379,7 +385,37 @@ export class ChatComponent implements OnInit {
 
           });
 
+        userInfoRef.componentInstance.OnViewAttachmentsOf
+          .subscribe((user: UserInfo) => {
+            this.ViewAttachmentsOf(user)
+          });
+
       })
+  }
+
+  public ViewAttachmentsOf(user: UserInfo) {
+    let conversation = this.Conversations.find(x => !x.isGroup && x.dialogueUser.id == user.id);
+
+    if (conversation) {
+      const attachmentsDialogRef = this.dialog.open(ViewAttachmentsDialogComponent, {
+        width: '450px',
+        data: {
+          conversation: conversation
+        }
+      });
+    }
+
+  }
+
+  public ViewAttachments(conversation: ConversationTemplate) {
+    if (conversation) {
+      const attachmentsDialogRef = this.dialog.open(ViewAttachmentsDialogComponent, {
+        width: '450px',
+        data: {
+          conversation: conversation
+        }
+      });
+    }
   }
 
   public OnUnblockUser(user: UserInfo) {

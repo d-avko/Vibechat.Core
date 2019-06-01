@@ -1,0 +1,49 @@
+<h1 mat-dialog-title>Attachments</h1>
+<mat-tab-group>
+
+  <mat-tab>
+
+    <ng-template mat-tab-label>
+      <mat-icon class="example-tab-icon">photo</mat-icon>
+      Images
+    </ng-template>
+
+    <!--Photos-->
+
+    <cdk-virtual-scroll-viewport (scrolledIndexChange)="OnAttachmentsScrolled($event)"
+                                 itemSize="50"
+                                 class="photos_scrollable">
+
+      <div *cdkVirtualFor="let photo of Photos" class="photos_wrapper">
+
+        <div class="photo_thumbnail_wrapper" (click)="ViewPhoto(photo.attachmentInfo)">
+          <img class="photo" src="{{photo.attachmentInfo.contentUrl}}"/>
+        </div>
+
+      </div>
+
+</cdk-virtual-scroll-viewport>
+
+  </mat-tab>
+
+</mat-tab-group>
+
+<style>
+
+  .photos_wrapper{
+    display: flex;
+    flex-direction: row;
+  }
+  .photo_thumbnail_wrapper{
+    margin-left: 1%;
+    height:50px;
+  }
+  .photo{
+   width: 50px;
+   height: 50px;
+   border-radius: 5px;
+  }
+  .photos_scrollable{
+    height:450px;
+  }
+</style>

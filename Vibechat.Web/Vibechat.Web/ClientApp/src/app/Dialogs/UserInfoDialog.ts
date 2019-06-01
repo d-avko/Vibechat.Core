@@ -32,6 +32,8 @@ export class UserInfoDialogComponent {
 
   public OnUnblockUser = new EventEmitter<UserInfo>();
 
+  public OnViewAttachmentsOf = new EventEmitter<UserInfo>();
+
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
     @Inject(MAT_DIALOG_DATA) public data: UserInfoData,
@@ -52,6 +54,10 @@ export class UserInfoDialogComponent {
 
   public CreateDialog(): void {
     this.OnCreateDialogWith.emit(this.data.user);
+  }
+
+  public ViewAttachments() {
+    this.OnViewAttachmentsOf.emit(this.data.user);
   }
 
   public Block(): void {

@@ -38,6 +38,8 @@ export class GroupInfoDialogComponent {
 
   public OnRemoveGroup = new EventEmitter<ConversationTemplate>();
 
+  public OnViewAttachments = new EventEmitter<ConversationTemplate>();
+
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
     @Inject(MAT_DIALOG_DATA) public data: GroupInfoData, public formatter: ConversationsFormatter, public ChangeNameDialog: MatDialog) { }
@@ -76,6 +78,10 @@ export class GroupInfoDialogComponent {
 
   public BanUser(user: UserInfo) {
     this.OnBanUser.emit(user);
+  }
+
+  public ViewAttachments(){
+    this.OnViewAttachments.emit(this.data.Conversation);
   }
 
   public IsCurrentUserCreatorOfConversation() {

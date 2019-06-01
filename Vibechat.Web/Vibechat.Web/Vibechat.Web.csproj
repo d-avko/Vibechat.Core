@@ -114,6 +114,7 @@
     <None Remove="ClientApp\src\app\Dialogs\FindUsersDialog.ts" />
     <None Remove="ClientApp\src\app\Dialogs\GroupInfoDialog.ts" />
     <None Remove="ClientApp\src\app\Dialogs\UserInfoDialog.ts" />
+    <None Remove="ClientApp\src\app\Dialogs\ViewAttachmentsDialog.ts" />
     <None Remove="ClientApp\src\app\Interceptors\ErrorHandlingInterceptor.ts" />
     <None Remove="ClientApp\src\app\Modules\ChatModule.ts" />
     <None Remove="ClientApp\src\app\Modules\LoginModule.ts" />
@@ -145,6 +146,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\Dialogs\FindUsersDialog.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Dialogs\GroupInfoDialog.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Dialogs\UserInfoDialog.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Dialogs\ViewAttachmentsDialog.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Formatters\ConversationsFormatter.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationTemplate.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ChatMessage.ts" />
