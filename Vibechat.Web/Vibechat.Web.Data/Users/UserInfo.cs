@@ -25,7 +25,7 @@ namespace VibeChat.Web.ChatData
         /// <summary>
         /// Time last seen
         /// </summary>
-        public DateTime LastSeen { get; set; }
+        public string LastSeen { get; set; }
 
         /// <summary>
         /// Thumbnail picture URL

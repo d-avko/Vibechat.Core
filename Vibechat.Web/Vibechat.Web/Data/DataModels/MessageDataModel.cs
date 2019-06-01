@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using VibeChat.Web.Data.DataModels;
 
@@ -30,7 +29,6 @@ namespace VibeChat.Web
         public int ConversationID { get; set; }
 
         //time when this message was received
-
         public DateTime TimeReceived { get; set; }
     }
 }

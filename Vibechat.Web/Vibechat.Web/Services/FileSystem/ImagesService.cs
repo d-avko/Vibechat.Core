@@ -1,14 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Vibechat.Web.ChatData.Messages;
 using Vibechat.Web.Services.Images;
 using Vibechat.Web.Services.Paths;
-using VibeChat.Web;
-using VibeChat.Web.ChatData;
 
 namespace Vibechat.Web.Services.FileSystem
 {
@@ -16,7 +10,7 @@ namespace Vibechat.Web.Services.FileSystem
     {
         private static string FilesLocationRelative = "Uploads/";
 
-        private static string StaticFilesLocation = "ClientApp/dist/";
+        private static string StaticFilesLocation = "wwwroot/";
 
         private static int MessageImageMaxWidth = 350;
 

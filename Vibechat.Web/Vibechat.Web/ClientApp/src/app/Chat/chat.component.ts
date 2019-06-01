@@ -23,6 +23,10 @@ import { SearchListComponent } from "../Search/searchlist.component";
 import { UserInfoDialogComponent } from "../Dialogs/UserInfoDialog";
 import { identity } from "rxjs";
 import { resetCompiledComponents } from "@angular/core/src/render3/jit/module";
+import { HttpResponse } from "@angular/common/http";
+import { UploadFilesResponse } from "../Data/UploadFilesResponse";
+import { retry } from "rxjs/operators";
+import { AnimationGroupPlayer } from "@angular/animations/src/players/animation_group_player";
 
 @Component({
   selector: 'chat-root',
@@ -174,7 +178,7 @@ export class ChatComponent implements OnInit {
           return;
         }
 
-        group = result.response;
+        this.UpdateConversationFields(group, result.response);
 
         const groupInfoRef = this.dialog.open(GroupInfoDialogComponent, {
           width: '450px',
@@ -291,7 +295,10 @@ export class ChatComponent implements OnInit {
         }
 
         user = result.response;
-        this.CurrentUser = result.response;
+
+        if (user.id == this.CurrentUser.id) {
+          this.CurrentUser = result.response;
+        }
 
         const userInfoRef = this.dialog.open(UserInfoDialogComponent, {
           width: '450px',
@@ -554,9 +561,8 @@ export class ChatComponent implements OnInit {
         }), this.CurrentConversation);
   }
 
-
   public OnMessageReceived(data: MessageReceivedModel): void {
-    data.message.timeReceived = new Date(<string>data.message.timeReceived);
+    data.message.timeReceived = new Date(data.message.timeReceived);
 
     let conversation = this.Conversations
       .find(x => x.conversationID == data.conversationId);
@@ -575,7 +581,7 @@ export class ChatComponent implements OnInit {
   public OnAddedToGroup(data: AddedToGroupModel): void {
     //c# date -> ts date
     if (data.conversation.messages != null) {
-      data.conversation.messages.forEach((x) => x.timeReceived = new Date(<string>x.timeReceived));
+      data.conversation.messages.forEach((x) => x.timeReceived = new Date(x.timeReceived));
     }
 
     if (data.conversation.isGroup) {
@@ -629,8 +635,15 @@ export class ChatComponent implements OnInit {
           return;
         }
 
-        data.conversation = result.response;
+        this.UpdateConversationFields(data.conversation, result.response);
       })
+  }
+
+  public UpdateConversationFields(old: ConversationTemplate, New: ConversationTemplate): void {
+    old.isMessagingRestricted = New.isMessagingRestricted;
+    old.name = New.name;
+    old.fullImageUrl = New.fullImageUrl;
+    old.thumbnailUrl = New.thumbnailUrl;
   }
 
   public OnRemovedFromGroup(data: RemovedFromGroupModel) {
@@ -680,10 +693,10 @@ export class ChatComponent implements OnInit {
 
           result.response.messages = result.response.messages.sort(this.MessagesSortFunc);
 
-          result.response.messages.forEach((x) => x.timeReceived = new Date(<string>x.timeReceived));
+          result.response.messages.forEach((x) => x.timeReceived = new Date(x.timeReceived));
 
           //append old messages to new ones.
-          this.CurrentConversation.messages = result.response.messages.concat(this.CurrentConversation.messages);
+          this.CurrentConversation.messages = [...result.response.messages.concat(this.CurrentConversation.messages)];
           this.IsMessagesLoading = false;
 
           this.messages.ScrollToMessage(result.response.messages.length);
@@ -743,7 +756,7 @@ export class ChatComponent implements OnInit {
               .forEach((conversation) => {
 
                 if (conversation.messages != null) {
-                  conversation.messages.forEach(msg => msg.timeReceived = new Date(<string>msg.timeReceived))
+                  conversation.messages.forEach(msg => msg.timeReceived = new Date(msg.timeReceived))
                 } else {
                   conversation.messages = new Array<ChatMessage>();
                 }
@@ -779,7 +792,7 @@ export class ChatComponent implements OnInit {
   public ChangeConversation(conversation: ConversationTemplate): void {
     //if we were on search screen, we should hide it
 
-      this.SearchString = '';
+    this.SearchString = '';
 
     if (conversation == this.CurrentConversation) {
       this.CurrentConversation = null;
@@ -795,8 +808,9 @@ export class ChatComponent implements OnInit {
           this.snackbar.openSnackBar('Failed to update some conversation info. Reason: ' + result.errorMessage);
           return;
         }
-
-        this.CurrentConversation = result.response;
+        //update existing data. Couldn't assign fetched object,
+        //because this will lead to lost pointer for messages, and thus they won't be updated on UI
+        this.UpdateConversationFields(this.CurrentConversation, result.response);
       });
 
     this.IsConversationHistoryEnd = false;
@@ -807,33 +821,37 @@ export class ChatComponent implements OnInit {
 
     for (let i = 0; i < files.length; ++i) {
       if (((files[i].size / 1024) / 1024) > ApiRequestsBuilder.maxUploadImageSizeMb) {
-        this.snackbar.openSnackBar("Some of the files was larger than " + ApiRequestsBuilder.maxUploadImageSizeMb + "MB");
+        this.snackbar.openSnackBar("Some of the files were larger than " + ApiRequestsBuilder.maxUploadImageSizeMb + "MB");
         return;
       }
     }
 
-    this.requestsBuilder.UploadImages(files, Cache.JwtToken).subscribe(
-      (result) => {
+    if (files.length == 0) {
+      return;
+    }
 
-      if (!result.isSuccessfull) {
-        this.snackbar.openSnackBar(result.errorMessage);
-        return;
-      }
+    this.requestsBuilder.UploadImages(files, Cache.JwtToken)
+      .subscribe((result) => {
 
-      result.response.uploadedFiles.forEach(
-        (file) => this.connectionManager.SendMessage(
-          new ChatMessage(
-            {
-              messageContent: null,
-              isAttachment: true,
-              user: this.CurrentUser,
-              conversationID: conversationToSend,
-              attachmentInfo: file
-            }), this.CurrentConversation)
+        let response = (<HttpResponse<ServerResponse<UploadFilesResponse>>>result).body;
+
+        if (!response.isSuccessfull) {
+          this.snackbar.openSnackBar(response.errorMessage);
+          return;
+        }
+
+        response.response.uploadedFiles.forEach(
+          (file) => this.connectionManager.SendMessage(
+            new ChatMessage(
+              {
+                messageContent: null,
+                isAttachment: true,
+                user: this.CurrentUser,
+                conversationID: conversationToSend,
+                attachmentInfo: file
+              }), this.CurrentConversation)
         )
-      },
-      (error) => this.OnApiError(error)
-    )
+      })
   }
 
   private OnTokenExpired() {
