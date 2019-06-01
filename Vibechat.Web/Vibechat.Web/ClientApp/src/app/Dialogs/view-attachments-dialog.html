@@ -11,13 +11,27 @@
     <!--Photos-->
 
     <cdk-virtual-scroll-viewport (scrolledIndexChange)="OnAttachmentsScrolled($event)"
+                                 minBufferPx="120000"
+                                 maxBufferPx="250000"
                                  itemSize="50"
                                  class="photos_scrollable">
 
-      <div *cdkVirtualFor="let photo of Photos" class="photos_wrapper">
+      <div *cdkVirtualFor="let photosInWeek of PhotosWeeks">
 
-        <div class="photo_thumbnail_wrapper" (click)="ViewPhoto(photo.attachmentInfo)">
-          <img class="photo" src="{{photo.attachmentInfo.contentUrl}}"/>
+        <div class="photos_break">
+          <span class="photos_break__date">{{formatter.GetFormattedDateForAttachments(photosInWeek)}}</span>
+        </div>
+
+        <div class="photos_wrapper">
+
+          <div *ngFor="let photo of photosInWeek">
+
+            <div class="photo_thumbnail_wrapper" (click)="ViewPhoto(photo.attachmentInfo)">
+              <img class="photo" src="{{photo.attachmentInfo.contentUrl}}" />
+            </div>
+
+          </div>
+
         </div>
 
       </div>
@@ -33,9 +47,19 @@
   .photos_wrapper{
     display: flex;
     flex-direction: row;
+    flex-wrap:wrap;
   }
+  .photos_break{
+    padding: 20px;
+  }
+
+  .photos_break__date{
+    color:cadetblue;
+    font: 300 13px/15px Roboto,"Helvetica Neue",sans-serif;
+  }
+
   .photo_thumbnail_wrapper{
-    margin-left: 1%;
+    padding: 5px;
     height:50px;
   }
   .photo{
