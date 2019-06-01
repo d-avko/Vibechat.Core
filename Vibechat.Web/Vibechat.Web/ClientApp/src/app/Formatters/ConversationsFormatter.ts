@@ -2,6 +2,7 @@ import { Cache } from "../Auth/Cache";
 import { Injectable } from "@angular/core"
 import { ChatMessage } from "../Data/ChatMessage";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
+import { retry } from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -126,6 +127,28 @@ export class ConversationsFormatter{
     }
   }
 
+  public GetFormattedDateForAttachments(attachments: Array<ChatMessage>) {
+    let date = new Date();
+    let attachmentDate = (<Date>attachments[0].timeReceived);
+                                      //take zero element, as it's the most recent attachment
+    let daysSinceReceived = (date.getTime() - attachmentDate.getTime()) / (1000 * 60 * 60 * 24);
+
+    switch (true) {
+      case daysSinceReceived <= 7: {
+        return "This week";
+      }
+      case daysSinceReceived <= 14: {
+        return "A week ago.";
+      }
+      case daysSinceReceived <= 21: {
+        return "Two weeks ago.";
+      }
+      default: {
+        return attachmentDate.toLocaleDateString();
+      }
+    }
+  }
+
   public GetConversationNameFormatted(conversation: ConversationTemplate) {
 
     if (!conversation.isGroup) {
@@ -136,6 +159,6 @@ export class ConversationsFormatter{
   }
 
   public GetMessageTimeFormatted(message: ChatMessage) {
-    return (<Date>message.timeReceived).toLocaleString();
+    return (<Date>message.timeReceived).toLocaleTimeString();
   }
 }
