@@ -11,7 +11,7 @@ import { CommonModule } from "@angular/common";
 import { ReactiveFormsModule, FormsModule } from "@angular/forms";
 import { BrowserModule } from "@angular/platform-browser";
 import { AppRoutersModule } from "../app.routes";
-import { HttpClientModule } from "@angular/common/http";
+import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { ConversationsListComponent } from "../Conversation/ConversationsList/conversationslist.component";
 import { AddGroupDialogComponent } from "../Dialogs/AddGroupDialog";
@@ -20,6 +20,7 @@ import { GroupInfoDialogComponent } from "../Dialogs/GroupInfoDialog";
 import { ChangeNameDialogComponent } from "../Dialogs/ChangeNameDialog";
 import { SearchListComponent } from "../Search/searchlist.component";
 import { UserInfoDialogComponent } from "../Dialogs/UserInfoDialog";
+import { UploaderService } from "../uploads/upload.service";
 
 @NgModule({
   declarations: [
@@ -47,7 +48,16 @@ import { UserInfoDialogComponent } from "../Dialogs/UserInfoDialog";
     FormsModule
   ],
   exports: [AddGroupDialogComponent],
-  entryComponents: [AddGroupDialogComponent, FindUsersDialogComponent, GroupInfoDialogComponent, ChangeNameDialogComponent, UserInfoDialogComponent],
-  providers: [ConnectionManager, ConversationsFormatter]
+  entryComponents: [
+    AddGroupDialogComponent,
+    FindUsersDialogComponent,
+    GroupInfoDialogComponent,
+    ChangeNameDialogComponent,
+    UserInfoDialogComponent],
+
+  providers: [
+    ConnectionManager,
+    ConversationsFormatter,
+    UploaderService]
 })
 export class ChatModule { }

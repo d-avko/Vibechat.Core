@@ -35,7 +35,7 @@ namespace VibeChat.Web
         /// <param name="options">The database context options</param>
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
-                
+
         }
 
         #endregion

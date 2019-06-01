@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System;
-using VibeChat.Web.ChatData;
 
 namespace VibeChat.Web
 {

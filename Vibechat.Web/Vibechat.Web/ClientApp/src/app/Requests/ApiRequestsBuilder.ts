@@ -2,7 +2,7 @@ import { Observable } from "rxjs";
 import { ServerResponse } from "../ApiModels/ServerResponse";
 import { LoginResponse } from "../ApiModels/LoginResponse";
 import { LoginRequest } from "../ApiModels/LoginRequest";
-import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { HttpClient, HttpHeaders, HttpRequest, HttpResponse, HttpEvent } from "@angular/common/http";
 import { RegisterRequest } from "../ApiModels/RegisterRequest";
 import { Injectable, Inject } from "@angular/core";
 import { ConversationResponse } from "../ApiModels/ConversationResponse";
@@ -17,6 +17,8 @@ import { FoundUsersResponse } from "../Data/FoundUsersResponse";
 import { forEach } from "@angular/router/src/utils/collection";
 import { UpdateThumbnailResponse } from "../ApiModels/UpdateThumbnailResponse";
 import { UserInfo } from "../Data/UserInfo";
+import { UploaderService } from "../uploads/upload.service";
+import { retry } from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -29,9 +31,12 @@ export class ApiRequestsBuilder {
 
   private httpClient: HttpClient;
 
-  constructor(httpClient: HttpClient, @Inject('BASE_URL') baseUrl: string) {
+  private uploader: UploaderService;
+
+  constructor(httpClient: HttpClient, @Inject('BASE_URL') baseUrl: string, uploader: UploaderService) {
     this.baseUrl = baseUrl;
     this.httpClient = httpClient;
+    this.uploader = uploader;
   }
 
   public LoginRequest(credentials: LoginRequest): Observable<ServerResponse<LoginResponse>>{
@@ -83,17 +88,8 @@ export class ApiRequestsBuilder {
 
   }
 
-  public UploadImages(files: FileList, token: string): Observable<ServerResponse<UploadFilesResponse>> {
-    let data = new FormData();
-    for (let i = 0; i < files.length; ++i) {
-      data.append('images', files[i]);
-    }
-
-    return this.MakeAuthorizedCall<UploadFilesResponse>(
-      token,
-      data,
-      'Files/UploadImages'
-    );
+  public UploadImages(files: FileList, token: string): Observable<HttpEvent<any>> {
+   return this.uploader.uploadImages(files, token);
   }
 
   public UploadConversationThumbnail(thumbnail: File, conversationId: number, token: string): Observable<ServerResponse<UpdateThumbnailResponse>> {

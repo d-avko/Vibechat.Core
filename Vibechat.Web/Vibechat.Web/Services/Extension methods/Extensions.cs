@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Vibechat.Web.ChatData.Messages;
+using Vibechat.Web.Services.Extension_methods;
 using VibeChat.Web;
 using VibeChat.Web.ChatData;
 using VibeChat.Web.Data.DataModels;
@@ -20,7 +21,7 @@ namespace Vibechat.Web.Extensions
                 ImageUrl = user.ProfilePicImageURL,
                 FullImageUrl = user.FullImageUrl,
                 LastName = user.LastName,
-                LastSeen = user.LastSeen,
+                LastSeen = user.LastSeen.ToUTCString(),
                 UserName = user.UserName,
                 ConnectionId = user.ConnectionId,
                 IsOnline = user.IsOnline,
@@ -67,7 +68,7 @@ namespace Vibechat.Web.Extensions
                 Id = value.MessageID,
                 ConversationID = value.ConversationID,
                 MessageContent = value.MessageContent,
-                TimeReceived = value.TimeReceived,
+                TimeReceived = value.TimeReceived.ToUTCString(),
                 User = value.User?.ToUserInfo(),
                 AttachmentInfo = value?.ToMessageAttachment(),
                 IsAttachment = value.IsAttachment

@@ -75,7 +75,7 @@ export class MessagesComponent implements AfterViewInit {
   }
 
   public ScrollToMessage(scrollToMessageIndex: number) {
-    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
       
       let messages = this.viewport.elementRef.nativeElement.children.item(0).children;
       let offset = 0;
@@ -154,6 +154,10 @@ export class MessagesComponent implements AfterViewInit {
   }
 
   public IsFirstMessageInSequence(message: ChatMessage): boolean {
+    if (this.Conversation.messages == null) {
+      return false;
+    }
+
     let messageIndex = this.Conversation.messages.findIndex((x) => x.id == message.id);
 
     if (messageIndex == 0) {

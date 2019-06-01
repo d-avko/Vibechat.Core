@@ -15,6 +15,7 @@ using Vibechat.Web.Data.ApiModels.Conversation;
 using Vibechat.Web.Data.ApiModels.Messages;
 using Vibechat.Web.Extensions;
 using Vibechat.Web.Services.ChatDataProviders;
+using Vibechat.Web.Services.Extension_methods;
 using Vibechat.Web.Services.FileSystem;
 using Vibechat.Web.Services.Repositories;
 using VibeChat.Web;
@@ -234,18 +235,13 @@ namespace Vibechat.Web.Services
         }
 
 
-        public async Task RemoveUserFromConversation(string userId, string whoRemovedId, int conversationId, bool IsSelf)
+        public async Task RemoveUserFromConversation(string userId, string whoRemovedId, int conversationId)
         {
             var conversation = conversationRepository.GetById(conversationId);
 
             if (conversation == null)
             {
                 throw new FormatException("Wrong conversation.");
-            }
-
-            if (!IsSelf && userId == whoRemovedId && conversation.IsGroup)
-            {
-                throw new FormatException("Couldn't remove yourself from group.");
             }
 
             var userConversation = await usersConversationsRepository.Get(userId, conversationId);
@@ -255,7 +251,7 @@ namespace Vibechat.Web.Services
                 throw new FormatException("User is not a part of this conversation.");
             }
 
-            if(conversation.Creator.Id != whoRemovedId && !IsSelf && !conversation.IsGroup)
+            if(conversation.Creator.Id != whoRemovedId && !conversation.IsGroup)
             {
                 throw new FormatException("Only creator can remove users in group.");
             }
@@ -264,7 +260,7 @@ namespace Vibechat.Web.Services
 
             //if last user LEAVES the group, remove conversation
 
-            if(IsSelf && usersConversationsRepository.GetConversationParticipants(conversationId).Count().Equals(0))
+            if(usersConversationsRepository.GetConversationParticipants(conversationId).Count().Equals(0))
             {
                 conversationRepository.Remove(conversation);
             }
@@ -288,7 +284,7 @@ namespace Vibechat.Web.Services
             {
                 foreach(var user in Conversation.Participants)
                 {
-                    await RemoveUserFromConversation(user.Id, whoRemoves, conversation.ConvID, false);
+                    await RemoveUserFromConversation(user.Id, whoRemoves, conversation.ConvID);
                 }
 
 
@@ -296,8 +292,8 @@ namespace Vibechat.Web.Services
             }
             else
             {
-                await RemoveUserFromConversation(Conversation.DialogueUser.Id, whoRemoves, conversation.ConvID, false);
-                await RemoveUserFromConversation(whoRemoves, whoRemoves, conversation.ConvID, false);
+                await RemoveUserFromConversation(Conversation.DialogueUser.Id, whoRemoves, conversation.ConvID);
+                await RemoveUserFromConversation(whoRemoves, whoRemoves, conversation.ConvID);
 
                 var messages = messagesRepository.GetMessagesForConversation(whoRemoves, conversation.ConvID, true);
 
@@ -443,12 +439,12 @@ namespace Vibechat.Web.Services
                                 Id = msg.MessageID,
                                 ConversationID = msg.ConversationID,
                                 MessageContent = msg.MessageContent,
-                                TimeReceived = msg.TimeReceived,
+                                TimeReceived = msg.TimeReceived.ToUTCString(),
                                 User = msg.User == null ? null : new UserInfo()
                                 {
                                     Id = msg.User.Id,
                                     LastName = msg.User.LastName,
-                                    LastSeen = msg.User.LastSeen,
+                                    LastSeen = msg.User.LastSeen.ToUTCString(),
                                     Name = msg.User.FirstName,
                                     UserName = msg.User.UserName,
                                     ImageUrl = msg.User.ProfilePicImageURL,

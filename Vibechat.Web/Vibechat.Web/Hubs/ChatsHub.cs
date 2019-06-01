@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Vibechat.Web.Extensions;
 using Vibechat.Web.Services;
 using Vibechat.Web.Services.Bans;
+using Vibechat.Web.Services.Extension_methods;
 using Vibechat.Web.Services.Users;
 using VibeChat.Web.ApiModels;
 using VibeChat.Web.ChatData;
@@ -60,7 +61,7 @@ namespace VibeChat.Web
 
             try
             {
-                await conversationsService.RemoveUserFromConversation(userToRemoveId, whoSentId, conversationId, IsSelf);
+                await conversationsService.RemoveUserFromConversation(userToRemoveId, whoSentId, conversationId);
                 await RemovedFromGroup(userToRemoveId, conversationId);
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, conversationId.ToString());
             }
@@ -237,7 +238,7 @@ namespace VibeChat.Web
                     created = await conversationsService.AddMessage(message, groupId, whoSent.Id);
                 }
 
-                message.TimeReceived = created.TimeReceived;
+                message.TimeReceived = created.TimeReceived.ToUTCString();
                 message.Id = created.MessageID;
 
                 await SendMessageToGroup(groupId, whoSent.Id, message, true, true);
@@ -278,7 +279,7 @@ namespace VibeChat.Web
                     created = await conversationsService.AddMessage(message, conversationId, whoSent.Id);
                 }
 
-                message.TimeReceived = created.TimeReceived;
+                message.TimeReceived = created.TimeReceived.ToUTCString();
                 message.Id = created.MessageID;
 
                 var userToSend = await userService.GetUserById(UserToSendId);

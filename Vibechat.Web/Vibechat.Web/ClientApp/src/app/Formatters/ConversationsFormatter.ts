@@ -55,28 +55,22 @@ export class ConversationsFormatter{
 
     let message = conversation.messages[conversation.messages.length - 1];
 
-    let daysSinceReceived = (new Date().getTime() - (<Date>message.timeReceived).getTime()) / (1000 * 60 * 60 * 24);
-
-    switch (true) {
-      case daysSinceReceived <= 1: {
-        return "Today"
-      }
-      case daysSinceReceived <= 2: {
-        return "Yesterday";
-      }
-      case daysSinceReceived > 2: {
-        return daysSinceReceived.toPrecision(1) + " days ago";
-      }
-    }
+    return this.DaysSinceEventFormatted((<Date>message.timeReceived));
   }
 
-  public GetMessagesDateStripFormatted(message: ChatMessage) {
+  public GetMessagesDateStripFormatted(message: ChatMessage) : string {
+    return this.DaysSinceEventFormatted((<Date>message.timeReceived));
+  }
 
-    let daysSinceReceived = (new Date().getTime() - (<Date>message.timeReceived).getTime()) / (1000 * 60 * 60 * 24);
+  private DaysSinceEventFormatted(eventDate: Date): string {
+    let currentTime = new Date();
+    let hoursSinceReceived = (currentTime.getTime() - eventDate.getTime()) / (1000 * 60 * 60);
+    let daysSinceReceived = hoursSinceReceived / 24;
+    let hoursSinceMidnight = currentTime.getHours();
 
-    switch (true) {
-      case daysSinceReceived <= 1: {
-        return "Today";
+    switch (true) {                 // this is for the case when user've sent message right in 00:00:00
+      case hoursSinceReceived <= hoursSinceMidnight + 0.001: {
+        return "Today"
       }
       case daysSinceReceived <= 2: {
         return "Yesterday";
@@ -93,24 +87,24 @@ export class ConversationsFormatter{
     return membersAmount.toString() + " Member(s)";
   }
 
-  public GetLastSeenFormatted(dateString: string) {
-    let date = new Date(dateString);
+  public GetLastSeenFormatted(dateString: string) : string {
+    let date = new Date(dateString).getTime();
 
-    let daysSinceOnline = (new Date().getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
+    let daysSinceOnline = (new Date().getTime() - date) / (1000 * 60 * 60 * 24);
 
     let result = "Last seen: ";
 
     switch (true) {
       case daysSinceOnline <= 1: {
 
-        let hoursSinceOnline = (new Date().getTime() - date.getTime()) / (1000 * 60 * 60);
+        let hoursSinceOnline = (new Date().getTime() - date) / (1000 * 60 * 60);
 
         switch (true) {
           case hoursSinceOnline <= 1: {
-            let minutesSinceOnline = (new Date().getTime() - date.getTime()) / (1000 * 60);
+            let minutesSinceOnline = (new Date().getTime() - date) / (1000 * 60);
 
-            if (minutesSinceOnline <= 5) {
-              return result + " less than 5 minutes ago";
+            if (minutesSinceOnline <= 10) {
+              return "Online";
             }
 
             return result + minutesSinceOnline.toPrecision(1) + " minutes ago";
@@ -142,6 +136,6 @@ export class ConversationsFormatter{
   }
 
   public GetMessageTimeFormatted(message: ChatMessage) {
-    return (<Date>message.timeReceived).toLocaleTimeString();
+    return (<Date>message.timeReceived).toLocaleString();
   }
 }
