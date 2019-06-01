@@ -1,12 +1,14 @@
 <div class="messages_component">
 
+  <!--since virtual scroll doesn't work with items of variable height, load everything-->
+
   <cdk-virtual-scroll-viewport (scrolledIndexChange)="OnMessagesScrolled($event)"
                                minBufferPx="120000"
                                maxBufferPx="250000"
                                itemSize="50"
                                class="messages_main">
 
-    <div *cdkVirtualFor= "let message of Conversation.messages;">
+    <div *cdkVirtualFor="let message of Conversation.messages;">
 
       <div (click)="SelectMessage(message)">
 
@@ -19,7 +21,7 @@
         </div>
 
         <div *ngIf="IsPreviousMessageOnAnotherDay(message)" class="messages_datestrip_wrapper padding10px">
-            <span class="datestrip_text">{{formatter.GetMessagesDateStripFormatted(message)}}</span>
+          <span class="datestrip_text">{{formatter.GetMessagesDateStripFormatted(message)}}</span>
         </div>
 
         <div class="messages_message_content" [ngClass]="{'selected-message': IsMessageSelected(message)}">
@@ -64,7 +66,9 @@
             class="marginleft10px"
             *ngIf="SelectedMessages.length !== 0"
             (click)="DeleteMessages()"
-            [@slideIn]>Delete messages</button>
+            [@slideIn]>
+      Delete messages
+    </button>
   </div>
 
 </div>

@@ -21,6 +21,7 @@ import { ChangeNameDialogComponent } from "../Dialogs/ChangeNameDialog";
 import { SearchListComponent } from "../Search/searchlist.component";
 import { UserInfoDialogComponent } from "../Dialogs/UserInfoDialog";
 import { UploaderService } from "../uploads/upload.service";
+import { ViewAttachmentsDialogComponent } from "../Dialogs/ViewAttachmentsDialog";
 
 @NgModule({
   declarations: [
@@ -34,7 +35,8 @@ import { UploaderService } from "../uploads/upload.service";
     GroupInfoDialogComponent,
     ChangeNameDialogComponent,
     UserInfoDialogComponent,
-    SearchListComponent
+    SearchListComponent,
+    ViewAttachmentsDialogComponent
   ],
   imports: [
     ScrollDispatchModule,
@@ -53,7 +55,8 @@ import { UploaderService } from "../uploads/upload.service";
     FindUsersDialogComponent,
     GroupInfoDialogComponent,
     ChangeNameDialogComponent,
-    UserInfoDialogComponent],
+    UserInfoDialogComponent,
+    ViewAttachmentsDialogComponent],
 
   providers: [
     ConnectionManager,

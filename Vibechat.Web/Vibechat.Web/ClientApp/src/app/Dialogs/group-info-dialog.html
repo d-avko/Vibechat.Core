@@ -13,6 +13,12 @@
 
   <mat-action-list>
 
+    <mat-list-item *ngIf="IsJoined() && !data.Conversation.isMessagingRestricted" (click)="ViewAttachments()">
+      <mat-icon class="cadetBlue">attach_file</mat-icon>
+
+      <h3 matLine>Attachments</h3>
+    </mat-list-item>
+
     <mat-list-item *ngIf="IsJoined() && !data.Conversation.isMessagingRestricted" (click)="InviteUsers()">
       <mat-icon class="cadetBlue">person_add</mat-icon>
 
