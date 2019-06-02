@@ -43,47 +43,22 @@ export class ViewAttachmentsDialogComponent {
 
       let currentWeek = this.GetDaysSinceReceived(attachments[0]);
 
-      let newWeekBoundaries = new Array<number>();
-
       attachments.forEach(
-        (attachment, index) => {
+        (attachment) => {
 
+          buffer.push(attachment);
 
           if (this.GetDaysSinceReceived(attachment) / 7 > currentWeek) {
-            newWeekBoundaries.push(index);
+            this.PhotosWeeks.push(new Array<ChatMessage>(...buffer));
+            buffer.splice(0, buffer.length);
             currentWeek = this.GetDaysSinceReceived(attachment) / 7;
           }
           
         }
       );
 
-      //all attachments are on the same day.
-
-      if (newWeekBoundaries.length == 0) {
-        this.PhotosWeeks.push(new Array<ChatMessage>(...attachments));
-        return;
-      }
-
-      //slice one-dimensional array to two-dimensional by weeks
-
-      for (let i = 0; i < newWeekBoundaries.length; ++i) {
-        let indexOfStart, indexOfEnd;
-
-        if (i == 0) {
-          indexOfStart = 0;
-          indexOfEnd = newWeekBoundaries[i];
-        } else {
-          indexOfStart = newWeekBoundaries[i - 1];
-          indexOfEnd = newWeekBoundaries[i];
-        }
-
-        this.PhotosWeeks.push(new Array<ChatMessage>(...attachments.slice(indexOfStart, indexOfEnd)));
-      }
-
-      if (newWeekBoundaries[newWeekBoundaries.length - 1] != attachments.length - 1) {
-        // if boundary of week was not at the end of array, slice more attachments
-
-        this.PhotosWeeks.push(new Array<ChatMessage>(...attachments.slice(newWeekBoundaries[newWeekBoundaries.length - 1], attachments.length - 1)));
+      if (buffer.length != 0) {
+          this.PhotosWeeks.push(new Array<ChatMessage>(...buffer));
       }
     }
 
@@ -92,7 +67,7 @@ export class ViewAttachmentsDialogComponent {
   private GetDaysSinceReceived(message: ChatMessage): number {
     let messageDate = (<Date>message.timeReceived).getTime();
     let nowDate = new Date().getTime();
-    let x = (nowDate - messageDate) / 1000;
+    let x = (nowDate - messageDate) / (1000 * 60 * 60 * 24);
     x = x / 60;
     x = x / 60;
     x = x / 24;
