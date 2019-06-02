@@ -30,8 +30,7 @@ export class UploaderService {
     // The `reportProgress` option tells HttpClient to listen and return
     // XHR progress events.
     const req = new HttpRequest('POST', '/Files/UploadImages', data, {
-      reportProgress: true,
-      headers: new HttpHeaders().append('Authorization', 'Bearer ' + token)
+      reportProgress: true
     });
 
 

@@ -33,6 +33,13 @@
           </div>
 
         </div>
+                                                            <!--Last in the list-->
+        <mat-progress-spinner *ngIf="PhotosLoading && PhotosWeeks[PhotosWeeks.length - 1] == photosInWeek"
+                              class="load-spinner"
+                              diameter="30"
+                              color="Primary"
+                              mode="indeterminate">
+        </mat-progress-spinner>
 
       </div>
 
@@ -51,6 +58,11 @@
   }
   .photos_break{
     padding: 20px;
+  }
+
+  .load-spinner {
+    margin-left: 45%;
+    margin-top: 10px;
   }
 
   .photos_break__date{

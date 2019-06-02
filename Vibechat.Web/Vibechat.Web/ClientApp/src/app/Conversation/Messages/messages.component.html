@@ -26,7 +26,7 @@
 
         <div class="messages_message_content" [ngClass]="{'selected-message': IsMessageSelected(message)}">
 
-          <div style="width: 35px; height: 35px; margin-right: 15px;">
+          <div style="width: 35px; height: 35px; margin-right: 15px; cursor:pointer" (click)="ViewUserInfo($event, message.user)">
             <img *ngIf="IsFirstMessageInSequence(message)" class="rounded-chat-image" src="{{message.user.imageUrl}}" />
           </div>
 

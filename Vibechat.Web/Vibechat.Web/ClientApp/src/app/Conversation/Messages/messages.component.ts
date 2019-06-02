@@ -5,6 +5,8 @@ import { ConversationTemplate } from '../../Data/ConversationTemplate';
 import { ChatMessage } from '../../Data/ChatMessage';
 import { ConversationsFormatter } from '../../Formatters/ConversationsFormatter';
 import { AttachmentKinds } from '../../Data/AttachmentKinds';
+import { UserInfo } from '../../Data/UserInfo';
+import { retry } from 'rxjs/operators';
 
 
 @Component({
@@ -39,15 +41,15 @@ export class MessagesComponent implements AfterViewInit {
 
   @Output() public OnDeleteMessages = new EventEmitter<Array<ChatMessage>>();
 
+  @Output() public OnViewUserInfo = new EventEmitter<UserInfo>();
+
   @Input() public Conversation: ConversationTemplate;
 
   @Input() public MessagesLoading: boolean;
 
-
-
   public IsScrollingAssistNeeded: boolean = false;
 
-  public static MessagesToScrollForGoBackButtonToShowUp: number = 60;
+  public static MessagesToScrollForGoBackButtonToShowUp: number = 20;
 
   @ViewChild(CdkVirtualScrollViewport) viewport: CdkVirtualScrollViewport;
 
@@ -74,17 +76,40 @@ export class MessagesComponent implements AfterViewInit {
     this.ScrollToMessage(this.Conversation.messages.length);
   }
 
+  public ViewUserInfo(event: any, user: UserInfo) {
+  // do not highlight the message, just show user profile.
+    event.stopPropagation();
+    this.OnViewUserInfo.emit(user);
+  }
+
+  public CalculateOffsetToMessage(index: number) {
+    let messages = this.viewport.elementRef.nativeElement.children.item(0).children;
+    let offset = 0;
+    for (let i = 0; i < index; ++i) {
+      offset += messages.item(i).clientHeight;
+    }
+
+    return offset;
+  }
+
   public ScrollToMessage(scrollToMessageIndex: number) {
       requestAnimationFrame(() => {
       
-      let messages = this.viewport.elementRef.nativeElement.children.item(0).children;
-      let offset = 0;
-      for (let i = 0; i < scrollToMessageIndex; ++i) {
-        offset += messages.item(i).clientHeight;
-      }
-
-      this.viewport.scrollToOffset(offset, 'smooth');
+        this.viewport.scrollToOffset(this.CalculateOffsetToMessage(scrollToMessageIndex), 'smooth');
     });
+  }
+
+  public CalculateCurrentMessageIndex() : number {
+    let currentOffset = this.viewport.measureScrollOffset();
+
+    let messages = this.viewport.elementRef.nativeElement.children.item(0).children;
+    let offset = 0;
+    let index = 0;
+    for (index = 0; offset < currentOffset; ++index) {
+      offset += messages.item(index).clientHeight;
+    }
+
+    return index - 1;
   }
 
   public OnMessagesScrolled(messageIndex: number): void {
@@ -96,9 +121,10 @@ export class MessagesComponent implements AfterViewInit {
 
     if (messageIndex == 0) {
       this.OnUpdateMessages.emit();
+      return;
     }
 
-    if (this.Conversation.messages.length - messageIndex > MessagesComponent.MessagesToScrollForGoBackButtonToShowUp) {
+    if (this.Conversation.messages.length - this.CalculateCurrentMessageIndex() > MessagesComponent.MessagesToScrollForGoBackButtonToShowUp) {
       this.IsScrollingAssistNeeded = true;
     } else {
       this.IsScrollingAssistNeeded = false;

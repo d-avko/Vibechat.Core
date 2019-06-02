@@ -74,15 +74,17 @@ namespace Vibechat.Web.Services.Repositories
             await mContext.SaveChangesAsync();
         }
 
-        public IQueryable<MessageDataModel> GetMessagesByIds(List<int> ids)
+        public IQueryable<MessageDataModel> GetByIds(List<int> ids)
         {
             return mContext.Messages.Where(msg => ids.Any(id => id == msg.MessageID));
         }
 
-        public IIncludableQueryable<MessageDataModel, MessageAttachmentDataModel> GetMessagesForConversation(
+        public IIncludableQueryable<MessageDataModel, MessageAttachmentDataModel> Get(
             string userId,
             int conversationId,
-            bool AllMessages = false, int offset = 0, int count = 0)
+            bool AllMessages = false, 
+            int offset = 0, 
+            int count = 0)
         {
             var deletedMessages = mContext
             .DeletedMessages
@@ -100,8 +102,32 @@ namespace Vibechat.Web.Services.Repositories
                     
            return mContext
                 .Messages
-                .Where(msg => msg.ConversationID == conversationId)
-                .Where(msg => !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID))
+                .Where(msg => msg.ConversationID == conversationId && !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID))
+                .OrderByDescending(x => x.TimeReceived)
+                .Skip(offset)
+                .Take(count)
+                .Include(msg => msg.User)
+                .Include(msg => msg.AttachmentInfo);
+        }
+
+        public IIncludableQueryable<MessageDataModel, MessageAttachmentDataModel> GetAttachments(
+            string userId, 
+            int conversationId, 
+            string attachmentKind,
+            int offset,
+            int count)
+        {
+            var deletedMessages = mContext
+              .DeletedMessages
+              .Where(msg => msg.Message.ConversationID == conversationId && msg.UserId == userId);
+
+            return mContext
+                .Messages
+                .Where(msg => 
+                msg.ConversationID == conversationId 
+                && msg.IsAttachment 
+                && msg.AttachmentInfo.AttachmentKind.Name == attachmentKind 
+                && !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID))
                 .OrderByDescending(x => x.TimeReceived)
                 .Skip(offset)
                 .Take(count)

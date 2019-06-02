@@ -2,23 +2,16 @@ import { Observable } from "rxjs";
 import { ServerResponse } from "../ApiModels/ServerResponse";
 import { LoginResponse } from "../ApiModels/LoginResponse";
 import { LoginRequest } from "../ApiModels/LoginRequest";
-import { HttpClient, HttpHeaders, HttpRequest, HttpResponse, HttpEvent } from "@angular/common/http";
+import { HttpClient, HttpHeaders, HttpEvent } from "@angular/common/http";
 import { RegisterRequest } from "../ApiModels/RegisterRequest";
 import { Injectable, Inject } from "@angular/core";
-import { ConversationResponse } from "../ApiModels/ConversationResponse";
-import { ConversationsRequest } from "../ApiModels/ConversationRequest";
-import { ConversationMessagesRequest } from "../ApiModels/ConversationMessagesRequest";
 import { ConversationMessagesResponse } from "../ApiModels/ConversationMessagesResponse";
 import { ChatMessage } from "../Data/ChatMessage";
-import { DeleteMessagesRequest } from "../Data/DeleteMessagesRequest";
-import { UploadFilesResponse } from "../Data/UploadFilesResponse";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { FoundUsersResponse } from "../Data/FoundUsersResponse";
-import { forEach } from "@angular/router/src/utils/collection";
 import { UpdateThumbnailResponse } from "../ApiModels/UpdateThumbnailResponse";
 import { UserInfo } from "../Data/UserInfo";
 import { UploaderService } from "../uploads/upload.service";
-import { retry } from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -155,6 +148,19 @@ export class ApiRequestsBuilder {
     );
   }
 
+  public GetAttachmentsForConversation(conversationId: number, kind: string, token: string, offset: number, count: number) {
+    return this.MakeAuthorizedCall<Array<ChatMessage>>(
+      token,
+      {
+        conversationId: conversationId,
+        kind: kind,
+        offset: offset,
+        count: count
+      },
+      'api/Conversations/GetAttachments'
+    );
+  }
+
   public CreateConversation(
     name: string,
     whoCreatedId: string,
@@ -234,13 +240,9 @@ export class ApiRequestsBuilder {
   }
 
   private MakeAuthorizedCall<T>(token: string, data: any, url: string): Observable<ServerResponse<T>> {
-    let headers = new HttpHeaders();
-    headers = headers.append('Authorization', 'Bearer ' + token);
-
     return this.httpClient.post<ServerResponse<T>>(
       this.baseUrl + url,
-      data,
-      { headers: headers });
+      data);
   }
 
   private MakeNonAuthorizedCall<T>(data: any, url: string): Observable<ServerResponse<T>> {

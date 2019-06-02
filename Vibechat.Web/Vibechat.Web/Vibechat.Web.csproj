@@ -105,6 +105,7 @@
     <None Remove="ClientApp\src\app\Data\DeleteMessagesRequest.ts" />
     <None Remove="ClientApp\src\app\Data\FoundUsersResponse.ts" />
     <None Remove="ClientApp\src\app\Data\MessageAttachment.ts" />
+    <None Remove="ClientApp\src\app\Data\StopPropagation.ts" />
     <None Remove="ClientApp\src\app\Data\UploadFilesResponse.ts" />
     <None Remove="ClientApp\src\app\Data\UserInfo.ts" />
     <None Remove="ClientApp\src\app\Delegates\AddedToConversationDelegate.ts" />
@@ -115,7 +116,7 @@
     <None Remove="ClientApp\src\app\Dialogs\GroupInfoDialog.ts" />
     <None Remove="ClientApp\src\app\Dialogs\UserInfoDialog.ts" />
     <None Remove="ClientApp\src\app\Dialogs\ViewAttachmentsDialog.ts" />
-    <None Remove="ClientApp\src\app\Interceptors\ErrorHandlingInterceptor.ts" />
+    <None Remove="ClientApp\src\app\Interceptors\HttpResponseInterceptor.ts" />
     <None Remove="ClientApp\src\app\Modules\ChatModule.ts" />
     <None Remove="ClientApp\src\app\Modules\LoginModule.ts" />
     <None Remove="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
@@ -138,6 +139,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\Data\AttachmentKinds.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationIdsFactory.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\FoundUsersResponse.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Data\StopPropagation.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\UploadFilesResponse.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Delegates\AddedToConversationDelegate.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Delegates\MessageReceivedDelegate.ts" />
@@ -153,7 +155,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\Data\DeleteMessagesRequest.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\MessageAttachment.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\UserInfo.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\Interceptors\ErrorHandlingInterceptor.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Interceptors\HttpResponseInterceptor.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Modules\ChatModule.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Modules\LoginModule.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />

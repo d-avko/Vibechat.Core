@@ -134,7 +134,6 @@ export class ChatComponent implements OnInit {
         .subscribe((result) => {
 
           if (!result.isSuccessfull) {
-            this.snackbar.openSnackBar(result.errorMessage);
             return;
           }
 
@@ -175,7 +174,6 @@ export class ChatComponent implements OnInit {
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
-          this.snackbar.openSnackBar(result.errorMessage);
           return;
         }
 
@@ -261,7 +259,6 @@ export class ChatComponent implements OnInit {
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
-          this.snackbar.openSnackBar(result.errorMessage);
           return;
         }
 
@@ -277,7 +274,6 @@ export class ChatComponent implements OnInit {
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
-          this.snackbar.openSnackBar(result.errorMessage);
           return;
         }
 
@@ -296,7 +292,6 @@ export class ChatComponent implements OnInit {
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
-          this.snackbar.openSnackBar(result.errorMessage);
           return;
         }
 
@@ -332,7 +327,6 @@ export class ChatComponent implements OnInit {
               .subscribe((result) => {
 
                 if (!result.isSuccessfull) {
-                  this.snackbar.openSnackBar(result.errorMessage);
                   return;
                 }
 
@@ -348,7 +342,6 @@ export class ChatComponent implements OnInit {
               .subscribe((result) => {
 
                 if (!result.isSuccessfull) {
-                  this.snackbar.openSnackBar(result.errorMessage);
                   return;
                 }
 
@@ -375,7 +368,6 @@ export class ChatComponent implements OnInit {
               .subscribe((result) => {
 
                 if (!result.isSuccessfull) {
-                  this.snackbar.openSnackBar(result.errorMessage);
                   return;
                 }
 
@@ -400,7 +392,8 @@ export class ChatComponent implements OnInit {
       const attachmentsDialogRef = this.dialog.open(ViewAttachmentsDialogComponent, {
         width: '450px',
         data: {
-          conversation: conversation
+          conversation: conversation,
+          token: Cache.JwtToken
         }
       });
     }
@@ -412,7 +405,8 @@ export class ChatComponent implements OnInit {
       const attachmentsDialogRef = this.dialog.open(ViewAttachmentsDialogComponent, {
         width: '450px',
         data: {
-          conversation: conversation
+          conversation: conversation,
+          token: Cache.JwtToken
         }
       });
     }
@@ -423,7 +417,6 @@ export class ChatComponent implements OnInit {
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
-          this.snackbar.openSnackBar(result.errorMessage);
           return;
         }
 
@@ -469,7 +462,6 @@ export class ChatComponent implements OnInit {
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
-          this.snackbar.openSnackBar(result.errorMessage);
           return;
         }
 
@@ -493,7 +485,6 @@ export class ChatComponent implements OnInit {
         (result) => {
 
           if (!result.isSuccessfull) {
-            this.snackbar.openSnackBar(result.errorMessage);
             return;
           }
 
@@ -570,7 +561,6 @@ export class ChatComponent implements OnInit {
           (result) => {
 
             if (!result.isSuccessfull) {
-              this.snackbar.openSnackBar(result.errorMessage);
               return;
             }
 
@@ -667,7 +657,6 @@ export class ChatComponent implements OnInit {
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
-          this.snackbar.openSnackBar(result.errorMessage);
           return;
         }
 
@@ -712,8 +701,7 @@ export class ChatComponent implements OnInit {
 
         .subscribe((result) => {
 
-          if (!result) {
-            this.snackbar.openSnackBar("Failed to update messages for " + this.CurrentConversation.name);
+          if (!result.isSuccessfull) {
             this.IsMessagesLoading = false;
             return;
           }
@@ -757,7 +745,6 @@ export class ChatComponent implements OnInit {
 
   public OnMessagesDeleted(response: ServerResponse<string>, SelectedMessages: Array<ChatMessage>, conversationId: number) {
     if (!response.isSuccessfull) {
-      this.snackbar.openSnackBar("Failed to delete messages. Reason: " + response.errorMessage);
       return;
     }
 
@@ -780,7 +767,6 @@ export class ChatComponent implements OnInit {
         (response) => {
 
           if (!response.isSuccessfull) {
-            this.snackbar.openSnackBar("Failed to update conversations. Reason: " + response.errorMessage);
             return;
           }
 
@@ -841,7 +827,6 @@ export class ChatComponent implements OnInit {
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
-          this.snackbar.openSnackBar('Failed to update some conversation info. Reason: ' + result.errorMessage);
           return;
         }
         //update existing data. Couldn't assign fetched object,
@@ -872,7 +857,6 @@ export class ChatComponent implements OnInit {
         let response = (<HttpResponse<ServerResponse<UploadFilesResponse>>>result).body;
 
         if (!response.isSuccessfull) {
-          this.snackbar.openSnackBar(response.errorMessage);
           return;
         }
 
@@ -896,7 +880,6 @@ export class ChatComponent implements OnInit {
         (result) => {
 
           if (!result.isSuccessfull) {
-            this.snackbar.openSnackBar(result.errorMessage, 2);
             return;
           }
 

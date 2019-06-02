@@ -174,6 +174,69 @@ namespace Vibechat.Web.Services
             };
         }
 
+        public async Task<List<Message>> GetAttachments(string kind, int conversationId, string whoAccessedId, int offset, int count)
+        {
+            var unAuthorizedError = new UnauthorizedAccessException("You are unauthorized to do such an action.");
+
+            if (messagesRepository.Empty())
+            {
+                return null;
+            }
+
+            var conversation = conversationRepository.GetById(conversationId);
+
+            if (conversation == null)
+            {
+                throw new FormatException("Wrong conversation to get attachments from.");
+            }
+
+            var members = usersConversationsRepository.GetConversationParticipants(conversationId);
+
+            //only member of conversation could request messages of non-public conversation.
+
+            if (members.FirstOrDefault(x => x.Id == whoAccessedId) == null && !conversation.IsPublic)
+            {
+                throw new UnauthorizedAccessException("You are unauthorized to do such an action.");
+            }
+
+            IIncludableQueryable<MessageDataModel, MessageAttachmentDataModel> messages = messagesRepository.GetAttachments(
+                whoAccessedId,
+                conversationId,
+                kind,
+                offset,
+                count);
+
+            return (from msg in messages
+                    select new Message()
+                    {
+                        Id = msg.MessageID,
+                        ConversationID = msg.ConversationID,
+                        MessageContent = msg.MessageContent,
+                        TimeReceived = msg.TimeReceived.ToUTCString(),
+                        User = msg.User == null ? null : new UserInfo()
+                        {
+                            Id = msg.User.Id,
+                            LastName = msg.User.LastName,
+                            LastSeen = msg.User.LastSeen.ToUTCString(),
+                            Name = msg.User.FirstName,
+                            UserName = msg.User.UserName,
+                            ImageUrl = msg.User.ProfilePicImageURL,
+                            IsOnline = msg.User.IsOnline,
+                            ConnectionId = msg.User.ConnectionId
+                        },
+                        AttachmentInfo = new MessageAttachment()
+                        {
+                            AttachmentKind = msg.AttachmentInfo.AttachmentKind.Name,
+                            ContentUrl = msg.AttachmentInfo.ContentUrl,
+                            AttachmentName = msg.AttachmentInfo.AttachmentName,
+                            ImageHeight = msg.AttachmentInfo.ImageHeight,
+                            ImageWidth = msg.AttachmentInfo.ImageWidth
+                        },
+                        IsAttachment = msg.IsAttachment
+                    }).ToList();
+            
+        }
+
         public async Task ChangeName (int conversationId, string name)
         {
             if(name.Length > MaxNameLength)
@@ -295,7 +358,7 @@ namespace Vibechat.Web.Services
                 await RemoveUserFromConversation(Conversation.DialogueUser.Id, whoRemoves, conversation.ConvID);
                 await RemoveUserFromConversation(whoRemoves, whoRemoves, conversation.ConvID);
 
-                var messages = messagesRepository.GetMessagesForConversation(whoRemoves, conversation.ConvID, true);
+                var messages = messagesRepository.Get(whoRemoves, conversation.ConvID, true);
 
                 await attachmentRepository.Remove(
                     messages
@@ -424,7 +487,7 @@ namespace Vibechat.Web.Services
             if (members.FirstOrDefault(x => x.Id == whoAccessedId) == null && !conversation.IsPublic)
                 throw unAuthorizedError;
 
-            var messages = messagesRepository.GetMessagesForConversation(
+            var messages = messagesRepository.Get(
                 whoAccessedId,
                 convInfo.ConversationID,
                 false,
@@ -536,7 +599,7 @@ namespace Vibechat.Web.Services
         {
             var unAuthorizedError = new UnauthorizedAccessException("You are unauthorized to do such an action.");
 
-            IQueryable<MessageDataModel> messagesToDelete = messagesRepository.GetMessagesByIds(messagesInfo.MessagesId);
+            IQueryable<MessageDataModel> messagesToDelete = messagesRepository.GetByIds(messagesInfo.MessagesId);
 
             if(!messagesToDelete.All(x => x.ConversationID == messagesInfo.ConversationId))
             {
