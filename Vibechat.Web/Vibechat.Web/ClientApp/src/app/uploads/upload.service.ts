@@ -17,7 +17,7 @@ export class UploaderService {
     private http: HttpClient,
     snackbar: MatSnackBar) { this.logger = new SnackBarHelper(snackbar); }
 
-  public uploadImages(files: FileList, token: string) : Observable<HttpEvent<any>> {
+  public uploadImages(files: FileList) : Observable<HttpEvent<any>> {
     if (!files || files.length == 0) { return; }
 
     let data = new FormData();

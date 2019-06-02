@@ -23,5 +23,9 @@ namespace Vibechat.Web.Services.Repositories
         Task ChangeLastName(string newName, string userId);
 
         Task ChangeName(string newName, string userId);
+
+        Task<string> GetRefreshToken(string userId);
+
+        Task UpdateRefreshToken(string userId, string token);
     }
 }

@@ -5,20 +5,22 @@ var Cache = /** @class */ (function () {
     }
     Cache.OnUserLoggedIn = function (credentials) {
         this.UserCache = credentials.info;
-        this.JwtToken = credentials.token;
-        localStorage.setItem('token', this.JwtToken);
+        localStorage.setItem('token', credentials.token);
+        localStorage.setItem('refreshtoken', credentials.refreshToken);
         localStorage.setItem('user', JSON.stringify(credentials.info));
         this.IsAuthenticated = true;
+        this.token = credentials.token;
     };
     Cache.TryAuthenticate = function () {
         var token = localStorage.getItem('token');
+        var refreshToken = localStorage.getItem('refreshtoken');
         var user = JSON.parse(localStorage.getItem('user'));
-        if (token == null || user == null) {
+        if (token == null || user == null || refreshToken == null) {
             return false;
         }
         this.UserCache = user;
-        this.JwtToken = token;
         this.IsAuthenticated = true;
+        this.token = token;
         return true;
     };
     Cache.LogOut = function () {

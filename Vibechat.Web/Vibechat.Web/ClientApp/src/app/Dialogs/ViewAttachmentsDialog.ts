@@ -12,7 +12,6 @@ import { CdkVirtualScrollViewport } from "@angular/cdk/scrolling";
 
 export interface AttachmentsData {
   conversation: ConversationTemplate;
-  token: string;
 }
 
 @Component({
@@ -109,23 +108,23 @@ export class ViewAttachmentsDialogComponent {
   }
 
   public UpdatePhotos() {
+
+    if (this.IsPhotosEnd || this.PhotosLoading) {
+      return;
+    }
+
     let offset = 0;
     this.PhotosWeeks.forEach(x => offset += x.length);
+    this.PhotosLoading = true;
 
     this.requestsBuilder.GetAttachmentsForConversation(
       this.data.conversation.conversationID,
       AttachmentKinds.Image,
-      this.data.token,
       offset,
       ViewAttachmentsDialogComponent.attachmentsToLoadAmount)
         .subscribe((result) => {
 
           if (!result.isSuccessfull) {
-            this.PhotosLoading = false;
-            return;
-          }
-
-          if (this.IsPhotosEnd) {
             this.PhotosLoading = false;
             return;
           }
@@ -144,17 +143,11 @@ export class ViewAttachmentsDialogComponent {
 
   public OnAttachmentsScrolled(index: number) {
 
-    if (this.PhotosLoading || this.IsPhotosEnd) {
-      return;
-    }
-
     let fullViewPortSize = this.viewport.measureRenderedContentSize();
     let currentOffset = this.viewport.measureScrollOffset() + this.viewport.getViewportSize() + ViewAttachmentsDialogComponent.allowedErrorInOffset;
-    console.log(`in event section current offset ${currentOffset}, size: ${fullViewPortSize}`);
+
     if (fullViewPortSize <= currentOffset) {
       // user scrolled to last attachment, load more.
-      this.PhotosLoading = true;
-      console.log("in update section");
       this.UpdatePhotos();
     }
   }

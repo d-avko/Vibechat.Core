@@ -43,7 +43,7 @@ namespace Vibechat.Web.Services.Extension_methods
         public static void AddBusinessLogic(this IServiceCollection services)
         {
             services.AddSingleton<ICustomHubUserIdProvider, DefaultUserIdProvider>();
-            services.AddScoped<ITokenClaimValidator, JwtTokenClaimValidator>();
+            services.AddScoped<ITokenValidator, JwtTokenValidator>();
             services.AddScoped<JwtSecurityTokenHandler, JwtSecurityTokenHandler>();
             services.AddSingleton<IChatDataProvider, DefaultChatDataProvider>();
             services.AddSingleton<IImageCompressionService, ImageCompressionService>();

@@ -62,7 +62,8 @@ namespace Vibechat.Web.Services.Login
             return new LoginResultApiModel()
             {
                 Info = user.ToUserInfo(),
-                Token = user.GenerateJwtToken(),
+                Token = user.GenerateToken(),
+                RefreshToken = user.RefreshToken
             };
         }
 
@@ -109,13 +110,14 @@ namespace Vibechat.Web.Services.Login
                 IsPublic = true
             };
 
-
             var result = await usersRepository.CreateUser(userToCreate, userToRegister.Password);
 
             if (!result.Succeeded)
             {
                 throw new FormatException(result.Errors?.ToList()[0].Description);
             }
+
+            await usersRepository.UpdateRefreshToken(userToCreate.Id, userToCreate.GenerateRefreshToken());
         }
     }
 }

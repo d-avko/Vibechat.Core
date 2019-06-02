@@ -60,7 +60,7 @@ export class SearchListComponent {
 
     this.IsSearchingForUsers = true;
 
-    this.requestsBuilder.FindUsersByUsername(Cache.JwtToken, this.SearchString)
+    this.requestsBuilder.FindUsersByUsername(this.SearchString)
       .subscribe(
         (result) => {
           this.IsSearchingForUsers = false;
@@ -88,7 +88,7 @@ export class SearchListComponent {
 
     this.IsSearchingForGroups = true;
 
-    this.requestsBuilder.SearchForGroups(Cache.JwtToken, this.SearchString)
+    this.requestsBuilder.SearchForGroups(this.SearchString)
       .subscribe(
         (result) => {
           this.IsSearchingForGroups = false;
