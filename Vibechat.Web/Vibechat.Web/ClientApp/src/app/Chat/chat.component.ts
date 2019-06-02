@@ -130,7 +130,7 @@ export class ChatComponent implements OnInit {
     if (this.IsAuthenticated) {
       this.UpdateConversations();
 
-      this.requestsBuilder.GetUserById(Cache.JwtToken,this.CurrentUser.id)
+      this.requestsBuilder.GetUserById(this.CurrentUser.id)
         .subscribe((result) => {
 
           if (!result.isSuccessfull) {
@@ -170,7 +170,7 @@ export class ChatComponent implements OnInit {
       return;
     }
 
-    this.requestsBuilder.GetConversationById(Cache.JwtToken, group.conversationID)
+    this.requestsBuilder.GetConversationById(group.conversationID)
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
@@ -255,7 +255,7 @@ export class ChatComponent implements OnInit {
   }
 
   public BanFromConversation(userToBan: UserInfo) {
-    this.requestsBuilder.BanFromConversation(Cache.JwtToken, userToBan.id, this.CurrentConversation.conversationID)
+    this.requestsBuilder.BanFromConversation(userToBan.id, this.CurrentConversation.conversationID)
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
@@ -270,7 +270,7 @@ export class ChatComponent implements OnInit {
 
     let conversationToBan = this.Conversations.find(x => !x.isGroup && x.dialogueUser.id == userToBan.id);
 
-    this.requestsBuilder.BanUser(Cache.JwtToken, userToBan.id, conversationToBan == null ? 0 : conversationToBan.conversationID)
+    this.requestsBuilder.BanUser(userToBan.id, conversationToBan == null ? 0 : conversationToBan.conversationID)
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
@@ -288,7 +288,7 @@ export class ChatComponent implements OnInit {
 
   public OnViewUserInfo(user: UserInfo) {
 
-    this.requestsBuilder.GetUserById(Cache.JwtToken, user.id)
+    this.requestsBuilder.GetUserById(user.id)
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
@@ -323,7 +323,7 @@ export class ChatComponent implements OnInit {
         userInfoRef.componentInstance.OnChangeLastname
           .subscribe((lastName: string) => {
 
-            this.requestsBuilder.ChangeCurrentUserLastName(Cache.JwtToken, lastName)
+            this.requestsBuilder.ChangeCurrentUserLastName(lastName)
               .subscribe((result) => {
 
                 if (!result.isSuccessfull) {
@@ -338,7 +338,7 @@ export class ChatComponent implements OnInit {
         userInfoRef.componentInstance.OnChangeName
           .subscribe((name: string) => {
 
-            this.requestsBuilder.ChangeCurrentUserName(Cache.JwtToken, name)
+            this.requestsBuilder.ChangeCurrentUserName(name)
               .subscribe((result) => {
 
                 if (!result.isSuccessfull) {
@@ -364,7 +364,7 @@ export class ChatComponent implements OnInit {
         userInfoRef.componentInstance.OnUpdateProfilePicture
           .subscribe((file: File) => {
 
-            this.requestsBuilder.UploadUserProfilePicture(file, Cache.JwtToken)
+            this.requestsBuilder.UploadUserProfilePicture(file)
               .subscribe((result) => {
 
                 if (!result.isSuccessfull) {
@@ -392,8 +392,7 @@ export class ChatComponent implements OnInit {
       const attachmentsDialogRef = this.dialog.open(ViewAttachmentsDialogComponent, {
         width: '450px',
         data: {
-          conversation: conversation,
-          token: Cache.JwtToken
+          conversation: conversation
         }
       });
     }
@@ -405,15 +404,14 @@ export class ChatComponent implements OnInit {
       const attachmentsDialogRef = this.dialog.open(ViewAttachmentsDialogComponent, {
         width: '450px',
         data: {
-          conversation: conversation,
-          token: Cache.JwtToken
+          conversation: conversation
         }
       });
     }
   }
 
   public OnUnblockUser(user: UserInfo) {
-    this.requestsBuilder.UnbanUser(Cache.JwtToken, user.id)
+    this.requestsBuilder.UnbanUser(user.id)
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
@@ -425,25 +423,13 @@ export class ChatComponent implements OnInit {
   } 
 
   public OnRemoveAllMessages(group: ConversationTemplate) {
-    this.requestsBuilder.DeleteMessages(group.messages, group.conversationID, Cache.JwtToken)
+    this.requestsBuilder.DeleteMessages(group.messages, group.conversationID)
       .subscribe(
         (result) => {
           this.OnMessagesDeleted(result, this.CurrentConversation.messages, group.conversationID);
           this.CurrentConversation = null;
-        },
-        (error) => this.OnApiError(error)
+        }
       )
-  }
-
-  public OnApiError(error: any) {
-    if (error.error instanceof ErrorEvent) {
-      this.snackbar.openSnackBar('Network error occurred. Try refreshing the page.', 2);
-    } else {
-      //unauthorized
-      if (error.status == 401) {
-        this.OnTokenExpired();
-      }
-    }
   }
 
   public Search() {
@@ -458,7 +444,7 @@ export class ChatComponent implements OnInit {
 
     let currentConversationId = this.CurrentConversation.conversationID;
 
-    this.requestsBuilder.UploadConversationThumbnail(file, this.CurrentConversation.conversationID, Cache.JwtToken)
+    this.requestsBuilder.UploadConversationThumbnail(file, this.CurrentConversation.conversationID)
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
@@ -480,7 +466,7 @@ export class ChatComponent implements OnInit {
   public OnChangeConversationName(name: string) {
     let currentConversationId = this.CurrentConversation.conversationID;
 
-    this.requestsBuilder.ChangeConversationName(name, this.CurrentConversation.conversationID, Cache.JwtToken)
+    this.requestsBuilder.ChangeConversationName(name, this.CurrentConversation.conversationID)
       .subscribe(
         (result) => {
 
@@ -501,8 +487,7 @@ export class ChatComponent implements OnInit {
       data: {
         conversationId: group.conversationID,
         requestsBuilder: this.requestsBuilder,
-        snackbar: this.snackbar,
-        token: Cache.JwtToken
+        snackbar: this.snackbar
       }
     });
 
@@ -556,7 +541,7 @@ export class ChatComponent implements OnInit {
         return;
       }
 
-      this.requestsBuilder.CreateConversation(result.name, this.CurrentUser.id, null, null, true, Cache.JwtToken, result.isPublic)
+      this.requestsBuilder.CreateConversation(result.name, this.CurrentUser.id, null, null, true, result.isPublic)
         .subscribe(
           (result) => {
 
@@ -569,8 +554,7 @@ export class ChatComponent implements OnInit {
             result.response.messages = new Array<ChatMessage>();
 
             this.Conversations = [...this.Conversations, result.response];
-          },
-          (error) => this.OnApiError(error)
+          }
         )
     });
   }
@@ -653,7 +637,7 @@ export class ChatComponent implements OnInit {
 
     //update data about this conversation.
 
-    this.requestsBuilder.GetConversationById(Cache.JwtToken, data.conversation.conversationID)
+    this.requestsBuilder.GetConversationById(data.conversation.conversationID)
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
@@ -697,7 +681,7 @@ export class ChatComponent implements OnInit {
       this.requestsBuilder.GetConversationMessages(
         this.CurrentConversation.messages.length,
         ChatComponent.MessagesBufferLength,
-        this.CurrentConversation.conversationID, Cache.JwtToken)
+        this.CurrentConversation.conversationID)
 
         .subscribe((result) => {
 
@@ -724,8 +708,7 @@ export class ChatComponent implements OnInit {
           this.IsMessagesLoading = false;
 
           this.messages.ScrollToMessage(result.response.messages.length);
-        },
-          (error) => this.OnApiError(error)
+        }
       )
     }
 
@@ -735,11 +718,10 @@ export class ChatComponent implements OnInit {
 
     let currentConversationId = this.CurrentConversation.conversationID;
 
-    this.requestsBuilder.DeleteMessages(SelectedMessages, this.CurrentConversation.conversationID, Cache.JwtToken)
+    this.requestsBuilder.DeleteMessages(SelectedMessages, this.CurrentConversation.conversationID)
       .subscribe(
         (result) => this.OnMessagesDeleted(result, SelectedMessages, currentConversationId)
-        ,
-        (error) => this.OnApiError(error)
+       
       )
   }
 
@@ -762,7 +744,7 @@ export class ChatComponent implements OnInit {
   }
 
   public UpdateConversations() {
-    this.requestsBuilder.UpdateConversationsRequest(Cache.JwtToken)
+    this.requestsBuilder.UpdateConversationsRequest()
       .subscribe(
         (response) => {
 
@@ -802,8 +784,7 @@ export class ChatComponent implements OnInit {
           //Initiate signalR group connections
 
           this.connectionManager.Start();
-        },
-        (error) => this.OnApiError(error)
+        }
       )
   }
 
@@ -823,7 +804,7 @@ export class ChatComponent implements OnInit {
 
     this.CurrentConversation = conversation;
 
-    this.requestsBuilder.GetConversationById(Cache.JwtToken,conversation.conversationID)
+    this.requestsBuilder.GetConversationById(conversation.conversationID)
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {
@@ -851,7 +832,7 @@ export class ChatComponent implements OnInit {
       return;
     }
 
-    this.requestsBuilder.UploadImages(files, Cache.JwtToken)
+    this.requestsBuilder.UploadImages(files)
       .subscribe((result) => {
 
         let response = (<HttpResponse<ServerResponse<UploadFilesResponse>>>result).body;
@@ -872,25 +853,6 @@ export class ChatComponent implements OnInit {
               }), this.CurrentConversation)
         )
       })
-  }
-
-  private OnTokenExpired() {
-    this.requestsBuilder.RefreshJwtToken(Cache.JwtToken, Cache.UserCache.id)
-      .subscribe(
-        (result) => {
-
-          if (!result.isSuccessfull) {
-            return;
-          }
-
-          Cache.JwtToken = result.response;
-          this.snackbar.openSnackBar('Your token expired and was updated. Please try that again.', 2);
-        },
-        (error) => {
-          this.router.navigateByUrl('/login');
-          return;
-        }
-      );
   }
 
   private MessagesSortFunc(left: ChatMessage, right: ChatMessage): number {

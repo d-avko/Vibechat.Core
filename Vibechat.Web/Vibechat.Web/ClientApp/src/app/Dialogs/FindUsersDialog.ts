@@ -9,7 +9,6 @@ export interface InviteUsersData {
   conversationId: number;
   requestsBuilder: ApiRequestsBuilder;
   snackbar: SnackBarHelper;
-  token: string;
 }
 
 @Component({
@@ -35,7 +34,7 @@ export class FindUsersDialogComponent {
       return;
     }
 
-    this.data.requestsBuilder.FindUsersByUsername(this.data.token, this.usernameToFind)
+    this.data.requestsBuilder.FindUsersByUsername(this.usernameToFind)
       .subscribe((result) => {
 
         if (!result.isSuccessfull) {

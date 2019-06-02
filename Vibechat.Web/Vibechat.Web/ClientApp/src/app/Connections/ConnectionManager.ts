@@ -59,7 +59,7 @@ export class ConnectionManager {
   public Start(): void {
 
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl("/hubs/chat", { accessTokenFactory: () => Cache.JwtToken })
+      .withUrl("/hubs/chat", { accessTokenFactory: () => Cache.token })
       .build();
 
     this.OnConnecting();

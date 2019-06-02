@@ -105,7 +105,6 @@
     <None Remove="ClientApp\src\app\Data\DeleteMessagesRequest.ts" />
     <None Remove="ClientApp\src\app\Data\FoundUsersResponse.ts" />
     <None Remove="ClientApp\src\app\Data\MessageAttachment.ts" />
-    <None Remove="ClientApp\src\app\Data\StopPropagation.ts" />
     <None Remove="ClientApp\src\app\Data\UploadFilesResponse.ts" />
     <None Remove="ClientApp\src\app\Data\UserInfo.ts" />
     <None Remove="ClientApp\src\app\Delegates\AddedToConversationDelegate.ts" />
@@ -139,7 +138,6 @@
     <TypeScriptCompile Include="ClientApp\src\app\Data\AttachmentKinds.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationIdsFactory.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\FoundUsersResponse.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\Data\StopPropagation.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\UploadFilesResponse.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Delegates\AddedToConversationDelegate.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Delegates\MessageReceivedDelegate.ts" />

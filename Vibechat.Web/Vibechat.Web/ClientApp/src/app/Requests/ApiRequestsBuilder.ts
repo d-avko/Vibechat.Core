@@ -46,19 +46,17 @@ export class ApiRequestsBuilder {
     );
   }
 
-  public UpdateConversationsRequest(token: string): Observable<ServerResponse<Array<ConversationTemplate>>> {
+  public UpdateConversationsRequest(): Observable<ServerResponse<Array<ConversationTemplate>>> {
 
     return this.MakeAuthorizedCall<Array<ConversationTemplate>>(
-      token,
       null,
       'api/Conversations/GetAll'
     );
   }
 
-  public GetConversationMessages(offset: number, count: number, conversationId: number, token: string): Observable<ServerResponse<ConversationMessagesResponse>> {
+  public GetConversationMessages(offset: number, count: number, conversationId: number): Observable<ServerResponse<ConversationMessagesResponse>> {
 
     return this.MakeAuthorizedCall<ConversationMessagesResponse>(
-      token,
         {
           Count: count,
           ConversationID: conversationId,
@@ -68,10 +66,9 @@ export class ApiRequestsBuilder {
     );
   }
 
-  public DeleteMessages(messages: Array<ChatMessage>, conversationId: number, token: string) : Observable<ServerResponse<string>> {
+  public DeleteMessages(messages: Array<ChatMessage>, conversationId: number) : Observable<ServerResponse<string>> {
 
     return this.MakeAuthorizedCall<string>(
-      token,
         {
           MessagesId: messages.map(x => x.id),
           ConversationId: conversationId
@@ -81,76 +78,68 @@ export class ApiRequestsBuilder {
 
   }
 
-  public UploadImages(files: FileList, token: string): Observable<HttpEvent<any>> {
-   return this.uploader.uploadImages(files, token);
+  public UploadImages(files: FileList): Observable<HttpEvent<any>> {
+   return this.uploader.uploadImages(files);
   }
 
-  public UploadConversationThumbnail(thumbnail: File, conversationId: number, token: string): Observable<ServerResponse<UpdateThumbnailResponse>> {
+  public UploadConversationThumbnail(thumbnail: File, conversationId: number): Observable<ServerResponse<UpdateThumbnailResponse>> {
     let data = new FormData();
     data.append('thumbnail', thumbnail);
     data.append('conversationId', conversationId.toString());
 
     return this.MakeAuthorizedCall<UpdateThumbnailResponse>(
-      token,
       data,
       'api/Conversations/UpdateThumbnail'
     );
   }
 
-  public UploadUserProfilePicture(picture: File, token: string): Observable<ServerResponse<UpdateThumbnailResponse>> {
+  public UploadUserProfilePicture(picture: File): Observable<ServerResponse<UpdateThumbnailResponse>> {
     let data = new FormData();
     data.append('picture', picture);
 
     return this.MakeAuthorizedCall<UpdateThumbnailResponse>(
-      token,
       data,
       'api/Users/UpdateProfilePicture'
     );
   }
 
-  public GetUserById(token: string, userId: string): Observable<ServerResponse<UserInfo>> {
+  public GetUserById(userId: string): Observable<ServerResponse<UserInfo>> {
     return this.MakeAuthorizedCall<UserInfo>(
-      token,
       { Id: userId },
       'api/Users/GetById'
     );
   }
 
-  public GetConversationById(token: string, conversationId: number): Observable<ServerResponse<ConversationTemplate>> {
+  public GetConversationById(conversationId: number): Observable<ServerResponse<ConversationTemplate>> {
     return this.MakeAuthorizedCall<ConversationTemplate>(
-      token,
       { conversationId: conversationId },
       'api/Conversations/GetById'
     );
   }
 
-  public ChangeCurrentUserName(token: string, newName: string): Observable<ServerResponse<boolean>> {
+  public ChangeCurrentUserName(newName: string): Observable<ServerResponse<boolean>> {
     return this.MakeAuthorizedCall<boolean>(
-      token,
       { newName: newName },
       'api/Users/ChangeName'
     );
   }
 
-  public ChangeCurrentUserLastName(token: string, newName: string): Observable<ServerResponse<boolean>> {
+  public ChangeCurrentUserLastName(newName: string): Observable<ServerResponse<boolean>> {
     return this.MakeAuthorizedCall<boolean>(
-      token,
       { newName: newName },
       'api/Users/ChangeLastName'
     );
   }
 
-  public FindUsersByUsername(token: string, username: string): Observable<ServerResponse<FoundUsersResponse>> {
+  public FindUsersByUsername(username: string): Observable<ServerResponse<FoundUsersResponse>> {
     return this.MakeAuthorizedCall<FoundUsersResponse>(
-      token,
       { UsernameToFind: username },
       'api/Users/FindByNickname'
     );
   }
 
-  public GetAttachmentsForConversation(conversationId: number, kind: string, token: string, offset: number, count: number) {
+  public GetAttachmentsForConversation(conversationId: number, kind: string, offset: number, count: number) {
     return this.MakeAuthorizedCall<Array<ChatMessage>>(
-      token,
       {
         conversationId: conversationId,
         kind: kind,
@@ -167,12 +156,10 @@ export class ApiRequestsBuilder {
     dialogUserId: string,
     thumbnailUrl: string,
     isGroup: boolean,
-    token: string,
     isPublic: boolean)
   : Observable<ServerResponse<ConversationTemplate>>
   {
     return this.MakeAuthorizedCall<ConversationTemplate>(
-      token,
       {
         ConversationName: name,
         CreatorId: whoCreatedId,
@@ -186,60 +173,55 @@ export class ApiRequestsBuilder {
 
   }
 
-  public ChangeConversationName(newName: string, conversationId: number, token: string): Observable<ServerResponse<boolean>> {
+  public ChangeConversationName(newName: string, conversationId: number): Observable<ServerResponse<boolean>> {
 
     return this.MakeAuthorizedCall<boolean>(
-      token,
       { ConversationId: conversationId, Name: newName },
       'api/Conversations/ChangeName'
     );
 
   }
 
-  public RefreshJwtToken(oldToken: string, userId: string): Observable<ServerResponse<string>>{
+  public RefreshJwtToken(refreshToken: string, userId: string): Observable<ServerResponse<string>>{
     return this.MakeNonAuthorizedCall<string>(
-      { OldToken: oldToken, UserId: userId },
+      { RefreshToken: refreshToken, userId: userId },
       'api/Tokens/Refresh'
     );
   }
 
-  public SearchForGroups(token: string, searchstring: string): Observable<ServerResponse<Array<ConversationTemplate>>>{
+  public SearchForGroups(searchstring: string): Observable<ServerResponse<Array<ConversationTemplate>>>{
 
     return this.MakeAuthorizedCall<Array<ConversationTemplate>>(
-      token,
       { SearchString: searchstring },
       'api/Conversations/SearchGroups'
     );
 
   }
 
-  public UnbanUser(token: string, userId: string): Observable<ServerResponse<boolean>> {
+  public UnbanUser(userId: string): Observable<ServerResponse<boolean>> {
 
     return this.MakeAuthorizedCall<boolean>(
-      token,
       { userId: userId },
       'api/Users/Unban'
     );
 
   }
 
-  public BanUser(token: string, userId: string, conversationId: number): Observable<ServerResponse<boolean>> {
+  public BanUser(userId: string, conversationId: number): Observable<ServerResponse<boolean>> {
     return this.MakeAuthorizedCall<boolean>(
-      token,
       { userId: userId, conversationId: conversationId == 0 ? null : conversationId },
       'api/Users/Block'
     );
   }
 
-  public BanFromConversation(token: string, userId: string, conversationId: number): Observable<ServerResponse<boolean>> {
+  public BanFromConversation(userId: string, conversationId: number): Observable<ServerResponse<boolean>> {
     return this.MakeAuthorizedCall<boolean>(
-      token,
       { userId: userId, conversationId: conversationId },
       'api/Conversations/BanFrom'
     );
   }
 
-  private MakeAuthorizedCall<T>(token: string, data: any, url: string): Observable<ServerResponse<T>> {
+  private MakeAuthorizedCall<T>(data: any, url: string): Observable<ServerResponse<T>> {
     return this.httpClient.post<ServerResponse<T>>(
       this.baseUrl + url,
       data);

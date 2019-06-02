@@ -14,6 +14,8 @@ namespace Vibechat.Web.ApiModels
         /// </summary>
         public string Token { get; set; }
 
+        public string RefreshToken { get; set; }
+
         public UserInfo Info { get; set; }
 
     }

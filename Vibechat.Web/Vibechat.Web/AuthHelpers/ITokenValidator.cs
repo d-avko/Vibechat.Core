@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace Vibechat.Web.AuthHelpers
 {
-    public interface ITokenClaimValidator
+    public interface ITokenValidator
     {
-        bool Validate(string token, string ClaimName, string ClaimValue);
+        Task<bool> Validate(string userId, string refreshToken);
     }
 }
