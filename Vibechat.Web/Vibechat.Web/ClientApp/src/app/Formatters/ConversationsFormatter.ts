@@ -77,7 +77,7 @@ export class ConversationsFormatter{
         return "Yesterday";
       }
       case daysSinceReceived > 2: {
-        return daysSinceReceived.toPrecision(1) + " days ago";
+        return Math.floor(daysSinceReceived).toString() + " days ago";
       }
     }
   }
@@ -108,11 +108,11 @@ export class ConversationsFormatter{
               return "Online";
             }
 
-            return result + minutesSinceOnline.toPrecision(1) + " minutes ago";
+            return result + Math.floor(minutesSinceOnline).toString() + " minutes ago";
           }
           default: {
 
-            return result + hoursSinceOnline.toPrecision(1) + " hours ago";
+            return result + Math.floor(hoursSinceOnline).toString() + " hours ago";
 
           }
         }
@@ -122,7 +122,7 @@ export class ConversationsFormatter{
         return result + "Yesterday";
       }
       case daysSinceOnline > 2: {
-        return result + daysSinceOnline.toPrecision(1) + " days ago";
+        return result + Math.floor(daysSinceOnline).toString() + " days ago";
       }
     }
   }

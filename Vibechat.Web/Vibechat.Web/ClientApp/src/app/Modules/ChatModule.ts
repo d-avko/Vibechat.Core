@@ -22,6 +22,8 @@ import { SearchListComponent } from "../Search/searchlist.component";
 import { UserInfoDialogComponent } from "../Dialogs/UserInfoDialog";
 import { UploaderService } from "../uploads/upload.service";
 import { ViewAttachmentsDialogComponent } from "../Dialogs/ViewAttachmentsDialog";
+import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
+import { HttpResponseInterceptor } from "../Interceptors/HttpResponseInterceptor";
 
 @NgModule({
   declarations: [
@@ -61,6 +63,7 @@ import { ViewAttachmentsDialogComponent } from "../Dialogs/ViewAttachmentsDialog
   providers: [
     ConnectionManager,
     ConversationsFormatter,
-    UploaderService]
+    UploaderService,
+    { provide: HTTP_INTERCEPTORS, useClass: HttpResponseInterceptor, multi: true }]
 })
 export class ChatModule { }

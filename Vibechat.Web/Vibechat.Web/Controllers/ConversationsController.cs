@@ -151,6 +151,48 @@ namespace VibeChat.Web.Controllers
             }
         }
 
+        public class GetAttachmentsRequest
+        {
+            public string kind { get; set; }
+
+            public int conversationId { get; set; }
+
+            public int offset { get; set; }
+
+            public int count { get; set; }
+        }
+
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Conversations/GetAttachments")]
+        public async Task<ResponseApiModel<List<Message>>> GetAttachments([FromBody] GetAttachmentsRequest request)
+        {
+            try
+            {
+                var result = await mConversationService.GetAttachments(
+                    request.kind, 
+                    request.conversationId, 
+                    JwtHelper.GetNamedClaimValue(User.Claims),
+                    request.offset,
+                    request.count);
+
+                return new ResponseApiModel<List<Message>>()
+                {
+                    IsSuccessfull = true,
+                    ErrorMessage = null,
+                    Response = result
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<List<Message>>()
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message,
+                    Response = null
+                };
+            }
+        }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/GetParticipants")]

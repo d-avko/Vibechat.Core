@@ -12,7 +12,7 @@
     <textarea (keydown.control.enter)="SendMessage()" matInput placeholder="Type in your message..."></textarea>
   </mat-form-field>
 
-  <button mat-button style="color:cadetblue">
+  <button mat-button style="color:cadetblue" (click)="SendMessage()">
     <mat-icon>send</mat-icon>
   </button>
 
