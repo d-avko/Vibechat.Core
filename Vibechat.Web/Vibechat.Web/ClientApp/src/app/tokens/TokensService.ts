@@ -11,7 +11,7 @@ import { ServerResponse } from "../ApiModels/ServerResponse";
 export class TokensService{
   constructor(public router: Router, public requestsBuilder: ApiRequestsBuilder) { }
 
-  public RefreshToken() : Observable<ServerResponse<string>> {
+  public async RefreshToken() : Promise<ServerResponse<string>> {
 
     let refreshToken: string = localStorage.getItem('refreshtoken');
 

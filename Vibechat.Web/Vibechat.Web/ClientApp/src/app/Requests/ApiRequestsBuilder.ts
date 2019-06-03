@@ -109,11 +109,11 @@ export class ApiRequestsBuilder {
     );
   }
 
-  public GetUserById(userId: string): Observable<ServerResponse<UserInfo>> {
+  public GetUserById(userId: string): Promise<ServerResponse<UserInfo>> {
     return this.MakeCall<UserInfo>(
       { Id: userId },
       'api/Users/GetById'
-    );
+    ).toPromise();
   }
 
   public GetConversationById(conversationId: number): Observable<ServerResponse<ConversationTemplate>> {
@@ -188,11 +188,11 @@ export class ApiRequestsBuilder {
 
   }
 
-  public RefreshJwtToken(refreshToken: string, userId: string): Observable<ServerResponse<string>>{
+  public RefreshJwtToken(refreshToken: string, userId: string): Promise<ServerResponse<string>>{
     return this.MakeCall<string>(
       { RefreshToken: refreshToken, userId: userId },
       'api/Tokens/Refresh'
-    );
+    ).toPromise();
   }
 
   public SearchForGroups(searchstring: string): Observable<ServerResponse<Array<ConversationTemplate>>>{

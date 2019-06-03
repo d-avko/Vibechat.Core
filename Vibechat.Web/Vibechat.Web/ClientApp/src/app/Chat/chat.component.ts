@@ -111,36 +111,32 @@ export class ChatComponent implements OnInit {
     this.IsAuthenticated = Cache.IsAuthenticated;
     this.CurrentUser = Cache.UserCache;
   }
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     if (this.IsAuthenticated) {
 
       HttpResponseInterceptor.IsRefreshingToken = true;
 
-      this.tokensService.RefreshToken()
-        .subscribe((result) => {
+      let result = await this.tokensService.RefreshToken()
 
-          if (!result.isSuccessfull) {
-            this.router.navigateByUrl('/login');
-            HttpResponseInterceptor.IsRefreshingToken = false;
-            return;
-          }
+      if (!result.isSuccessfull) {
+        this.router.navigateByUrl('/login');
+        HttpResponseInterceptor.IsRefreshingToken = false;
+        return;
+      }
 
-          Cache.token = result.response;
-          localStorage.setItem('token', result.response);
-          HttpResponseInterceptor.IsRefreshingToken = false;
+      Cache.token = result.response;
+      localStorage.setItem('token', result.response);
+      HttpResponseInterceptor.IsRefreshingToken = false;
 
-          this.UpdateConversations();
+      this.UpdateConversations();
 
-          this.requestsBuilder.GetUserById(this.CurrentUser.id)
-            .subscribe((result) => {
+      let response = await this.requestsBuilder.GetUserById(this.CurrentUser.id);
 
-              if (!result.isSuccessfull) {
-                return;
-              }
+      if (!response.isSuccessfull) {
+        return;
+      }
 
-              this.CurrentUser = result.response;
-            })
-        });
+      this.CurrentUser = response.response;
     }
   }
 
@@ -303,103 +299,100 @@ export class ChatComponent implements OnInit {
     this.connectionManager.AddUserToConversation(this.CurrentUser.id, conversation);
   }
 
-  public OnViewUserInfo(user: UserInfo) {
+  public async OnViewUserInfo(user: UserInfo) {
 
-    this.requestsBuilder.GetUserById(user.id)
-      .subscribe((result) => {
+    let result = await this.requestsBuilder.GetUserById(user.id)
 
-        if (!result.isSuccessfull) {
-          return;
-        }
+    if (!result.isSuccessfull) {
+      return;
+    }
 
-        user = result.response;
+    user = result.response;
 
-        if (user.id == this.CurrentUser.id) {
-          this.CurrentUser = result.response;
-        }
+    if (user.id == this.CurrentUser.id) {
+      this.CurrentUser = result.response;
+    }
 
-        const userInfoRef = this.dialog.open(UserInfoDialogComponent, {
-          width: '450px',
-          data: {
-            user: user,
-            currentUser: this.CurrentUser,
-            Conversations: this.Conversations
-          }
-        });
+    const userInfoRef = this.dialog.open(UserInfoDialogComponent, {
+      width: '450px',
+      data: {
+        user: user,
+        currentUser: this.CurrentUser,
+        Conversations: this.Conversations
+      }
+    });
 
-        userInfoRef.componentInstance.OnBlockUser
-          .subscribe((user: UserInfo) => {
-            this.BanFromMessaging(user);
+    userInfoRef.componentInstance.OnBlockUser
+      .subscribe((user: UserInfo) => {
+        this.BanFromMessaging(user);
+      });
+
+    userInfoRef.componentInstance.OnUnblockUser
+      .subscribe((user: UserInfo) => {
+        this.OnUnblockUser(user);
+      });
+
+    userInfoRef.componentInstance.OnChangeLastname
+      .subscribe((lastName: string) => {
+
+        this.requestsBuilder.ChangeCurrentUserLastName(lastName)
+          .subscribe((result) => {
+
+            if (!result.isSuccessfull) {
+              return;
+            }
+
+            this.CurrentUser.lastName = lastName;
           });
 
-        userInfoRef.componentInstance.OnUnblockUser
-          .subscribe((user: UserInfo) => {
-            this.OnUnblockUser(user);
+      });
+
+    userInfoRef.componentInstance.OnChangeName
+      .subscribe((name: string) => {
+
+        this.requestsBuilder.ChangeCurrentUserName(name)
+          .subscribe((result) => {
+
+            if (!result.isSuccessfull) {
+              return;
+            }
+
+            this.CurrentUser.name = name;
+          });
+      });
+
+    userInfoRef.componentInstance.OnCreateDialogWith
+      .subscribe((user: UserInfo) => {
+        this.connectionManager.CreateDialog(user);
+      });
+
+    userInfoRef.componentInstance.OnRemoveDialogWith
+      .subscribe((user: UserInfo) => {
+        this.connectionManager.RemoveConversation(this.Conversations.find(x => !x.isGroup && x.dialogueUser.id == user.id));
+        this.CurrentConversation = null;
+        userInfoRef.close();
+      });
+
+    userInfoRef.componentInstance.OnUpdateProfilePicture
+      .subscribe((file: File) => {
+
+        this.requestsBuilder.UploadUserProfilePicture(file)
+          .subscribe((result) => {
+
+            if (!result.isSuccessfull) {
+              return;
+            }
+
+            this.CurrentUser.imageUrl = result.response.thumbnailUrl;
+            this.CurrentUser.fullImageUrl = result.response.fullImageUrl;
           });
 
-        userInfoRef.componentInstance.OnChangeLastname
-          .subscribe((lastName: string) => {
+      });
 
-            this.requestsBuilder.ChangeCurrentUserLastName(lastName)
-              .subscribe((result) => {
-
-                if (!result.isSuccessfull) {
-                  return;
-                }
-
-                this.CurrentUser.lastName = lastName;
-              });
-
-          });
-
-        userInfoRef.componentInstance.OnChangeName
-          .subscribe((name: string) => {
-
-            this.requestsBuilder.ChangeCurrentUserName(name)
-              .subscribe((result) => {
-
-                if (!result.isSuccessfull) {
-                  return;
-                }
-
-                this.CurrentUser.name = name;
-              });
-          });
-
-        userInfoRef.componentInstance.OnCreateDialogWith
-          .subscribe((user: UserInfo) => {
-            this.connectionManager.CreateDialog(user);
-          });
-
-        userInfoRef.componentInstance.OnRemoveDialogWith
-          .subscribe((user: UserInfo) => {
-            this.connectionManager.RemoveConversation(this.Conversations.find(x => !x.isGroup && x.dialogueUser.id == user.id));
-            this.CurrentConversation = null;
-            userInfoRef.close();
-          });
-
-        userInfoRef.componentInstance.OnUpdateProfilePicture
-          .subscribe((file: File) => {
-
-            this.requestsBuilder.UploadUserProfilePicture(file)
-              .subscribe((result) => {
-
-                if (!result.isSuccessfull) {
-                  return;
-                }
-
-                this.CurrentUser.imageUrl = result.response.thumbnailUrl;
-                this.CurrentUser.fullImageUrl = result.response.fullImageUrl;
-              });
-
-          });
-
-        userInfoRef.componentInstance.OnViewAttachmentsOf
-          .subscribe((user: UserInfo) => {
-            this.ViewAttachmentsOf(user)
-          });
-
-      })
+    userInfoRef.componentInstance.OnViewAttachmentsOf
+      .subscribe((user: UserInfo) => {
+        this.ViewAttachmentsOf(user)
+      });
   }
 
   public ViewAttachmentsOf(user: UserInfo) {
