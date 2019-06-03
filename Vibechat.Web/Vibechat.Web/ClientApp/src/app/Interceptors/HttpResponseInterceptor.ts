@@ -8,14 +8,15 @@ import {
   HttpErrorResponse
 } from '@angular/common/http';
 
-import { Observable, throwError, BehaviorSubject } from 'rxjs';
-import { map, catchError, retry } from 'rxjs/operators';
+import { Observable, throwError, BehaviorSubject, from } from 'rxjs';
+import { map, catchError, retry, switchMap, mergeMap } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material';
 import { SnackBarHelper } from '../Snackbar/SnackbarHelper';
 import { Router } from '@angular/router';
 import { ApiRequestsBuilder } from '../Requests/ApiRequestsBuilder';
 import { Cache } from '../Auth/Cache';
 import { TokensService } from '../tokens/TokensService';
+import { ServerResponse } from '../ApiModels/ServerResponse';
 
 @Injectable()
 export class HttpResponseInterceptor implements HttpInterceptor {
@@ -29,32 +30,49 @@ export class HttpResponseInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     let token: string = localStorage.getItem('token');
+
     if (!token) {
       return this.handleRequest(request, next);
     }
 
-    HttpResponseInterceptor.IsRefreshingToken = true;
-
     if (!HttpResponseInterceptor.IsRefreshingToken) {
-      //refresh token for every call
-      this.tokensService.RefreshToken()
-        .subscribe((result) => {
 
-          if (!result.isSuccessfull) {
-            this.router.navigateByUrl('/login');
-            HttpResponseInterceptor.IsRefreshingToken = false;
-            return;
-          }
+      HttpResponseInterceptor.IsRefreshingToken = true;
 
-          Cache.token = result.response;
-          localStorage.setItem('token', result.response);
-          HttpResponseInterceptor.IsRefreshingToken = false;
-        });
+      return from(this.tokensService.RefreshToken())
+        .pipe(
+          mergeMap(
+            response => {
+
+              let token = this.handleRefreshTokenResponse(response);
+
+              if (!token) {
+                return;
+              }
+
+              request = request.clone({ headers: request.headers.set('Authorization', 'Bearer ' + token) });
+              return this.handleRequest(request, next);
+            }
+          )
+        )
+
+    } else {
+      request = request.clone({ headers: request.headers.set('Authorization', 'Bearer ' + token) });
+      return this.handleRequest(request, next);
+    }
+  }
+
+  public handleRefreshTokenResponse(response: ServerResponse<string>) : string {
+    if (!response.isSuccessfull) {
+      this.router.navigateByUrl('/login');
+      HttpResponseInterceptor.IsRefreshingToken = false;
+      return;
     }
 
-    request = request.clone({ headers: request.headers.set('Authorization', 'Bearer ' + token) });
-
-    return this.handleRequest(request, next);
+    Cache.token = response.response;
+    localStorage.setItem('token', response.response);
+    HttpResponseInterceptor.IsRefreshingToken = false;
+    return response.response;
   }
 
   public handleRequest(request: HttpRequest<any>, next: HttpHandler) {
@@ -77,18 +95,9 @@ export class HttpResponseInterceptor implements HttpInterceptor {
 
           HttpResponseInterceptor.IsRefreshingToken = true;
 
-          this.tokensService.RefreshToken()
+          from(this.tokensService.RefreshToken())
             .subscribe((result) => {
-
-              if (!result.isSuccessfull) {
-                this.router.navigateByUrl('/login');
-                HttpResponseInterceptor.IsRefreshingToken = false;
-                return;
-              }
-
-              Cache.token = result.response;
-              localStorage.setItem('token', result.response);
-              HttpResponseInterceptor.IsRefreshingToken = false;
+              this.handleRefreshTokenResponse(result);
             });
 
           window.location.reload();
