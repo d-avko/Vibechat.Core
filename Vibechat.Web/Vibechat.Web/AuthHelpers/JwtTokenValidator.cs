@@ -10,17 +10,14 @@ namespace Vibechat.Web.AuthHelpers
 {
     public class JwtTokenValidator : ITokenValidator
     {
-        public JwtTokenValidator(IUsersRepository usersRepository)
+        public JwtTokenValidator(IUsersRepository usersRepository, JwtSecurityTokenHandler tokensHandler)
         {
             UsersRepository = usersRepository;
-        }
-        protected JwtSecurityTokenHandler tokensHandler { get; set; }
-        public IUsersRepository UsersRepository { get; }
-
-        public JwtTokenValidator(JwtSecurityTokenHandler tokensHandler)
-        {
             this.tokensHandler = tokensHandler;
         }
+
+        protected JwtSecurityTokenHandler tokensHandler { get; set; }
+        public IUsersRepository UsersRepository { get; }
 
         public async Task<bool> Validate(string userId, string refreshToken)
         {

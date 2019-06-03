@@ -296,7 +296,7 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                await BansService.Unban(
+                await BansService.UnbanDialog(
                     request.userId,
                     JwtHelper.GetNamedClaimValue(User.Claims));
 

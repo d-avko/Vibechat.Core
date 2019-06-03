@@ -21,4 +21,6 @@ export class UserInfo {
   public isMessagingRestricted: boolean;
 
   public isBlocked: boolean;
+
+  public isBlockedInConversation: boolean;
 }

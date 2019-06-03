@@ -52,6 +52,16 @@ namespace VibeChat.Web.ChatData
         /// </summary>
         public bool IsMessagingRestricted { get; set; }
 
+        /// <summary>
+        /// Field indicates if user who is querying the data banned this user.
+        /// This field is filled automatically.
+        /// </summary>
         public bool IsBlocked { get; set; }
+
+        /// <summary>
+        /// Field filled by methods in <see cref="ConversationsController"/> , 
+        /// indicating whether user was banned in specific conversation.
+        /// </summary>
+        public bool IsBlockedInConversation { get; set; }
     }
 }

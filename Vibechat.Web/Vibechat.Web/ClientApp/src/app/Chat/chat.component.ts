@@ -91,11 +91,11 @@ export class ChatComponent implements OnInit {
   constructor(
     public dialog: MatDialog,
     requestsBuilder: ApiRequestsBuilder,
-    snackbar: MatSnackBar,
+    snackbar: SnackBarHelper,
     router: Router,
     formatter: ConversationsFormatter) {
 
-    this.snackbar = new SnackBarHelper(snackbar);
+    this.snackbar = snackbar;
 
     this.router = router;
     
@@ -231,6 +231,9 @@ export class ChatComponent implements OnInit {
         groupInfoRef.componentInstance.OnBanUser
           .subscribe((user: UserInfo) => this.BanFromConversation(user));
 
+        groupInfoRef.componentInstance.OnUnBanUser
+          .subscribe((user: UserInfo) => this.UnbanFromConversation(user));
+
         groupInfoRef.componentInstance.OnRemoveGroup
           .subscribe((group: ConversationTemplate) => {
             this.connectionManager.RemoveConversation(group);
@@ -254,6 +257,18 @@ export class ChatComponent implements OnInit {
     this.connectionManager.RemoveUserFromConversation(user.id, this.CurrentConversation.conversationID, false);
   }
 
+  public UnbanFromConversation(user: UserInfo) {
+    this.requestsBuilder.UnBanFromConversation(user.id, this.CurrentConversation.conversationID)
+      .subscribe((result) => {
+
+        if (!result.isSuccessfull) {
+          return;
+        }
+
+        user.isBlockedInConversation = false;
+      });
+  }
+
   public BanFromConversation(userToBan: UserInfo) {
     this.requestsBuilder.BanFromConversation(userToBan.id, this.CurrentConversation.conversationID)
       .subscribe((result) => {
@@ -262,7 +277,7 @@ export class ChatComponent implements OnInit {
           return;
         }
 
-        //should mark some flag there that user was banned successfully.
+        userToBan.isBlockedInConversation = true;
       });
   }
 

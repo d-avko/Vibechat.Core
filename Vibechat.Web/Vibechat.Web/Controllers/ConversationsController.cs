@@ -96,7 +96,15 @@ namespace VibeChat.Web.Controllers
 
                 List<ConversationTemplate> result = await mConversationService.GetConversations(thisUserId);
 
-                result.ForEach(async x => x.IsMessagingRestricted = await BansService.IsBannedFromConversation(x.ConversationID, thisUserId));
+                foreach(ConversationTemplate conversation in result)
+                {
+                    conversation.IsMessagingRestricted = await BansService.IsBannedFromConversation(conversation.ConversationID, thisUserId);
+
+                    foreach(UserInfo user in conversation.Participants)
+                    {
+                        user.IsBlockedInConversation = await BansService.IsBannedFromConversation(conversation.ConversationID, user.Id);
+                    }
+                }
 
                 return new ResponseApiModel<List<ConversationTemplate>>()
                 {
@@ -132,6 +140,11 @@ namespace VibeChat.Web.Controllers
                 ConversationTemplate result = await mConversationService.GetById(request.conversationId, thisUserId).ConfigureAwait(false);
 
                 result.IsMessagingRestricted = await BansService.IsBannedFromConversation(request.conversationId, thisUserId).ConfigureAwait(false);
+
+                foreach (UserInfo user in result.Participants)
+                {
+                    user.IsBlockedInConversation = await BansService.IsBannedFromConversation(request.conversationId, user.Id);
+                }
 
                 return new ResponseApiModel<ConversationTemplate>()
                 {
@@ -415,34 +428,31 @@ namespace VibeChat.Web.Controllers
             }
         }
 
-        //public class IsBannedFromRequest
-        //{
-        //    public int[] conversationIds{ get; set; }
-        //}
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Conversations/UnbanFrom")]
+        public async Task<ResponseApiModel<bool>> UnbanFrom([FromBody] BanRequest request)
+        {
+            try
+            {
+                await BansService.UnbanUserFromConversation(
+                    request.conversationId,
+                    request.userId,
+                    JwtHelper.GetNamedClaimValue(User.Claims));
 
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        //[Route("api/Conversations/isBannedFrom")]
-        //public async Task<ResponseApiModel<bool[]>> IsBannedFrom([FromBody]IsBannedFromRequest request)
-        //{
-        //    try
-        //    {
-        //        var result = await BansService.IsBannedFromConversations(request.conversationIds,
-        //              JwtHelper.GetNamedClaim(User.Claims));
-
-        //        return new ResponseApiModel<bool[]>()
-        //        {
-        //            IsSuccessfull = true,
-        //            Response = result
-        //        };
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return new ResponseApiModel<bool[]>()
-        //        {
-        //            ErrorMessage = ex.Message,
-        //            IsSuccessfull = false
-        //        };
-        //    }
-        //}
+                return new ResponseApiModel<bool>()
+                {
+                    IsSuccessfull = true,
+                    Response = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<bool>()
+                {
+                    ErrorMessage = ex.Message,
+                    IsSuccessfull = false
+                };
+            }
+        }
     }
 }
