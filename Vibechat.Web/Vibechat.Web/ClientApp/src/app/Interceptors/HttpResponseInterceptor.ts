@@ -15,71 +15,41 @@ import { SnackBarHelper } from '../Snackbar/SnackbarHelper';
 import { Router } from '@angular/router';
 import { ApiRequestsBuilder } from '../Requests/ApiRequestsBuilder';
 import { Cache } from '../Auth/Cache';
+import { TokensService } from '../tokens/TokensService';
 
 @Injectable()
 export class HttpResponseInterceptor implements HttpInterceptor {
 
-  constructor(public errorsLogger: SnackBarHelper, public router: Router, public requestsBuilder: ApiRequestsBuilder)
+  constructor(public errorsLogger: SnackBarHelper, public router: Router, public requestsBuilder: ApiRequestsBuilder, public tokensService: TokensService)
   {
-    setTimeout(() => {
-      this.RefreshToken()
-    }, 1000 * 60 * 3)
+    
   }
 
-  RefreshTokenWithTimeout() {
-    let refreshToken: string = localStorage.getItem('refreshtoken');
-
-    if (!refreshToken) {
-      this.router.navigateByUrl('/login');
-      return;
-    }
-
-    localStorage.removeItem('token');
-
-    this.requestsBuilder.RefreshJwtToken(refreshToken, Cache.UserCache.id).subscribe((result) => {
-
-      if (!result.isSuccessfull) {
-        this.router.navigateByUrl('/login');
-        return;
-      }
-
-      Cache.token = result.response;
-      localStorage.setItem('token', result.response);
-    })
-
-    setTimeout(() => {
-      this.RefreshTokenWithTimeout()
-    }, 1000 * 60 * 3)
-  }
-
-  RefreshToken() {
-
-    let refreshToken: string = localStorage.getItem('refreshtoken');
-
-    if (!refreshToken) {
-      this.router.navigateByUrl('/login');
-      return;
-    }
-
-    localStorage.removeItem('token');
-
-    this.requestsBuilder.RefreshJwtToken(refreshToken, Cache.UserCache.id).subscribe((result) => {
-
-      if (!result.isSuccessfull) {
-        this.router.navigateByUrl('/login');
-        return;
-      }
-
-      Cache.token = result.response;
-      localStorage.setItem('token', result.response);
-    })
-
-  }
+  public static IsRefreshingToken: boolean;
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     let token: string = localStorage.getItem('token');
     if (!token) {
       return this.handleRequest(request, next);
+    }
+
+    HttpResponseInterceptor.IsRefreshingToken = true;
+
+    if (!HttpResponseInterceptor.IsRefreshingToken) {
+      //refresh token for every call
+      this.tokensService.RefreshToken()
+        .subscribe((result) => {
+
+          if (!result.isSuccessfull) {
+            this.router.navigateByUrl('/login');
+            HttpResponseInterceptor.IsRefreshingToken = false;
+            return;
+          }
+
+          Cache.token = result.response;
+          localStorage.setItem('token', result.response);
+          HttpResponseInterceptor.IsRefreshingToken = false;
+        });
     }
 
     request = request.clone({ headers: request.headers.set('Authorization', 'Bearer ' + token) });
@@ -104,7 +74,23 @@ export class HttpResponseInterceptor implements HttpInterceptor {
       catchError((error: HttpErrorResponse) => {
 
         if (error.status == 401) {
-          this.RefreshToken();
+
+          HttpResponseInterceptor.IsRefreshingToken = true;
+
+          this.tokensService.RefreshToken()
+            .subscribe((result) => {
+
+              if (!result.isSuccessfull) {
+                this.router.navigateByUrl('/login');
+                HttpResponseInterceptor.IsRefreshingToken = false;
+                return;
+              }
+
+              Cache.token = result.response;
+              localStorage.setItem('token', result.response);
+              HttpResponseInterceptor.IsRefreshingToken = false;
+            });
+
           window.location.reload();
           return;
         }
