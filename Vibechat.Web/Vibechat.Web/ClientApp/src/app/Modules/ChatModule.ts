@@ -24,6 +24,7 @@ import { UploaderService } from "../uploads/upload.service";
 import { ViewAttachmentsDialogComponent } from "../Dialogs/ViewAttachmentsDialog";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { HttpResponseInterceptor } from "../Interceptors/HttpResponseInterceptor";
+import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
 
 @NgModule({
   declarations: [
@@ -64,6 +65,7 @@ import { HttpResponseInterceptor } from "../Interceptors/HttpResponseInterceptor
     ConnectionManager,
     ConversationsFormatter,
     UploaderService,
+    SnackBarHelper,
     { provide: HTTP_INTERCEPTORS, useClass: HttpResponseInterceptor, multi: true }]
 })
 export class ChatModule { }

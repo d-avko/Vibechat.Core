@@ -12,6 +12,9 @@ import { FoundUsersResponse } from "../Data/FoundUsersResponse";
 import { UpdateThumbnailResponse } from "../ApiModels/UpdateThumbnailResponse";
 import { UserInfo } from "../Data/UserInfo";
 import { UploaderService } from "../uploads/upload.service";
+import {
+} from "@angular/material";
+import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
 
 @Injectable({
   providedIn: 'root'
@@ -26,21 +29,24 @@ export class ApiRequestsBuilder {
 
   private uploader: UploaderService;
 
-  constructor(httpClient: HttpClient, @Inject('BASE_URL') baseUrl: string, uploader: UploaderService) {
+  private logger: SnackBarHelper
+
+  constructor(httpClient: HttpClient, @Inject('BASE_URL') baseUrl: string, uploader: UploaderService, logger: SnackBarHelper) {
     this.baseUrl = baseUrl;
     this.httpClient = httpClient;
     this.uploader = uploader;
+    this.logger = logger;
   }
 
   public LoginRequest(credentials: LoginRequest): Observable<ServerResponse<LoginResponse>>{
-    return this.MakeNonAuthorizedCall<LoginResponse>(
+    return this.MakeCall<LoginResponse>(
       credentials,
       'api/login'
     );
   }
 
   public RegisterRequest(credentials: RegisterRequest): Observable<ServerResponse<string>> {
-    return this.MakeNonAuthorizedCall<string>(
+    return this.MakeCall<string>(
       credentials,
       'api/register'
     );
@@ -48,7 +54,7 @@ export class ApiRequestsBuilder {
 
   public UpdateConversationsRequest(): Observable<ServerResponse<Array<ConversationTemplate>>> {
 
-    return this.MakeAuthorizedCall<Array<ConversationTemplate>>(
+    return this.MakeCall<Array<ConversationTemplate>>(
       null,
       'api/Conversations/GetAll'
     );
@@ -56,7 +62,7 @@ export class ApiRequestsBuilder {
 
   public GetConversationMessages(offset: number, count: number, conversationId: number): Observable<ServerResponse<ConversationMessagesResponse>> {
 
-    return this.MakeAuthorizedCall<ConversationMessagesResponse>(
+    return this.MakeCall<ConversationMessagesResponse>(
         {
           Count: count,
           ConversationID: conversationId,
@@ -68,7 +74,7 @@ export class ApiRequestsBuilder {
 
   public DeleteMessages(messages: Array<ChatMessage>, conversationId: number) : Observable<ServerResponse<string>> {
 
-    return this.MakeAuthorizedCall<string>(
+    return this.MakeCall<string>(
         {
           MessagesId: messages.map(x => x.id),
           ConversationId: conversationId
@@ -87,7 +93,7 @@ export class ApiRequestsBuilder {
     data.append('thumbnail', thumbnail);
     data.append('conversationId', conversationId.toString());
 
-    return this.MakeAuthorizedCall<UpdateThumbnailResponse>(
+    return this.MakeCall<UpdateThumbnailResponse>(
       data,
       'api/Conversations/UpdateThumbnail'
     );
@@ -97,49 +103,49 @@ export class ApiRequestsBuilder {
     let data = new FormData();
     data.append('picture', picture);
 
-    return this.MakeAuthorizedCall<UpdateThumbnailResponse>(
+    return this.MakeCall<UpdateThumbnailResponse>(
       data,
       'api/Users/UpdateProfilePicture'
     );
   }
 
   public GetUserById(userId: string): Observable<ServerResponse<UserInfo>> {
-    return this.MakeAuthorizedCall<UserInfo>(
+    return this.MakeCall<UserInfo>(
       { Id: userId },
       'api/Users/GetById'
     );
   }
 
   public GetConversationById(conversationId: number): Observable<ServerResponse<ConversationTemplate>> {
-    return this.MakeAuthorizedCall<ConversationTemplate>(
+    return this.MakeCall<ConversationTemplate>(
       { conversationId: conversationId },
       'api/Conversations/GetById'
     );
   }
 
   public ChangeCurrentUserName(newName: string): Observable<ServerResponse<boolean>> {
-    return this.MakeAuthorizedCall<boolean>(
+    return this.MakeCall<boolean>(
       { newName: newName },
       'api/Users/ChangeName'
     );
   }
 
   public ChangeCurrentUserLastName(newName: string): Observable<ServerResponse<boolean>> {
-    return this.MakeAuthorizedCall<boolean>(
+    return this.MakeCall<boolean>(
       { newName: newName },
       'api/Users/ChangeLastName'
     );
   }
 
   public FindUsersByUsername(username: string): Observable<ServerResponse<FoundUsersResponse>> {
-    return this.MakeAuthorizedCall<FoundUsersResponse>(
+    return this.MakeCall<FoundUsersResponse>(
       { UsernameToFind: username },
       'api/Users/FindByNickname'
     );
   }
 
   public GetAttachmentsForConversation(conversationId: number, kind: string, offset: number, count: number) {
-    return this.MakeAuthorizedCall<Array<ChatMessage>>(
+    return this.MakeCall<Array<ChatMessage>>(
       {
         conversationId: conversationId,
         kind: kind,
@@ -159,7 +165,7 @@ export class ApiRequestsBuilder {
     isPublic: boolean)
   : Observable<ServerResponse<ConversationTemplate>>
   {
-    return this.MakeAuthorizedCall<ConversationTemplate>(
+    return this.MakeCall<ConversationTemplate>(
       {
         ConversationName: name,
         CreatorId: whoCreatedId,
@@ -175,7 +181,7 @@ export class ApiRequestsBuilder {
 
   public ChangeConversationName(newName: string, conversationId: number): Observable<ServerResponse<boolean>> {
 
-    return this.MakeAuthorizedCall<boolean>(
+    return this.MakeCall<boolean>(
       { ConversationId: conversationId, Name: newName },
       'api/Conversations/ChangeName'
     );
@@ -183,7 +189,7 @@ export class ApiRequestsBuilder {
   }
 
   public RefreshJwtToken(refreshToken: string, userId: string): Observable<ServerResponse<string>>{
-    return this.MakeNonAuthorizedCall<string>(
+    return this.MakeCall<string>(
       { RefreshToken: refreshToken, userId: userId },
       'api/Tokens/Refresh'
     );
@@ -191,7 +197,7 @@ export class ApiRequestsBuilder {
 
   public SearchForGroups(searchstring: string): Observable<ServerResponse<Array<ConversationTemplate>>>{
 
-    return this.MakeAuthorizedCall<Array<ConversationTemplate>>(
+    return this.MakeCall<Array<ConversationTemplate>>(
       { SearchString: searchstring },
       'api/Conversations/SearchGroups'
     );
@@ -200,7 +206,7 @@ export class ApiRequestsBuilder {
 
   public UnbanUser(userId: string): Observable<ServerResponse<boolean>> {
 
-    return this.MakeAuthorizedCall<boolean>(
+    return this.MakeCall<boolean>(
       { userId: userId },
       'api/Users/Unban'
     );
@@ -208,26 +214,27 @@ export class ApiRequestsBuilder {
   }
 
   public BanUser(userId: string, conversationId: number): Observable<ServerResponse<boolean>> {
-    return this.MakeAuthorizedCall<boolean>(
+    return this.MakeCall<boolean>(
       { userId: userId, conversationId: conversationId == 0 ? null : conversationId },
       'api/Users/Block'
     );
   }
 
   public BanFromConversation(userId: string, conversationId: number): Observable<ServerResponse<boolean>> {
-    return this.MakeAuthorizedCall<boolean>(
+    return this.MakeCall<boolean>(
       { userId: userId, conversationId: conversationId },
       'api/Conversations/BanFrom'
     );
   }
 
-  private MakeAuthorizedCall<T>(data: any, url: string): Observable<ServerResponse<T>> {
-    return this.httpClient.post<ServerResponse<T>>(
-      this.baseUrl + url,
-      data);
+  public UnBanFromConversation(userId: string, conversationId: number): Observable<ServerResponse<boolean>> {
+    return this.MakeCall<boolean>(
+      { userId: userId, conversationId: conversationId },
+      'api/Conversations/UnbanFrom'
+    );
   }
 
-  private MakeNonAuthorizedCall<T>(data: any, url: string): Observable<ServerResponse<T>> {
+  private MakeCall<T>(data: any, url: string): Observable<ServerResponse<T>> {
     return this.httpClient.post<ServerResponse<T>>(
       this.baseUrl + url,
       data);

@@ -11,11 +11,9 @@ import { MatSnackBar } from '@angular/material';
 @Injectable()
 export class UploaderService {
 
-  private logger: SnackBarHelper;
-
   constructor(
     private http: HttpClient,
-    snackbar: MatSnackBar) { this.logger = new SnackBarHelper(snackbar); }
+    private logger: SnackBarHelper) { }
 
   public uploadImages(files: FileList) : Observable<HttpEvent<any>> {
     if (!files || files.length == 0) { return; }

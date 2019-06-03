@@ -36,6 +36,8 @@ export class GroupInfoDialogComponent {
 
   public OnBanUser = new EventEmitter<UserInfo>();
 
+  public OnUnBanUser = new EventEmitter<UserInfo>();
+
   public OnRemoveGroup = new EventEmitter<ConversationTemplate>();
 
   public OnViewAttachments = new EventEmitter<ConversationTemplate>();
@@ -78,6 +80,10 @@ export class GroupInfoDialogComponent {
 
   public BanUser(user: UserInfo) {
     this.OnBanUser.emit(user);
+  }
+
+  public UnbanUser(user: UserInfo) {
+    this.OnUnBanUser.emit(user);
   }
 
   public ViewAttachments(){

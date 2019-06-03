@@ -75,8 +75,7 @@
   <mat-action-list *ngIf="!data.Conversation.isMessagingRestricted" class="users_in_Conversation_list">
     <h3 mat-subheader>Users in group</h3>
 
-    <mat-list-item *ngFor="let user of data.Conversation.participants"
-                   >
+    <mat-list-item *ngFor="let user of data.Conversation.participants">
       <div class="viewuser" (click)="ViewUserInfo(user)">
         <img matListAvatar src="{{user.imageUrl}}" alt="user profile picture">
 
@@ -86,7 +85,8 @@
       </div>
 
       <button class="kickButton" *ngIf="IsCurrentUserCreatorOfConversation()" (click)="KickUser(user)" mat-button>Kick</button>
-      <button class="banButon" *ngIf="IsCurrentUserCreatorOfConversation()" (click)="BanUser(user)" mat-button>Ban</button>
+      <button class="banButon" *ngIf="IsCurrentUserCreatorOfConversation() && !user.isBlockedInConversation" (click)="BanUser(user)" mat-button>Ban</button>
+      <button class="unbanButon" *ngIf="IsCurrentUserCreatorOfConversation() && user.isBlockedInConversation" (click)="UnbanUser(user)" mat-button>Unban</button>
 
     </mat-list-item>
 
@@ -145,6 +145,7 @@
       color:black;
     }
 
+    .unbanButon,
     .banned-text,
     .banButon,
     .bannedicon,

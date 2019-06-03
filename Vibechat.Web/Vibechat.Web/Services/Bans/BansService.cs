@@ -117,7 +117,7 @@ namespace Vibechat.Web.Services.Bans
             return UsersBansRepository.IsBanned(who, byWho);
         }
 
-        public async Task Unban(string userId, string whoUnbans)
+        public async Task UnbanDialog(string userId, string whoUnbans)
         {
             try
             {
@@ -126,6 +126,41 @@ namespace Vibechat.Web.Services.Bans
             catch
             {
                 throw new FormatException("Wrong id of a person to unban.");
+            }
+        }
+
+        public async Task UnbanUserFromConversation(int conversationId, string userToUnbanId, string whoAccessedId)
+        {
+            if (userToUnbanId == whoAccessedId)
+            {
+                throw new FormatException("Can't unban yourself.");
+            }
+
+            ConversationDataModel conversation = ConversationRepository.GetById(conversationId);
+            UserInApplication banned = await UsersRepository.GetById(userToUnbanId);
+
+            if (conversation.Creator.Id != whoAccessedId)
+            {
+                throw new FormatException("Only creator can unban users.");
+            }
+
+            if (banned == null)
+            {
+                throw new FormatException("Wrong user to unban id was provided.");
+            }
+
+            if (conversation == null)
+            {
+                throw new FormatException("Wrong conversation id was provided.");
+            }
+
+            try
+            {
+                ConversationsBansRepository.UnbanUserInGroup(userToUnbanId, conversationId);
+            }
+            catch
+            {
+                throw new FormatException("Wrong conversation id was provided.");
             }
         }
     }
