@@ -28,6 +28,8 @@ import { UploadFilesResponse } from "../Data/UploadFilesResponse";
 import { retry } from "rxjs/operators";
 import { AnimationGroupPlayer } from "@angular/animations/src/players/animation_group_player";
 import { ViewAttachmentsDialogComponent } from "../Dialogs/ViewAttachmentsDialog";
+import { TokensService } from "../tokens/TokensService";
+import { HttpResponseInterceptor } from "../Interceptors/HttpResponseInterceptor";
 
 @Component({
   selector: 'chat-root',
@@ -58,19 +60,7 @@ export class ChatComponent implements OnInit {
 
   public CurrentUser: UserInfo;
 
-  //pop-up that will inform user of errors.
-
-  protected snackbar: SnackBarHelper;
-
-  protected router: Router;
-
   protected connectionManager: ConnectionManager;
-
-
-
-  protected requestsBuilder: ApiRequestsBuilder
-
-  public formatter: ConversationsFormatter;
 
   public static MessagesBufferLength: number = 50;
 
@@ -90,21 +80,16 @@ export class ChatComponent implements OnInit {
 
   constructor(
     public dialog: MatDialog,
-    requestsBuilder: ApiRequestsBuilder,
-    snackbar: SnackBarHelper,
-    router: Router,
-    formatter: ConversationsFormatter) {
-
-    this.snackbar = snackbar;
-
-    this.router = router;
-    
-    this.requestsBuilder = requestsBuilder;
+    protected requestsBuilder: ApiRequestsBuilder,
+    protected snackbar: SnackBarHelper,
+    protected router: Router,
+    public formatter: ConversationsFormatter,
+    public tokensService: TokensService) {
 
     this.Conversations = new Array<ConversationTemplate>();
 
     this.formatter = formatter;
-  
+    
     if (!Cache.IsAuthenticated) {
       if (!Cache.TryAuthenticate()) {
         router.navigateByUrl('/login');
@@ -128,17 +113,34 @@ export class ChatComponent implements OnInit {
   }
   ngOnInit(): void {
     if (this.IsAuthenticated) {
-      this.UpdateConversations();
 
-      this.requestsBuilder.GetUserById(this.CurrentUser.id)
+      HttpResponseInterceptor.IsRefreshingToken = true;
+
+      this.tokensService.RefreshToken()
         .subscribe((result) => {
 
           if (!result.isSuccessfull) {
+            this.router.navigateByUrl('/login');
+            HttpResponseInterceptor.IsRefreshingToken = false;
             return;
           }
 
-          this.CurrentUser = result.response;
-        })
+          Cache.token = result.response;
+          localStorage.setItem('token', result.response);
+          HttpResponseInterceptor.IsRefreshingToken = false;
+
+          this.UpdateConversations();
+
+          this.requestsBuilder.GetUserById(this.CurrentUser.id)
+            .subscribe((result) => {
+
+              if (!result.isSuccessfull) {
+                return;
+              }
+
+              this.CurrentUser = result.response;
+            })
+        });
     }
   }
 

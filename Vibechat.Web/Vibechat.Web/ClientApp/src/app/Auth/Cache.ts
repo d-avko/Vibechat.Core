@@ -36,7 +36,9 @@ export class Cache {
   }
 
   public static LogOut(): void {
-    localStorage.clear();
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshtoken');
+    localStorage.removeItem('user');
   }
 
 }

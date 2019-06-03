@@ -24,7 +24,9 @@ var Cache = /** @class */ (function () {
         return true;
     };
     Cache.LogOut = function () {
-        localStorage.clear();
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshtoken');
+        localStorage.removeItem('user');
     };
     return Cache;
 }());

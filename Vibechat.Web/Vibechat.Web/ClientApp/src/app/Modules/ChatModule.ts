@@ -25,6 +25,7 @@ import { ViewAttachmentsDialogComponent } from "../Dialogs/ViewAttachmentsDialog
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { HttpResponseInterceptor } from "../Interceptors/HttpResponseInterceptor";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
+import { TokensService } from "../tokens/TokensService";
 
 @NgModule({
   declarations: [
@@ -66,6 +67,7 @@ import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
     ConversationsFormatter,
     UploaderService,
     SnackBarHelper,
+    TokensService,
     { provide: HTTP_INTERCEPTORS, useClass: HttpResponseInterceptor, multi: true }]
 })
 export class ChatModule { }

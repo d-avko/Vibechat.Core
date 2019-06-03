@@ -45,7 +45,7 @@ export class ViewAttachmentsDialogComponent {
   }
   //photos should be sorted new to old.
   private AddPhotos(photos: Array<ChatMessage>) {
-    if (!photos) {
+    if (photos.length == 0) {
       return;
     }
 
