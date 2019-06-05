@@ -41,7 +41,7 @@ export class HttpResponseInterceptor implements HttpInterceptor {
 
       return from(this.tokensService.RefreshToken())
         .pipe(
-          mergeMap(
+          switchMap(
             response => {
 
               let token = this.handleRefreshTokenResponse(response);

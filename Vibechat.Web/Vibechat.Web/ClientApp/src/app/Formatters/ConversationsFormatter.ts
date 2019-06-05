@@ -88,12 +88,16 @@ export class ConversationsFormatter{
     return membersAmount.toString() + " Member(s)";
   }
 
-  public GetLastSeenFormatted(dateString: string) : string {
+  public GetLastSeenFormatted(dateString: string, isOnline: boolean): string {
+    if (isOnline) {
+      return "Online";
+    }
+
     let date = new Date(dateString).getTime();
 
     let daysSinceOnline = (new Date().getTime() - date) / (1000 * 60 * 60 * 24);
 
-    let result = "Last seen: ";
+    let result = "Offline. Last seen: ";
 
     switch (true) {
       case daysSinceOnline <= 1: {
@@ -105,7 +109,7 @@ export class ConversationsFormatter{
             let minutesSinceOnline = (new Date().getTime() - date) / (1000 * 60);
 
             if (minutesSinceOnline <= 10) {
-              return "Online";
+              return "less than 10 minutes ago.";
             }
 
             return result + Math.floor(minutesSinceOnline).toString() + " minutes ago";

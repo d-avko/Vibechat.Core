@@ -177,6 +177,7 @@ namespace VibeChat.Web.Controllers
         {
             public string userId { get; set; }
 
+            //there could not exist a conversation with user we want to block.
             public int? conversationId { get; set; }
         }
 
@@ -186,7 +187,14 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                await BansService.BanUser(request.userId, request.conversationId, JwtHelper.GetNamedClaimValue(User.Claims));
+                string thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+
+                await BansService.BanUser(request.userId, thisUserId);
+
+                if(request.conversationId != null)
+                {
+                    await BansService.BanUserFromConversation(request.conversationId.Value, request.userId, thisUserId);
+                }
 
                 return new ResponseApiModel<bool>()
                 {

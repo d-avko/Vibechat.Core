@@ -33,6 +33,17 @@ namespace Vibechat.Web.Services.Repositories
             await mContext.SaveChangesAsync();
         }
 
+        public async Task MakeUserOnline(string userId)
+        {
+            UserInApplication user = await GetById(userId);
+
+            user.IsOnline = true;
+
+            user.LastSeen = DateTime.UtcNow;
+
+            await mContext.SaveChangesAsync();
+        }
+
         public async Task MakeUserOffline(string userId)
         {
             var user = await GetById(userId);

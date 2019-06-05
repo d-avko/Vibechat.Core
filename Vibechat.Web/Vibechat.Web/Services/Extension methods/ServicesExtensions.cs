@@ -5,6 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using Vibechat.Web.AuthHelpers;
+using Vibechat.Web.Middleware;
 using Vibechat.Web.Services.Bans;
 using Vibechat.Web.Services.ChatDataProviders;
 using Vibechat.Web.Services.FileSystem;
@@ -26,6 +27,7 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddScoped<ConversationsInfoService, ConversationsInfoService>();
             services.AddScoped<UsersInfoService, UsersInfoService>();
             services.AddScoped<LoginService, LoginService>();
+            services.AddScoped<UserStatusMiddleware, UserStatusMiddleware>();
         }
 
         public static void AddDefaultRepositories(this IServiceCollection services)

@@ -63,7 +63,6 @@ import { TokensService } from "../tokens/TokensService";
     ViewAttachmentsDialogComponent],
 
   providers: [
-    ConnectionManager,
     ConversationsFormatter,
     UploaderService,
     SnackBarHelper,
