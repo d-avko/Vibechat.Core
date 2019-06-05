@@ -18,5 +18,7 @@ export class ChatMessage {
 
   public attachmentInfo: MessageAttachment;
 
+  public forwardedMessage: ChatMessage;
+
   public isAttachment: boolean;
 }

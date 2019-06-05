@@ -29,15 +29,15 @@ namespace Vibechat.Web.Extensions
             };
         }
 
-        public static MessageAttachment ToMessageAttachment(this MessageDataModel value)
+        public static MessageAttachment ToMessageAttachment(this MessageAttachmentDataModel value)
         {
             return new MessageAttachment()
             {
-                AttachmentKind = value.AttachmentInfo.AttachmentKind.Name,
-                ContentUrl = value.AttachmentInfo.ContentUrl,
-                AttachmentName = value.AttachmentInfo.AttachmentName,
-                ImageHeight = value.AttachmentInfo.ImageHeight,
-                ImageWidth = value.AttachmentInfo.ImageWidth
+                AttachmentKind = value.AttachmentKind.Name,
+                ContentUrl = value.ContentUrl,
+                AttachmentName = value.AttachmentName,
+                ImageHeight = value.ImageHeight,
+                ImageWidth = value.ImageWidth
             };
         }
 
@@ -70,8 +70,9 @@ namespace Vibechat.Web.Extensions
                 MessageContent = value.MessageContent,
                 TimeReceived = value.TimeReceived.ToUTCString(),
                 User = value.User?.ToUserInfo(),
-                AttachmentInfo = value?.ToMessageAttachment(),
-                IsAttachment = value.IsAttachment
+                AttachmentInfo = value.AttachmentInfo?.ToMessageAttachment(),
+                IsAttachment = value.IsAttachment,
+                ForwardedMessage = value.ForwardedMessage?.ToMessage()
             };
         }
     }

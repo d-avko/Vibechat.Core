@@ -79,6 +79,7 @@
           <messages-view class="messages_wrapper_messages"
                          (OnUpdateMessages)="OnUpdateMessages()"
                          (OnDeleteMessages)="OnDeleteMessages($event)"
+                         (OnForwardMessages)="OnForwardMessages($event)"
                          (OnViewUserInfo)="OnViewUserInfo($event)"
                          [Conversation]="CurrentConversation"
                          [MessagesLoading]="IsMessagesLoading"></messages-view>
