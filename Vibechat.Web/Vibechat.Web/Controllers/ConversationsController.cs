@@ -209,13 +209,13 @@ namespace VibeChat.Web.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/GetParticipants")]
-        public async Task<ResponseApiModel<GetParticipantsResultApiModel>> GetParticipants([FromBody] GetParticipantsApiModel convInfo)
+        public async Task<ResponseApiModel<List<UserInfo>>> GetParticipants([FromBody] GetParticipantsApiModel convInfo)
         {
             try
             {
-                var result = await mConversationService.GetParticipants(convInfo);
+                List<UserInfo> result = await mConversationService.GetParticipants(convInfo);
 
-                return new ResponseApiModel<GetParticipantsResultApiModel>()
+                return new ResponseApiModel<List<UserInfo>>()
                 {
                     IsSuccessfull = true,
                     ErrorMessage = null,
@@ -224,7 +224,7 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<GetParticipantsResultApiModel>()
+                return new ResponseApiModel<List<UserInfo>>()
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
@@ -236,15 +236,15 @@ namespace VibeChat.Web.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/GetMessages")]
-        public async Task<ResponseApiModel<GetMessagesResultApiModel>> GetMessages([FromBody] GetMessagesApiModel convInfo)
+        public async Task<ResponseApiModel<List<Message>>> GetMessages([FromBody] GetMessagesApiModel convInfo)
         {
             try
             {
-                var result = await mConversationService.GetMessages(
+                List<Message> result = await mConversationService.GetMessages(
                     convInfo,
                      JwtHelper.GetNamedClaimValue(User.Claims));
 
-                return new ResponseApiModel<GetMessagesResultApiModel>()
+                return new ResponseApiModel<List<Message>>()
                 {
                     IsSuccessfull = true,
                     ErrorMessage = null,
@@ -253,7 +253,7 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<GetMessagesResultApiModel>()
+                return new ResponseApiModel<List<Message>>()
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,

@@ -22,7 +22,7 @@
           <p class="subHeader cadetBlue username">{{data.user.userName}}</p>
         </div>
 
-        <p class="subHeader last-seen">{{formatter.GetLastSeenFormatted(data.currentUser.lastSeen)}}</p>
+        <p class="subHeader last-seen">{{formatter.GetLastSeenFormatted(data.currentUser.lastSeen, data.currentUser.isOnline)}}</p>
       </div>
 
     </div>
@@ -74,7 +74,7 @@
           <p class="subHeader cadetBlue username">{{data.user.userName}}</p>
         </div>
 
-        <p class="subHeader last-seen">{{formatter.GetLastSeenFormatted(data.user.lastSeen)}}</p>
+        <p class="subHeader last-seen">{{formatter.GetLastSeenFormatted(data.user.lastSeen, data.user.isOnline)}}</p>
       </div>
 
     </div>
@@ -86,6 +86,13 @@
         <mat-icon class="cadetBlue">person_add</mat-icon>
 
         <h3 matLine>Start chatting</h3>
+      </mat-list-item>
+
+      <mat-list-item *ngIf="HasConversationWith()" (click)="ViewAttachments()">
+
+        <mat-icon class="cadetBlue">attach_file</mat-icon>
+
+        <h3 matLine>Attachments</h3>
       </mat-list-item>
 
       <mat-list-item *ngIf="HasConversationWith()" (click)="DeleteConversation()">

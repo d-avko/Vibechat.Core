@@ -9,6 +9,7 @@ import { ConversationsFormatter } from "../Formatters/ConversationsFormatter";
 import { retry } from "rxjs/operators";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { CdkVirtualScrollViewport } from "@angular/cdk/scrolling";
+import { MessagesDateParserService } from "../Services/MessagesDateParserService";
 
 export interface AttachmentsData {
   conversation: ConversationTemplate;
@@ -38,7 +39,8 @@ export class ViewAttachmentsDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: AttachmentsData,
     public photoDialog: MatDialog,
     public formatter: ConversationsFormatter,
-    public requestsBuilder: ApiRequestsBuilder)
+    public requestsBuilder: ApiRequestsBuilder,
+    public dateParser: MessagesDateParserService)
   {
     this.PhotosWeeks = new Array<Array<ChatMessage>>();
     this.Init();
@@ -136,7 +138,7 @@ export class ViewAttachmentsDialogComponent {
           }
 
           this.PhotosLoading = false;
-          result.response.forEach(x => x.timeReceived = new Date(x.timeReceived));
+          this.dateParser.ParseStringDatesInMessages(result.response);
           this.AddPhotos(result.response);
         });
   }

@@ -21,7 +21,7 @@ namespace Vibechat.Web.Services.Repositories
             this.mContext = dbContext;
         }
 
-        public async Task<MessageDataModel> Add(UserInApplication whoSent, Message message, int groupId)
+        public async Task<MessageDataModel> Add(UserInApplication whoSent, Message message, int groupId, MessageDataModel forwardedMessage)
         {
             var addedMessage = mContext.Messages.Add(new MessageDataModel()
             {
@@ -30,7 +30,8 @@ namespace Vibechat.Web.Services.Repositories
                 TimeReceived = DateTime.UtcNow,
                 User = whoSent,
                 AttachmentInfo = null,
-                IsAttachment = false
+                IsAttachment = false,
+                ForwardedMessage = forwardedMessage
             });
 
             await mContext.SaveChangesAsync();

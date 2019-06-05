@@ -24,6 +24,8 @@ namespace VibeChat.Web
 
         public bool IsAttachment { get; set; }
 
+        public MessageDataModel ForwardedMessage { get; set; }
+
         //Id of a conversation where this message was sent 
 
         public int ConversationID { get; set; }

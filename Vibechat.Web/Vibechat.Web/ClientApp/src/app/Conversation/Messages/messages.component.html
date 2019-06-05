@@ -27,11 +27,11 @@
         <div class="messages_message_content" [ngClass]="{'selected-message': IsMessageSelected(message)}">
 
           <div style="width: 35px; height: 35px; margin-right: 15px; cursor:pointer" (click)="ViewUserInfo($event, message.user)">
-            <img *ngIf="IsFirstMessageInSequence(message)" class="rounded-chat-image" src="{{message.user.imageUrl}}" />
+            <img *ngIf="IsFirstMessageInSequence(message) || (message.forwardedMessage)" class="rounded-chat-image" src="{{message.user.imageUrl}}" />
           </div>
 
           <div class="content_messageAndName">
-            <span *ngIf="IsFirstMessageInSequence(message)" class="message_header">{{message.user.userName}}</span>
+            <span *ngIf="IsFirstMessageInSequence(message) || (message.forwardedMessage)" class="message_header">{{message.user.userName}}</span>
 
             <p *ngIf="! message.isAttachment" class="message_text">{{message.messageContent}}</p>
 
@@ -42,6 +42,41 @@
             </div>
 
             <!--Audio / archive / etc-->
+            <!--Forwarded message-->
+            <div *ngIf="message.forwardedMessage" class="forwarded_message">
+
+              <div>
+
+                <div class="messages_message_content" [ngClass]="{'selected-message': IsMessageSelected(message)}">
+
+                  <div style="width: 35px; height: 35px; margin-right: 15px; cursor:pointer" (click)="ViewUserInfo($event, message.forwardedMessage.user)">
+                    <img class="rounded-chat-image" src="{{message.forwardedMessage.user.imageUrl}}" />
+                  </div>
+
+                  <div class="content_messageAndName">
+                    <span class="message_header">{{message.forwardedMessage.user.userName}}</span>
+
+                    <p *ngIf="! message.forwardedMessage.isAttachment" class="message_text">{{message.forwardedMessage.messageContent}}</p>
+
+                    <!--Attachments-->
+
+                    <div *ngIf="IsImage(message.forwardedMessage)" class="image_attachment">
+                      <img class="message_attachment--image"
+                           [style.width.px]="message.forwardedMessage.attachmentInfo.imageWidth"
+                           [style.height.px]="message.forwardedMessage.attachmentInfo.imageHeight"
+                           src="{{message.forwardedMessage.attachmentInfo.contentUrl}}" />
+                    </div>
+
+                    <!--Audio / archive / etc-->
+
+                  </div>
+
+                  <span class="message_timereceived">{{formatter.GetMessageTimeFormatted(message.forwardedMessage)}}</span>
+                </div>
+              </div>
+
+            </div>
+            <!--Forwarded message end-->
           </div>
 
           <span class="message_timereceived">{{formatter.GetMessageTimeFormatted(message)}}</span>
@@ -68,6 +103,14 @@
             [@slideIn]>
       Delete messages
     </button>
+
+    <button mat-button
+            color="primary"
+            *ngIf="SelectedMessages.length !== 0"
+            (click)="ForwardMessages()"
+            [@slideIn]>
+      Forward messages
+    </button>
   </div>
 
 </div>
@@ -91,5 +134,9 @@
   .chat_misc_backtonow:hover{
     transition: all 0.3s ease 0s;
     background-color: #f0f6f6;
+  }
+
+  .forwarded_message{
+    border-left: 2px solid cadetblue;
   }
 </style>

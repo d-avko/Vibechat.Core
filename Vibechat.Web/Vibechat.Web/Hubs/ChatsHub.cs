@@ -126,8 +126,8 @@ namespace VibeChat.Web
                 }
                 else
                 {
-                    List<UserInfo> participants = (await conversationsService
-                        .GetParticipants(new GetParticipantsApiModel() { ConvId = conversation.ConversationID })).Participants;
+                    List<UserInfo> participants = await conversationsService
+                        .GetParticipants(new GetParticipantsApiModel() { ConvId = conversation.ConversationID });
 
                     foreach(UserInfo user in participants)
                     {

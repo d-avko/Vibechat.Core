@@ -138,7 +138,7 @@ namespace Vibechat.Web.Services
             //after saving changes we have Id of our 
             //created conversation in ConversationToAdd variable
             return ConversationToAdd.ToConversationTemplate(
-                (await GetParticipants(new GetParticipantsApiModel() { ConvId = ConversationToAdd.ConvID })).Participants,
+                await GetParticipants(new GetParticipantsApiModel() { ConvId = ConversationToAdd.ConvID }),
                 null,
                 SecondDialogueUser
                 );
@@ -199,42 +199,24 @@ namespace Vibechat.Web.Services
                 throw new UnauthorizedAccessException("You are unauthorized to do such an action.");
             }
 
-            IIncludableQueryable<MessageDataModel, MessageAttachmentDataModel> messages = messagesRepository.GetAttachments(
+            var messages = messagesRepository.GetAttachments(
                 whoAccessedId,
                 conversationId,
                 kind,
                 offset,
-                count);
+                count)
+                .Include(x => x.AttachmentInfo)
+                .ThenInclude(x => x.AttachmentKind)
+                .Include(x => x.User)
+                .Include(x => x.ForwardedMessage)
+                .ThenInclude(x => x.AttachmentInfo)
+                .ThenInclude(x => x.AttachmentKind)
+                .Include(x => x.ForwardedMessage)
+                .ThenInclude(x => x.User);
 
             return (from msg in messages
-                    select new Message()
-                    {
-                        Id = msg.MessageID,
-                        ConversationID = msg.ConversationID,
-                        MessageContent = msg.MessageContent,
-                        TimeReceived = msg.TimeReceived.ToUTCString(),
-                        User = msg.User == null ? null : new UserInfo()
-                        {
-                            Id = msg.User.Id,
-                            LastName = msg.User.LastName,
-                            LastSeen = msg.User.LastSeen.ToUTCString(),
-                            Name = msg.User.FirstName,
-                            UserName = msg.User.UserName,
-                            ImageUrl = msg.User.ProfilePicImageURL,
-                            IsOnline = msg.User.IsOnline,
-                            ConnectionId = msg.User.ConnectionId
-                        },
-                        AttachmentInfo = new MessageAttachment()
-                        {
-                            AttachmentKind = msg.AttachmentInfo.AttachmentKind.Name,
-                            ContentUrl = msg.AttachmentInfo.ContentUrl,
-                            AttachmentName = msg.AttachmentInfo.AttachmentName,
-                            ImageHeight = msg.AttachmentInfo.ImageHeight,
-                            ImageWidth = msg.AttachmentInfo.ImageWidth
-                        },
-                        IsAttachment = msg.IsAttachment
-                    }).ToList();
-            
+                    select msg.ToMessage()).ToList();
+
         }
 
         public async Task ChangeName (int conversationId, string name)
@@ -276,8 +258,8 @@ namespace Vibechat.Web.Services
             {
                 result.Add(
                     conversation.ToConversationTemplate(
-                        (await GetParticipants(new GetParticipantsApiModel() { ConvId = conversation.ConvID })).Participants,
-                        (await GetMessages(new GetMessagesApiModel() { ConversationID = conversation.ConvID, Count = 1, MesssagesOffset = 0 }, whoAccessedId)).Messages,
+                        await GetParticipants(new GetParticipantsApiModel() { ConvId = conversation.ConvID }),
+                        await GetMessages(new GetMessagesApiModel() { ConversationID = conversation.ConvID, Count = 1, MesssagesOffset = 0 }, whoAccessedId),
                         null
                     ));
             }
@@ -422,9 +404,9 @@ namespace Vibechat.Web.Services
                 returnData.Add
                     (
                     conversation.ToConversationTemplate(
-                         (await GetParticipants(new GetParticipantsApiModel() { ConvId = conversation.ConvID })).Participants,
+                         await GetParticipants(new GetParticipantsApiModel() { ConvId = conversation.ConvID }),
                          //only get last message here, client should fetch messages after he opened the conversation.
-                         (await GetMessages(new GetMessagesApiModel() { ConversationID = conversation.ConvID, Count = 1, MesssagesOffset = 0 }, whoAccessedId)).Messages,
+                         await GetMessages(new GetMessagesApiModel() { ConversationID = conversation.ConvID, Count = 1, MesssagesOffset = 0 }, whoAccessedId),
                          DialogUser)
                     );
             }
@@ -434,7 +416,7 @@ namespace Vibechat.Web.Services
         }
 
 
-        public async Task<GetParticipantsResultApiModel> GetParticipants(GetParticipantsApiModel convInfo)
+        public async Task<List<UserInfo>> GetParticipants(GetParticipantsApiModel convInfo)
         {
             var defaultErrorMessage = new FormatException("Wrong conversation was provided.");
 
@@ -447,18 +429,15 @@ namespace Vibechat.Web.Services
                 throw defaultErrorMessage;
 
             var participants = usersConversationsRepository.GetConversationParticipants(convInfo.ConvId);
-            
-            return new GetParticipantsResultApiModel()
-            {
-                Participants = (from participant in participants
-                               select participant.ToUserInfo()
-                               ).ToList()
-             };
+
+            return (from participant in participants
+                    select participant.ToUserInfo()
+                               ).ToList();
 
         }
 
 
-        public async Task<GetMessagesResultApiModel> GetMessages(GetMessagesApiModel convInfo, string whoAccessedId)
+        public async Task<List<Message>> GetMessages(GetMessagesApiModel convInfo, string whoAccessedId)
         {
             var defaultErrorMessage = new FormatException("Wrong conversation was provided.");
 
@@ -466,10 +445,7 @@ namespace Vibechat.Web.Services
 
             if (messagesRepository.Empty())
             {
-                return new GetMessagesResultApiModel()
-                {
-                    Messages = null
-                };
+                return null;
             }
 
             if (convInfo == null)
@@ -492,39 +468,18 @@ namespace Vibechat.Web.Services
                 convInfo.ConversationID,
                 false,
                 convInfo.MesssagesOffset,
-                convInfo.Count);
+                convInfo.Count)
+                .Include(x => x.AttachmentInfo)
+                .ThenInclude(x => x.AttachmentKind)
+                .Include(x => x.User)
+                .Include(x => x.ForwardedMessage)
+                .ThenInclude(x => x.AttachmentInfo)
+                .ThenInclude(x => x.AttachmentKind)
+                .Include(x => x.ForwardedMessage)
+                .ThenInclude(x => x.User);
 
-            return new GetMessagesResultApiModel()
-            {
-                Messages = (from msg in messages
-                            select new Message()
-                            {
-                                Id = msg.MessageID,
-                                ConversationID = msg.ConversationID,
-                                MessageContent = msg.MessageContent,
-                                TimeReceived = msg.TimeReceived.ToUTCString(),
-                                User = msg.User == null ? null : new UserInfo()
-                                {
-                                    Id = msg.User.Id,
-                                    LastName = msg.User.LastName,
-                                    LastSeen = msg.User.LastSeen.ToUTCString(),
-                                    Name = msg.User.FirstName,
-                                    UserName = msg.User.UserName,
-                                    ImageUrl = msg.User.ProfilePicImageURL,
-                                    IsOnline = msg.User.IsOnline,
-                                    ConnectionId = msg.User.ConnectionId
-                                },
-                                AttachmentInfo = msg.AttachmentInfo == null ? null : new MessageAttachment()
-                                {
-                                    AttachmentKind = msg.AttachmentInfo.AttachmentKind.Name,
-                                    ContentUrl = msg.AttachmentInfo.ContentUrl,
-                                    AttachmentName = msg.AttachmentInfo.AttachmentName,
-                                    ImageHeight = msg.AttachmentInfo.ImageHeight,
-                                    ImageWidth = msg.AttachmentInfo.ImageWidth
-                                },
-                                IsAttachment = msg.IsAttachment
-                            }).ToList()
-            };
+            return (from msg in messages
+                    select msg.ToMessage()).ToList();
 
         }
 
@@ -576,7 +531,21 @@ namespace Vibechat.Web.Services
                 throw new FormatException($"Failed to retrieve user with id {SenderId} from database: no such user exists");
             }
 
-            return await messagesRepository.Add(whoSent, message, groupId);
+            MessageDataModel forwardedMessage = null;
+
+            if(message.ForwardedMessage != null)
+            {
+                var foundMessage = messagesRepository.GetByIds(new List<int>() { message.ForwardedMessage.Id }).ToList();
+
+                if (!foundMessage.Count().Equals(1))
+                {
+                    throw new FormatException($"Forwarded message was not found.");
+                }
+
+                forwardedMessage = foundMessage[0];
+            }
+
+            return await messagesRepository.Add(whoSent, message, groupId, forwardedMessage);
         }
 
         public async Task<MessageDataModel> AddAttachmentMessage(Message message, int groupId, string SenderId)

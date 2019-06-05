@@ -15,6 +15,7 @@ import { UploaderService } from "../uploads/upload.service";
 import {
 } from "@angular/material";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
+import { Message } from "@angular/compiler/src/i18n/i18n_ast";
 
 @Injectable({
   providedIn: 'root'
@@ -60,9 +61,9 @@ export class ApiRequestsBuilder {
     );
   }
 
-  public GetConversationMessages(offset: number, count: number, conversationId: number): Observable<ServerResponse<ConversationMessagesResponse>> {
+  public GetConversationMessages(offset: number, count: number, conversationId: number): Observable<ServerResponse<Array<ChatMessage>>> {
 
-    return this.MakeCall<ConversationMessagesResponse>(
+    return this.MakeCall<Array<ChatMessage>>(
         {
           Count: count,
           ConversationID: conversationId,

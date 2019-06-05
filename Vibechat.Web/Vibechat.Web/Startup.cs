@@ -137,8 +137,6 @@ namespace Vibechat.Web
                 app.UseHsts();
             }
 
-            DI.serviceProvider = serviceProvider;
-
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();

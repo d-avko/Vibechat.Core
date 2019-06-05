@@ -7,7 +7,13 @@ import { ConversationsFormatter } from '../../Formatters/ConversationsFormatter'
 import { AttachmentKinds } from '../../Data/AttachmentKinds';
 import { UserInfo } from '../../Data/UserInfo';
 import { retry } from 'rxjs/operators';
+import { MatDialog } from '@angular/material';
+import { ForwardMessagesDialogComponent } from '../../Dialogs/ForwardMessagesDialog';
 
+export class ForwardMessagesModel {
+  public forwardTo: Array<number>;
+  public Messages: Array<ChatMessage>;
+}
 
 @Component({
   selector: 'messages-view',
@@ -30,16 +36,15 @@ import { retry } from 'rxjs/operators';
 })
 export class MessagesComponent implements AfterViewInit {
 
-  public formatter: ConversationsFormatter
-
-  constructor(formatter: ConversationsFormatter) {
-    this.formatter = formatter;
+  constructor(public formatter: ConversationsFormatter, public dialog: MatDialog) {
     this.SelectedMessages = new Array<ChatMessage>();
   }
 
   @Output() public OnUpdateMessages = new EventEmitter<void>();
 
   @Output() public OnDeleteMessages = new EventEmitter<Array<ChatMessage>>();
+
+  @Output() public OnForwardMessages = new EventEmitter<Array<ChatMessage>>();
 
   @Output() public OnViewUserInfo = new EventEmitter<UserInfo>();
 
@@ -134,6 +139,10 @@ export class MessagesComponent implements AfterViewInit {
 
   public DeleteMessages() {
     this.OnDeleteMessages.emit(this.SelectedMessages);
+  }
+
+  public ForwardMessages() {
+    this.OnForwardMessages.emit(this.SelectedMessages);
   }
 
   public SelectMessage(message: ChatMessage): void {

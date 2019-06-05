@@ -26,6 +26,8 @@ import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { HttpResponseInterceptor } from "../Interceptors/HttpResponseInterceptor";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
 import { TokensService } from "../tokens/TokensService";
+import { ForwardMessagesDialogComponent } from "../Dialogs/ForwardMessagesDialog";
+import { MessagesDateParserService } from "../Services/MessagesDateParserService";
 
 @NgModule({
   declarations: [
@@ -40,7 +42,8 @@ import { TokensService } from "../tokens/TokensService";
     ChangeNameDialogComponent,
     UserInfoDialogComponent,
     SearchListComponent,
-    ViewAttachmentsDialogComponent
+    ViewAttachmentsDialogComponent,
+    ForwardMessagesDialogComponent
   ],
   imports: [
     ScrollDispatchModule,
@@ -60,10 +63,12 @@ import { TokensService } from "../tokens/TokensService";
     GroupInfoDialogComponent,
     ChangeNameDialogComponent,
     UserInfoDialogComponent,
-    ViewAttachmentsDialogComponent],
+    ViewAttachmentsDialogComponent,
+    ForwardMessagesDialogComponent],
 
   providers: [
     ConversationsFormatter,
+    MessagesDateParserService,
     UploaderService,
     SnackBarHelper,
     TokensService,

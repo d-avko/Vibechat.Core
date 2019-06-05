@@ -14,7 +14,7 @@ import { MessageReceivedModel } from "../Shared/MessageReceivedModel";
 import { AddedToGroupModel } from "../Shared/AddedToGroupModel";
 import { RemovedFromGroupModel } from "../Shared/RemovedFromGroupModel";
 import { EmptyModel } from "../Shared/EmptyModel";
-import { MessagesComponent } from "../Conversation/Messages/messages.component";
+import { MessagesComponent, ForwardMessagesModel } from "../Conversation/Messages/messages.component";
 import { UserInfo } from "../Data/UserInfo";
 import { FindUsersDialogComponent } from "../Dialogs/FindUsersDialog";
 import { AddGroupDialogComponent } from "../Dialogs/AddGroupDialog";
@@ -30,6 +30,8 @@ import { AnimationGroupPlayer } from "@angular/animations/src/players/animation_
 import { ViewAttachmentsDialogComponent } from "../Dialogs/ViewAttachmentsDialog";
 import { TokensService } from "../tokens/TokensService";
 import { HttpResponseInterceptor } from "../Interceptors/HttpResponseInterceptor";
+import { ForwardMessagesDialogComponent } from "../Dialogs/ForwardMessagesDialog";
+import { MessagesDateParserService } from "../Services/MessagesDateParserService";
 
 @Component({
   selector: 'chat-root',
@@ -84,7 +86,8 @@ export class ChatComponent implements OnInit {
     protected snackbar: SnackBarHelper,
     protected router: Router,
     public formatter: ConversationsFormatter,
-    public tokensService: TokensService) {
+    public tokensService: TokensService,
+    public dateParser: MessagesDateParserService) {
 
     this.Conversations = new Array<ConversationTemplate>();
 
@@ -582,7 +585,7 @@ export class ChatComponent implements OnInit {
   }
 
   public OnMessageReceived(data: MessageReceivedModel): void {
-    data.message.timeReceived = new Date(data.message.timeReceived);
+    this.dateParser.ParseStringDateInMessage(data.message);
 
     let conversation = this.Conversations
       .find(x => x.conversationID == data.conversationId);
@@ -595,13 +598,15 @@ export class ChatComponent implements OnInit {
       return;
     }
 
-    this.messages.ScrollToMessage(newLength);
+    if (data.conversationId == this.CurrentConversation.conversationID) {
+      this.messages.ScrollToMessage(newLength);
+    }
   }
 
   public OnAddedToGroup(data: AddedToGroupModel): void {
-    //c# date -> ts date
+
     if (data.conversation.messages != null) {
-      data.conversation.messages.forEach((x) => x.timeReceived = new Date(x.timeReceived));
+      this.dateParser.ParseStringDatesInMessages(data.conversation.messages);
     }
 
     if (data.conversation.isGroup) {
@@ -702,22 +707,22 @@ export class ChatComponent implements OnInit {
 
           //server sent zero messages, we reached end of our history.
 
-          if (result.response.messages == null || result.response.messages.length == 0) {
+          if (result.response == null || result.response.length == 0) {
             this.IsMessagesLoading = false;
             this.IsConversationHistoryEnd = true;
 
             return;
           }
 
-          result.response.messages = result.response.messages.sort(this.MessagesSortFunc);
+          result.response = result.response.sort(this.MessagesSortFunc);
 
-          result.response.messages.forEach((x) => x.timeReceived = new Date(x.timeReceived));
+          this.dateParser.ParseStringDatesInMessages(result.response);
 
           //append old messages to new ones.
-          this.CurrentConversation.messages = [...result.response.messages.concat(this.CurrentConversation.messages)];
+          this.CurrentConversation.messages = [...result.response.concat(this.CurrentConversation.messages)];
           this.IsMessagesLoading = false;
 
-          this.messages.ScrollToMessage(result.response.messages.length);
+          this.messages.ScrollToMessage(result.response.length);
         }
       )
     }
@@ -733,6 +738,46 @@ export class ChatComponent implements OnInit {
         (result) => this.OnMessagesDeleted(result, SelectedMessages, currentConversationId)
        
       )
+  }
+
+  public OnForwardMessages(values: Array<ChatMessage>) {
+    let forwardMessagesDialog = this.dialog.open(
+      ForwardMessagesDialogComponent,
+      {
+        data: {
+          conversations: this.Conversations
+        }
+      }
+    );
+
+    forwardMessagesDialog
+      .afterClosed()
+      .subscribe((result : Array<ConversationTemplate>) => {
+
+        if (result == null || result.length == 0) {
+          return;
+        }
+
+        result.forEach(
+          (conversation) => {
+
+            values.forEach(msg => {
+
+              this.connectionManager.SendMessage(
+                new ChatMessage({
+                  user: this.CurrentUser,
+                  conversationID: conversation.conversationID,
+                  isAttachment: false,
+                  forwardedMessage: msg.forwardedMessage ? msg.forwardedMessage : msg
+                }), conversation
+              )
+
+            })
+          }
+        )
+
+        values.splice(0, values.length);
+      })
   }
 
   public OnMessagesDeleted(response: ServerResponse<string>, SelectedMessages: Array<ChatMessage>, conversationId: number) {
@@ -770,7 +815,7 @@ export class ChatComponent implements OnInit {
               .forEach((conversation) => {
 
                 if (conversation.messages != null) {
-                  conversation.messages.forEach(msg => msg.timeReceived = new Date(msg.timeReceived))
+                  this.dateParser.ParseStringDatesInMessages(conversation.messages);
                 } else {
                   conversation.messages = new Array<ChatMessage>();
                 }
@@ -855,11 +900,10 @@ export class ChatComponent implements OnInit {
           (file) => this.connectionManager.SendMessage(
             new ChatMessage(
               {
-                messageContent: null,
                 isAttachment: true,
                 user: this.CurrentUser,
                 conversationID: conversationToSend,
-                attachmentInfo: file
+                attachmentInfo: file,
               }), this.CurrentConversation)
         )
       })

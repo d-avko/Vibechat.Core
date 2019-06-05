@@ -21,6 +21,10 @@ export class ConversationsFormatter{
 
     let user = message.user.id == Cache.UserCache.id ? 'You' : message.user.userName;
 
+    if (message.forwardedMessage) {
+      return "Forwarded message";
+    }
+
     if (message.isAttachment) {
       return user + ": " + this.GetFormattedAttachmentName(message.attachmentInfo.attachmentKind);
     }
@@ -109,7 +113,7 @@ export class ConversationsFormatter{
             let minutesSinceOnline = (new Date().getTime() - date) / (1000 * 60);
 
             if (minutesSinceOnline <= 10) {
-              return "less than 10 minutes ago.";
+              return result + "less than 10 minutes ago.";
             }
 
             return result + Math.floor(minutesSinceOnline).toString() + " minutes ago";
