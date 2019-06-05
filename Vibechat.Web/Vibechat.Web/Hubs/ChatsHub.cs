@@ -58,6 +58,7 @@ namespace VibeChat.Web
         public async Task RemoveFromGroup(string userToRemoveId, int conversationId, bool IsSelf)
         {
             var whoSentId = userProvider.GetUserId(Context);
+            await userService.MakeUserOnline(whoSentId, Context.ConnectionId);
 
             try
             {
@@ -76,6 +77,7 @@ namespace VibeChat.Web
         public async Task AddToGroup(string userId, ConversationTemplate conversation)
         {
             UserInApplication whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
+            await userService.MakeUserOnline(whoSent.Id, Context.ConnectionId);
 
             try
             {
@@ -113,6 +115,7 @@ namespace VibeChat.Web
         public async Task RemoveConversation(ConversationTemplate conversation)
         {
             UserInApplication whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
+            await userService.MakeUserOnline(whoSent.Id, Context.ConnectionId);
 
             try
             {
@@ -150,6 +153,7 @@ namespace VibeChat.Web
         public async Task CreateDialog(UserInfo user)
         {
             UserInApplication whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
+            await userService.MakeUserOnline(whoSent.Id, Context.ConnectionId);
 
             try
             {
@@ -208,6 +212,7 @@ namespace VibeChat.Web
         public async Task SendMessageToGroup(Message message, int groupId)
         {
             UserInApplication whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
+            await userService.MakeUserOnline(whoSent.Id, Context.ConnectionId);
 
             try
             {
@@ -255,6 +260,7 @@ namespace VibeChat.Web
         public async Task SendMessageToUser(Message message, string UserToSendId, int conversationId)
         {
             UserInApplication whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
+            await userService.MakeUserOnline(whoSent.Id, Context.ConnectionId);
 
             try
             {

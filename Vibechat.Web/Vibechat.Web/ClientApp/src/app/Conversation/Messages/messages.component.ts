@@ -58,6 +58,7 @@ export class MessagesComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     this.UpdateMessagesIfNotUpdated();
+    this.ScrollToMessage(this.Conversation.messages.length - 1);
   }
 
   public UpdateMessagesIfNotUpdated() {
@@ -95,7 +96,7 @@ export class MessagesComponent implements AfterViewInit {
   public ScrollToMessage(scrollToMessageIndex: number) {
       requestAnimationFrame(() => {
       
-        this.viewport.scrollToOffset(this.CalculateOffsetToMessage(scrollToMessageIndex), 'smooth');
+        this.viewport.scrollToOffset(this.CalculateOffsetToMessage(scrollToMessageIndex));
     });
   }
 

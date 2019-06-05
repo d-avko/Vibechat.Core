@@ -11,7 +11,9 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Text;
 using System.Threading.Tasks;
+using Vibechat.Web.Middleware;
 using Vibechat.Web.Services.Extension_methods;
+using Vibechat.Web.Services.Repositories;
 using VibeChat.Web;
 
 namespace Vibechat.Web
@@ -135,11 +137,15 @@ namespace Vibechat.Web
                 app.UseHsts();
             }
 
+            DI.serviceProvider = serviceProvider;
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
             app.UseAuthentication();
+
+            app.UseMiddleware<UserStatusMiddleware>();
 
             app.UseSignalR(routes =>
             {

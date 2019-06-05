@@ -62,7 +62,7 @@ namespace Vibechat.Web.Services.Bans
             }
         }
 
-        public async Task BanUser(string UserToBanId, int? conversationId, string whoAccessedId)
+        public async Task BanUser(string UserToBanId, string whoAccessedId)
         {
             if (UserToBanId == whoAccessedId)
             {
@@ -84,18 +84,6 @@ namespace Vibechat.Web.Services.Bans
             catch
             {
                 throw new FormatException("User is already banned.");
-            }
-
-            if(conversationId != null)
-            {
-                ConversationDataModel conversation = ConversationRepository.GetById(conversationId.Value);
-
-                if (conversation == null)
-                {
-                    throw new FormatException("Something really bad happened: conversation to ban was provided, but it was incorrect.");
-                }
-
-                ConversationsBansRepository.BanUserInGroup(banned, conversation);
             }
         }
 
