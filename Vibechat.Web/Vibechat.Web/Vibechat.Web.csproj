@@ -124,6 +124,7 @@
     <None Remove="ClientApp\src\app\Shared\AddedToGroupModel.ts" />
     <None Remove="ClientApp\src\app\Shared\EmptyModel.ts" />
     <None Remove="ClientApp\src\app\Shared\MessageReceivedModel.ts" />
+    <None Remove="ClientApp\src\app\Shared\MessageState.ts" />
     <None Remove="ClientApp\src\app\Shared\RemovedFromGroupModel.ts" />
     <None Remove="ClientApp\src\app\tokens\TokensService.ts" />
     <None Remove="ClientApp\src\app\uploads\upload.service.ts" />
@@ -164,6 +165,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\Shared\AddedToGroupModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\EmptyModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\MessageReceivedModel.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Shared\MessageState.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\RemovedFromGroupModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\tokens\TokensService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\uploads\upload.service.ts" />

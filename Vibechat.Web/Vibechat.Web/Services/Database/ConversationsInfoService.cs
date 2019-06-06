@@ -522,6 +522,51 @@ namespace Vibechat.Web.Services
 
         }
 
+        public async Task<ConversationTemplate> GetByIdSimplified(int conversationId, string whoAccessedId)
+        {
+            ConversationDataModel conversation = conversationRepository.GetById(conversationId);
+
+            if (conversation == null)
+            {
+                throw new FormatException("No such conversation was found.");
+            }
+
+            var dialogUser = new UserInApplication();
+
+            if (!conversation.IsGroup)
+            {
+                dialogUser = usersConversationsRepository.GetUserInDialog(conversationId, whoAccessedId);
+
+                if (dialogUser == null)
+                {
+                    throw new FormatException("Unexpected error: no corresponding user in dialogue.");
+                }
+            }
+
+            return new ConversationTemplate()
+            {
+                DialogueUser = dialogUser?.ToUserInfo(),
+                IsGroup = conversation.IsGroup
+            }; 
+        }
+
+        public async Task MarkMessageAsRead(int msgId, int conversationId, string whoAccessedId)
+        {
+            MessageDataModel message = messagesRepository.GetById(msgId);
+
+            if (message.User.Id == whoAccessedId)
+            {
+                throw new UnauthorizedAccessException("Couldn't mark this message as read because it was sent by you.");
+            }
+
+            if(!await ExistsInConversation(conversationId, whoAccessedId))
+            {
+                throw new UnauthorizedAccessException("User was not present in conversation. Couldn't mark the message as read.");
+            }
+
+            messagesRepository.MarkAsRead(message);
+        }
+
         public async Task<MessageDataModel> AddMessage(Message message, int groupId, string SenderId)
         {
             UserInApplication whoSent = await usersRepository.GetById(SenderId);

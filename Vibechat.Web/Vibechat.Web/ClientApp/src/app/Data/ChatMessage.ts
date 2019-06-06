@@ -13,6 +13,8 @@ export class ChatMessage {
   public messageContent: string;
     
   public conversationID: number;
+
+  public state: number;
     
   public timeReceived: Date | string;
 

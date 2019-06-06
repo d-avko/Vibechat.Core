@@ -17,5 +17,7 @@ namespace VibeChat.Web.ChatData
         public bool IsAttachment { get; set; }
 
         public MessageAttachment AttachmentInfo { get; set; }
+
+        public MessageState State { get; set; }
     }
 }

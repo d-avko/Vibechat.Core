@@ -72,7 +72,8 @@ namespace Vibechat.Web.Extensions
                 User = value.User?.ToUserInfo(),
                 AttachmentInfo = value.AttachmentInfo?.ToMessageAttachment(),
                 IsAttachment = value.IsAttachment,
-                ForwardedMessage = value.ForwardedMessage?.ToMessage()
+                ForwardedMessage = value.ForwardedMessage?.ToMessage(),
+                State = value.State
             };
         }
     }

@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, Input, ViewChild, OnInit, AfterViewInit } from '@angular/core';
+import { Component, Output, EventEmitter, Input, ViewChild, OnInit, AfterViewInit, OnChanges, AfterContentInit, AfterViewChecked, SimpleChanges } from '@angular/core';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { trigger, state, style, transition, animate } from "@angular/animations";
 import { ConversationTemplate } from '../../Data/ConversationTemplate';
@@ -9,6 +9,11 @@ import { UserInfo } from '../../Data/UserInfo';
 import { retry } from 'rxjs/operators';
 import { MatDialog } from '@angular/material';
 import { ForwardMessagesDialogComponent } from '../../Dialogs/ForwardMessagesDialog';
+import { MessageState } from '../../Shared/MessageState';
+import { ViewportScroller } from '@angular/common';
+import { ApiRequestsBuilder } from '../../Requests/ApiRequestsBuilder';
+import { MessagesDateParserService } from '../../Services/MessagesDateParserService';
+import { ConnectionManager } from '../../Connections/ConnectionManager';
 
 export class ForwardMessagesModel {
   public forwardTo: Array<number>;
@@ -34,37 +39,163 @@ export class ForwardMessagesModel {
     ])
   ]
 })
-export class MessagesComponent implements AfterViewInit {
+export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnChanges {
 
-  constructor(public formatter: ConversationsFormatter, public dialog: MatDialog) {
+  constructor(
+    public formatter: ConversationsFormatter,
+    public dialog: MatDialog,
+    public requestsBuilder: ApiRequestsBuilder,
+    public dateParser: MessagesDateParserService) {
     this.SelectedMessages = new Array<ChatMessage>();
   }
 
-  @Output() public OnUpdateMessages = new EventEmitter<void>();
-
-  @Output() public OnDeleteMessages = new EventEmitter<Array<ChatMessage>>();
-
-  @Output() public OnForwardMessages = new EventEmitter<Array<ChatMessage>>();
+  @Output() public OnMessageRead = new EventEmitter<ChatMessage>();
 
   @Output() public OnViewUserInfo = new EventEmitter<UserInfo>();
 
+  @Output() public OnForwardMessages = new EventEmitter<Array<ChatMessage>>();
+
   @Input() public Conversation: ConversationTemplate;
 
-  @Input() public MessagesLoading: boolean;
+  @Input() public Conversations: Array<ConversationTemplate>;
+
+  @Input() public User: UserInfo;
+
+  public MessagesLoading: boolean;
+
+  public IsConversationHistoryEnd: boolean = false;
 
   public IsScrollingAssistNeeded: boolean = false;
 
   public static MessagesToScrollForGoBackButtonToShowUp: number = 20;
 
+  public static MessageMinSize: number = 50;
+
+  public static MessagesBufferLength: number = 50;
+
   @ViewChild(CdkVirtualScrollViewport) viewport: CdkVirtualScrollViewport;
-
-
+  
   public SelectedMessages: Array<ChatMessage>;
 
   ngAfterViewInit() {
-    this.UpdateMessagesIfNotUpdated();
     this.ScrollToMessage(this.Conversation.messages.length - 1);
   }
+
+  ngOnChanges(changes: SimpleChanges) {
+
+    if (changes.Conversation != undefined) {
+      this.IsScrollingAssistNeeded = false;
+      this.IsConversationHistoryEnd = false;
+      this.SelectedMessages = new Array<ChatMessage>();
+      this.UpdateMessagesIfNotUpdated();
+      this.ScrollToMessage(this.Conversation.messages.length - 1);
+    }
+  }
+
+  ngAfterViewChecked() {
+
+    if (!this.Conversation.messages || this.Conversation.messages.length == 0) {
+      return;
+    }
+
+    this.ReadMessagesInViewport();
+  }
+
+  public UpdateMessages() {
+
+    if (!this.MessagesLoading && !this.IsConversationHistoryEnd) {
+      this.MessagesLoading = true;
+
+      if (this.Conversation.messages == null) {
+        return;
+      }
+
+      this.requestsBuilder.GetConversationMessages(
+        this.Conversation.messages.length,
+        MessagesComponent.MessagesBufferLength,
+        this.Conversation.conversationID)
+
+        .subscribe((result) => {
+
+          if (!result.isSuccessfull) {
+            this.MessagesLoading = false;
+            return;
+          }
+
+          //server sent zero messages, we reached end of our history.
+
+          if (result.response == null || result.response.length == 0) {
+            this.MessagesLoading = false;
+            this.IsConversationHistoryEnd = true;
+
+            return;
+          }
+
+
+          result.response = result.response.sort(this.MessagesSortFunc);
+
+          this.dateParser.ParseStringDatesInMessages(result.response);
+
+          //append old messages to new ones.
+          this.Conversation.messages = [...result.response.concat(this.Conversation.messages)];
+          this.MessagesLoading = false;
+
+          this.ScrollToMessage(result.response.length);
+        }
+        )
+    }
+
+  }
+
+  public DeleteMessages() {
+
+    let currentConversationId = this.Conversation.conversationID;
+
+    let notLocalMessages = this.SelectedMessages.filter(x => x.state != MessageState.Pending)
+
+    //delete local unsent messages
+    this.Conversation.messages = this.Conversation.messages
+      .filter(msg => notLocalMessages.findIndex(selected => selected.id == msg.id) == -1);
+
+    if (notLocalMessages.length == 0) {
+      return;
+    }
+
+    let conversationId = this.Conversation.conversationID;
+
+    this.requestsBuilder.DeleteMessages(notLocalMessages, conversationId)
+      .subscribe(
+        (response) => {
+
+          if (!response.isSuccessfull) {
+            return;
+          }
+
+          //delete messages locally
+
+          let conversation = this.Conversations.find(x => x.conversationID == conversationId);
+
+          conversation.messages = conversation
+            .messages
+            .filter(msg => this.SelectedMessages.findIndex(selected => selected.id == msg.id) == -1);
+
+          this.ScrollToStart();
+
+          this.SelectedMessages.splice(0, this.SelectedMessages.length);
+        }
+      );
+  }
+
+  public ForwardMessages() {
+    this.OnForwardMessages.emit(this.SelectedMessages);
+  }
+
+  private MessagesSortFunc(left: ChatMessage, right: ChatMessage): number {
+    if (left.timeReceived < right.timeReceived) return -1;
+    if (left.timeReceived > right.timeReceived) return 1;
+    return 0;
+  }
+
 
   public UpdateMessagesIfNotUpdated() {
 
@@ -72,9 +203,8 @@ export class MessagesComponent implements AfterViewInit {
       return;
     }
     
-
-    if (this.Conversation.messages.length > 1) {
-      this.OnUpdateMessages.emit();
+    if (this.Conversation.messages.length <= 1) {
+      this.UpdateMessages();
     }
   }
 
@@ -86,6 +216,16 @@ export class MessagesComponent implements AfterViewInit {
   // do not highlight the message, just show user profile.
     event.stopPropagation();
     this.OnViewUserInfo.emit(user);
+  }
+
+  public ReadMessagesInViewport() {
+    let boundaries = this.CalculateMessagesViewportBoundaries();
+
+    for (let i = boundaries[0]; i < boundaries[1] + 1; ++i) {
+      if (this.Conversation.messages[i].state == MessageState.Delivered) {
+        this.OnMessageRead.emit(this.Conversation.messages[i]);
+      }
+    }
   }
 
   public CalculateOffsetToMessage(index: number) {
@@ -108,14 +248,42 @@ export class MessagesComponent implements AfterViewInit {
   public CalculateCurrentMessageIndex() : number {
     let currentOffset = this.viewport.measureScrollOffset();
 
+    if (currentOffset == 0) {
+      return 0;
+    }
+
     let messages = this.viewport.elementRef.nativeElement.children.item(0).children;
     let offset = 0;
     let index = 0;
+
     for (index = 0; offset < currentOffset; ++index) {
       offset += messages.item(index).clientHeight;
     }
-
     return index - 1;
+  }
+
+  public CalculateMessagesViewportBoundaries(): Array<number> {
+
+    let currentOffset = this.viewport.measureScrollOffset();
+    let viewPortSize = this.viewport.getViewportSize();
+    let messages = this.viewport.elementRef.nativeElement.children.item(0).children;
+    let startBoundary = 0;
+    let endBoundary = 0;
+    let offset = 0;
+    let index = 0;
+
+    for (index = 0; index < messages.length && offset < currentOffset; ++index) {
+      offset += messages.item(index).clientHeight;
+    }
+    startBoundary = Math.max(index - 1, 0);
+
+    for (index = startBoundary + 1; index < messages.length && offset < currentOffset + viewPortSize; ++index) {
+      offset += messages.item(index).clientHeight;
+    }
+
+    endBoundary = Math.max(index - 1, 0);
+
+    return new Array<number>(startBoundary, endBoundary);
   }
 
   public OnMessagesScrolled(messageIndex: number): void {
@@ -126,23 +294,21 @@ export class MessagesComponent implements AfterViewInit {
     }
 
     if (messageIndex == 0) {
-      this.OnUpdateMessages.emit();
+      this.UpdateMessages();
       return;
     }
 
-    if (this.Conversation.messages.length - this.CalculateCurrentMessageIndex() > MessagesComponent.MessagesToScrollForGoBackButtonToShowUp) {
+    let currentMessageIndex = this.CalculateCurrentMessageIndex();
+
+    if (this.Conversation.messages.length - currentMessageIndex > MessagesComponent.MessagesToScrollForGoBackButtonToShowUp) {
       this.IsScrollingAssistNeeded = true;
     } else {
       this.IsScrollingAssistNeeded = false;
     }
-  }
 
-  public DeleteMessages() {
-    this.OnDeleteMessages.emit(this.SelectedMessages);
-  }
+    //read the message if it's not read
 
-  public ForwardMessages() {
-    this.OnForwardMessages.emit(this.SelectedMessages);
+    this.ReadMessagesInViewport();
   }
 
   public SelectMessage(message: ChatMessage): void {
