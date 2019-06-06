@@ -31,7 +31,8 @@ namespace Vibechat.Web.Services.Repositories
                 User = whoSent,
                 AttachmentInfo = null,
                 IsAttachment = false,
-                ForwardedMessage = forwardedMessage
+                ForwardedMessage = forwardedMessage,
+                State = MessageState.Delivered
             });
 
             await mContext.SaveChangesAsync();
@@ -54,7 +55,8 @@ namespace Vibechat.Web.Services.Repositories
                 TimeReceived = DateTime.UtcNow,
                 User = whoSent,
                 AttachmentInfo = attachment,
-                IsAttachment = true
+                IsAttachment = true,
+                State = MessageState.Delivered
             });
 
             await mContext.SaveChangesAsync();
@@ -78,6 +80,19 @@ namespace Vibechat.Web.Services.Repositories
         public IQueryable<MessageDataModel> GetByIds(List<int> ids)
         {
             return mContext.Messages.Where(msg => ids.Any(id => id == msg.MessageID));
+        }
+
+        public MessageDataModel GetById(int id)
+        {
+            return mContext.Messages
+                .Include(x => x.User)
+                .FirstOrDefault(x => x.MessageID == id);
+        }
+
+        public void MarkAsRead(MessageDataModel message)
+        {
+            message.State = MessageState.Read;
+            mContext.SaveChanges();
         }
 
         public IIncludableQueryable<MessageDataModel, MessageAttachmentDataModel> Get(

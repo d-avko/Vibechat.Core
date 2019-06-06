@@ -12,6 +12,8 @@
 
       <div (click)="SelectMessage(message)">
 
+        <!--loading progress spinner-->
+
         <div *ngIf="MessagesLoading && IsLastMessage(message)" class="padding10px">
           <mat-progress-spinner class="load-spinner"
                                 diameter="60"
@@ -20,11 +22,15 @@
           </mat-progress-spinner>
         </div>
 
+        <!--Today, yesterday . .etc-->
+
         <div *ngIf="IsPreviousMessageOnAnotherDay(message)" class="messages_datestrip_wrapper padding10px">
           <span class="datestrip_text">{{formatter.GetMessagesDateStripFormatted(message)}}</span>
         </div>
 
         <div class="messages_message_content" [ngClass]="{'selected-message': IsMessageSelected(message)}">
+
+          <!--name and avatar-->
 
           <div style="width: 35px; height: 35px; margin-right: 15px; cursor:pointer" (click)="ViewUserInfo($event, message.user)">
             <img *ngIf="IsFirstMessageInSequence(message) || (message.forwardedMessage)" class="rounded-chat-image" src="{{message.user.imageUrl}}" />
@@ -79,13 +85,28 @@
             <!--Forwarded message end-->
           </div>
 
-          <span class="message_timereceived">{{formatter.GetMessageTimeFormatted(message)}}</span>
+          <div class="time-and-states-wrapper">
+
+            <span class="message_timereceived">{{formatter.GetMessageTimeFormatted(message)}}</span>
+            <!--read, delivered etc.-->
+
+            <mat-icon class="messagestate" *ngIf="message.state == 0">
+              query_builder
+            </mat-icon>
+
+            <mat-icon class="messagestate" *ngIf="message.state == 1">
+              done
+            </mat-icon>
+
+            <mat-icon class="messagestate" *ngIf="message.state == 2">
+              done_all
+            </mat-icon>
+
+          </div>
         </div>
-      </div>
-
-      <div class="padding10px">
 
       </div>
+
     </div>
   </cdk-virtual-scroll-viewport>
 
@@ -136,6 +157,15 @@
     background-color: #f0f6f6;
   }
 
+  .time-and-states-wrapper{
+    display: flex;
+    flex-direction: column;
+  }
+  .messagestate{
+    color:cadetblue;
+    width: 15px;
+    height: 15px;
+  }
   .forwarded_message{
     border-left: 2px solid cadetblue;
   }

@@ -4,6 +4,12 @@ using VibeChat.Web.Data.DataModels;
 
 namespace VibeChat.Web
 {
+    public enum MessageState
+    {
+        Delivered = 1,
+        Read = 2
+    }
+
     /// <summary>
     /// Data model for messages
     /// </summary>
@@ -12,11 +18,11 @@ namespace VibeChat.Web
         [Key]
         public int MessageID { get; set; }
 
-        //Who sent this message
+        public MessageState State { get; set; }
 
         public UserInApplication User { get; set; }
 
-        //content of a message: text or image
+        //content of a message: text
 
         public string MessageContent { get; set; }
 
@@ -27,7 +33,7 @@ namespace VibeChat.Web
         public MessageDataModel ForwardedMessage { get; set; }
 
         //Id of a conversation where this message was sent 
-
+        
         public int ConversationID { get; set; }
 
         //time when this message was received

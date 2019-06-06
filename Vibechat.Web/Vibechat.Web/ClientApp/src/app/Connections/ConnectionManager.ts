@@ -36,6 +36,10 @@ export class ConnectionManager {
 
   private OnConnected: () => void;
 
+  private OnMessageDelivered: (id: number, clientMessageId: number, conversationId: number) => void;
+
+  private OnMessageRead: (id: number, conversationId: number) => void;
+
   constructor(
     convIdsFactory: ConversationIdsFactory,
     onMessageReceived: MessageReceivedDelegate,
@@ -44,7 +48,9 @@ export class ConnectionManager {
     OnRemovedFromGroupDelegate: RemovedFromGroupDelegate,
     OnDisconnected: () => void,
     OnConnecting: () => void,
-    OnConnected: () => void) {
+    OnConnected: () => void,
+    OnMessageDelivered: (id: number, clientMessageId: number, conversationId: number) => void,
+    OnMessageRead: (id: number, conversationId: number) => void) {
 
     this.onMessageReceived = onMessageReceived;
     this.onAddedToGroup = onAddedToGroup;
@@ -54,6 +60,8 @@ export class ConnectionManager {
     this.OnDisconnected = OnDisconnected;
     this.OnConnecting = OnConnecting;
     this.OnConnected = OnConnected;
+    this.OnMessageDelivered = OnMessageDelivered;
+    this.OnMessageRead = OnMessageRead;
   }
 
   public Start(): void {
@@ -89,6 +97,13 @@ export class ConnectionManager {
       this.OnRemovedFromGroupDelegate(new RemovedFromGroupModel({ userId: userId, conversationId: conversationId }));
     });
 
+    this.connection.on("MessageDelivered", (msgId: number, clientMessageId: number, conversationId: number) => {
+      this.OnMessageDelivered(msgId, clientMessageId, conversationId);
+    });
+
+    this.connection.on("MessageRead", (msgId: number, conversationId: number) => {
+      this.OnMessageRead(msgId, conversationId);
+    });
   }
 
   public SendMessage(message: ChatMessage, conversation: ConversationTemplate) : void {
@@ -118,6 +133,10 @@ export class ConnectionManager {
 
   public CreateDialog(user: UserInfo) {
     this.connection.send("CreateDialog", user);
+  }
+
+  public ReadMessage(msgId: number, conversationId: number) {
+    this.connection.send("MessageRead", msgId, conversationId);
   }
 
   public InitiateConnections(conversationIds: Array<number>) : void {

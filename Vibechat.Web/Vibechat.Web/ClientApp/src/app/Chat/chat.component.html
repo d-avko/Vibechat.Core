@@ -77,12 +77,12 @@
                                    [Conversation]="CurrentConversation"></conversationHeader-view>
 
           <messages-view class="messages_wrapper_messages"
-                         (OnUpdateMessages)="OnUpdateMessages()"
-                         (OnDeleteMessages)="OnDeleteMessages($event)"
-                         (OnForwardMessages)="OnForwardMessages($event)"
+                         (OnMessageRead)="ReadMessage($event)"
                          (OnViewUserInfo)="OnViewUserInfo($event)"
+                         (OnForwardMessages)="OnForwardMessages($event)"
                          [Conversation]="CurrentConversation"
-                         [MessagesLoading]="IsMessagesLoading"></messages-view>
+                         [User]="CurrentUser"
+                         [Conversations]="Conversations"></messages-view>
 
 
           <input-view class="messages_wrapper_input"

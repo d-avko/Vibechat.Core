@@ -32,6 +32,8 @@ import { TokensService } from "../tokens/TokensService";
 import { HttpResponseInterceptor } from "../Interceptors/HttpResponseInterceptor";
 import { ForwardMessagesDialogComponent } from "../Dialogs/ForwardMessagesDialog";
 import { MessagesDateParserService } from "../Services/MessagesDateParserService";
+import { MessageState } from "../Shared/MessageState";
+import { MessageAttachment } from "../Data/MessageAttachment";
 
 @Component({
   selector: 'chat-root',
@@ -64,15 +66,7 @@ export class ChatComponent implements OnInit {
 
   protected connectionManager: ConnectionManager;
 
-  public static MessagesBufferLength: number = 50;
-
-
-
-  public IsMessagesLoading: boolean = false;
-
   public IsAuthenticated: boolean;
-
-  public IsConversationHistoryEnd: boolean = false;
 
   public SearchString: string;
 
@@ -108,7 +102,9 @@ export class ChatComponent implements OnInit {
       (data) => this.OnRemovedFromGroup(data),
       () => this.OnDisconnected(),
       () => this.OnConnecting(),
-      () => this.OnConnected()
+      () => this.OnConnected(),
+      (msgId, clientMessageId, conversationId) => this.OnMessageDelivered(msgId, clientMessageId, conversationId),
+      (msgId, conversationId) => this.OnMessageRead(msgId, conversationId),
     );
 
     this.IsAuthenticated = Cache.IsAuthenticated;
@@ -162,6 +158,42 @@ export class ChatComponent implements OnInit {
 
   public OnError(error: string) : void{
     this.snackbar.openSnackBar(error, 2);
+  }
+
+  public OnForwardMessages(values: Array<ChatMessage>) {
+    let forwardMessagesDialog = this.dialog.open(
+      ForwardMessagesDialogComponent,
+      {
+        data: {
+          conversations: this.Conversations
+        }
+      }
+    );
+
+    forwardMessagesDialog
+      .beforeClosed()
+      .subscribe((result: Array<ConversationTemplate>) => {
+
+        if (result == null || result.length == 0) {
+          return;
+        }
+
+        result.forEach(
+          (conversation) => {
+
+            values.forEach(msg => {
+              let messageToSend = this.BuildForwardedMessage(conversation.conversationID, msg.forwardedMessage ? msg.forwardedMessage : msg);
+
+              this.connectionManager.SendMessage(messageToSend, conversation);
+
+              conversation.messages.push(messageToSend);
+
+            })
+          }
+        )
+
+        values.splice(0, values.length);
+      })
   }
 
   public OnViewGroupInfo(group: ConversationTemplate) {
@@ -504,7 +536,7 @@ export class ChatComponent implements OnInit {
       }
     });
 
-    dialogRef.afterClosed().subscribe(users => {
+    dialogRef.beforeClosed().subscribe(users => {
 
       if (users === '' || users == null) {
         return;
@@ -547,8 +579,8 @@ export class ChatComponent implements OnInit {
       width: '250px'
     });
 
-    
-    dialogRef.afterClosed().subscribe(result => {
+
+    dialogRef.beforeClosed().subscribe(result => {
 
       if (result.name === '' || result.name == null) {
         return;
@@ -574,14 +606,48 @@ export class ChatComponent implements OnInit {
 
   public OnSendMessage(message: string) {
 
-    this.connectionManager.SendMessage(
-      new ChatMessage(
-        {
-          messageContent: message,
-          isAttachment: false,
-          user: this.CurrentUser,
-          conversationID: this.CurrentConversation.conversationID
-        }), this.CurrentConversation);
+    let messageToSend = this.BuildMessage(message, this.CurrentConversation.conversationID);
+
+    this.CurrentConversation.messages.push(
+      messageToSend
+    );
+
+    this.connectionManager.SendMessage(messageToSend, this.CurrentConversation);
+  }
+
+  public BuildMessage(message: string, whereTo: number, isAttachment = false, AttachmentInfo: MessageAttachment = null): ChatMessage {
+    var min = 1;
+    var max = 100000;
+    var clientMessageId = Math.floor(Math.random() * (+max - +min) + +min);
+
+    return new ChatMessage(
+      {
+        id: clientMessageId,
+        messageContent: message,
+        isAttachment: isAttachment,
+        attachmentInfo: AttachmentInfo,
+        user: this.CurrentUser,
+        conversationID: whereTo,
+        state: MessageState.Pending,
+        timeReceived: new Date()
+      });
+  }
+
+  public BuildForwardedMessage(whereTo: number, forwarded: ChatMessage): ChatMessage {
+    var min = 1;
+    var max = 100000;
+    var clientMessageId = Math.floor(Math.random() * (+max - +min) + +min);
+
+    return new ChatMessage(
+      {
+        id: clientMessageId,
+        isAttachment: false,
+        user: this.CurrentUser,
+        conversationID: whereTo,
+        state: MessageState.Pending,
+        timeReceived: new Date(),
+        forwardedMessage: forwarded
+      });
   }
 
   public OnMessageReceived(data: MessageReceivedModel): void {
@@ -601,6 +667,50 @@ export class ChatComponent implements OnInit {
     if (data.conversationId == this.CurrentConversation.conversationID) {
       this.messages.ScrollToMessage(newLength);
     }
+  }
+
+  public ReadMessage(message: ChatMessage) {
+
+    if (message.user.id == this.CurrentUser.id) {
+      return;
+    }
+
+    this.connectionManager.ReadMessage(message.id, message.conversationID);
+  }
+
+  public OnMessageRead(msgId: number, conversationId: number) {
+    let conversation = this.Conversations.find(x => x.conversationID == conversationId);
+
+    if (conversation == null) {
+      return;
+    }
+
+    let message = conversation.messages.find(x => x.id == msgId);
+
+    if (message == null) {
+      return;
+    }
+
+    message.state = MessageState.Read;
+    conversation.messages = [...conversation.messages];
+  }
+
+  public OnMessageDelivered(msgId: number, clientMessageId: number, conversationId: number) {
+    let conversation = this.Conversations.find(x => x.conversationID == conversationId);
+
+    if (conversation == null) {
+      return;
+    }
+
+    let message = conversation.messages.find(x => x.id == clientMessageId);
+
+    if (message == null) {
+      return;
+    }
+
+    message.id = msgId;
+    message.state = MessageState.Delivered;
+    conversation.messages = [...conversation.messages];
   }
 
   public OnAddedToGroup(data: AddedToGroupModel): void {
@@ -684,101 +794,26 @@ export class ChatComponent implements OnInit {
     }
   }
 
-  public OnUpdateMessages() {
-
-    if (!this.IsMessagesLoading && !this.IsConversationHistoryEnd) {
-      this.IsMessagesLoading = true;
-
-      if (this.CurrentConversation.messages == null) {
-        return;
-      }
-
-      this.requestsBuilder.GetConversationMessages(
-        this.CurrentConversation.messages.length,
-        ChatComponent.MessagesBufferLength,
-        this.CurrentConversation.conversationID)
-
-        .subscribe((result) => {
-
-          if (!result.isSuccessfull) {
-            this.IsMessagesLoading = false;
-            return;
-          }
-
-          //server sent zero messages, we reached end of our history.
-
-          if (result.response == null || result.response.length == 0) {
-            this.IsMessagesLoading = false;
-            this.IsConversationHistoryEnd = true;
-
-            return;
-          }
-
-          result.response = result.response.sort(this.MessagesSortFunc);
-
-          this.dateParser.ParseStringDatesInMessages(result.response);
-
-          //append old messages to new ones.
-          this.CurrentConversation.messages = [...result.response.concat(this.CurrentConversation.messages)];
-          this.IsMessagesLoading = false;
-
-          this.messages.ScrollToMessage(result.response.length);
-        }
-      )
-    }
-
-  }
-
   public OnDeleteMessages(SelectedMessages: Array<ChatMessage>) {
 
     let currentConversationId = this.CurrentConversation.conversationID;
 
-    this.requestsBuilder.DeleteMessages(SelectedMessages, this.CurrentConversation.conversationID)
+    let notLocalMessages = SelectedMessages.filter(x => x.state != MessageState.Pending)
+
+    //delete local unsent messages
+    this.CurrentConversation.messages = this.CurrentConversation.messages
+      .filter(msg => notLocalMessages.findIndex(selected => selected.id == msg.id) == -1);
+
+    if (notLocalMessages.length == 0) {
+      return;
+    }
+
+    this.requestsBuilder.DeleteMessages(notLocalMessages, this.CurrentConversation.conversationID)
       .subscribe(
         (result) => this.OnMessagesDeleted(result, SelectedMessages, currentConversationId)
-       
-      )
+      );   
   }
 
-  public OnForwardMessages(values: Array<ChatMessage>) {
-    let forwardMessagesDialog = this.dialog.open(
-      ForwardMessagesDialogComponent,
-      {
-        data: {
-          conversations: this.Conversations
-        }
-      }
-    );
-
-    forwardMessagesDialog
-      .afterClosed()
-      .subscribe((result : Array<ConversationTemplate>) => {
-
-        if (result == null || result.length == 0) {
-          return;
-        }
-
-        result.forEach(
-          (conversation) => {
-
-            values.forEach(msg => {
-
-              this.connectionManager.SendMessage(
-                new ChatMessage({
-                  user: this.CurrentUser,
-                  conversationID: conversation.conversationID,
-                  isAttachment: false,
-                  forwardedMessage: msg.forwardedMessage ? msg.forwardedMessage : msg
-                }), conversation
-              )
-
-            })
-          }
-        )
-
-        values.splice(0, values.length);
-      })
-  }
 
   public OnMessagesDeleted(response: ServerResponse<string>, SelectedMessages: Array<ChatMessage>, conversationId: number) {
     if (!response.isSuccessfull) {
@@ -867,10 +902,8 @@ export class ChatComponent implements OnInit {
         }
         //update existing data. Couldn't assign fetched object,
         //because this will lead to lost pointer for messages, and thus they won't be updated on UI
-        this.UpdateConversationFields(this.CurrentConversation, result.response);
+        this.UpdateConversationFields(conversation, result.response);
       });
-
-    this.IsConversationHistoryEnd = false;
   }
 
   public OnUploadImages(files: FileList) {
@@ -897,22 +930,14 @@ export class ChatComponent implements OnInit {
         }
 
         response.response.uploadedFiles.forEach(
-          (file) => this.connectionManager.SendMessage(
-            new ChatMessage(
-              {
-                isAttachment: true,
-                user: this.CurrentUser,
-                conversationID: conversationToSend,
-                attachmentInfo: file,
-              }), this.CurrentConversation)
+          (file) => {
+            let message = this.BuildMessage(null, conversationToSend, true, file);
+
+            this.connectionManager.SendMessage(message, this.CurrentConversation);
+
+            this.CurrentConversation.messages.push(message);
+          } 
         )
       })
   }
-
-  private MessagesSortFunc(left: ChatMessage, right: ChatMessage): number {
-    if (left.timeReceived < right.timeReceived) return -1;
-    if (left.timeReceived > right.timeReceived) return 1;
-    return 0;
-  }
-
 }
