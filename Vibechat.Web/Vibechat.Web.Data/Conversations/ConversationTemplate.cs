@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VibeChat.Web.Controllers;
 
 namespace VibeChat.Web.ChatData
 {
@@ -48,6 +49,10 @@ namespace VibeChat.Web.ChatData
         /// Field indicating whether calling user can message in this conversation.
         /// </summary>
         public bool IsMessagingRestricted { get; set; }
-        public bool IsBlocked { get; internal set; }
+        
+        /// <summary>
+        /// This field is filled only once in <see cref="ConversationsController.GetAll()"/> method
+        /// </summary>
+        public int MessagesUnread { get; set; }
     }
 }

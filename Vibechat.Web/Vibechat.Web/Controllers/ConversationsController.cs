@@ -98,11 +98,12 @@ namespace VibeChat.Web.Controllers
 
                 foreach(ConversationTemplate conversation in result)
                 {
-                    conversation.IsMessagingRestricted = await BansService.IsBannedFromConversation(conversation.ConversationID, thisUserId);
+                    conversation.IsMessagingRestricted = await BansService.IsBannedFromConversation(conversation.ConversationID, thisUserId).ConfigureAwait(false);
+                    conversation.MessagesUnread = await mConversationService.GetUnreadMessagesInConversation(conversation.ConversationID, thisUserId).ConfigureAwait(false);
 
                     foreach(UserInfo user in conversation.Participants)
                     {
-                        user.IsBlockedInConversation = await BansService.IsBannedFromConversation(conversation.ConversationID, user.Id);
+                        user.IsBlockedInConversation = await BansService.IsBannedFromConversation(conversation.ConversationID, user.Id).ConfigureAwait(false);
                     }
                 }
 

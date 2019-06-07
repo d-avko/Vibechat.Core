@@ -17,6 +17,8 @@ namespace Vibechat.Web.Services.Repositories
 
         MessageDataModel GetById(int id);
 
+        int GetUnreadAmount(int conversationId, string userId);
+
         void MarkAsRead(MessageDataModel message);
 
         IIncludableQueryable<MessageDataModel, MessageAttachmentDataModel> Get(
