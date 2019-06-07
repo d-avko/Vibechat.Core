@@ -14,8 +14,6 @@ namespace Vibechat.Web.Services.Repositories
     {
         private ApplicationDbContext mContext { get; set; }
 
-        private const long MaxMessages = 8192000000;
-
         public MessagesRepository(ApplicationDbContext dbContext)
         {
             this.mContext = dbContext;
@@ -149,6 +147,21 @@ namespace Vibechat.Web.Services.Repositories
                 .Take(count)
                 .Include(msg => msg.User)
                 .Include(msg => msg.AttachmentInfo);
+        }
+        
+        public int GetUnreadAmount(int conversationId, string userId)
+        {
+            var deletedMessages = mContext
+             .DeletedMessages
+             .Where(msg => msg.Message.ConversationID == conversationId && msg.UserId == userId);
+
+            return  mContext
+                    .Messages
+                    .Where(
+                    msg => msg.ConversationID == conversationId 
+                    && !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID)
+                    && msg.State == MessageState.Delivered
+                    && msg.User.Id != userId).Count();
         }
 
         public bool Empty()

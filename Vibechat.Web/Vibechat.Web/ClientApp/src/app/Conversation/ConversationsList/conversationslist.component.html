@@ -27,7 +27,29 @@
       <span class="lastmessage_content_lastmessageDate" [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
         {{formatter.GetLastMessageDateFormatted(conversation)}}
       </span>
+
+      <div *ngIf="conversation.messagesUnread" class="unread_bubble">
+        <span class="unread_bubble_text">{{formatter.GetMessagesUnreadFormatted(conversation.messagesUnread)}}</span>
+      </div>
     </div>
   </mat-list-item>
 
 </mat-action-list>
+
+<style>
+
+  .unread_bubble{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
+    background-color: #436f70;
+  }
+
+  .unread_bubble_text{
+    color: white;
+  }
+
+</style>

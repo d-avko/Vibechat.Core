@@ -23,4 +23,6 @@ export class ConversationTemplate {
   public participants: Array<UserInfo>;
 
   public isMessagingRestricted: boolean;
+
+  public messagesUnread: number;
 }

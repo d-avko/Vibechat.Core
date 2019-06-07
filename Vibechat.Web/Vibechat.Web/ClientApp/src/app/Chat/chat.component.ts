@@ -34,6 +34,7 @@ import { ForwardMessagesDialogComponent } from "../Dialogs/ForwardMessagesDialog
 import { MessagesDateParserService } from "../Services/MessagesDateParserService";
 import { MessageState } from "../Shared/MessageState";
 import { MessageAttachment } from "../Data/MessageAttachment";
+import { setTimeout } from "timers";
 
 @Component({
   selector: 'chat-root',
@@ -70,6 +71,8 @@ export class ChatComponent implements OnInit {
 
   public SearchString: string;
 
+  public PendingReadMessages: Array<number>;
+
   @ViewChild(MessagesComponent) messages: MessagesComponent;
   @ViewChild(MatDrawer) sideDrawer: MatDrawer;
   @ViewChild(SearchListComponent) searchList: SearchListComponent;
@@ -84,7 +87,7 @@ export class ChatComponent implements OnInit {
     public dateParser: MessagesDateParserService) {
 
     this.Conversations = new Array<ConversationTemplate>();
-
+    this.PendingReadMessages = new Array<number>();
     this.formatter = formatter;
     
     if (!Cache.IsAuthenticated) {
@@ -660,8 +663,8 @@ export class ChatComponent implements OnInit {
 
     conversation.messages = [...conversation.messages];
 
-    if (this.messages == undefined) {
-      return;
+    if (data.senderId != this.CurrentUser.id) {
+       conversation.messagesUnread += 1;
     }
 
     if (data.conversationId == this.CurrentConversation.conversationID) {
@@ -674,6 +677,12 @@ export class ChatComponent implements OnInit {
     if (message.user.id == this.CurrentUser.id) {
       return;
     }
+
+    if (this.PendingReadMessages.find(x => x == message.id)) {
+      return;
+    }
+
+    this.PendingReadMessages.push(message.id);
 
     this.connectionManager.ReadMessage(message.id, message.conversationID);
   }
@@ -691,8 +700,22 @@ export class ChatComponent implements OnInit {
       return;
     }
 
+    if (message.state == MessageState.Read) {
+      return;
+    }
+
     message.state = MessageState.Read;
     conversation.messages = [...conversation.messages];
+
+    if (message.user.id != this.CurrentUser.id) {
+      --conversation.messagesUnread;
+    }
+
+    let pendingIndex = this.PendingReadMessages.findIndex(x => x == message.id);
+
+    if (pendingIndex != -1) {
+      this.PendingReadMessages.splice(pendingIndex, 1);
+    }
   }
 
   public OnMessageDelivered(msgId: number, clientMessageId: number, conversationId: number) {

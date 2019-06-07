@@ -144,6 +144,22 @@ namespace Vibechat.Web.Services
                 );
         }
 
+        public async Task<int> GetUnreadMessagesInConversation(int conversationId, string userId)
+        {
+            ConversationDataModel conversation = conversationRepository.GetById(conversationId);
+
+            if (conversation == null)
+            {
+                throw new InvalidDataException($"Wrong conversation id was provided.");
+            }
+
+            if (messagesRepository.Empty())
+            {
+                return 0;
+            }
+
+            return messagesRepository.GetUnreadAmount(conversationId, userId);
+        }
         public async Task<UpdateThumbnailResponse> UpdateThumbnail(int conversationId, IFormFile image)
         {
             if ((image.Length / (1024 * 1024)) > MaxThumbnailLengthMB)

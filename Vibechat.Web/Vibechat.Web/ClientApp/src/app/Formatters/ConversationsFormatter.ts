@@ -67,6 +67,21 @@ export class ConversationsFormatter{
     return this.DaysSinceEventFormatted((<Date>message.timeReceived));
   }
 
+  public GetMessagesUnreadFormatted(amount: number): string {
+    if (!amount) {
+      return '';
+    }
+
+    switch (true) {
+      case amount <= 1000: {
+        return amount.toString();
+      }
+      default: {
+        return Math.floor(amount / 1000).toString() + 'K';
+      }
+    }
+  }
+
   private DaysSinceEventFormatted(eventDate: Date): string {
     let currentTime = new Date();
     let hoursSinceReceived = (currentTime.getTime() - eventDate.getTime()) / (1000 * 60 * 60);
