@@ -6,8 +6,8 @@ import { ServerResponse } from '../ApiModels/ServerResponse';
 import { LoginResponse } from '../ApiModels/LoginResponse';
 import { LoginRequest } from '../ApiModels/LoginRequest';
 import { Router } from '@angular/router';
-import { Cache } from '../Auth/Cache';
 import { ApiRequestsBuilder } from '../Requests/ApiRequestsBuilder';
+import { AuthService } from '../Auth/AuthService';
 
 @Component({
   selector: 'login-view',
@@ -25,7 +25,7 @@ export class LoginComponent {
 
   public canLogIn: boolean = true;
 
-  constructor(requestsBuilder: ApiRequestsBuilder, snackbar: MatSnackBar, router: Router ) {
+  constructor(requestsBuilder: ApiRequestsBuilder, snackbar: MatSnackBar, router: Router, private auth: AuthService ) {
     this.usernameOrEmail = new FormControl('', Validators.required);
     this.password = new FormControl('', Validators.required);
     this.snackbar = new SnackBarHelper(snackbar);
@@ -55,7 +55,7 @@ export class LoginComponent {
 
     this.canLogIn = true;
 
-    Cache.OnUserLoggedIn(result.response);
+    this.auth.OnUserLoggedIn(result.response);
 
     this.router.navigateByUrl('/chat');
   }

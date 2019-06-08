@@ -11,12 +11,21 @@ import { MatSnackBar } from '@angular/material';
 @Injectable()
 export class UploaderService {
 
+  public static maxUploadImageSizeMb: number = 5;
+
   constructor(
     private http: HttpClient,
     private logger: SnackBarHelper) { }
 
   public uploadImages(files: FileList) : Observable<HttpEvent<any>> {
     if (!files || files.length == 0) { return; }
+
+    for (let i = 0; i < files.length; ++i) {
+      if (((files[i].size / 1024) / 1024) > UploaderService.maxUploadImageSizeMb) {
+        this.logger.openSnackBar("Some of the files were larger than " + UploaderService.maxUploadImageSizeMb + "MB");
+        return;
+      }
+    }
 
     let data = new FormData();
 

@@ -25,16 +25,18 @@
   </mat-action-list>
 
 
-  <mat-progress-spinner *ngIf="IsSearchingForConversations"
-                        class="load-spinner"
-                        diameter="40"
-                        color="Primary"
-                        mode="indeterminate">
-  </mat-progress-spinner>
 
 
   <mat-action-list class="searchlist_conversations">
     <h3 mat-subheader>Global search</h3>
+
+    <mat-progress-spinner *ngIf="IsSearchingForGroups"
+                          class="load-spinner"
+                          diameter="40"
+                          color="Primary"
+                          mode="indeterminate">
+    </mat-progress-spinner>
+
     <h3 mat-subheader>Conversations</h3>
 
     <mat-list-item *ngFor="let conversation of GlobalConversations"
@@ -49,15 +51,15 @@
 
   </mat-action-list>
 
-  <mat-progress-spinner *ngIf="IsSearchingForUsers"
-                        class="load-spinner"
-                        diameter="40"
-                        color="Primary"
-                        mode="indeterminate">
-  </mat-progress-spinner>
-
   <mat-action-list class="searchlist_users">
     <h3 mat-subheader>Users</h3>
+
+    <mat-progress-spinner *ngIf="IsSearchingForUsers"
+                          class="load-spinner"
+                          diameter="40"
+                          color="Primary"
+                          mode="indeterminate">
+    </mat-progress-spinner>
 
     <mat-list-item *ngFor="let user of Users"
                    (click)="ViewUser(user)">

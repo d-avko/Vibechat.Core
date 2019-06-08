@@ -189,12 +189,7 @@ namespace VibeChat.Web.Controllers
             {
                 string thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
-                await BansService.BanUser(request.userId, thisUserId);
-
-                if(request.conversationId != null)
-                {
-                    await BansService.BanUserFromConversation(request.conversationId.Value, request.userId, thisUserId);
-                }
+                await BansService.BanDialog(request.userId, thisUserId);
 
                 return new ResponseApiModel<bool>()
                 {

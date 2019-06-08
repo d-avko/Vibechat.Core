@@ -20,7 +20,7 @@ export class ForwardMessagesDialogComponent {
 
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ForwardMessagesData) { }
+    @Inject(MAT_DIALOG_DATA) public conversationsService: ForwardMessagesData) { }
 
   public onCancelClick() {
     this.dialogRef.close();

@@ -22,8 +22,6 @@ import { Message } from "@angular/compiler/src/i18n/i18n_ast";
 })
 export class ApiRequestsBuilder {
 
-  public static maxUploadImageSizeMb: number = 5;
-
   private baseUrl: string;
 
   private httpClient: HttpClient;
@@ -53,15 +51,15 @@ export class ApiRequestsBuilder {
     );
   }
 
-  public UpdateConversationsRequest(): Observable<ServerResponse<Array<ConversationTemplate>>> {
+  public UpdateConversationsRequest(): Promise<ServerResponse<Array<ConversationTemplate>>> {
 
     return this.MakeCall<Array<ConversationTemplate>>(
       null,
       'api/Conversations/GetAll'
-    );
+    ).toPromise();
   }
 
-  public GetConversationMessages(offset: number, count: number, conversationId: number): Observable<ServerResponse<Array<ChatMessage>>> {
+  public GetConversationMessages(offset: number, count: number, conversationId: number): Promise<ServerResponse<Array<ChatMessage>>> {
 
     return this.MakeCall<Array<ChatMessage>>(
         {
@@ -70,10 +68,10 @@ export class ApiRequestsBuilder {
           MesssagesOffset: offset
         },
       'api/Conversations/GetMessages'
-    );
+    ).toPromise();
   }
 
-  public DeleteMessages(messages: Array<ChatMessage>, conversationId: number) : Observable<ServerResponse<string>> {
+  public DeleteMessages(messages: Array<ChatMessage>, conversationId: number) : Promise<ServerResponse<string>> {
 
     return this.MakeCall<string>(
         {
@@ -81,15 +79,15 @@ export class ApiRequestsBuilder {
           ConversationId: conversationId
         },
       'api/Conversations/DeleteMessages'
-    );
+    ).toPromise();
 
   }
 
-  public UploadImages(files: FileList): Observable<HttpEvent<any>> {
-   return this.uploader.uploadImages(files);
+  public UploadImages(files: FileList): Promise<HttpEvent<any>> {
+   return this.uploader.uploadImages(files).toPromise();
   }
 
-  public UploadConversationThumbnail(thumbnail: File, conversationId: number): Observable<ServerResponse<UpdateThumbnailResponse>> {
+  public UploadConversationThumbnail(thumbnail: File, conversationId: number): Promise<ServerResponse<UpdateThumbnailResponse>> {
     let data = new FormData();
     data.append('thumbnail', thumbnail);
     data.append('conversationId', conversationId.toString());
@@ -97,17 +95,17 @@ export class ApiRequestsBuilder {
     return this.MakeCall<UpdateThumbnailResponse>(
       data,
       'api/Conversations/UpdateThumbnail'
-    );
+    ).toPromise();
   }
 
-  public UploadUserProfilePicture(picture: File): Observable<ServerResponse<UpdateThumbnailResponse>> {
+  public UploadUserProfilePicture(picture: File): Promise<ServerResponse<UpdateThumbnailResponse>> {
     let data = new FormData();
     data.append('picture', picture);
 
     return this.MakeCall<UpdateThumbnailResponse>(
       data,
       'api/Users/UpdateProfilePicture'
-    );
+    ).toPromise();
   }
 
   public GetUserById(userId: string): Promise<ServerResponse<UserInfo>> {
@@ -117,32 +115,32 @@ export class ApiRequestsBuilder {
     ).toPromise();
   }
 
-  public GetConversationById(conversationId: number): Observable<ServerResponse<ConversationTemplate>> {
+  public GetConversationById(conversationId: number): Promise<ServerResponse<ConversationTemplate>> {
     return this.MakeCall<ConversationTemplate>(
       { conversationId: conversationId },
       'api/Conversations/GetById'
-    );
+    ).toPromise();
   }
 
-  public ChangeCurrentUserName(newName: string): Observable<ServerResponse<boolean>> {
+  public ChangeCurrentUserName(newName: string): Promise<ServerResponse<boolean>> {
     return this.MakeCall<boolean>(
       { newName: newName },
       'api/Users/ChangeName'
-    );
+    ).toPromise();
   }
 
-  public ChangeCurrentUserLastName(newName: string): Observable<ServerResponse<boolean>> {
+  public ChangeCurrentUserLastName(newName: string): Promise<ServerResponse<boolean>> {
     return this.MakeCall<boolean>(
       { newName: newName },
       'api/Users/ChangeLastName'
-    );
+    ).toPromise();
   }
 
-  public FindUsersByUsername(username: string): Observable<ServerResponse<FoundUsersResponse>> {
+  public FindUsersByUsername(username: string): Promise<ServerResponse<FoundUsersResponse>> {
     return this.MakeCall<FoundUsersResponse>(
       { UsernameToFind: username },
       'api/Users/FindByNickname'
-    );
+    ).toPromise();
   }
 
   public GetAttachmentsForConversation(conversationId: number, kind: string, offset: number, count: number) {
@@ -154,7 +152,7 @@ export class ApiRequestsBuilder {
         count: count
       },
       'api/Conversations/GetAttachments'
-    );
+    ).toPromise();
   }
 
   public CreateConversation(
@@ -164,7 +162,7 @@ export class ApiRequestsBuilder {
     thumbnailUrl: string,
     isGroup: boolean,
     isPublic: boolean)
-  : Observable<ServerResponse<ConversationTemplate>>
+  : Promise<ServerResponse<ConversationTemplate>>
   {
     return this.MakeCall<ConversationTemplate>(
       {
@@ -176,63 +174,66 @@ export class ApiRequestsBuilder {
         IsPublic: isPublic
       },
       'api/Conversations/Create'
-    );
+    ).toPromise();
 
   }
 
-  public ChangeConversationName(newName: string, conversationId: number): Observable<ServerResponse<boolean>> {
+  public ChangeConversationName(newName: string, conversationId: number): Promise<ServerResponse<boolean>> {
 
     return this.MakeCall<boolean>(
       { ConversationId: conversationId, Name: newName },
       'api/Conversations/ChangeName'
-    );
+    ).toPromise();
 
   }
 
   public RefreshJwtToken(refreshToken: string, userId: string): Promise<ServerResponse<string>>{
-    return this.MakeCall<string>(
+    let headers = new HttpHeaders();
+    headers = headers.append('refreshtoken', '1');
+
+    return this.httpClient.post<ServerResponse<string>>(
+      this.baseUrl + 'api/Tokens/Refresh',
       { RefreshToken: refreshToken, userId: userId },
-      'api/Tokens/Refresh'
-    ).toPromise();
+      { headers: headers}).toPromise();
   }
 
-  public SearchForGroups(searchstring: string): Observable<ServerResponse<Array<ConversationTemplate>>>{
+  public SearchForGroups(searchstring: string): Promise<ServerResponse<Array<ConversationTemplate>>>{
 
     return this.MakeCall<Array<ConversationTemplate>>(
       { SearchString: searchstring },
       'api/Conversations/SearchGroups'
-    );
+    ).toPromise();
 
   }
 
-  public UnbanUser(userId: string): Observable<ServerResponse<boolean>> {
+  public UnbanUser(userId: string): Promise<ServerResponse<boolean>> {
 
     return this.MakeCall<boolean>(
       { userId: userId },
       'api/Users/Unban'
-    );
+    ).toPromise();
 
   }
 
-  public BanUser(userId: string, conversationId: number): Observable<ServerResponse<boolean>> {
+  public BanUser(userId: string): Promise<ServerResponse<boolean>> {
     return this.MakeCall<boolean>(
-      { userId: userId, conversationId: conversationId == 0 ? null : conversationId },
+      { userId: userId},
       'api/Users/Block'
-    );
+    ).toPromise();
   }
 
-  public BanFromConversation(userId: string, conversationId: number): Observable<ServerResponse<boolean>> {
+  public BanFromConversation(userId: string, conversationId: number): Promise<ServerResponse<boolean>> {
     return this.MakeCall<boolean>(
       { userId: userId, conversationId: conversationId },
       'api/Conversations/BanFrom'
-    );
+    ).toPromise();
   }
 
-  public UnBanFromConversation(userId: string, conversationId: number): Observable<ServerResponse<boolean>> {
+  public UnBanFromConversation(userId: string, conversationId: number): Promise<ServerResponse<boolean>> {
     return this.MakeCall<boolean>(
       { userId: userId, conversationId: conversationId },
       'api/Conversations/UnbanFrom'
-    );
+    ).toPromise();
   }
 
   private MakeCall<T>(data: any, url: string): Observable<ServerResponse<T>> {

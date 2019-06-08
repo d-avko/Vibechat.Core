@@ -118,5 +118,26 @@ namespace Vibechat.Web.Services.Repositories
 
             return false;
         }
+
+        public async Task<UsersConversationDataModel> GetDialog(string firstUserId, string secondUserId)
+        {
+            IQueryable<UsersConversationDataModel> firstUserConversations = mContext
+              .UsersConversations
+              .Where(x => x.User.Id == firstUserId && !x.Conversation.IsGroup)
+              .Include(x => x.Conversation)
+              .Include(x => x.User);
+
+            foreach (UsersConversationDataModel conversation in firstUserConversations)
+            {
+                if (await mContext
+                    .UsersConversations
+                    .AnyAsync(x => x.Conversation.ConvID == conversation.Conversation.ConvID && x.User.Id == secondUserId))
+                {
+                    return conversation;
+                }
+            }
+
+            return null;
+        }
     }
 }

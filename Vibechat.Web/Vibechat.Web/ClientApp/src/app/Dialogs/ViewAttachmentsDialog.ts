@@ -10,6 +10,7 @@ import { retry } from "rxjs/operators";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { CdkVirtualScrollViewport } from "@angular/cdk/scrolling";
 import { MessagesDateParserService } from "../Services/MessagesDateParserService";
+import { ConversationsService } from "../Services/ConversationsService";
 
 export interface AttachmentsData {
   conversation: ConversationTemplate;
@@ -39,8 +40,7 @@ export class ViewAttachmentsDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: AttachmentsData,
     public photoDialog: MatDialog,
     public formatter: ConversationsFormatter,
-    public requestsBuilder: ApiRequestsBuilder,
-    public dateParser: MessagesDateParserService)
+    public conversationsService: ConversationsService)
   {
     this.PhotosWeeks = new Array<Array<ChatMessage>>();
     this.Init();
@@ -109,7 +109,7 @@ export class ViewAttachmentsDialogComponent {
 
   }
 
-  public UpdatePhotos() {
+  public async UpdatePhotos() {
 
     if (this.IsPhotosEnd || this.PhotosLoading) {
       return;
@@ -119,28 +119,20 @@ export class ViewAttachmentsDialogComponent {
     this.PhotosWeeks.forEach(x => offset += x.length);
     this.PhotosLoading = true;
 
-    this.requestsBuilder.GetAttachmentsForConversation(
+    let result = await this.conversationsService.GetAttachmentsFor(
       this.data.conversation.conversationID,
       AttachmentKinds.Image,
       offset,
-      ViewAttachmentsDialogComponent.attachmentsToLoadAmount)
-        .subscribe((result) => {
+      ViewAttachmentsDialogComponent.attachmentsToLoadAmount);
 
-          if (!result.isSuccessfull) {
-            this.PhotosLoading = false;
-            return;
-          }
+    this.PhotosLoading = false;
 
-          if (result.response == null || result.response.length == 0) {
-            this.IsPhotosEnd = true;
-            this.PhotosLoading = false;
-            return;
-          }
+    if (result == null || result.length == 0) {
+      this.IsPhotosEnd = true;
+      return;
+    }
 
-          this.PhotosLoading = false;
-          this.dateParser.ParseStringDatesInMessages(result.response);
-          this.AddPhotos(result.response);
-        });
+    this.AddPhotos(result);
   }
 
   public OnAttachmentsScrolled(index: number) {

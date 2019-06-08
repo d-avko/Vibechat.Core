@@ -8,7 +8,7 @@
                                itemSize="50"
                                class="messages_main">
 
-    <div *cdkVirtualFor="let message of Conversation.messages;">
+    <div *cdkVirtualFor="let message of conversationsService.CurrentConversation.messages;">
 
       <div (click)="SelectMessage(message)">
 

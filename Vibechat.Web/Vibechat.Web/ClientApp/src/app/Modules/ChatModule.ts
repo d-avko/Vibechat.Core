@@ -25,9 +25,12 @@ import { ViewAttachmentsDialogComponent } from "../Dialogs/ViewAttachmentsDialog
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { HttpResponseInterceptor } from "../Interceptors/HttpResponseInterceptor";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
-import { TokensService } from "../tokens/TokensService";
 import { ForwardMessagesDialogComponent } from "../Dialogs/ForwardMessagesDialog";
 import { MessagesDateParserService } from "../Services/MessagesDateParserService";
+import { ConversationsService } from "../Services/ConversationsService";
+import { UsersService } from "../Services/UsersService";
+import { MessageReportingService } from "../Services/MessageReportingService";
+import { AuthService } from "../Auth/AuthService";
 
 @NgModule({
   declarations: [
@@ -71,7 +74,10 @@ import { MessagesDateParserService } from "../Services/MessagesDateParserService
     MessagesDateParserService,
     UploaderService,
     SnackBarHelper,
-    TokensService,
+    ConversationsService,
+    UsersService,
+    MessageReportingService,
+    AuthService,
     { provide: HTTP_INTERCEPTORS, useClass: HttpResponseInterceptor, multi: true }]
 })
 export class ChatModule { }

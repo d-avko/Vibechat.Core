@@ -8,38 +8,38 @@ import {
   HttpErrorResponse
 } from '@angular/common/http';
 
-import { Observable, throwError, BehaviorSubject, from } from 'rxjs';
+import { Observable, throwError, from } from 'rxjs';
 import { map, catchError, retry, switchMap, mergeMap } from 'rxjs/operators';
-import { MatSnackBar } from '@angular/material';
 import { SnackBarHelper } from '../Snackbar/SnackbarHelper';
 import { Router } from '@angular/router';
 import { ApiRequestsBuilder } from '../Requests/ApiRequestsBuilder';
-import { Cache } from '../Auth/Cache';
-import { TokensService } from '../tokens/TokensService';
 import { ServerResponse } from '../ApiModels/ServerResponse';
+import { AuthService } from '../Auth/AuthService';
 
 @Injectable()
 export class HttpResponseInterceptor implements HttpInterceptor {
 
-  constructor(public errorsLogger: SnackBarHelper, public router: Router, public requestsBuilder: ApiRequestsBuilder, public tokensService: TokensService)
+  constructor(
+    public errorsLogger: SnackBarHelper,
+    public router: Router,
+    public requestsBuilder: ApiRequestsBuilder,
+    public authService: AuthService)
   {
     
   }
 
-  public static IsRefreshingToken: boolean;
-
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     let token: string = localStorage.getItem('token');
-
+    
     if (!token) {
       return this.handleRequest(request, next);
     }
 
-    if (!HttpResponseInterceptor.IsRefreshingToken) {
+    if (!request.headers.has('refreshtoken')) {
 
-      HttpResponseInterceptor.IsRefreshingToken = true;
+      request = request.clone({ headers: request.headers.set('refreshtoken', '1') });
 
-      return from(this.tokensService.RefreshToken())
+      return from(this.authService.RefreshToken())
         .pipe(
           switchMap(
             response => {
@@ -65,13 +65,11 @@ export class HttpResponseInterceptor implements HttpInterceptor {
   public handleRefreshTokenResponse(response: ServerResponse<string>) : string {
     if (!response.isSuccessfull) {
       this.router.navigateByUrl('/login');
-      HttpResponseInterceptor.IsRefreshingToken = false;
       return;
     }
 
-    Cache.token = response.response;
+    this.authService.token = response.response;
     localStorage.setItem('token', response.response);
-    HttpResponseInterceptor.IsRefreshingToken = false;
     return response.response;
   }
 
@@ -93,9 +91,7 @@ export class HttpResponseInterceptor implements HttpInterceptor {
 
         if (error.status == 401) {
 
-          HttpResponseInterceptor.IsRefreshingToken = true;
-
-          from(this.tokensService.RefreshToken())
+          from(this.authService.RefreshToken())
             .subscribe((result) => {
               this.handleRefreshTokenResponse(result);
             });

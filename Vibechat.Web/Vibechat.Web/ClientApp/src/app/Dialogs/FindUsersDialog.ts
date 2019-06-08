@@ -4,11 +4,10 @@ import { ChatComponent } from "../Chat/chat.component";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
 import { UserInfo } from "../Data/UserInfo";
+import { UsersService } from "../Services/UsersService";
 
 export interface InviteUsersData {
   conversationId: number;
-  requestsBuilder: ApiRequestsBuilder;
-  snackbar: SnackBarHelper;
 }
 
 @Component({
@@ -25,33 +24,31 @@ export class FindUsersDialogComponent {
 
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: InviteUsersData) { }
+    @Inject(MAT_DIALOG_DATA) public data: InviteUsersData, public usersService: UsersService, public snackBar: SnackBarHelper) {
+    this.SelectedUsers = new Array<UserInfo>();
+  }
 
-  public OnFindUsers(): void {
+  public async OnFindUsers(): Promise<void> {
 
     if (this.usernameToFind == '' || this.usernameToFind == null) {
-      this.data.snackbar.openSnackBar('Please enter a username in search bar.', 2);
+      this.snackBar.openSnackBar('Please enter a username in search bar.', 2);
       return;
     }
 
-    this.data.requestsBuilder.FindUsersByUsername(this.usernameToFind)
-      .subscribe((result) => {
+    let users = await this.usersService.FindUsersByUsername(this.usernameToFind);
 
-        if (!result.isSuccessfull) {
-          this.data.snackbar.openSnackBar(result.errorMessage);
-          return;
-        }
+    if (users == null) {
+      this.snackBar.openSnackBar('Noone was found.', 2);
 
-        if (result.response.usersFound == null) {
-          this.data.snackbar.openSnackBar('Noone was found.', 2);
+      this.FoundUsers = new Array<UserInfo>();
 
-          this.FoundUsers = new Array<UserInfo>();
+    } else {
+      this.FoundUsers = [...users]; 
+    }
 
-        } else {
-          this.FoundUsers = [...result.response.usersFound]; 
-        }
-        this.SelectedUsers = new Array<UserInfo>();
-      });
+    if (this.SelectedUsers.length != 0) {
+      this.SelectedUsers.splice(0, this.SelectedUsers.length);
+    }
 
     this.usernameToFind = '';
   }

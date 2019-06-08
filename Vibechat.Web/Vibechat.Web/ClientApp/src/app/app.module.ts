@@ -5,6 +5,7 @@ import { AppComponent } from './app.component';
 import { ApiRequestsBuilder } from './Requests/ApiRequestsBuilder';
 import { ChatModule } from './Modules/ChatModule';
 import { LoginModule } from './Modules/LoginModule';
+import { AuthService } from './Auth/AuthService';
 
 @NgModule({
   declarations: [
@@ -15,7 +16,7 @@ import { LoginModule } from './Modules/LoginModule';
     ChatModule,
     LoginModule
   ],
-  providers: [ApiRequestsBuilder],
+  providers: [ApiRequestsBuilder, AuthService],
   bootstrap: [AppComponent]
 })
 export class AppModule {}
