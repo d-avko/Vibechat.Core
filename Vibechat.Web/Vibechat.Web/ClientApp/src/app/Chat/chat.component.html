@@ -7,7 +7,7 @@
     <mat-drawer #actionsdrawer [mode]="over">
       <div class="chatactions_flex">
 
-        <button mat-button (click)="OnViewUserInfo(this.CurrentUser)">
+        <button mat-button (click)="OnViewUserInfo(this.auth.User)">
           <div class="padding10px flexaligned">
             <mat-icon>sentiment_satisfied</mat-icon>
             <span class="padding5px">My profile</span>
@@ -33,7 +33,7 @@
 
     <mat-drawer-content>
 
-      <mat-card-content *ngIf="IsAuthenticated" class="chat_wrapper_content">
+      <mat-card-content class="chat_wrapper_content">
 
         <div class="conversations_wrapper">
           <div class="conversations_wrapper_searchbar">
@@ -50,7 +50,7 @@
           </div>
 
           <searchlist-view *ngIf="SearchString != null && SearchString !== ''"
-                           [LocalConversations]="Conversations"
+                           [LocalConversations]="conversationsService.Conversations"
                            (OnViewUser)="OnViewUserInfo($event)"
                            (OnViewConversation)="OnViewGroupInfo($event)"
                            (OnViewLocalConversation)="ChangeConversation($event)"
@@ -61,9 +61,9 @@
           </searchlist-view>
 
           <conversationslist-view *ngIf="SearchString == null || SearchString === ''"
-                                  [CurrentConversation]="CurrentConversation"
+                                  [CurrentConversation]="conversationsService.CurrentConversation"
                                   class="conversations_wrapper_conversations"
-                                  [Conversations]="Conversations"
+                                  [Conversations]="conversationsService.Conversations"
                                   (OnSelectedConversationChanged)="ChangeConversation($event)">
 
           </conversationslist-view>
@@ -73,21 +73,18 @@
         <div *ngIf="IsConversationSelected()" class="messages_wrapper">
 
           <conversationHeader-view class="messages_wrapper_header"
-                                   (OnViewGroupInfo)="OnViewGroupInfo(CurrentConversation)"
-                                   [Conversation]="CurrentConversation"></conversationHeader-view>
+                                   (OnViewGroupInfo)="OnViewGroupInfo(conversationsService.CurrentConversation)"
+                                   [Conversation]="conversationsService.CurrentConversation"></conversationHeader-view>
 
           <messages-view class="messages_wrapper_messages"
                          (OnMessageRead)="ReadMessage($event)"
                          (OnViewUserInfo)="OnViewUserInfo($event)"
-                         (OnForwardMessages)="OnForwardMessages($event)"
-                         [Conversation]="CurrentConversation"
-                         [User]="CurrentUser"
-                         [Conversations]="Conversations"></messages-view>
+                         (OnForwardMessages)="OnForwardMessages($event)"></messages-view>
 
 
           <input-view class="messages_wrapper_input"
-                      [User]="CurrentUser"
-                      [Conversation]="CurrentConversation"
+                      [User]="auth.User"
+                      [Conversation]="conversationsService.CurrentConversation"
                       (OnSendMessage)="OnSendMessage($event)"
                       (OnUploadImages)="OnUploadImages($event)"></input-view>
 
@@ -97,6 +94,4 @@
 
     </mat-drawer-content>
   </mat-drawer-container>
-
-  <img *ngIf="! IsAuthenticated" src="/Assets/401.jpg" />
 </mat-card>

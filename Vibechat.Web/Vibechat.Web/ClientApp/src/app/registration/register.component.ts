@@ -6,6 +6,7 @@ import { ServerResponse } from '../ApiModels/ServerResponse';
 import { LoginComponent } from '../login/login.component';
 import { Router } from '@angular/router';
 import { ApiRequestsBuilder } from '../Requests/ApiRequestsBuilder';
+import { AuthService } from '../Auth/AuthService';
 
 @Component({
   selector: 'register-view',
@@ -20,9 +21,9 @@ export class RegisterComponent extends LoginComponent {
 
   public canLogOut: boolean = false;
 
-  constructor(requestsBuilder: ApiRequestsBuilder, snackbar: MatSnackBar, router: Router) {
+  constructor(requestsBuilder: ApiRequestsBuilder, snackbar: MatSnackBar, router: Router, auth: AuthService) {
 
-    super(requestsBuilder, snackbar, router);
+    super(requestsBuilder, snackbar, router, auth);
 
     this.registerGroup = new FormGroup(
       {

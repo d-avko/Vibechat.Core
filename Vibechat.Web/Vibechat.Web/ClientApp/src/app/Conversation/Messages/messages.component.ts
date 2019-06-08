@@ -14,6 +14,7 @@ import { ViewportScroller } from '@angular/common';
 import { ApiRequestsBuilder } from '../../Requests/ApiRequestsBuilder';
 import { MessagesDateParserService } from '../../Services/MessagesDateParserService';
 import { ConnectionManager } from '../../Connections/ConnectionManager';
+import { ConversationsService } from '../../Services/ConversationsService';
 
 export class ForwardMessagesModel {
   public forwardTo: Array<number>;
@@ -44,8 +45,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
   constructor(
     public formatter: ConversationsFormatter,
     public dialog: MatDialog,
-    public requestsBuilder: ApiRequestsBuilder,
-    public dateParser: MessagesDateParserService) {
+    public conversationsService: ConversationsService) {
     this.SelectedMessages = new Array<ChatMessage>();
   }
 
@@ -54,12 +54,6 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
   @Output() public OnViewUserInfo = new EventEmitter<UserInfo>();
 
   @Output() public OnForwardMessages = new EventEmitter<Array<ChatMessage>>();
-
-  @Input() public Conversation: ConversationTemplate;
-
-  @Input() public Conversations: Array<ConversationTemplate>;
-
-  @Input() public User: UserInfo;
 
   public MessagesLoading: boolean;
 
@@ -78,7 +72,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
   public SelectedMessages: Array<ChatMessage>;
 
   ngAfterViewInit() {
-    this.ScrollToMessage(this.Conversation.messages.length - 1);
+    this.ScrollToMessage(this.conversationsService.CurrentConversation.messages.length - 1);
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -88,128 +82,63 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
       this.IsConversationHistoryEnd = false;
       this.SelectedMessages = new Array<ChatMessage>();
       this.UpdateMessagesIfNotUpdated();
-      this.ScrollToMessage(this.Conversation.messages.length - 1);
+      this.ScrollToMessage(this.conversationsService.CurrentConversation.messages.length - 1);
     }
   }
 
   ngAfterViewChecked() {
 
-    if (!this.Conversation.messages || this.Conversation.messages.length == 0) {
+    if (!this.conversationsService.CurrentConversation.messages || this.conversationsService.CurrentConversation.messages.length == 0) {
       return;
     }
 
     this.ReadMessagesInViewport();
   }
 
-  public UpdateMessages() {
+  public async UpdateMessages() {
 
     if (!this.MessagesLoading && !this.IsConversationHistoryEnd) {
       this.MessagesLoading = true;
 
-      if (this.Conversation.messages == null) {
+      if (this.conversationsService.CurrentConversation.messages == null) {
         return;
       }
 
-      this.requestsBuilder.GetConversationMessages(
-        this.Conversation.messages.length,
-        MessagesComponent.MessagesBufferLength,
-        this.Conversation.conversationID)
+      let result = await this.conversationsService.GetMessagesForConversation(MessagesComponent.MessagesBufferLength);
 
-        .subscribe((result) => {
+      if (result == null || result.length == 0) {
+        this.MessagesLoading = false;
+        this.IsConversationHistoryEnd = true;
+        return;
+      }
 
-          if (!result.isSuccessfull) {
-            this.MessagesLoading = false;
-            return;
-          }
-
-          //server sent zero messages, we reached end of our history.
-
-          if (result.response == null || result.response.length == 0) {
-            this.MessagesLoading = false;
-            this.IsConversationHistoryEnd = true;
-
-            return;
-          }
-
-
-          result.response = result.response.sort(this.MessagesSortFunc);
-
-          this.dateParser.ParseStringDatesInMessages(result.response);
-
-          //append old messages to new ones.
-          this.Conversation.messages = [...result.response.concat(this.Conversation.messages)];
-          this.MessagesLoading = false;
-
-          this.ScrollToMessage(result.response.length);
-        }
-        )
+      this.ScrollToMessage(result.length);
     }
 
   }
 
-  public DeleteMessages() {
-
-    let currentConversationId = this.Conversation.conversationID;
-
-    let notLocalMessages = this.SelectedMessages.filter(x => x.state != MessageState.Pending)
-
-    //delete local unsent messages
-    this.Conversation.messages = this.Conversation.messages
-      .filter(msg => notLocalMessages.findIndex(selected => selected.id == msg.id) == -1);
-
-    if (notLocalMessages.length == 0) {
-      return;
-    }
-
-    let conversationId = this.Conversation.conversationID;
-
-    this.requestsBuilder.DeleteMessages(notLocalMessages, conversationId)
-      .subscribe(
-        (response) => {
-
-          if (!response.isSuccessfull) {
-            return;
-          }
-
-          //delete messages locally
-
-          let conversation = this.Conversations.find(x => x.conversationID == conversationId);
-
-          conversation.messages = conversation
-            .messages
-            .filter(msg => this.SelectedMessages.findIndex(selected => selected.id == msg.id) == -1);
-
-          this.ScrollToStart();
-
-          this.SelectedMessages.splice(0, this.SelectedMessages.length);
-        }
-      );
+  public async DeleteMessages() {
+    await this.conversationsService.DeleteMessages(this.SelectedMessages);
   }
 
   public ForwardMessages() {
     this.OnForwardMessages.emit(this.SelectedMessages);
   }
 
-  private MessagesSortFunc(left: ChatMessage, right: ChatMessage): number {
-    if (left.timeReceived < right.timeReceived) return -1;
-    if (left.timeReceived > right.timeReceived) return 1;
-    return 0;
-  }
-
-
+  
   public UpdateMessagesIfNotUpdated() {
 
-    if (this.Conversation.messages == null) {
+    if (this.conversationsService.CurrentConversation.messages == null) {
       return;
     }
     
-    if (this.Conversation.messages.length <= 1) {
+    if (this.conversationsService.CurrentConversation.messages.length <= 1) {
       this.UpdateMessages();
     }
   }
 
   public ScrollToStart() {
-    this.ScrollToMessage(this.Conversation.messages.length);
+    this.ScrollToMessage(this.conversationsService.CurrentConversation.messages.length);
   }
 
   public ViewUserInfo(event: any, user: UserInfo) {
@@ -222,8 +151,8 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     let boundaries = this.CalculateMessagesViewportBoundaries();
 
     for (let i = boundaries[0]; i < boundaries[1] + 1; ++i) {
-      if (this.Conversation.messages[i].state == MessageState.Delivered) {
-        this.OnMessageRead.emit(this.Conversation.messages[i]);
+      if (this.conversationsService.CurrentConversation.messages[i].state == MessageState.Delivered) {
+        this.OnMessageRead.emit(this.conversationsService.CurrentConversation.messages[i]);
       }
     }
   }
@@ -289,7 +218,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
   public OnMessagesScrolled(messageIndex: number): void {
     // user scrolled to last loaded message, load more messages
 
-    if (this.Conversation.messages == null) {
+    if (this.conversationsService.CurrentConversation.messages == null) {
       return;
     }
 
@@ -300,7 +229,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
 
     let currentMessageIndex = this.CalculateCurrentMessageIndex();
 
-    if (this.Conversation.messages.length - currentMessageIndex > MessagesComponent.MessagesToScrollForGoBackButtonToShowUp) {
+    if (this.conversationsService.CurrentConversation.messages.length - currentMessageIndex > MessagesComponent.MessagesToScrollForGoBackButtonToShowUp) {
       this.IsScrollingAssistNeeded = true;
     } else {
       this.IsScrollingAssistNeeded = false;
@@ -326,11 +255,11 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
   }
 
   public IsPreviousMessageOnAnotherDay(message: ChatMessage): boolean {
-    if (this.Conversation.messages == null) {
+    if (this.conversationsService.CurrentConversation.messages == null) {
       return false;
     }
 
-    let messageIndex = this.Conversation.messages.findIndex((x) => x.id == message.id);
+    let messageIndex = this.conversationsService.CurrentConversation.messages.findIndex((x) => x.id == message.id);
 
     if (messageIndex == -1) {
       return false;
@@ -340,15 +269,15 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
       return true;
     }
 
-    return (<Date>message.timeReceived).getDay() != (<Date>this.Conversation.messages[messageIndex - 1].timeReceived).getDay();
+    return (<Date>message.timeReceived).getDay() != (<Date>this.conversationsService.CurrentConversation.messages[messageIndex - 1].timeReceived).getDay();
   }
 
   public IsLastMessage(message: ChatMessage): boolean {
 
-    if (this.Conversation.messages == null)
+    if (this.conversationsService.CurrentConversation.messages == null)
       return false;
 
-    return this.Conversation.messages.findIndex((x) => x.id == message.id) == 0;
+    return this.conversationsService.CurrentConversation.messages.findIndex((x) => x.id == message.id) == 0;
   }
 
   public IsMessageSelected(message: ChatMessage): boolean {
@@ -356,11 +285,11 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
   }
 
   public IsFirstMessageInSequence(message: ChatMessage): boolean {
-    if (this.Conversation.messages == null) {
+    if (this.conversationsService.CurrentConversation.messages == null) {
       return false;
     }
 
-    let messageIndex = this.Conversation.messages.findIndex((x) => x.id == message.id);
+    let messageIndex = this.conversationsService.CurrentConversation.messages.findIndex((x) => x.id == message.id);
 
     if (messageIndex == 0) {
       return true;
@@ -370,7 +299,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
       return false;
     }
 
-    return this.Conversation.messages[messageIndex - 1].user.userName != message.user.userName;
+    return this.conversationsService.CurrentConversation.messages[messageIndex - 1].user.userName != message.user.userName;
   }
 
   public IsImage(message: ChatMessage): boolean {

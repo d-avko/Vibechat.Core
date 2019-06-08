@@ -1,13 +1,14 @@
-import { Cache } from "../Auth/Cache";
 import { Injectable } from "@angular/core"
 import { ChatMessage } from "../Data/ChatMessage";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
-import { retry } from "rxjs/operators";
+import { AuthService } from "../Auth/AuthService";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ConversationsFormatter{
+
+  constructor(private auth: AuthService) {}
 
   public static messageMaxLength = 22;
 
@@ -19,7 +20,7 @@ export class ConversationsFormatter{
 
     let message = conversation.messages[conversation.messages.length - 1];
 
-    let user = message.user.id == Cache.UserCache.id ? 'You' : message.user.userName;
+    let user = message.user.id == this.auth.User.id ? 'You' : message.user.userName;
 
     if (message.forwardedMessage) {
       return "Forwarded message";

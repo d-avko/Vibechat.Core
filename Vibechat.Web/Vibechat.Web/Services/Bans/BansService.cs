@@ -10,16 +10,20 @@ namespace Vibechat.Web.Services.Bans
 {
     public class BansService
     {
+        private readonly IUsersConversationsRepository usersConversationsRepository;
+
         public BansService(
             IUsersBansRepository usersBansRepository, 
             IConversationsBansRepository conversationsBansRepository,
             IUsersRepository usersRepository,
-            IConversationRepository conversationRepository)
+            IConversationRepository conversationRepository,
+            IUsersConversationsRepository usersConversationsRepository)
         {
             UsersBansRepository = usersBansRepository;
             ConversationsBansRepository = conversationsBansRepository;
             UsersRepository = usersRepository;
             ConversationRepository = conversationRepository;
+            this.usersConversationsRepository = usersConversationsRepository;
         }
 
         public IUsersBansRepository UsersBansRepository { get; }
@@ -62,7 +66,7 @@ namespace Vibechat.Web.Services.Bans
             }
         }
 
-        public async Task BanUser(string UserToBanId, string whoAccessedId)
+        public async Task BanDialog(string UserToBanId, string whoAccessedId)
         {
             if (UserToBanId == whoAccessedId)
             {
@@ -71,7 +75,7 @@ namespace Vibechat.Web.Services.Bans
 
             UserInApplication bannedBy = await UsersRepository.GetById(whoAccessedId);
             UserInApplication banned = await UsersRepository.GetById(UserToBanId);
-
+            
             if (banned == null || bannedBy == null)
             {
                 throw new FormatException("Wrong id of person to ban.");
@@ -84,6 +88,13 @@ namespace Vibechat.Web.Services.Bans
             catch
             {
                 throw new FormatException("User is already banned.");
+            }
+
+            UsersConversationDataModel dialog;
+
+            if((dialog = await usersConversationsRepository.GetDialog(UserToBanId, whoAccessedId)) != null)
+            {
+                ConversationsBansRepository.BanUserInGroup(banned, dialog.Conversation);
             }
         }
 
@@ -114,6 +125,13 @@ namespace Vibechat.Web.Services.Bans
             catch
             {
                 throw new FormatException("Wrong id of a person to unban.");
+            }
+
+            UsersConversationDataModel dialog;
+
+            if ((dialog = await usersConversationsRepository.GetDialog(userId, whoUnbans)) != null)
+            {
+                ConversationsBansRepository.UnbanUserInGroup(userId, dialog.Conversation.ConvID);
             }
         }
 

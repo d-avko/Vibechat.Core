@@ -5,7 +5,7 @@ var Cache_1 = require("../Auth/Cache");
 var ConnectionManager = /** @class */ (function () {
     function ConnectionManager() {
         this.connection = new signalR.HubConnectionBuilder()
-            .withUrl("/hubs/chat", { accessTokenFactory: function () { return Cache_1.Cache.JwtToken; } })
+            .withUrl("/hubs/chat", { accessTokenFactory: function () { return Cache_1.AuthService.JwtToken; } })
             .build();
     }
     ConnectionManager.prototype.Start = function (OnConnectingNotify, OnMessageReceived, OnAddedToGroup, OnRemovedFromGroup, OnDisconnectedNotify) {

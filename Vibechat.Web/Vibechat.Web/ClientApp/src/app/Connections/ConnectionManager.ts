@@ -1,17 +1,14 @@
 import * as signalR from "@aspnet/signalr";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { ChatMessage } from "../Data/ChatMessage";
-import { Cache } from "../Auth/Cache";
 import { Injectable } from "@angular/core";
 import { MessageReceivedModel } from "../Shared/MessageReceivedModel";
 import { AddedToGroupModel } from "../Shared/AddedToGroupModel";
 import { RemovedFromGroupModel } from "../Shared/RemovedFromGroupModel";
-import { ConversationIdsFactory } from "../Data/ConversationIdsFactory";
-import { MessageReceivedDelegate } from "../Delegates/MessageReceivedDelegate";
-import { AddedToConversationDelegate } from "../Delegates/AddedToConversationDelegate";
 import { UserInfo } from "../Data/UserInfo";
-import { ErrorDelegate } from "../Delegates/ErrorDelegate";
-import { RemovedFromGroupDelegate } from "../Delegates/RemovedFromGroupDelegate";
+import { ConversationsService } from "../Services/ConversationsService";
+import { MessageReportingService } from "../Services/MessageReportingService";
+import { AuthService } from "../Auth/AuthService";
 
 @Injectable({
   providedIn: 'root'
@@ -20,89 +17,53 @@ import { RemovedFromGroupDelegate } from "../Delegates/RemovedFromGroupDelegate"
 export class ConnectionManager {
   private connection: signalR.HubConnection;
 
-  private convIdsFactory: ConversationIdsFactory;
+  private ConversationsService: ConversationsService;
 
-  private onMessageReceived: MessageReceivedDelegate;
-
-  private onAddedToGroup: AddedToConversationDelegate;
-
-  private onError: ErrorDelegate;
-
-  private OnRemovedFromGroupDelegate: RemovedFromGroupDelegate;
-
-  private OnDisconnected: () => void;
-
-  private OnConnecting: () => void;
-
-  private OnConnected: () => void;
-
-  private OnMessageDelivered: (id: number, clientMessageId: number, conversationId: number) => void;
-
-  private OnMessageRead: (id: number, conversationId: number) => void;
-
-  constructor(
-    convIdsFactory: ConversationIdsFactory,
-    onMessageReceived: MessageReceivedDelegate,
-    onAddedToGroup: AddedToConversationDelegate,
-    onError: ErrorDelegate,
-    OnRemovedFromGroupDelegate: RemovedFromGroupDelegate,
-    OnDisconnected: () => void,
-    OnConnecting: () => void,
-    OnConnected: () => void,
-    OnMessageDelivered: (id: number, clientMessageId: number, conversationId: number) => void,
-    OnMessageRead: (id: number, conversationId: number) => void) {
-
-    this.onMessageReceived = onMessageReceived;
-    this.onAddedToGroup = onAddedToGroup;
-    this.convIdsFactory = convIdsFactory;
-    this.onError = onError;
-    this.OnRemovedFromGroupDelegate = OnRemovedFromGroupDelegate;
-    this.OnDisconnected = OnDisconnected;
-    this.OnConnecting = OnConnecting;
-    this.OnConnected = OnConnected;
-    this.OnMessageDelivered = OnMessageDelivered;
-    this.OnMessageRead = OnMessageRead;
+  public setConversationsService(service: ConversationsService) {
+    this.ConversationsService = service;
   }
+
+  constructor(private messagesService: MessageReportingService, private auth: AuthService) {}
 
   public Start(): void {
 
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl("/hubs/chat", { accessTokenFactory: () => Cache.token })
+      .withUrl("/hubs/chat", { accessTokenFactory: () => this.auth.token })
       .build();
 
-    this.OnConnecting();
+    this.messagesService.OnConnecting();
 
     this.connection.start().then(
       () => {
-        this.InitiateConnections(this.convIdsFactory());
-        this.OnConnected();
+        this.InitiateConnections(this.ConversationsService.GetConversationsIds());
+        this.messagesService.OnConnected();
       });
   
-    this.connection.onclose(() => this.OnDisconnected());
+    this.connection.onclose(() => this.messagesService.OnDisconnected());
 
 
     this.connection.on("ReceiveMessage", (senderId: string, message: ChatMessage, conversationId: number) => {
-      this.onMessageReceived(new MessageReceivedModel({ senderId: senderId, message: message, conversationId: conversationId }));
+      this.ConversationsService.OnMessageReceived(new MessageReceivedModel({ senderId: senderId, message: message, conversationId: conversationId }));
     });
 
     this.connection.on("AddedToGroup", (conversation: ConversationTemplate, user: UserInfo) => {
-      this.onAddedToGroup(new AddedToGroupModel({ conversation: conversation, user: user}));
+      this.ConversationsService.OnAddedToGroup(new AddedToGroupModel({ conversation: conversation, user: user}));
     });
 
     this.connection.on("Error", (error: string) => {
-      this.onError(error);
+      this.messagesService.OnError(error);
     });
 
     this.connection.on("RemovedFromGroup", (userId: string, conversationId: number) => {
-      this.OnRemovedFromGroupDelegate(new RemovedFromGroupModel({ userId: userId, conversationId: conversationId }));
+      this.ConversationsService.OnRemovedFromGroup(new RemovedFromGroupModel({ userId: userId, conversationId: conversationId }));
     });
 
     this.connection.on("MessageDelivered", (msgId: number, clientMessageId: number, conversationId: number) => {
-      this.OnMessageDelivered(msgId, clientMessageId, conversationId);
+      this.ConversationsService.OnMessageDelivered(msgId, clientMessageId, conversationId);
     });
 
     this.connection.on("MessageRead", (msgId: number, conversationId: number) => {
-      this.OnMessageRead(msgId, conversationId);
+      this.ConversationsService.OnMessageRead(msgId, conversationId);
     });
   }
 

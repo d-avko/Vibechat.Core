@@ -2,7 +2,8 @@ import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { UserInfo } from "../Data/UserInfo";
 import { Output, EventEmitter, Component, Input } from "@angular/core";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
-import { Cache } from "../Auth/Cache";
+import { ConversationsService } from "../Services/ConversationsService";
+import { UsersService } from "../Services/UsersService";
 
 @Component({
   selector: 'searchlist-view',
@@ -15,8 +16,6 @@ export class SearchListComponent {
 
   public Users: Array<UserInfo>;
 
-  private requestsBuilder: ApiRequestsBuilder;
-
   @Output() public OnViewUser = new EventEmitter<UserInfo>();
   @Output() public OnViewConversation = new EventEmitter<ConversationTemplate>();
   @Output() public OnViewLocalConversation = new EventEmitter<ConversationTemplate>();
@@ -28,16 +27,17 @@ export class SearchListComponent {
   private IsSearchingForGroups: boolean;
   private IsSearchingForUsers: boolean;
 
-  constructor(requestsBuilder: ApiRequestsBuilder) {
-    this.requestsBuilder = requestsBuilder;
+  constructor(private conversationsService: ConversationsService, private usersService: UsersService) {
     this.FoundLocalConversations = new Array<ConversationTemplate>();
   }
 
-  public Search() {
+  public async Search() {
 
     while (this.FoundLocalConversations.length != 0) {
       this.FoundLocalConversations.pop();
     }
+
+    //searching groups and dialogs locally
 
     this.LocalConversations.forEach(
       (conversation) => {
@@ -54,57 +54,41 @@ export class SearchListComponent {
 
       });
 
+    //Searching users globally
+
     if (this.IsSearchingForUsers) {
       return;
     }
 
     this.IsSearchingForUsers = true;
 
-    this.requestsBuilder.FindUsersByUsername(this.SearchString)
-      .subscribe(
-        (result) => {
-          this.IsSearchingForUsers = false;
+    let result = await this.usersService.FindUsersByUsername(this.SearchString);
 
-          if (!result.isSuccessfull) {
-            this.OnError.emit(result.errorMessage);
-            return;
-          }
+    this.IsSearchingForUsers = false;
 
-          if (result.response.usersFound == null) {
-            return;
-          }
+    if (result == null) {
+      return;
+    }
 
-          this.Users = [...result.response.usersFound];
-        },
-        (error) => {
-          this.OnApiError.emit(error);
-          this.IsSearchingForUsers = false;
-        }
-    );
+    this.Users = [...result];
 
     if (this.IsSearchingForGroups) {
       return;
     }
 
+    //searching groups globally
+
     this.IsSearchingForGroups = true;
 
-    this.requestsBuilder.SearchForGroups(this.SearchString)
-      .subscribe(
-        (result) => {
-          this.IsSearchingForGroups = false;
+    let response = await this.conversationsService.FindGroupsByName(this.SearchString);
 
-          if (!result.isSuccessfull) {
-            this.OnError.emit(result.errorMessage);
-            return;
-          }
+    this.IsSearchingForGroups = false;
 
-          this.GlobalConversations = [...result.response];
-        },
-        (error) => {
-          this.IsSearchingForGroups = false;
-          this.OnApiError.emit(error);
-        }
-      );
+    if (response == null) {
+      return;
+    }
+
+    this.GlobalConversations = [...response];
   }
 
   public ViewLocalConversation(conversation: ConversationTemplate): void {
