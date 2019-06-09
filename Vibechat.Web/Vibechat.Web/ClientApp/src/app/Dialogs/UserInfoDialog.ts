@@ -5,6 +5,9 @@ import { UserInfo } from "../Data/UserInfo";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { ConversationsFormatter } from "../Formatters/ConversationsFormatter";
 import { ChangeNameDialogComponent } from "./ChangeNameDialog";
+import { ConversationsService } from "../Services/ConversationsService";
+import { UsersService } from "../Services/UsersService";
+import { ViewAttachmentsDialogComponent } from "./ViewAttachmentsDialog";
 
 export interface UserInfoData {
   user: UserInfo;
@@ -18,88 +21,85 @@ export interface UserInfoData {
 })
 export class UserInfoDialogComponent {
 
-  public OnRemoveDialogWith = new EventEmitter<UserInfo>();
-
-  public OnCreateDialogWith = new EventEmitter<UserInfo>();
-
-  public OnBlockUser = new EventEmitter<UserInfo>();
-
-  public OnUpdateProfilePicture = new EventEmitter<File>();
-
-  public OnChangeName = new EventEmitter<string>();
-
-  public OnChangeLastname = new EventEmitter<string>();
-
-  public OnUnblockUser = new EventEmitter<UserInfo>();
-
-  public OnViewAttachmentsOf = new EventEmitter<UserInfo>();
-
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
     @Inject(MAT_DIALOG_DATA) public data: UserInfoData,
-    public ChangeNameDialog: MatDialog,
-    public formatter: ConversationsFormatter) { }
+    public dialog: MatDialog,
+    public formatter: ConversationsFormatter,
+    public conversationsService: ConversationsService,
+    public usersService: UsersService
+    ) { }
 
   public HasConversationWith() : boolean {
     if (this.data.Conversations == null) {
       return false;
     }
 
-    return this.data.Conversations.find(x => !x.isGroup && x.dialogueUser.id == this.data.user.id) != null;
+    return this.conversationsService.FindDialogWith(this.data.user) != null;
   }
 
-  public DeleteConversation() : void {
-    this.OnRemoveDialogWith.emit(this.data.user);
+  public DeleteConversation(): void {
+    this.conversationsService.RemoveDialogWith(this.data.user);
+    this.dialogRef.close();
   }
 
   public CreateDialog(): void {
-    this.OnCreateDialogWith.emit(this.data.user);
+    this.conversationsService.CreateDialogWith(this.data.user);
   }
 
   public ViewAttachments() {
-    this.OnViewAttachmentsOf.emit(this.data.user);
+    let conversation = this.conversationsService.FindDialogWith(this.data.user);
+
+    if (conversation) {
+      const attachmentsDialogRef = this.dialog.open(ViewAttachmentsDialogComponent, {
+        width: '450px',
+        data: {
+          conversation: conversation
+        }
+      });
+    }
   }
 
-  public Block(): void {
-    this.OnBlockUser.emit(this.data.user);
+  public async Block() {
+    await this.usersService.BlockUser(this.data.user);
   }
 
-  public UnBlock(): void {
-    this.OnUnblockUser.emit(this.data.user);
+  public async UnBlock() {
+    await this.usersService.UnblockUser(this.data.user);
   }
 
-  public UpdateThumbnail(event: any): void {
-    this.OnUpdateProfilePicture.emit(event.target.files[0]);
+  public async UpdateThumbnail(event: any) {
+    await this.usersService.UpdateProfilePicture(event.target.files[0]);
   }
 
   public ChangeName(): void {
-    const groupInfoRef = this.ChangeNameDialog.open(ChangeNameDialogComponent, {
+    const groupInfoRef = this.dialog.open(ChangeNameDialogComponent, {
       width: '450px'
     });
 
     groupInfoRef.afterClosed().subscribe(
-      (name) => {
-        if (name == null || name == '') {
+      async (name) => {
+        if (!name) {
           return;
         }
 
-        this.OnChangeName.emit(name);
+        await this.usersService.ChangeName(name);
       }
     )
   }
 
   public ChangeLastname(): void {
-    const groupInfoRef = this.ChangeNameDialog.open(ChangeNameDialogComponent, {
+    const groupInfoRef = this.dialog.open(ChangeNameDialogComponent, {
       width: '450px'
     });
 
     groupInfoRef.afterClosed().subscribe(
-      (name) => {
-        if (name == null || name == '') {
+      async (name) => {
+        if (!name) {
           return;
         }
 
-        this.OnChangeLastname.emit(name);
+        await this.usersService.ChangeLastname(name);
       }
     )
   }

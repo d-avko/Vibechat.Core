@@ -5,6 +5,9 @@ import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { UserInfo } from "../Data/UserInfo";
 import { ConversationsFormatter } from "../Formatters/ConversationsFormatter";
 import { ChangeNameDialogComponent } from "./ChangeNameDialog";
+import { FindUsersDialogComponent } from "./FindUsersDialog";
+import { ConversationsService } from "../Services/ConversationsService";
+import { ViewAttachmentsDialogComponent } from "./ViewAttachmentsDialog";
 
 export interface  GroupInfoData {
   Conversation: ConversationTemplate;
@@ -18,37 +21,19 @@ export interface  GroupInfoData {
 })
 export class GroupInfoDialogComponent {
 
-  public OnKickUser = new EventEmitter<UserInfo>();
-
-  public OnClearMessages = new EventEmitter<ConversationTemplate>();
-
-  public OnChangeName = new EventEmitter<string>();
-
-  public OnChangeThumbnail = new EventEmitter<File>();
-
-  public OnLeaveGroup = new EventEmitter<ConversationTemplate>();
-
-  public OnInviteUsers = new EventEmitter<ConversationTemplate>();
-
   public OnViewUserInfo = new EventEmitter<UserInfo>();
 
   public OnJoinGroup = new EventEmitter<ConversationTemplate>();
-
-  public OnBanUser = new EventEmitter<UserInfo>();
-
-  public OnUnBanUser = new EventEmitter<UserInfo>();
-
-  public OnRemoveGroup = new EventEmitter<ConversationTemplate>();
 
   public OnViewAttachments = new EventEmitter<ConversationTemplate>();
 
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: GroupInfoData, public formatter: ConversationsFormatter, public ChangeNameDialog: MatDialog) { }
-
-  onNoClick(): void {
-    this.dialogRef.close();
-  }
+    public dialog: MatDialog ,
+    @Inject(MAT_DIALOG_DATA) public data: GroupInfoData,
+    public formatter: ConversationsFormatter,
+    public conversationsService: ConversationsService,
+    public ChangeNameDialog: MatDialog) { }
 
   public ViewUserInfo(user: UserInfo) {
     this.OnViewUserInfo.emit(user);
@@ -58,12 +43,13 @@ export class GroupInfoDialogComponent {
     return this.data.ExistsInThisGroup;
   }
 
-  public ClearMessages(){
-    this.OnClearMessages.emit(this.data.Conversation);
+  public async ClearMessages() {
+    await this.conversationsService.RemoveAllMessages(this.data.Conversation);
+    this.dialogRef.close();
   }
 
   public RemoveGroup() {
-    this.OnRemoveGroup.emit(this.data.Conversation);
+    this.conversationsService.RemoveGroup(this.data.Conversation);
   }
 
   public JoinGroup() {
@@ -71,31 +57,37 @@ export class GroupInfoDialogComponent {
   }
 
   public LeaveGroup() {
-    this.OnLeaveGroup.emit(this.data.Conversation);
+    this.conversationsService.Leave(this.data.Conversation);
+    this.dialogRef.close();
   }
 
   public KickUser(user: UserInfo) {
-    this.OnKickUser.emit(user);
+    this.conversationsService.KickUser(user);
   }
 
-  public BanUser(user: UserInfo) {
-    this.OnBanUser.emit(user);
+  public async BanUser(user: UserInfo) {
+    await this.conversationsService.BanFromConversation(user);
   }
 
-  public UnbanUser(user: UserInfo) {
-    this.OnUnBanUser.emit(user);
+  public async UnbanUser(user: UserInfo) {
+    await this.conversationsService.UnbanFromConversation(user);
   }
 
-  public ViewAttachments(){
-    this.OnViewAttachments.emit(this.data.Conversation);
+  public ViewAttachments() {
+    const attachmentsDialogRef = this.dialog.open(ViewAttachmentsDialogComponent, {
+      width: '450px',
+      data: {
+        conversation: this.data.Conversation
+      }
+    });
   }
 
   public IsCurrentUserCreatorOfConversation() {
     return this.data.user.id == this.data.Conversation.creator.id;
   }
 
-  public UpdateThumbnail(event: any) {
-    this.OnChangeThumbnail.emit(event.target.files[0]);
+  public async UpdateThumbnail(event: any) {
+    await this.conversationsService.ChangeThumbnail(event.target.files[0]);
   }
 
   public ChangeName() {
@@ -105,18 +97,28 @@ export class GroupInfoDialogComponent {
     });
 
     groupInfoRef.afterClosed().subscribe(
-      (name) => {
+      async (name) => {
         if (name == null || name == '') {
           return;
         }
 
-        this.OnChangeName.emit(name);
+        await this.conversationsService.ChangeConversationName(name);
       }
     )
   }
 
   public InviteUsers() {
-    this.OnInviteUsers.emit(this.data.Conversation);
+    const dialogRef = this.dialog.open(FindUsersDialogComponent, {
+      width: '350px',
+      data: {
+        conversationId: this.data.Conversation.conversationID
+      }
+    });
+
+    dialogRef.beforeClosed().subscribe(users => {
+
+      this.conversationsService.InviteUsersToGroup(users, this.data.Conversation);
+    });
   }
 
 }

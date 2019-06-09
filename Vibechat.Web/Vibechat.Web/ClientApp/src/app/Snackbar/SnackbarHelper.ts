@@ -1,8 +1,8 @@
 import { MatSnackBar } from "@angular/material";
-import { Component } from "@angular/core";
+import { Injectable } from "@angular/core";
 
-@Component({
-  selector: 'snackbar-custom'
+@Injectable({
+  providedIn: 'root'
 })
 export class SnackBarHelper {
   durationInSeconds = 4.5;

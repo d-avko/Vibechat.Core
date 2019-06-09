@@ -6,7 +6,6 @@ import {
 import { of, Observable } from 'rxjs';
 import { catchError, last, map, tap } from 'rxjs/operators';
 import { SnackBarHelper } from '../Snackbar/SnackbarHelper';
-import { MatSnackBar } from '@angular/material';
 
 @Injectable()
 export class UploaderService {
