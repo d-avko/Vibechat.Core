@@ -44,11 +44,12 @@ export class ChatComponent implements OnInit {
   @ViewChild(MessagesComponent) messages: MessagesComponent;
   @ViewChild(MatDrawer) sideDrawer: MatDrawer;
   @ViewChild(SearchListComponent) searchList: SearchListComponent;
+  over: any;
 
   constructor(
     public dialog: MatDialog,
     public formatter: ConversationsFormatter,
-    private auth: AuthService,
+    public auth: AuthService,
     private usersService: UsersService,
     private conversationsService: ConversationsService) { }
 
@@ -58,24 +59,6 @@ export class ChatComponent implements OnInit {
     this.UpdateConversations();
 
     await this.usersService.UpdateUserInfo(this.auth.User.id);
-  }
-
-  public OnForwardMessages(values: Array<ChatMessage>) {
-    let forwardMessagesDialog = this.dialog.open(
-      ForwardMessagesDialogComponent,
-      {
-        data: {
-          conversations: this.conversationsService.Conversations
-        }
-      }
-    );
-
-    forwardMessagesDialog
-      .beforeClosed()
-      .subscribe((result: Array<ConversationTemplate>) => {
-
-        this.conversationsService.ForwardMessagesTo(result, values);
-      })
   }
 
   public async OnViewGroupInfo(group: ConversationTemplate) : Promise<void> {
@@ -97,32 +80,6 @@ export class ChatComponent implements OnInit {
     });
 
     groupInfoRef.componentInstance
-      .OnInviteUsers
-      .subscribe((group: ConversationTemplate) => this.OnInviteUsersToGroup(group));
-
-    groupInfoRef.componentInstance
-      .OnChangeName
-      .subscribe(async (name: string) => await this.OnChangeConversationName(name));
-
-    groupInfoRef.componentInstance
-      .OnLeaveGroup
-      .subscribe((group: ConversationTemplate) => {
-        this.OnLeaveGroup(group);
-        groupInfoRef.close();
-      });
-
-    groupInfoRef.componentInstance
-      .OnChangeThumbnail
-      .subscribe(async (file: File) => await this.OnChangeGroupThumbnail(file));
-
-    groupInfoRef.componentInstance
-      .OnClearMessages
-      .subscribe((async (group: ConversationTemplate) => {
-        await this.OnRemoveAllMessages(group);
-        groupInfoRef.close();
-      }));
-
-    groupInfoRef.componentInstance
       .OnViewUserInfo
       .subscribe((user: UserInfo) => this.OnViewUserInfo(user));
 
@@ -132,43 +89,10 @@ export class ChatComponent implements OnInit {
         groupInfoRef.close();
         this.OnJoinGroup(group);
       });
-
-    groupInfoRef.componentInstance.OnKickUser
-      .subscribe((user: UserInfo) => this.OnKickUser(user));
-
-    groupInfoRef.componentInstance.OnBanUser
-      .subscribe(async (user: UserInfo) => await this.BanFromConversation(user));
-
-    groupInfoRef.componentInstance.OnUnBanUser
-      .subscribe(async (user: UserInfo) => await this.UnbanFromConversation(user));
-
-    groupInfoRef.componentInstance.OnRemoveGroup
-      .subscribe((group: ConversationTemplate) => {
-       this.OnRemoveGroup(group)
-      });
-
-    groupInfoRef.componentInstance.OnViewAttachments
-      .subscribe((group: ConversationTemplate) => {
-        this.ViewAttachments(group);
-      });
-
-  
   }
 
-  public OnRemoveGroup(group: ConversationTemplate) {
-    this.conversationsService.RemoveGroup(group);
-  }
-
-  public OnKickUser(user: UserInfo) {
-    this.conversationsService.KickUser(user);
-  }
-
-  public async UnbanFromConversation(user: UserInfo) {
-    await this.conversationsService.UnbanFromConversation(user);
-  }
-
-  public async BanFromConversation(userToBan: UserInfo) {
-    await this.conversationsService.BanFromConversation(userToBan);
+  public OnLogOut(): void {
+    this.auth.LogOut();
   }
 
   public OnJoinGroup(conversation: ConversationTemplate) {
@@ -187,52 +111,6 @@ export class ChatComponent implements OnInit {
         Conversations: this.conversationsService.Conversations
       }
     });
-
-    userInfoRef.componentInstance.OnBlockUser
-      .subscribe(async (user: UserInfo) => {
-        await this.BlockUser(user);
-      });
-
-    userInfoRef.componentInstance.OnUnblockUser
-      .subscribe(async (user: UserInfo) => {
-        await this.OnUnblockUser(user);
-      });
-
-    userInfoRef.componentInstance.OnChangeLastname
-      .subscribe(async (lastName: string) => {
-
-        await this.ChangeThisUserLastname(lastName);
-      });
-
-    userInfoRef.componentInstance.OnChangeName
-      .subscribe(async (name: string) => {
-        await this.ChangeThisUserFirstname(name);
-      });
-
-    userInfoRef.componentInstance.OnCreateDialogWith
-      .subscribe((user: UserInfo) => {
-        this.CreateDialogWith(user);
-      });
-
-    userInfoRef.componentInstance.OnRemoveDialogWith
-      .subscribe((user: UserInfo) => {
-        this.RemoveDialogWith(user);
-        userInfoRef.close();
-      });
-
-    userInfoRef.componentInstance.OnUpdateProfilePicture
-      .subscribe(async (file: File) => {
-        await this.UpdateProfilePicture(file);
-      });
-
-    userInfoRef.componentInstance.OnViewAttachmentsOf
-      .subscribe((user: UserInfo) => {
-        this.ViewAttachmentsOf(user)
-      });
-  }
-
-  public async UpdateProfilePicture(file: File) {
-    await this.usersService.UpdateProfilePicture(file);
   }
 
   public RemoveDialogWith(user: UserInfo) {
@@ -241,52 +119,6 @@ export class ChatComponent implements OnInit {
 
   public CreateDialogWith(user: UserInfo) {
     this.conversationsService.CreateDialogWith(user);
-  }
-
-  public async ChangeThisUserLastname(name: string) {
-    await this.usersService.ChangeLastname(name);
-  }
-
-  public async ChangeThisUserFirstname(name: string) {
-    await this.usersService.ChangeName(name);
-  }
-
-  public async BlockUser(userToBan: UserInfo) {
-
-    await this.usersService.BlockUser(userToBan);
-  }
-
-  public ViewAttachmentsOf(user: UserInfo) {
-    let conversation = this.conversationsService.FindDialogWith(user);
-
-    if (conversation) {
-      const attachmentsDialogRef = this.dialog.open(ViewAttachmentsDialogComponent, {
-        width: '450px',
-        data: {
-          conversation: conversation
-        }
-      });
-    }
-
-  }
-
-  public ViewAttachments(conversation: ConversationTemplate) {
-    if (conversation) {
-      const attachmentsDialogRef = this.dialog.open(ViewAttachmentsDialogComponent, {
-        width: '450px',
-        data: {
-          conversation: conversation
-        }
-      });
-    }
-  }
-
-  public async OnUnblockUser(user: UserInfo) {
-    await this.usersService.UnblockUser(user);
-  } 
-
-  public async OnRemoveAllMessages(group: ConversationTemplate) : Promise<void> {
-    await this.conversationsService.RemoveAllMessages(group);
   }
 
   public async Search() {
@@ -301,27 +133,8 @@ export class ChatComponent implements OnInit {
     await this.conversationsService.ChangeThumbnail(file);
   }
 
-  public OnLeaveGroup(conversation: ConversationTemplate){
-    this.conversationsService.Leave(conversation);
-  }
-
   public async OnChangeConversationName(name: string) : Promise<void> {
     await this.conversationsService.ChangeConversationName(name);
-  }
-
-  public OnInviteUsersToGroup(group: ConversationTemplate) {
-
-    const dialogRef = this.dialog.open(FindUsersDialogComponent, {
-      width: '350px',
-      data: {
-        conversationId: group.conversationID
-      }
-    });
-
-    dialogRef.beforeClosed().subscribe(users => {
-
-      this.conversationsService.InviteUsersToGroup(users, group);
-    });
   }
 
   public CreateGroup() {
@@ -343,21 +156,18 @@ export class ChatComponent implements OnInit {
     });
   }
 
-  public async OnSendMessage(message: string) {
-    await this.conversationsService.SendMessage(message);
-  }
- 
-  public ReadMessage(message: ChatMessage) {
-    this.conversationsService.ReadMessage(message);
-  }
-
   public IsConversationSelected(): boolean {
     return this.conversationsService.IsConversationSelected();
   }
 
-
   public async UpdateConversations() {
     await this.conversationsService.UpdateConversations();
+  }
+
+  public async ChangeConversationTo(conversation: ConversationTemplate) {
+    this.SearchString = '';
+    await this.conversationsService.ChangeConversation(null);
+    await this.conversationsService.ChangeConversation(conversation);
   }
 
   public async ChangeConversation(conversation: ConversationTemplate) {
@@ -366,6 +176,12 @@ export class ChatComponent implements OnInit {
     this.SearchString = '';
 
     await this.conversationsService.ChangeConversation(conversation);
+  }
+
+  //input events
+
+  public async OnSendMessage(message: string) {
+    await this.conversationsService.SendMessage(message);
   }
 
   public async OnUploadImages(files: FileList) {

@@ -224,7 +224,7 @@ namespace VibeChat.Web
                 }
                 else
                 {
-                    await MessageReadInDialog(conversation.DialogueUser.ConnectionId, Context.ConnectionId, msgId, conversationId);
+                    await MessageReadInDialog(conversation.DialogueUser.IsOnline ? conversation.DialogueUser.ConnectionId : null, Context.ConnectionId, msgId, conversationId);
                 }
             }
             catch(Exception ex)
@@ -376,7 +376,11 @@ namespace VibeChat.Web
 
         private async Task MessageReadInDialog(string dialogUserConnectionId, string SenderConnectionId, int messageId, int conversationId)
         {
-            await Clients.Client(dialogUserConnectionId).SendAsync("MessageRead", messageId, conversationId);
+            if(dialogUserConnectionId != null)
+            {
+                await Clients.Client(dialogUserConnectionId).SendAsync("MessageRead", messageId, conversationId);
+            }
+
             await Clients.Client(SenderConnectionId).SendAsync("MessageRead", messageId, conversationId);
         }
 

@@ -1,20 +1,15 @@
-import { Component, Output, EventEmitter, Input, ViewChild, OnInit, AfterViewInit, OnChanges, AfterContentInit, AfterViewChecked, SimpleChanges } from '@angular/core';
+import { Component, Output, EventEmitter, ViewChild, AfterViewInit, OnChanges,  AfterViewChecked, SimpleChanges } from '@angular/core';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { trigger, state, style, transition, animate } from "@angular/animations";
-import { ConversationTemplate } from '../../Data/ConversationTemplate';
 import { ChatMessage } from '../../Data/ChatMessage';
 import { ConversationsFormatter } from '../../Formatters/ConversationsFormatter';
 import { AttachmentKinds } from '../../Data/AttachmentKinds';
 import { UserInfo } from '../../Data/UserInfo';
-import { retry } from 'rxjs/operators';
 import { MatDialog } from '@angular/material';
-import { ForwardMessagesDialogComponent } from '../../Dialogs/ForwardMessagesDialog';
 import { MessageState } from '../../Shared/MessageState';
-import { ViewportScroller } from '@angular/common';
-import { ApiRequestsBuilder } from '../../Requests/ApiRequestsBuilder';
-import { MessagesDateParserService } from '../../Services/MessagesDateParserService';
-import { ConnectionManager } from '../../Connections/ConnectionManager';
 import { ConversationsService } from '../../Services/ConversationsService';
+import { ForwardMessagesDialogComponent } from '../../Dialogs/ForwardMessagesDialog';
+import { ConversationTemplate } from '../../Data/ConversationTemplate';
 
 export class ForwardMessagesModel {
   public forwardTo: Array<number>;
@@ -49,11 +44,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     this.SelectedMessages = new Array<ChatMessage>();
   }
 
-  @Output() public OnMessageRead = new EventEmitter<ChatMessage>();
-
   @Output() public OnViewUserInfo = new EventEmitter<UserInfo>();
-
-  @Output() public OnForwardMessages = new EventEmitter<Array<ChatMessage>>();
 
   public MessagesLoading: boolean;
 
@@ -122,7 +113,21 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
   }
 
   public ForwardMessages() {
-    this.OnForwardMessages.emit(this.SelectedMessages);
+    let forwardMessagesDialog = this.dialog.open(
+      ForwardMessagesDialogComponent,
+      {
+        data: {
+          conversations: this.conversationsService.Conversations
+        }
+      }
+    );
+
+    forwardMessagesDialog
+      .beforeClosed()
+      .subscribe((result: Array<ConversationTemplate>) => {
+
+        this.conversationsService.ForwardMessagesTo(result, this.SelectedMessages);
+      })
   }
 
   
@@ -152,7 +157,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
 
     for (let i = boundaries[0]; i < boundaries[1] + 1; ++i) {
       if (this.conversationsService.CurrentConversation.messages[i].state == MessageState.Delivered) {
-        this.OnMessageRead.emit(this.conversationsService.CurrentConversation.messages[i]);
+        this.conversationsService.ReadMessage(this.conversationsService.CurrentConversation.messages[i]);
       }
     }
   }

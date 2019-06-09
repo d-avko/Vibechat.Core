@@ -60,10 +60,11 @@ export class AuthService {
     return this.requestsBuilder.RefreshJwtToken(refreshToken, this.User.id);
   }
 
-  public static LogOut(): void {
+  public LogOut(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('refreshtoken');
     localStorage.removeItem('user');
+    this.router.navigateByUrl('/login');
   }
 
 }

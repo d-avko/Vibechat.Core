@@ -54,8 +54,6 @@
                            (OnViewUser)="OnViewUserInfo($event)"
                            (OnViewConversation)="OnViewGroupInfo($event)"
                            (OnViewLocalConversation)="ChangeConversation($event)"
-                           (OnApiError)="OnApiError($event)"
-                           (OnError)="OnError($event)"
                            [SearchString]="SearchString">
 
           </searchlist-view>
@@ -77,9 +75,7 @@
                                    [Conversation]="conversationsService.CurrentConversation"></conversationHeader-view>
 
           <messages-view class="messages_wrapper_messages"
-                         (OnMessageRead)="ReadMessage($event)"
-                         (OnViewUserInfo)="OnViewUserInfo($event)"
-                         (OnForwardMessages)="OnForwardMessages($event)"></messages-view>
+                         (OnViewUserInfo)="OnViewUserInfo($event)"></messages-view>
 
 
           <input-view class="messages_wrapper_input"

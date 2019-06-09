@@ -16,8 +16,8 @@ import { AuthService } from '../Auth/AuthService';
 })
 export class LoginComponent {
 
-  private usernameOrEmail: FormControl;
-  private password: FormControl;
+  public usernameOrEmail: FormControl;
+  public password: FormControl;
 
   protected snackbar: SnackBarHelper;
   protected router: Router;

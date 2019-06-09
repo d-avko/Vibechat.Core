@@ -24,8 +24,8 @@ export class SearchListComponent {
   @Input() public SearchString: string;
   @Input() public LocalConversations: Array<ConversationTemplate>;
 
-  private IsSearchingForGroups: boolean;
-  private IsSearchingForUsers: boolean;
+  public IsSearchingForGroups: boolean;
+  public IsSearchingForUsers: boolean;
 
   constructor(private conversationsService: ConversationsService, private usersService: UsersService) {
     this.FoundLocalConversations = new Array<ConversationTemplate>();

@@ -1,9 +1,6 @@
 import { Component, Inject } from "@angular/core";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material";
 import { ChatComponent } from "../Chat/chat.component";
-import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
-import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
-import { UserInfo } from "../Data/UserInfo";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 
 export interface ForwardMessagesData {
@@ -20,7 +17,7 @@ export class ForwardMessagesDialogComponent {
 
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
-    @Inject(MAT_DIALOG_DATA) public conversationsService: ForwardMessagesData) { }
+    @Inject(MAT_DIALOG_DATA) public data: ForwardMessagesData) { }
 
   public onCancelClick() {
     this.dialogRef.close();

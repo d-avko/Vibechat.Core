@@ -15,7 +15,7 @@ import { AuthService } from '../Auth/AuthService';
 })
 export class RegisterComponent extends LoginComponent {
 
-  private registerGroup: FormGroup
+  public registerGroup: FormGroup
 
   public canRegister: boolean = true;
 
