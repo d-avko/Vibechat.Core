@@ -30,6 +30,7 @@ import { ConversationsService } from "../Services/ConversationsService";
 import { UsersService } from "../Services/UsersService";
 import { MessageReportingService } from "../Services/MessageReportingService";
 import { AuthService } from "../Auth/AuthService";
+import { ThemesService } from "../Theming/ThemesService";
 
 @NgModule({
   declarations: [
@@ -77,6 +78,7 @@ import { AuthService } from "../Auth/AuthService";
     UsersService,
     MessageReportingService,
     AuthService,
+    ThemesService,
     { provide: HTTP_INTERCEPTORS, useClass: HttpResponseInterceptor, multi: true }]
 })
 export class ChatModule { }

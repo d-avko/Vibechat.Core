@@ -44,8 +44,12 @@
   width: 80%;
 }
 
-.selected-message {
+.selected-message-light {
   background-color: #c4dbdc;
+}
+
+.selected-message-dark {
+  background-color: #395e60;
 }
 
 .message_header {
@@ -69,7 +73,11 @@
   border-radius: 10px;
 }
 
-.message_timereceived {
+.message_timereceived-dark {
+  color: white;
+  font-size: 12px;
+}
+.message_timereceived-light {
   color: dimgray;
   font-size: 12px;
 }
