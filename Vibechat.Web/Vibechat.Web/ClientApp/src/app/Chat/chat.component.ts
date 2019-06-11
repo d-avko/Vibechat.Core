@@ -17,6 +17,7 @@ import { ViewAttachmentsDialogComponent } from "../Dialogs/ViewAttachmentsDialog
 import { ForwardMessagesDialogComponent } from "../Dialogs/ForwardMessagesDialog";
 import { UsersService } from "../Services/UsersService";
 import { ConversationsService } from "../Services/ConversationsService";
+import { ThemesService } from "../Theming/ThemesService";
 
 @Component({
   selector: 'chat-root',
@@ -51,7 +52,8 @@ export class ChatComponent implements OnInit {
     public formatter: ConversationsFormatter,
     public auth: AuthService,
     private usersService: UsersService,
-    private conversationsService: ConversationsService) { }
+    private conversationsService: ConversationsService,
+    private themesService: ThemesService) { }
 
   async ngOnInit(): Promise<void> {
     await this.auth.TryAuthenticate();
@@ -59,6 +61,14 @@ export class ChatComponent implements OnInit {
     this.UpdateConversations();
 
     await this.usersService.UpdateUserInfo(this.auth.User.id);
+  }
+
+  public IsDarkTheme() {
+    return this.themesService.currentThemeName == 'dark';
+  }
+
+  public SwitchTheme(name: string) {
+    this.themesService.changeTheme(name);
   }
 
   public async OnViewGroupInfo(group: ConversationTemplate) : Promise<void> {
@@ -148,7 +158,7 @@ export class ChatComponent implements OnInit {
 
     dialogRef.beforeClosed().subscribe(async result => {
 
-      if (result.name === '' || result.name == null) {
+      if (!result || !result.name) {
         return;
       }
 

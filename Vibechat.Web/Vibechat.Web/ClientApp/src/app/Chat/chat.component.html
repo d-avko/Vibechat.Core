@@ -28,6 +28,20 @@
             <span class="padding5px">Log out</span>
           </div>
         </button>
+
+        <button *ngIf="IsDarkTheme()" mat-button (click)="SwitchTheme('white')">
+          <div class="padding10px flexaligned">
+            <mat-icon>wb_sunny</mat-icon>
+            <span class="padding5px">White theme</span>
+          </div>
+        </button>
+
+        <button *ngIf="!IsDarkTheme()" mat-button (click)="SwitchTheme('dark')">
+          <div class="padding10px flexaligned">
+            <mat-icon>brightness_2</mat-icon>
+            <span class="padding5px">Dark theme</span>
+          </div>
+        </button>
       </div>
     </mat-drawer>
 
@@ -75,6 +89,7 @@
                                    [Conversation]="conversationsService.CurrentConversation"></conversationHeader-view>
 
           <messages-view class="messages_wrapper_messages"
+                         [CurrentConversation]="conversationsService.CurrentConversation"
                          (OnViewUserInfo)="OnViewUserInfo($event)"></messages-view>
 
 

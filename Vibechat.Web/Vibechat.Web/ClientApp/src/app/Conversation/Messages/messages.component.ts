@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, ViewChild, AfterViewInit, OnChanges,  AfterViewChecked, SimpleChanges } from '@angular/core';
+import { Component, Output, EventEmitter, ViewChild, AfterViewInit, OnChanges,  AfterViewChecked, SimpleChanges, Input } from '@angular/core';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { trigger, state, style, transition, animate } from "@angular/animations";
 import { ChatMessage } from '../../Data/ChatMessage';
@@ -10,6 +10,7 @@ import { MessageState } from '../../Shared/MessageState';
 import { ConversationsService } from '../../Services/ConversationsService';
 import { ForwardMessagesDialogComponent } from '../../Dialogs/ForwardMessagesDialog';
 import { ConversationTemplate } from '../../Data/ConversationTemplate';
+import { ThemesService } from '../../Theming/ThemesService';
 
 export class ForwardMessagesModel {
   public forwardTo: Array<number>;
@@ -40,9 +41,12 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
   constructor(
     public formatter: ConversationsFormatter,
     public dialog: MatDialog,
-    public conversationsService: ConversationsService) {
+    public conversationsService: ConversationsService,
+    private themes: ThemesService) {
     this.SelectedMessages = new Array<ChatMessage>();
   }
+
+  @Input() public CurrentConversation: ConversationTemplate;
 
   @Output() public OnViewUserInfo = new EventEmitter<UserInfo>();
 
@@ -63,27 +67,31 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
   public SelectedMessages: Array<ChatMessage>;
 
   ngAfterViewInit() {
-    this.ScrollToMessage(this.conversationsService.CurrentConversation.messages.length - 1);
+    this.ScrollToMessage(this.CurrentConversation.messages.length - 1);
   }
 
   ngOnChanges(changes: SimpleChanges) {
 
-    if (changes.Conversation != undefined) {
+    if (changes.CurrentConversation != undefined) {
       this.IsScrollingAssistNeeded = false;
       this.IsConversationHistoryEnd = false;
       this.SelectedMessages = new Array<ChatMessage>();
       this.UpdateMessagesIfNotUpdated();
-      this.ScrollToMessage(this.conversationsService.CurrentConversation.messages.length - 1);
+      this.ScrollToMessage(this.CurrentConversation.messages.length - 1);
     }
   }
 
   ngAfterViewChecked() {
 
-    if (!this.conversationsService.CurrentConversation.messages || this.conversationsService.CurrentConversation.messages.length == 0) {
+    if (!this.CurrentConversation.messages || this.CurrentConversation.messages.length == 0) {
       return;
     }
 
     this.ReadMessagesInViewport();
+  }
+
+  public IsDarkTheme() {
+    return this.themes.currentThemeName == 'dark';
   }
 
   public async UpdateMessages() {
@@ -91,7 +99,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     if (!this.MessagesLoading && !this.IsConversationHistoryEnd) {
       this.MessagesLoading = true;
 
-      if (this.conversationsService.CurrentConversation.messages == null) {
+      if (this.CurrentConversation.messages == null) {
         return;
       }
 
@@ -133,17 +141,17 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
   
   public UpdateMessagesIfNotUpdated() {
 
-    if (this.conversationsService.CurrentConversation.messages == null) {
+    if (this.CurrentConversation.messages == null) {
       return;
     }
     
-    if (this.conversationsService.CurrentConversation.messages.length <= 1) {
+    if (this.CurrentConversation.messages.length <= 1) {
       this.UpdateMessages();
     }
   }
 
   public ScrollToStart() {
-    this.ScrollToMessage(this.conversationsService.CurrentConversation.messages.length);
+    this.ScrollToMessage(this.CurrentConversation.messages.length);
   }
 
   public ViewUserInfo(event: any, user: UserInfo) {
@@ -156,8 +164,8 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     let boundaries = this.CalculateMessagesViewportBoundaries();
 
     for (let i = boundaries[0]; i < boundaries[1] + 1; ++i) {
-      if (this.conversationsService.CurrentConversation.messages[i].state == MessageState.Delivered) {
-        this.conversationsService.ReadMessage(this.conversationsService.CurrentConversation.messages[i]);
+      if (this.CurrentConversation.messages[i].state == MessageState.Delivered) {
+        this.conversationsService.ReadMessage(this.CurrentConversation.messages[i]);
       }
     }
   }
@@ -223,7 +231,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
   public OnMessagesScrolled(messageIndex: number): void {
     // user scrolled to last loaded message, load more messages
 
-    if (this.conversationsService.CurrentConversation.messages == null) {
+    if (this.CurrentConversation.messages == null) {
       return;
     }
 
@@ -234,7 +242,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
 
     let currentMessageIndex = this.CalculateCurrentMessageIndex();
 
-    if (this.conversationsService.CurrentConversation.messages.length - currentMessageIndex > MessagesComponent.MessagesToScrollForGoBackButtonToShowUp) {
+    if (this.CurrentConversation.messages.length - currentMessageIndex > MessagesComponent.MessagesToScrollForGoBackButtonToShowUp) {
       this.IsScrollingAssistNeeded = true;
     } else {
       this.IsScrollingAssistNeeded = false;
@@ -260,11 +268,11 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
   }
 
   public IsPreviousMessageOnAnotherDay(message: ChatMessage): boolean {
-    if (this.conversationsService.CurrentConversation.messages == null) {
+    if (this.CurrentConversation.messages == null) {
       return false;
     }
 
-    let messageIndex = this.conversationsService.CurrentConversation.messages.findIndex((x) => x.id == message.id);
+    let messageIndex = this.CurrentConversation.messages.findIndex((x) => x.id == message.id);
 
     if (messageIndex == -1) {
       return false;
@@ -274,15 +282,15 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
       return true;
     }
 
-    return (<Date>message.timeReceived).getDay() != (<Date>this.conversationsService.CurrentConversation.messages[messageIndex - 1].timeReceived).getDay();
+    return (<Date>message.timeReceived).getDay() != (<Date>this.CurrentConversation.messages[messageIndex - 1].timeReceived).getDay();
   }
 
   public IsLastMessage(message: ChatMessage): boolean {
 
-    if (this.conversationsService.CurrentConversation.messages == null)
+    if (this.CurrentConversation.messages == null)
       return false;
 
-    return this.conversationsService.CurrentConversation.messages.findIndex((x) => x.id == message.id) == 0;
+    return this.CurrentConversation.messages.findIndex((x) => x.id == message.id) == 0;
   }
 
   public IsMessageSelected(message: ChatMessage): boolean {
@@ -290,11 +298,11 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
   }
 
   public IsFirstMessageInSequence(message: ChatMessage): boolean {
-    if (this.conversationsService.CurrentConversation.messages == null) {
+    if (this.CurrentConversation.messages == null) {
       return false;
     }
 
-    let messageIndex = this.conversationsService.CurrentConversation.messages.findIndex((x) => x.id == message.id);
+    let messageIndex = this.CurrentConversation.messages.findIndex((x) => x.id == message.id);
 
     if (messageIndex == 0) {
       return true;
@@ -304,7 +312,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
       return false;
     }
 
-    return this.conversationsService.CurrentConversation.messages[messageIndex - 1].user.userName != message.user.userName;
+    return this.CurrentConversation.messages[messageIndex - 1].user.userName != message.user.userName;
   }
 
   public IsImage(message: ChatMessage): boolean {
