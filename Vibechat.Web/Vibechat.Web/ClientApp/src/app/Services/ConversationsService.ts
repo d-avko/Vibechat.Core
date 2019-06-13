@@ -67,7 +67,7 @@ export class ConversationsService {
     }
   }
 
-  public async GetMessagesForConversation(count: number) {
+  public async GetMessagesForCurrentConversation(count: number) {
     let result = await this.requestsBuilder.GetConversationMessages(
       this.CurrentConversation.messages.length,
       count,

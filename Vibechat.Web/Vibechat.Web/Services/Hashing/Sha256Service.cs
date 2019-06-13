@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Vibechat.Web.Services.Hashing
@@ -18,6 +19,11 @@ namespace Vibechat.Web.Services.Hashing
         public string Hash(byte[] value)
         {
             return ByteArrayToHexViaLookup32(HashAlgorithm.ComputeHash(value));
+        }
+
+        public string Hash(string value)
+        {
+            return ByteArrayToHexViaLookup32(HashAlgorithm.ComputeHash(Encoding.Default.GetBytes(value)));
         }
 
         private static readonly uint[] _lookup32 = CreateLookup32();
