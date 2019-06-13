@@ -30,6 +30,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Messages\DeleteMessagesRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Messages\GetMessagesApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Messages\GetMessagesResultApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\misc\EncryptedRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Register\RegisterInformationApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\ResponseApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Tokens\RefreshTokenApiModel.cs" />

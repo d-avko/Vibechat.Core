@@ -79,7 +79,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
       this.UpdateMessagesIfNotUpdated();
       this.ScrollToMessage(this.CurrentConversation.messages.length - 1);
     }
-  }
+  } 
 
   ngAfterViewChecked() {
 
@@ -103,7 +103,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
         return;
       }
 
-      let result = await this.conversationsService.GetMessagesForConversation(MessagesComponent.MessagesBufferLength);
+      let result = await this.conversationsService.GetMessagesForCurrentConversation(MessagesComponent.MessagesBufferLength);
 
       if (result == null || result.length == 0) {
         this.MessagesLoading = false;

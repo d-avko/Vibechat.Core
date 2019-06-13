@@ -3,11 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Vibechat.Web.AuthHelpers;
 using Vibechat.Web.Middleware;
 using Vibechat.Web.Services.Bans;
 using Vibechat.Web.Services.ChatDataProviders;
+using Vibechat.Web.Services.Encryption;
 using Vibechat.Web.Services.FileSystem;
 using Vibechat.Web.Services.Hashing;
 using Vibechat.Web.Services.Images;
@@ -27,7 +29,17 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddScoped<ConversationsInfoService, ConversationsInfoService>();
             services.AddScoped<UsersInfoService, UsersInfoService>();
             services.AddScoped<LoginService, LoginService>();
+            services.AddScoped<EncryptionService, EncryptionService>();
+            services.AddScoped<ImagesService, ImagesService>();
+            services.AddScoped<BansService, BansService>();
+            services.AddScoped<SessionsService, SessionsService>();
+        }
+
+        public static void AddDefaultMiddleware(this IServiceCollection services)
+        {
             services.AddScoped<UserStatusMiddleware, UserStatusMiddleware>();
+            services.AddScoped<RequestDecryptionMiddleware, RequestDecryptionMiddleware>();
+            services.AddScoped<ResponseEncryptionMiddleware, ResponseEncryptionMiddleware>();
         }
 
         public static void AddDefaultRepositories(this IServiceCollection services)
@@ -40,6 +52,7 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddScoped<IConversationRepository, ConversationsRepository>();
             services.AddScoped<IConversationsBansRepository, ConversationsBansRepository>();
             services.AddScoped<IUsersBansRepository, UsersBansRepository>();
+            services.AddScoped<IUsersSessionsRepository, UsersSessionsRepository>();
         }
 
         public static void AddBusinessLogic(this IServiceCollection services)
@@ -52,8 +65,6 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddSingleton<IImageScalingService, ImageCompressionService>();
             services.AddSingleton<IHexHashingService, Sha256Service>();
             services.AddSingleton<UniquePathsProvider, UniquePathsProvider>();
-            services.AddScoped<ImagesService, ImagesService>();
-            services.AddScoped<BansService, BansService>();
         }
     }
 }
