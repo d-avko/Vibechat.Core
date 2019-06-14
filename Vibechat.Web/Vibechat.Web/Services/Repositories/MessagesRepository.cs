@@ -27,7 +27,6 @@ namespace Vibechat.Web.Services.Repositories
                 MessageContent = message.MessageContent,
                 TimeReceived = DateTime.UtcNow,
                 User = whoSent,
-                AttachmentInfo = null,
                 IsAttachment = false,
                 ForwardedMessage = forwardedMessage,
                 State = MessageState.Delivered
@@ -38,6 +37,22 @@ namespace Vibechat.Web.Services.Repositories
             return addedMessage.Entity;
         }
 
+        public async Task<MessageDataModel> AddSecureMessage(UserInApplication whoSent, string message, int groupId)
+        {
+            var addedMessage = mContext.Messages.Add(new MessageDataModel()
+            {
+                ConversationID = groupId,
+                TimeReceived = DateTime.UtcNow,
+                User = whoSent,
+                IsAttachment = false,
+                State = MessageState.Delivered,
+                EncryptedPayload = message
+            });
+
+            await mContext.SaveChangesAsync();
+
+            return addedMessage.Entity;
+        }
 
         public async Task<MessageDataModel> AddAttachment(
             UserInApplication whoSent,

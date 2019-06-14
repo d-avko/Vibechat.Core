@@ -29,6 +29,7 @@ namespace VibeChat.Web
 
         public DbSet<UserSessionDataModel> UsersSessions { get; set; }
 
+        public DbSet<ContactsDataModel> Contacts { get; set; }
         #region Constructor
 
         /// <summary>

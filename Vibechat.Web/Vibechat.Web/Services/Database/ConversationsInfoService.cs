@@ -394,6 +394,21 @@ namespace Vibechat.Web.Services
             return addedUser.ToUserInfo();
         }
 
+        public async Task ValidateDialog(string firstUserId, string secondUserId, int conversationId)
+        {
+            var dialog = await usersConversationsRepository.GetDialog(firstUserId, secondUserId);
+
+            if(dialog == null)
+            {
+                throw new InvalidDataException("Wrong id of a user in dialog.");
+            }
+
+            if (dialog.Conversation.ConvID != conversationId)
+            {
+                throw new InvalidDataException("Wrong conversationId.");
+            }
+        }
+
         public async Task<List<ConversationTemplate>> GetConversations(string whoAccessedId)
         {
             var defaultError = new FormatException("User info provided was not correct.");
@@ -607,6 +622,18 @@ namespace Vibechat.Web.Services
             }
 
             return await messagesRepository.Add(whoSent, message, groupId, forwardedMessage);
+        }
+
+        public async Task<MessageDataModel> AddEncryptedMessage(string message, int groupId, string SenderId)
+        {
+            UserInApplication whoSent = await usersRepository.GetById(SenderId);
+
+            if (whoSent == null)
+            {
+                throw new FormatException($"Failed to retrieve user with id {SenderId} from database: no such user exists");
+            }
+
+            return await messagesRepository.AddSecureMessage(whoSent, message, groupId);
         }
 
         public async Task<MessageDataModel> AddAttachmentMessage(Message message, int groupId, string SenderId)

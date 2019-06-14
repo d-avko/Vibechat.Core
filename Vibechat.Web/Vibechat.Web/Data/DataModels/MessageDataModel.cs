@@ -38,5 +38,10 @@ namespace VibeChat.Web
 
         //time when this message was received
         public DateTime TimeReceived { get; set; }
+
+        /// <summary>
+        /// if this message is from private chat, store payload there.
+        /// </summary>
+        public string EncryptedPayload { get; set; }
     }
 }

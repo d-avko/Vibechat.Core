@@ -10,4 +10,6 @@ export class MessageReceivedModel {
   public message: ChatMessage
 
   public conversationId: number
+
+  public secure: boolean;
 }

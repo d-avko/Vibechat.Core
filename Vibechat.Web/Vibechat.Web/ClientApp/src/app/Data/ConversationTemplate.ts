@@ -23,5 +23,7 @@ export class ConversationTemplate {
 
   public isMessagingRestricted: boolean;
 
+  public authKeyId: string; 
+
   public messagesUnread: number;
 }

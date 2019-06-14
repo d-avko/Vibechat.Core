@@ -57,7 +57,8 @@ namespace Vibechat.Web.Extensions
                 FullImageUrl = value.FullImageUrl,
                 Participants = participants,
                 Messages = messages,
-                Creator = value.Creator.ToUserInfo()
+                Creator = value.Creator.ToUserInfo(),
+                AuthKeyId = value.AuthKeyId
             };
         }
 
@@ -73,7 +74,8 @@ namespace Vibechat.Web.Extensions
                 AttachmentInfo = value.AttachmentInfo?.ToMessageAttachment(),
                 IsAttachment = value.IsAttachment,
                 ForwardedMessage = value.ForwardedMessage?.ToMessage(),
-                State = value.State
+                State = value.State,
+                EncryptedPayload = value.EncryptedPayload
             };
         }
     }

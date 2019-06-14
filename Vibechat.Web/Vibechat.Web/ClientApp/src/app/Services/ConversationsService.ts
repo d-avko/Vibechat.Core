@@ -14,6 +14,8 @@ import { UploadFilesResponse } from "../Data/UploadFilesResponse";
 import { HttpResponse } from "@angular/common/http";
 import { ServerResponse } from "../ApiModels/ServerResponse";
 import { Injectable } from "@angular/core";
+import { SecureChatsService } from "../Encryption/SecureChatsService";
+import { E2EencryptionService } from "../Encryption/E2EencryptionService";
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +25,9 @@ export class ConversationsService {
     private dateParser: MessagesDateParserService,
     private authService: AuthService,
     private requestsBuilder: ApiRequestsBuilder,
-    private connectionManager: ConnectionManager)
+    private connectionManager: ConnectionManager,
+    private secureChatsService: SecureChatsService,
+    private encryptionService: E2EencryptionService)
   {
     this.connectionManager.setConversationsService(this);
     this.PendingReadMessages = new Array<number>();
@@ -68,6 +72,8 @@ export class ConversationsService {
   }
 
   public async GetMessagesForCurrentConversation(count: number) {
+    let secure = this.CurrentConversation.authKeyId != null;
+
     let result = await this.requestsBuilder.GetConversationMessages(
       this.CurrentConversation.messages.length,
       count,
@@ -83,12 +89,28 @@ export class ConversationsService {
       return result.response;
     }
 
+    if (secure) {
+      result.response.forEach(x => {
+
+        this.DecryptedMessageToLocalMessage(
+          x,
+          this.encryptionService.Decrypt(this.CurrentConversation.dialogueUser.id, x.encryptedPayload));
+
+      })
+    }
+
     result.response = result.response.sort(this.MessagesSortFunc);
 
     this.dateParser.ParseStringDatesInMessages(result.response);
 
     //append old messages to new ones.
     this.CurrentConversation.messages = [...result.response.concat(this.CurrentConversation.messages)];
+  }
+
+  private DecryptedMessageToLocalMessage(container: ChatMessage, decrypted: ChatMessage) {
+    decrypted.id = container.id;
+    decrypted.state = container.state;
+    decrypted.timeReceived = container.timeReceived;
   }
 
   private MessagesSortFunc(left: ChatMessage, right: ChatMessage): number {
@@ -149,6 +171,26 @@ export class ConversationsService {
 
         })
 
+      let toDeleteIndexes = [];
+      response.response.forEach((x, index) => {
+        //delete secure chats where we've lost auth keys
+        if (x.authKeyId) {
+
+          if (!this.secureChatsService.AuthKeyExists(x.authKeyId)) {
+            toDeleteIndexes.push(index);
+          } else {
+
+            x.messages.forEach(msg => {
+              this.DecryptedMessageToLocalMessage(
+                msg,
+                this.encryptionService.Decrypt(x.dialogueUser.id, msg.encryptedPayload))
+            });
+
+          }
+        }
+      });
+
+      toDeleteIndexes.forEach(x => response.response.splice(x, 1));
 
       this.Conversations = response.response;
 
@@ -169,6 +211,18 @@ export class ConversationsService {
   }
 
   public OnMessageReceived(data: MessageReceivedModel): void {
+    if (data.secure) {
+      let decrypted = this.encryptionService.Decrypt(data.senderId, data.message.encryptedPayload);
+
+      if (!decrypted) {
+        return;
+      }
+
+      this.DecryptedMessageToLocalMessage(data.message, decrypted);
+
+      data.message = decrypted;
+    }
+
     this.dateParser.ParseStringDateInMessage(data.message);
 
     let conversation = this.Conversations
@@ -179,6 +233,25 @@ export class ConversationsService {
     conversation.messages = [...conversation.messages];
 
     if (data.senderId != this.authService.User.id) {
+      ++conversation.messagesUnread;
+    }
+  }
+
+  public OnSecureMessageReceived(groupId: number, message: string, senderId: string): void {
+    let conversation = this.Conversations
+      .find(x => x.conversationID == groupId);
+
+    if (!conversation) {
+      return;
+    }
+
+    let decrypted = this.encryptionService.Decrypt(conversation.dialogueUser.id, message);
+
+    conversation.messages.push(decrypted);
+
+    conversation.messages = [...conversation.messages];
+
+    if (senderId != this.authService.User.id) {
       ++conversation.messagesUnread;
     }
   }
@@ -267,7 +340,20 @@ export class ConversationsService {
       messageToSend
     );
 
-    this.connectionManager.SendMessage(messageToSend, this.CurrentConversation);
+    //secure chat
+    if (this.CurrentConversation.authKeyId) {
+
+      this.connectionManager.SendMessageToSecureChat(
+        this.encryptionService.Encrypt(this.CurrentConversation.dialogueUser.id, messageToSend),
+        messageToSend.id,
+        this.CurrentConversation.dialogueUser.id,
+        this.CurrentConversation.conversationID);
+
+    } else {
+      //non-secure chat
+
+      this.connectionManager.SendMessage(messageToSend, this.CurrentConversation);
+    }
   }
 
   public ReadMessage(message: ChatMessage) {
@@ -567,7 +653,17 @@ export class ConversationsService {
       (file) => {
         let message = this.BuildMessage(null, conversationToSend, true, file);
 
-        this.connectionManager.SendMessage(message, this.CurrentConversation);
+        //secure chat
+        if (this.CurrentConversation.authKeyId) {
+
+          this.connectionManager.SendMessageToSecureChat(
+            this.encryptionService.Encrypt(this.CurrentConversation.dialogueUser.id, message),
+            message.id,
+            this.CurrentConversation.dialogueUser.id, conversationToSend);
+
+        } else {
+          this.connectionManager.SendMessage(message, this.CurrentConversation);
+        }
 
         this.CurrentConversation.messages.push(message);
       })

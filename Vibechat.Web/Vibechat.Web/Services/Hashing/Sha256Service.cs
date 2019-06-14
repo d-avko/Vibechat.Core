@@ -23,7 +23,7 @@ namespace Vibechat.Web.Services.Hashing
 
         public string Hash(string value)
         {
-            return ByteArrayToHexViaLookup32(HashAlgorithm.ComputeHash(Encoding.Default.GetBytes(value)));
+            return ByteArrayToHexViaLookup32(HashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(value)));
         }
 
         private static readonly uint[] _lookup32 = CreateLookup32();
