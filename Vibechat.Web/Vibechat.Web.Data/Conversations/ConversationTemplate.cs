@@ -46,6 +46,11 @@ namespace VibeChat.Web.ChatData
         public List<UserInfo> Participants { get; set; }
 
         /// <summary>
+        /// If this is secret chat, this property is a hash of first 1024 bits of auth key.
+        /// </summary>
+        public string AuthKeyId { get; set; }
+
+        /// <summary>
         /// Field indicating whether calling user can message in this conversation.
         /// </summary>
         public bool IsMessagingRestricted { get; set; }

@@ -25,6 +25,8 @@ namespace VibeChat.Web
 
         public bool IsPublic { get; set; }
 
+        public string AuthKeyId { get; set; }
+
         public UserInApplication Creator { get; set; }
     }
 }

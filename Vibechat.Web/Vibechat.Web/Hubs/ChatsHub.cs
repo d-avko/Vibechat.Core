@@ -10,6 +10,7 @@ using Vibechat.Web.Extensions;
 using Vibechat.Web.Services;
 using Vibechat.Web.Services.Bans;
 using Vibechat.Web.Services.Extension_methods;
+using Vibechat.Web.Services.Repositories;
 using Vibechat.Web.Services.Users;
 using VibeChat.Web.ApiModels;
 using VibeChat.Web.ChatData;
@@ -19,6 +20,8 @@ namespace VibeChat.Web
 {
     public class ChatsHub : Hub
     {
+        private readonly IUsersConversationsRepository usersConversationsRepository;
+
         private ICustomHubUserIdProvider userProvider { get; set; }
 
         private UsersInfoService userService { get; set; }
@@ -32,12 +35,14 @@ namespace VibeChat.Web
             ICustomHubUserIdProvider userProvider, 
             UsersInfoService userService,
             ConversationsInfoService conversationsService,
+            IUsersConversationsRepository usersConversationsRepository,
             BansService bansService,
             ILogger<ChatsHub> logger)
         { 
             this.userProvider = userProvider;
             this.userService = userService;
             this.conversationsService = conversationsService;
+            this.usersConversationsRepository = usersConversationsRepository;
             this.bansService = bansService;
             this.logger = logger;
         }
@@ -273,7 +278,7 @@ namespace VibeChat.Web
                 message.Id = created.MessageID;
                 message.State = MessageState.Delivered;
 
-                await SendMessageToGroupExcept(groupId, Context.ConnectionId, whoSent.Id, message, true, true);
+                await SendMessageToGroupExcept(groupId, Context.ConnectionId, whoSent.Id, message);
                 await MessageDelivered(Context.ConnectionId, message.Id, clientMessageId, groupId);
             }
             catch(Exception ex)
@@ -322,7 +327,7 @@ namespace VibeChat.Web
 
                 if (userToSend.IsOnline)
                 {
-                    await SendMessageToUser(message, whoSent.Id, userToSend.ConnectionId, conversationId, true, true);
+                    await SendMessageToUser(message, whoSent.Id, userToSend.ConnectionId, conversationId, false);
                 }
 
                 await MessageDelivered(Context.ConnectionId, message.Id, clientMessageId, conversationId);
@@ -334,6 +339,38 @@ namespace VibeChat.Web
             }
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task SendSecureMessage(string encryptedMessage, int generatedMessageId, string userId, int conversationId)
+        {
+            UserInApplication whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
+            await userService.MakeUserOnline(whoSent.Id, Context.ConnectionId);
+
+            try
+            {
+                await conversationsService.ValidateDialog(whoSent.Id, userId, conversationId);
+                var user = await userService.GetUserById(userId);
+                var toSend = new Message();
+                MessageDataModel created = await conversationsService.AddEncryptedMessage(encryptedMessage, conversationId, whoSent.Id);
+
+                toSend.Id = created.MessageID;
+                toSend.EncryptedPayload = created.EncryptedPayload;
+                toSend.TimeReceived = created.TimeReceived.ToUTCString();
+                toSend.State = MessageState.Delivered;
+
+                if (user.IsOnline)
+                {
+                    await SendMessageToUser(toSend, whoSent.Id, user.ConnectionId, conversationId, true);
+                }
+
+                await MessageDelivered(Context.ConnectionId, toSend.Id, generatedMessageId, conversationId);
+            }
+            catch (Exception ex)
+            {
+                await SendError(Context.ConnectionId, ex.Message);
+                logger.LogError(ex.Message);
+            }
+           
+        }
 
         private async Task RemovedFromGroup(string userId, int conversationId)
         {
@@ -354,14 +391,14 @@ namespace VibeChat.Web
             await Clients.Client(connectionId).SendAsync("RemovedFromGroup", userId, conversationId);
         }
 
-        private async Task SendMessageToGroupExcept(int groupId, string exceptConnectionId, string SenderId, Message message, bool y, bool x)
+        private async Task SendMessageToGroupExcept(int groupId, string exceptConnectionId, string SenderId, Message message, bool secure = false)
         {
-            await Clients.GroupExcept(groupId.ToString(), exceptConnectionId).SendAsync("ReceiveMessage", SenderId, message, groupId);
+            await Clients.GroupExcept(groupId.ToString(), exceptConnectionId).SendAsync("ReceiveMessage", SenderId, message, groupId, secure);
         }
 
-        private async Task SendMessageToUser(Message message, string SenderId, string UserToSendConnectionId, int conversationId, bool x, bool y)
+        private async Task SendMessageToUser(Message message, string SenderId, string UserToSendConnectionId, int conversationId, bool secure = false)
         {
-            await Clients.Client(UserToSendConnectionId).SendAsync("ReceiveMessage", SenderId, message, conversationId);
+            await Clients.Client(UserToSendConnectionId).SendAsync("ReceiveMessage", SenderId, message, conversationId, secure);
         }
 
         private async Task MessageDelivered(string connectionId, int messageId, int clientMessageId, int conversationId)

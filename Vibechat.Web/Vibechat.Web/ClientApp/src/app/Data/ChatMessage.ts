@@ -23,4 +23,6 @@ export class ChatMessage {
   public forwardedMessage: ChatMessage;
 
   public isAttachment: boolean;
+
+  public encryptedPayload: string;
 }

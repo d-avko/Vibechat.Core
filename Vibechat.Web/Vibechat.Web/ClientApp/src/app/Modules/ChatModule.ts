@@ -31,6 +31,8 @@ import { UsersService } from "../Services/UsersService";
 import { MessageReportingService } from "../Services/MessageReportingService";
 import { AuthService } from "../Auth/AuthService";
 import { ThemesService } from "../Theming/ThemesService";
+import { EncryptionInterceptor } from "../Interceptors/EncryptionInterceptor";
+import { DecryptionInterceptor } from "../Interceptors/DecryptionInterceptor";
 
 @NgModule({
   declarations: [
@@ -79,6 +81,8 @@ import { ThemesService } from "../Theming/ThemesService";
     MessageReportingService,
     AuthService,
     ThemesService,
-    { provide: HTTP_INTERCEPTORS, useClass: HttpResponseInterceptor, multi: true }]
+    { provide: HTTP_INTERCEPTORS, useClass: EncryptionInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: HttpResponseInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: DecryptionInterceptor, multi: true }]
 })
 export class ChatModule { }

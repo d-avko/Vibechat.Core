@@ -29,17 +29,14 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddScoped<ConversationsInfoService, ConversationsInfoService>();
             services.AddScoped<UsersInfoService, UsersInfoService>();
             services.AddScoped<LoginService, LoginService>();
-            services.AddScoped<EncryptionService, EncryptionService>();
+            services.AddScoped<CryptoService, CryptoService>();
             services.AddScoped<ImagesService, ImagesService>();
             services.AddScoped<BansService, BansService>();
-            services.AddScoped<SessionsService, SessionsService>();
         }
 
         public static void AddDefaultMiddleware(this IServiceCollection services)
         {
             services.AddScoped<UserStatusMiddleware, UserStatusMiddleware>();
-            services.AddScoped<RequestDecryptionMiddleware, RequestDecryptionMiddleware>();
-            services.AddScoped<ResponseEncryptionMiddleware, ResponseEncryptionMiddleware>();
         }
 
         public static void AddDefaultRepositories(this IServiceCollection services)
@@ -52,7 +49,6 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddScoped<IConversationRepository, ConversationsRepository>();
             services.AddScoped<IConversationsBansRepository, ConversationsBansRepository>();
             services.AddScoped<IUsersBansRepository, UsersBansRepository>();
-            services.AddScoped<IUsersSessionsRepository, UsersSessionsRepository>();
         }
 
         public static void AddBusinessLogic(this IServiceCollection services)
