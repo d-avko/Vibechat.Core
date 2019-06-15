@@ -88,6 +88,20 @@
         <h3 matLine>Start chatting</h3>
       </mat-list-item>
 
+      <mat-list-item *ngIf="!IsInContactList()" (click)="AddToContacts()">
+
+        <mat-icon class="cadetBlue">person_add</mat-icon>
+
+        <h3 matLine>Add to contacts</h3>
+      </mat-list-item>
+
+      <mat-list-item *ngIf="IsInContactList()" (click)="RemoveFromContacts()">
+
+        <mat-icon class="cadetBlue">person_add</mat-icon>
+
+        <h3 matLine>Remove from contacts</h3>
+      </mat-list-item>
+
       <mat-list-item *ngIf="HasConversationWith()" (click)="ViewAttachments()">
 
         <mat-icon class="cadetBlue">attach_file</mat-icon>

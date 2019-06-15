@@ -47,6 +47,14 @@ export class UserInfoDialogComponent {
     this.conversationsService.CreateDialogWith(this.data.user);
   }
 
+  public RemoveFromContacts(): void {
+
+  }
+
+  public AddToContacts(): void {
+
+  }
+
   public ViewAttachments() {
     let conversation = this.conversationsService.FindDialogWith(this.data.user);
 

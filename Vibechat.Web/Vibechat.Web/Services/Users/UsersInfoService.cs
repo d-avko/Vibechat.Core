@@ -19,15 +19,19 @@ namespace Vibechat.Web.Services.Users
     {
         private readonly IUsersRepository usersRepository;
         private readonly ImagesService imagesService;
+        private readonly IContactsRepository contactsRepository;
+
         public const int MaxThumbnailLengthMB = 5;
         public const int MaxNameLength = 128;
 
         public UsersInfoService(
             IUsersRepository usersRepository,
-            ImagesService imagesService)
+            ImagesService imagesService,
+            IContactsRepository contactsRepository)
         {
             this.usersRepository = usersRepository;
             this.imagesService = imagesService;
+            this.contactsRepository = contactsRepository;
         }
 
         public async Task<UserInfo> GetUserById(UserByIdApiModel userId)
@@ -55,6 +59,51 @@ namespace Vibechat.Web.Services.Users
             }
 
             await usersRepository.ChangeName(newName, whoCalled);
+        }
+
+        public async Task<List<UserInfo>> GetContacts(string callerId)
+        {
+            UserInApplication caller = await usersRepository.GetById(callerId);
+
+            if (caller == null)
+            {
+                throw new ArgumentException("caller id was wrong.");
+            }
+
+            return contactsRepository.GetContactsOf(callerId)
+                .Select(x => x.Contact.ToUserInfo())
+                ?.ToList();
+        }
+
+        public async Task AddToContacts(string userId, string callerId)
+        {
+            UserInApplication contact = await usersRepository.GetById(userId);
+
+            if(contact == null)
+            {
+                throw new ArgumentException("user id was wrong.");
+            }
+
+            UserInApplication caller = await usersRepository.GetById(callerId);
+
+            if (caller == null)
+            {
+                throw new ArgumentException("caller id was wrong.");
+            }
+
+            await contactsRepository.AddContact(caller, contact);
+        }
+
+        public async Task RemoveFromContacts(string userId, string caller)
+        {
+            try
+            {
+                await contactsRepository.RemoveContact(caller, userId);
+            }
+            catch (Exception ex)
+            {                
+                throw new InvalidDataException("Wrong caller id or user id", ex);
+            }
         }
 
         public async Task ChangeLastName(string newName, string whoCalled)

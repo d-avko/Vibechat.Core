@@ -349,13 +349,15 @@ namespace VibeChat.Web
             {
                 await conversationsService.ValidateDialog(whoSent.Id, userId, conversationId);
                 var user = await userService.GetUserById(userId);
-                var toSend = new Message();
                 MessageDataModel created = await conversationsService.AddEncryptedMessage(encryptedMessage, conversationId, whoSent.Id);
 
-                toSend.Id = created.MessageID;
-                toSend.EncryptedPayload = created.EncryptedPayload;
-                toSend.TimeReceived = created.TimeReceived.ToUTCString();
-                toSend.State = MessageState.Delivered;
+                var toSend = new Message()
+                {
+                    Id = created.MessageID,
+                    EncryptedPayload = created.EncryptedPayload,
+                    TimeReceived = created.TimeReceived.ToUTCString(),
+                    State = MessageState.Delivered
+                };
 
                 if (user.IsOnline)
                 {
@@ -370,6 +372,11 @@ namespace VibeChat.Web
                 logger.LogError(ex.Message);
             }
            
+        }
+
+        private async Task StartKeyExchange(string userId, string userConnectionId)
+        {
+
         }
 
         private async Task RemovedFromGroup(string userId, int conversationId)

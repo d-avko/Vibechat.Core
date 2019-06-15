@@ -7,7 +7,7 @@ using VibeChat.Web;
 
 namespace Vibechat.Web.Services.Repositories
 {
-    public class ContactsRepository
+    public class ContactsRepository : IContactsRepository
     {
         private ApplicationDbContext mContext { get; set; }
 

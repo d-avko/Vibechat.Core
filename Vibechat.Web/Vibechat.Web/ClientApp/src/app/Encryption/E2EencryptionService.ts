@@ -24,7 +24,7 @@ export class E2EencryptionService {
 
     //simple symmetric encryption.
 
-   return crypto.AES.encrypt(JSON.stringify(message), authKey).ciphertext;
+    return crypto.AES.encrypt(JSON.stringify(message), authKey, { mode: crypto.mode.CBC }).ciphertext;
   }
 
   //returns null if no auth key was found in local storage.
@@ -34,6 +34,6 @@ export class E2EencryptionService {
       return null;
     }
 
-    return <ChatMessage>JSON.parse(crypto.AES.decrypt(encrypted, authKey).toString());
+    return <ChatMessage>JSON.parse(crypto.AES.decrypt(encrypted, authKey, { mode: crypto.mode.CBC }).toString());
   }
 }

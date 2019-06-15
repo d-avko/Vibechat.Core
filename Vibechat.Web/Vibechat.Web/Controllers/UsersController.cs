@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Vibechat.Web.ApiModels;
@@ -239,6 +240,78 @@ namespace VibeChat.Web.Controllers
             catch (Exception ex)
             {
                 return new ResponseApiModel<UpdateProfilePictureResponse>()
+                {
+                    ErrorMessage = ex.Message,
+                    IsSuccessfull = false
+                };
+            }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Users/GetContacts")]
+        public async Task<ResponseApiModel<List<UserInfo>>> GetContacts()
+        {
+            try
+            {
+                var result = await mUsersService.GetContacts(JwtHelper.GetNamedClaimValue(User.Claims));
+
+                return new ResponseApiModel<List<UserInfo>>()
+                {
+                    IsSuccessfull = true,
+                    Response = result
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<List<UserInfo>>()
+                {
+                    ErrorMessage = ex.Message,
+                    IsSuccessfull = false
+                };
+            }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Users/AddToContacts")]
+        public async Task<ResponseApiModel<bool>> AddToContacts([FromBody]UserInfoRequest request)
+        {
+            try
+            {
+                await mUsersService.AddToContacts(request.userId, JwtHelper.GetNamedClaimValue(User.Claims));
+
+                return new ResponseApiModel<bool>()
+                {
+                    IsSuccessfull = true,
+                    Response = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<bool>()
+                {
+                    ErrorMessage = ex.Message,
+                    IsSuccessfull = false
+                };
+            }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Users/RemoveFromContacts")]
+        public async Task<ResponseApiModel<bool>> RemoveFromContacts([FromBody]UserInfoRequest request)
+        {
+            try
+            {
+                await mUsersService.RemoveFromContacts(request.userId, JwtHelper.GetNamedClaimValue(User.Claims));
+
+                return new ResponseApiModel<bool>()
+                {
+                    IsSuccessfull = true,
+                    Response = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<bool>()
                 {
                     ErrorMessage = ex.Message,
                     IsSuccessfull = false
