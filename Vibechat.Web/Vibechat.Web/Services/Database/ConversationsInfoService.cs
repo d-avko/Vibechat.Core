@@ -78,9 +78,21 @@ namespace Vibechat.Web.Services
 
         #region Conversations
 
-        public void UpdateAuthKey(int chatId, string authKeyId, string thisUserId)
+        public async Task UpdateAuthKey(int chatId, string authKeyId, string thisUserId)
         {
-            
+            if(!await ExistsInConversation(chatId, thisUserId))
+            {
+                throw new InvalidDataException($"Wrong conversation id was provided.");
+            }
+
+            ConversationDataModel chat = conversationRepository.GetById(chatId);
+
+            if (chat == null)
+            {
+                throw new InvalidDataException($"Wrong conversation id was provided.");
+            }
+
+            await conversationRepository.UpdateAuthKey(chat, authKeyId);
         }
 
         public async Task<ConversationTemplate> CreateConversation(CreateConversationCredentialsApiModel convInfo)
@@ -444,11 +456,6 @@ namespace Vibechat.Web.Services
             if(dialog == null)
             {
                 throw new InvalidDataException("Wrong id of a user in dialog.");
-            }
-
-            if (dialog.Conversation.ConvID != conversationId)
-            {
-                throw new InvalidDataException("Wrong conversationId.");
             }
         }
 

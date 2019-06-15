@@ -73,7 +73,7 @@ namespace VibeChat.Web.Controllers
             {
                 var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
-                mConversationService.UpdateAuthKey(request.chatId, request.AuthKeyId, thisUserId);
+                await mConversationService.UpdateAuthKey(request.chatId, request.AuthKeyId, thisUserId);
 
                 return new ResponseApiModel<bool>()
                 {

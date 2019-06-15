@@ -84,8 +84,8 @@ export class ConnectionManager {
       this.ConversationsService.OnSecureMessageReceived(chatId, encryptedMessage, whoSentId);
     });
 
-    this.connection.on("ReceiveDhParam", (param: string, sentBy: string, chatId: number) => {
-      this.DHServerKeyExchangeService.OnIntermidiateParamsReceived(param, sentBy, chatId);
+    this.connection.on("ReceiveDhParam", async (param: string, sentBy: string, chatId: number) => {
+      await this.DHServerKeyExchangeService.OnIntermidiateParamsReceived(param, sentBy, chatId);
     });
   }
 
