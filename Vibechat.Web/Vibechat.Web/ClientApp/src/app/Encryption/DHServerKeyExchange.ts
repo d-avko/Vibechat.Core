@@ -4,7 +4,8 @@ import { Injectable, EventEmitter } from "@angular/core";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { ConversationsService } from "../Services/ConversationsService";
 import { SecureChatsService } from "./SecureChatsService";
-import * as crypto from "crypto-js";
+import * as biginteger from "big-integer";
+import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 
 class DictionaryEntry<K, V> {
   public constructor(init?: Partial<DictionaryEntry<K, V>>) {
@@ -19,9 +20,10 @@ class KeyExchangeEntry {
   public constructor(init?: Partial<KeyExchangeEntry>) {
     (<any>Object).assign(this, init);
   }
+  public busy: boolean;
   public secondUserS: string; // g^a mod p
   public thisUserS: string; // g^b mod p
-  public thisUserPrivateKey: string;
+  public thisUserPrivateKey: biginteger.BigInteger;
 }
 
 @Injectable({
@@ -29,63 +31,94 @@ class KeyExchangeEntry {
 })
 export class DHServerKeyExchangeService {
   constructor(
-    private chatService: ConversationsService,
     private secureChatsService: SecureChatsService,
-    private connectionManager: ConnectionManager) {
+    private connectionManager: ConnectionManager,
+    private api: ApiRequestsBuilder) {
     this.connectionManager.setDHServerKeyExchangeService(this);
   }
 
+  private chatService: ConversationsService;
   private PendingParams = new Array<DictionaryEntry<string, KeyExchangeEntry>>();
 
-  private OnKeysGenerated = new EventEmitter<number>();
+  public setChatService(c: ConversationsService) {
+    this.chatService = c;
+  }
 
   public InitiateKeyExchange(conversation: ConversationTemplate) {
     let entry = this.PendingParams.find(x => x.key == conversation.dialogueUser.id);
 
     if (!entry) {
-      this.PendingParams.push(new DictionaryEntry<string, KeyExchangeEntry>(
+      entry = new DictionaryEntry<string, KeyExchangeEntry>(
         {
           key: conversation.dialogueUser.id,
           value: new KeyExchangeEntry()
-        }));
+        });
+
+      this.PendingParams.push(entry);
     }
 
-    if (entry.value.secondUserS) {
+    if (entry.value.secondUserS || entry.value.busy) {
       return;
     }
 
-    //generate private number
-    //let x = conversation.publicKey.generator ^ (number) % conversation.publicKey.modulus
-    //send x
+    let min = biginteger(2).pow(50);
+    let max = biginteger(2).pow(150);
+    let modulus = biginteger(conversation.publicKey.modulus);
+    let generator = biginteger(conversation.publicKey.generator);
+
+    entry.value.thisUserPrivateKey = biginteger.randBetween(min, max);
+    let toSend = generator.modPow(entry.value.thisUserPrivateKey, modulus).toString();
+
+    entry.value.busy = true;
+    this.connectionManager.SendDhParam(toSend, conversation.dialogueUser.id, conversation.conversationID);
   }
 
 
-  public OnIntermidiateParamsReceived(s: string, sentBy: string, chatId: number) {
+  public async OnIntermidiateParamsReceived(s: string, sentBy: string, chatId: number) {
     let entry = this.PendingParams.find(x => x.key == sentBy);
 
     if (!entry) {
-      this.PendingParams.push(new DictionaryEntry<string, KeyExchangeEntry>(
+      entry = new DictionaryEntry<string, KeyExchangeEntry>(
         {
           key: sentBy,
           value: new KeyExchangeEntry()
-        }));
+        });
+
+      this.PendingParams.push(entry);
     }
 
     entry.value.secondUserS = s;
 
     let chat = this.chatService.Conversations.find(x => x.conversationID == chatId);
-
     //only creator could initiate key exchange. Here send generated param to creator.
     if (chat.creator.id == sentBy) {
 
+      let min = biginteger(2).pow(100);
+      let max = biginteger(2).pow(320);
+      let modulus = biginteger(chat.publicKey.modulus);
+      let generator = biginteger(chat.publicKey.generator);
 
+      entry.value.thisUserPrivateKey = biginteger.randBetween(min, max);
+      let toSend = generator.modPow(entry.value.thisUserPrivateKey, modulus).toString();
 
-    } else {
-      //creator received generated param: calculate auth key and store it.
-      
+      this.connectionManager.SendDhParam(toSend, chat.dialogueUser.id, chat.conversationID);
     }
 
-    //if values not generated, generate and send
-    //if generated, send existing
+    let authKey = biginteger(s).modPow(entry.value.thisUserPrivateKey, biginteger(chat.publicKey.modulus)).toString();
+
+    //got response, update authkeyId
+    if (chat.creator.id != sentBy) {
+
+      let authKeyId = this.secureChatsService.GetAuthKeyId(authKey);
+
+      let result = await this.api.UpdateAuthKeyId(authKeyId, chat.conversationID);
+
+      if (result.isSuccessfull) {
+        chat.authKeyId = authKeyId;
+      }
+    }
+
+    this.secureChatsService.StoreAuthKey(authKey, chat.dialogueUser.id);
+    entry.value.busy = false;
   }
 }

@@ -33,6 +33,7 @@ export class ConversationsService {
   {
     this.connectionManager.setConversationsService(this);
     this.PendingReadMessages = new Array<number>();
+    this.dh.setChatService(this);
   }
 
   public Conversations: Array<ConversationTemplate>;
@@ -74,13 +75,14 @@ export class ConversationsService {
   }
 
   public CreateSecureChat(user: UserInfo) : boolean {
-    let dialog = this.FindDialogWithSecurityCheck(user, true);
+    //let dialog = this.FindDialogWithSecurityCheck(user, true);
 
-    if (dialog) {
-      return false;
-    }
+    //if (dialog) {
+    //  return false;
+    //}
 
     this.CreateDialogWith(user, true);
+    return true;
   }
 
   public async GetMessagesForCurrentConversation(count: number) {
@@ -563,31 +565,17 @@ export class ConversationsService {
       }
     } else {
 
-      //we created dialog with someone;
+      if (data.conversation.messages == null) {
+        data.conversation.messages = new Array<ChatMessage>();
+      }
 
-      if (data.user.id == this.authService.User.id) {
+      this.Conversations = [...this.Conversations, data.conversation];
 
-        if (data.conversation.messages == null) {
-          data.conversation.messages = new Array<ChatMessage>();
+      if (data.conversation.isSecure && data.conversation.creator.id == this.authService.User.id) {
+
+        if (data.conversation.dialogueUser.isOnline) {
+          this.dh.InitiateKeyExchange(data.conversation);
         }
-
-        this.Conversations = [...this.Conversations, data.conversation];
-
-        //initiate key exchange, if this is secure chat.
-
-        if (data.conversation.isSecure) {
-
-          if (data.conversation.dialogueUser.isOnline) {
-            this.dh.InitiateKeyExchange(data.conversation);
-          }
-        }
-
-      } else {
-
-        //someone created dialog with us.
-
-        data.conversation.dialogueUser = data.user;
-        this.Conversations = [...this.Conversations, data.conversation];
       }
 
     }

@@ -178,16 +178,18 @@ namespace VibeChat.Web
                         IsSecure = secure
                     });
 
+                UserInApplication userToSend = await userService.GetUserById(user.Id);
+
                 if (whoSent.IsOnline)
                 {
+                    created.DialogueUser = userToSend.ToUserInfo();
                     //send to self 
                     await AddedToDialog(new UserInfo() { Id = whoSent.Id }, Context.ConnectionId, created);
                 }
 
-                UserInApplication userToSend = await userService.GetUserById(user.Id);
-
                 if (userToSend.IsOnline)
                 {
+                    created.DialogueUser = whoSent.ToUserInfo();
                     await AddedToDialog(new UserInfo() { Id = userToSend.Id }, userToSend.ConnectionId, created);
                 }
             }

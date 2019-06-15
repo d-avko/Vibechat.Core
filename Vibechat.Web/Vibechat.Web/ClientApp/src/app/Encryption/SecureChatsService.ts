@@ -10,6 +10,11 @@ class authKeys {
 })
 export class SecureChatsService {
 
+  public GetAuthKeyId(authKey: string) {
+    let raw = crypto.SHA256(authKey.substr(0, authKey.length / 2));
+    return crypto.enc.Base64.stringify(raw);
+  }
+
   public GetAuthKey(userOrGroupId: string) {
     let container = <authKeys>JSON.parse(localStorage.getItem('authKeys'));
 
@@ -32,12 +37,15 @@ export class SecureChatsService {
     let container = <authKeys>JSON.parse(localStorage.getItem('authKeys'));
 
     if (!container) {
-      return;
+      container = new authKeys();
+      container.ids = new Array<string>();
+      container.keys = new Array<string>();
     }
 
     container.ids.push(userId);
     container.keys.push(authKey);
 
+    localStorage.removeItem('authKeys');
     localStorage.setItem(JSON.stringify(container), 'authKeys');
   }
 
@@ -47,11 +55,12 @@ export class SecureChatsService {
     let container = <authKeys>JSON.parse(localStorage.getItem('authKeys'));
 
     if (!container) {
-      return null;
+      return false;
     }
     for (let i = 0; i < container.keys.length; ++i) {
 
-      if (crypto.SHA256(container.keys[i].substr(0, container.keys[i].length / 2)).ciphertext === authKeyId) {
+      let raw = crypto.SHA256(container.keys[i].substr(0, container.keys[i].length / 2));
+      if (crypto.enc.Base64.stringify(raw) === authKeyId) {
         return true;
       }
     }

@@ -198,6 +198,13 @@ export class ApiRequestsBuilder {
     ).toPromise();
   }
 
+  public UpdateAuthKeyId(authKeyId: string, chatId: number) {
+    return this.MakeCall<boolean>(
+      { chatId: chatId, AuthKeyId: authKeyId },
+      'api/Conversations/UpdateAuthKey'
+    ).toPromise();
+  }
+
   public ChangeConversationName(newName: string, conversationId: number): Promise<ServerResponse<boolean>> {
 
     return this.MakeCall<boolean>(
