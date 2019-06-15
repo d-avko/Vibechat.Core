@@ -177,6 +177,27 @@ export class ApiRequestsBuilder {
 
   }
 
+  public AddToContacts(userId: string) : Promise<ServerResponse<boolean>> {
+    return this.MakeCall<boolean>(
+      { userId: userId },
+      'api/Users/AddToContacts'
+    ).toPromise();
+  }
+
+  public RemoveFromContacts(userId: string): Promise<ServerResponse<boolean>> {
+    return this.MakeCall<boolean>(
+      { userId: userId },
+      'api/Users/RemoveFromContacts'
+    ).toPromise();
+  }
+
+  public GetContacts(): Promise<ServerResponse<Array<UserInfo>>> {
+    return this.MakeCall<Array<UserInfo>>(
+      null,
+      'api/Users/GetContacts'
+    ).toPromise();
+  }
+
   public ChangeConversationName(newName: string, conversationId: number): Promise<ServerResponse<boolean>> {
 
     return this.MakeCall<boolean>(

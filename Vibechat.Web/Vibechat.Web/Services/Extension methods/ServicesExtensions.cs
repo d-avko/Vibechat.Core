@@ -49,6 +49,7 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddScoped<IConversationRepository, ConversationsRepository>();
             services.AddScoped<IConversationsBansRepository, ConversationsBansRepository>();
             services.AddScoped<IUsersBansRepository, UsersBansRepository>();
+            services.AddScoped<IContactsRepository, ContactsRepository>();
         }
 
         public static void AddBusinessLogic(this IServiceCollection services)

@@ -13,6 +13,8 @@ export class AuthService {
 
   public User: UserInfo;
 
+  public Contacts: Array<UserInfo>;
+
   public token: string;
 
   public IsAuthenticated: boolean;

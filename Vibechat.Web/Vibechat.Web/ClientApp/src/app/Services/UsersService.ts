@@ -38,6 +38,32 @@ export class UsersService {
     }
   }
 
+  public async AddToContacts(user: UserInfo) {
+    let result = await this.requestsBuilder.AddToContacts(user.id);
+
+    if (!result.isSuccessfull) {
+      return;
+    }
+
+    this.auth.Contacts.push(user);
+  }
+
+  public async RemoveFromContacts(user: UserInfo) {
+    let result = await this.requestsBuilder.RemoveFromContacts(user.id);
+
+    if (!result.isSuccessfull) {
+      return;
+    }
+
+    let contactIndex = this.auth.Contacts.findIndex(x => x.id == user.id);
+
+    if (contactIndex == -1) {
+      return;
+    }
+
+    this.auth.Contacts.splice(contactIndex, 1);
+  }
+
   public async BlockUser(user: UserInfo) {
     let result = await this.requestsBuilder.BanUser(user.id);
 
