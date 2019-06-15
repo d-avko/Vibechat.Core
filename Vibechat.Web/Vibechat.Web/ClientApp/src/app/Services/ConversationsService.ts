@@ -16,6 +16,7 @@ import { ServerResponse } from "../ApiModels/ServerResponse";
 import { Injectable } from "@angular/core";
 import { SecureChatsService } from "../Encryption/SecureChatsService";
 import { E2EencryptionService } from "../Encryption/E2EencryptionService";
+import { DHServerKeyExchangeService } from "../Encryption/DHServerKeyExchange";
 
 @Injectable({
   providedIn: 'root'
@@ -27,7 +28,8 @@ export class ConversationsService {
     private requestsBuilder: ApiRequestsBuilder,
     private connectionManager: ConnectionManager,
     private secureChatsService: SecureChatsService,
-    private encryptionService: E2EencryptionService)
+    private encryptionService: E2EencryptionService,
+    private dh: DHServerKeyExchangeService)
   {
     this.connectionManager.setConversationsService(this);
     this.PendingReadMessages = new Array<number>();
@@ -71,9 +73,17 @@ export class ConversationsService {
     }
   }
 
-  public async GetMessagesForCurrentConversation(count: number) {
-    let secure = this.CurrentConversation.authKeyId != null;
+  public CreateSecureChat(user: UserInfo) : boolean {
+    let dialog = this.FindDialogWithSecurityCheck(user, true);
 
+    if (dialog) {
+      return false;
+    }
+
+    this.CreateDialogWith(user, true);
+  }
+
+  public async GetMessagesForCurrentConversation(count: number) {
     let result = await this.requestsBuilder.GetConversationMessages(
       this.CurrentConversation.messages.length,
       count,
@@ -89,7 +99,7 @@ export class ConversationsService {
       return result.response;
     }
 
-    if (secure) {
+    if (this.CurrentConversation.isSecure) {
       result.response.forEach(x => {
 
         this.DecryptedMessageToLocalMessage(
@@ -174,9 +184,9 @@ export class ConversationsService {
       let toDeleteIndexes = [];
       response.response.forEach((x, index) => {
         //delete secure chats where we've lost auth keys
-        if (x.authKeyId) {
+        if (x.isSecure) {
 
-          if (!this.secureChatsService.AuthKeyExists(x.authKeyId)) {
+          if (x.authKeyId && !this.secureChatsService.AuthKeyExists(x.authKeyId)) {
             toDeleteIndexes.push(index);
           } else {
 
@@ -341,7 +351,7 @@ export class ConversationsService {
     );
 
     //secure chat
-    if (this.CurrentConversation.authKeyId) {
+    if (this.CurrentConversation.isSecure) {
 
       this.connectionManager.SendMessageToSecureChat(
         this.encryptionService.Encrypt(this.CurrentConversation.dialogueUser.id, messageToSend),
@@ -385,8 +395,8 @@ export class ConversationsService {
     this.Conversations = [...this.Conversations, result.response];
   }
 
-  public CreateDialogWith(user: UserInfo) {
-    this.connectionManager.CreateDialog(user);
+  public CreateDialogWith(user: UserInfo, secure: boolean) {
+    this.connectionManager.CreateDialog(user, secure);
   }
 
   public RemoveDialogWith(user: UserInfo) {
@@ -408,6 +418,13 @@ export class ConversationsService {
 
   public FindDialogWith(user: UserInfo) {
     return this.Conversations.find(x => !x.isGroup && x.dialogueUser.id == user.id);
+  }
+
+  public FindDialogWithSecurityCheck(user: UserInfo, secure: boolean) {
+    return this.Conversations.find(x =>
+      !x.isGroup
+        && x.dialogueUser.id == user.id
+        && x.isSecure == secure);
   }
 
   public async UpdateExisting(target: ConversationTemplate) : Promise<void> {
@@ -556,6 +573,15 @@ export class ConversationsService {
 
         this.Conversations = [...this.Conversations, data.conversation];
 
+        //initiate key exchange, if this is secure chat.
+
+        if (data.conversation.isSecure) {
+
+          if (data.conversation.dialogueUser.isOnline) {
+            this.dh.InitiateKeyExchange(data.conversation);
+          }
+        }
+
       } else {
 
         //someone created dialog with us.
@@ -654,7 +680,7 @@ export class ConversationsService {
         let message = this.BuildMessage(null, conversationToSend, true, file);
 
         //secure chat
-        if (this.CurrentConversation.authKeyId) {
+        if (this.CurrentConversation.isSecure) {
 
           this.connectionManager.SendMessageToSecureChat(
             this.encryptionService.Encrypt(this.CurrentConversation.dialogueUser.id, message),

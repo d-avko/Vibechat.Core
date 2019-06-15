@@ -58,6 +58,39 @@ namespace VibeChat.Web.Controllers
             }
         }
 
+        public class UpdateAuthKeyRequest
+        {
+            public int chatId { get; set; }
+
+            public string AuthKeyId { get; set; }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Conversations/UpdateAuthKey")]
+        public async Task<ResponseApiModel<bool>> UpdateAuthKey([FromBody] UpdateAuthKeyRequest request)
+        {
+            try
+            {
+                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+
+                mConversationService.UpdateAuthKey(request.chatId, request.AuthKeyId, thisUserId);
+
+                return new ResponseApiModel<bool>()
+                {
+                    IsSuccessfull = true,
+                    Response = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<bool>()
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message,
+                    Response = false
+                };
+            }
+        }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/AddUserTo")]
@@ -99,7 +132,7 @@ namespace VibeChat.Web.Controllers
                 foreach(ConversationTemplate conversation in result)
                 {
                     conversation.IsMessagingRestricted = await BansService.IsBannedFromConversation(conversation.ConversationID, thisUserId).ConfigureAwait(false);
-                    conversation.MessagesUnread = await mConversationService.GetUnreadMessagesInConversation(conversation.ConversationID, thisUserId).ConfigureAwait(false);
+                    conversation.MessagesUnread = await mConversationService.GetUnreadMessagesAmount(conversation.ConversationID, thisUserId).ConfigureAwait(false);
 
                     foreach(UserInfo user in conversation.Participants)
                     {

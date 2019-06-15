@@ -9,7 +9,7 @@ using Vibechat.Web.AuthHelpers;
 using Vibechat.Web.Middleware;
 using Vibechat.Web.Services.Bans;
 using Vibechat.Web.Services.ChatDataProviders;
-using Vibechat.Web.Services.Encryption;
+using Vibechat.Web.Services.Crypto;
 using Vibechat.Web.Services.FileSystem;
 using Vibechat.Web.Services.Hashing;
 using Vibechat.Web.Services.Images;
@@ -29,7 +29,6 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddScoped<ConversationsInfoService, ConversationsInfoService>();
             services.AddScoped<UsersInfoService, UsersInfoService>();
             services.AddScoped<LoginService, LoginService>();
-            services.AddScoped<CryptoService, CryptoService>();
             services.AddScoped<ImagesService, ImagesService>();
             services.AddScoped<BansService, BansService>();
         }
@@ -50,6 +49,7 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddScoped<IConversationsBansRepository, ConversationsBansRepository>();
             services.AddScoped<IUsersBansRepository, UsersBansRepository>();
             services.AddScoped<IContactsRepository, ContactsRepository>();
+            services.AddScoped<IDhPublicKeysRepository, DhPublicKeysRepository>();
         }
 
         public static void AddBusinessLogic(this IServiceCollection services)
@@ -62,6 +62,7 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddSingleton<IImageScalingService, ImageCompressionService>();
             services.AddSingleton<IHexHashingService, Sha256Service>();
             services.AddSingleton<UniquePathsProvider, UniquePathsProvider>();
+            services.AddScoped<CryptoService, CryptoService>();
         }
     }
 }

@@ -38,6 +38,7 @@ namespace Vibechat.Web.Services.Repositories
         {
             var usersConversations = mContext.UsersConversations
                .Include(x => x.Conversation)
+               .ThenInclude(x => x.PublicKey)
                .Include(y => y.User);
 
             return from userConversation in usersConversations
@@ -63,6 +64,7 @@ namespace Vibechat.Web.Services.Repositories
                 .UsersConversations
                 .Include(x => x.User)
                 .Include(x => x.Conversation)
+                .ThenInclude(x => x.PublicKey)
                 .FirstOrDefaultAsync(x => x.User.Id == userId && x.Conversation.ConvID == conversationId);
         }
 
@@ -110,7 +112,9 @@ namespace Vibechat.Web.Services.Repositories
             {
                 if(await mContext
                     .UsersConversations
-                    .AnyAsync(x => x.Conversation.ConvID == conversation.Conversation.ConvID && x.User.Id == secondUserId))
+                    .AnyAsync(x => 
+                    x.Conversation.ConvID == conversation.Conversation.ConvID 
+                    && x.User.Id == secondUserId))
                 {
                     return true;
                 }

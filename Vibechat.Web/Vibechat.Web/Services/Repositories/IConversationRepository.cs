@@ -1,12 +1,14 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using Vibechat.Web.Data.DataModels;
 using VibeChat.Web;
 
 namespace Vibechat.Web.Services.Repositories
 {
     public interface IConversationRepository
     {
-        Task<ConversationDataModel> Add(bool IsGroup, string name, string imageUrl, UserInApplication user,bool IsPublic);
+        Task Add(ConversationDataModel conversation);
+
         ConversationDataModel GetById(int id);
 
         void Remove(ConversationDataModel entity);
@@ -18,5 +20,9 @@ namespace Vibechat.Web.Services.Repositories
         Task<IQueryable<ConversationDataModel>> SearchByName(string name, UserInApplication whoSearches, IUsersConversationsRepository participantsProvider);
 
         Task ChangePublicState(int conversationId);
+
+        Task SetPublicKey(ConversationDataModel chat, DhPublicKeyDataModel dh);
+
+        Task UpdateAuthKey(ConversationDataModel chat, string authKeyId);
     }
 }

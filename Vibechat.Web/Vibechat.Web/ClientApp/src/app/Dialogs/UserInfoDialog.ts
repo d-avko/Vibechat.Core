@@ -44,15 +44,19 @@ export class UserInfoDialogComponent {
   }
 
   public CreateDialog(): void {
-    this.conversationsService.CreateDialogWith(this.data.user);
+    this.conversationsService.CreateDialogWith(this.data.user, false);
   }
 
-  public RemoveFromContacts(): void {
-
+  public IsInContactList(): boolean {
+    return this.usersService.HasContactWith(this.data.user)
   }
 
-  public AddToContacts(): void {
+  public async RemoveFromContacts() {
+    await this.usersService.RemoveFromContacts(this.data.user);
+  }
 
+  public async AddToContacts() {
+    await this.usersService.AddToContacts(this.data.user);
   }
 
   public ViewAttachments() {

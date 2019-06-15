@@ -31,8 +31,7 @@ import { UsersService } from "../Services/UsersService";
 import { MessageReportingService } from "../Services/MessageReportingService";
 import { AuthService } from "../Auth/AuthService";
 import { ThemesService } from "../Theming/ThemesService";
-import { EncryptionInterceptor } from "../Interceptors/EncryptionInterceptor";
-import { DecryptionInterceptor } from "../Interceptors/DecryptionInterceptor";
+import { ChooseContactDialogComponent } from "../Dialogs/ChooseContactDialog";
 
 @NgModule({
   declarations: [
@@ -48,7 +47,8 @@ import { DecryptionInterceptor } from "../Interceptors/DecryptionInterceptor";
     UserInfoDialogComponent,
     SearchListComponent,
     ViewAttachmentsDialogComponent,
-    ForwardMessagesDialogComponent
+    ForwardMessagesDialogComponent,
+    ChooseContactDialogComponent
   ],
   imports: [
     ScrollDispatchModule,
@@ -69,7 +69,8 @@ import { DecryptionInterceptor } from "../Interceptors/DecryptionInterceptor";
     ChangeNameDialogComponent,
     UserInfoDialogComponent,
     ViewAttachmentsDialogComponent,
-    ForwardMessagesDialogComponent],
+    ForwardMessagesDialogComponent,
+    ChooseContactDialogComponent],
 
   providers: [
     ConversationsFormatter,
@@ -81,8 +82,6 @@ import { DecryptionInterceptor } from "../Interceptors/DecryptionInterceptor";
     MessageReportingService,
     AuthService,
     ThemesService,
-    { provide: HTTP_INTERCEPTORS, useClass: EncryptionInterceptor, multi: true },
-    { provide: HTTP_INTERCEPTORS, useClass: HttpResponseInterceptor, multi: true },
-    { provide: HTTP_INTERCEPTORS, useClass: DecryptionInterceptor, multi: true }]
+    { provide: HTTP_INTERCEPTORS, useClass: HttpResponseInterceptor, multi: true }]
 })
 export class ChatModule { }

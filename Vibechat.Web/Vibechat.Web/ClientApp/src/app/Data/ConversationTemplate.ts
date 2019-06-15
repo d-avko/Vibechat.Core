@@ -1,6 +1,11 @@
 import { UserInfo } from "./UserInfo";
 import { ChatMessage } from "./ChatMessage";
 
+export class DhPublicKey {
+  public modulus: string;
+  public generator: string;
+}
+
 export class ConversationTemplate {
 
   public conversationID: number;
@@ -23,7 +28,11 @@ export class ConversationTemplate {
 
   public isMessagingRestricted: boolean;
 
-  public authKeyId: string; 
+  public isSecure: boolean;
+
+  public authKeyId: string;
+
+  public publicKey: DhPublicKey; 
 
   public messagesUnread: number;
 }

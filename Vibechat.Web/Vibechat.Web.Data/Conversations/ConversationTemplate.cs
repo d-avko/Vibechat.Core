@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Vibechat.Web.Data.Conversations;
 using VibeChat.Web.Controllers;
 
 namespace VibeChat.Web.ChatData
@@ -45,10 +46,14 @@ namespace VibeChat.Web.ChatData
         /// </summary>
         public List<UserInfo> Participants { get; set; }
 
+        public bool IsSecure { get; set; }
+
         /// <summary>
         /// If this is secret chat, this property is a hash of first 1024 bits of auth key.
         /// </summary>
         public string AuthKeyId { get; set; }
+
+        public DhPublicKey PublicKey { get; set; }
 
         /// <summary>
         /// Field indicating whether calling user can message in this conversation.

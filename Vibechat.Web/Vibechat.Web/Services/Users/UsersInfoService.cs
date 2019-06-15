@@ -77,6 +77,11 @@ namespace Vibechat.Web.Services.Users
 
         public async Task AddToContacts(string userId, string callerId)
         {
+            if(userId == callerId)
+            {
+                throw new InvalidDataException("Can't add yourself to contacts.");
+            }
+
             UserInApplication contact = await usersRepository.GetById(userId);
 
             if(contact == null)

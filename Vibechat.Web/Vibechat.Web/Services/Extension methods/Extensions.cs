@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Vibechat.Web.ChatData.Messages;
+using Vibechat.Web.Data.Conversations;
+using Vibechat.Web.Data.DataModels;
 using Vibechat.Web.Services.Extension_methods;
 using VibeChat.Web;
 using VibeChat.Web.ChatData;
@@ -41,6 +43,15 @@ namespace Vibechat.Web.Extensions
             };
         }
 
+        public static DhPublicKey ToDhPublicKey(this DhPublicKeyDataModel value)
+        {
+            return new DhPublicKey()
+            {
+                Generator = value.Generator,
+                Modulus = value.Modulus
+            };
+        }
+
         public static ConversationTemplate ToConversationTemplate(
             this ConversationDataModel value, 
             List<UserInfo> participants,
@@ -58,7 +69,9 @@ namespace Vibechat.Web.Extensions
                 Participants = participants,
                 Messages = messages,
                 Creator = value.Creator.ToUserInfo(),
-                AuthKeyId = value.AuthKeyId
+                AuthKeyId = value.AuthKeyId,
+                IsSecure = value.IsSecure,
+                PublicKey = value.PublicKey?.ToDhPublicKey()
             };
         }
 

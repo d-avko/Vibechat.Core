@@ -18,6 +18,8 @@ import { ForwardMessagesDialogComponent } from "../Dialogs/ForwardMessagesDialog
 import { UsersService } from "../Services/UsersService";
 import { ConversationsService } from "../Services/ConversationsService";
 import { ThemesService } from "../Theming/ThemesService";
+import { ChooseContactDialogComponent } from "../Dialogs/ChooseContactDialog";
+import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
 
 @Component({
   selector: 'chat-root',
@@ -53,14 +55,17 @@ export class ChatComponent implements OnInit {
     public auth: AuthService,
     private usersService: UsersService,
     private conversationsService: ConversationsService,
-    private themesService: ThemesService) { }
+    private themesService: ThemesService,
+    private snackBar: SnackBarHelper) { }
 
   async ngOnInit(): Promise<void> {
     await this.auth.TryAuthenticate();
 
-    this.UpdateConversations();
+    await this.UpdateConversations();
 
     await this.usersService.UpdateUserInfo(this.auth.User.id);
+
+    await this.usersService.UpdateContacts();
   }
 
   public IsDarkTheme() {
@@ -105,6 +110,24 @@ export class ChatComponent implements OnInit {
     this.auth.LogOut();
   }
 
+  public CreateSecureChat() {
+    const chooseContactRef = this.dialog.open(ChooseContactDialogComponent, {
+      width: '450px'
+    });
+
+    chooseContactRef.beforeClosed().subscribe(
+      (user) => {
+        if (!user) {
+          return;
+        }
+
+        if (!this.conversationsService.CreateSecureChat(user)) {
+          this.snackBar.openSnackBar('Unable to create the chat with this user. Probably there already exists one.', 3);
+        }
+      }
+    )
+  }
+
   public OnJoinGroup(conversation: ConversationTemplate) {
     this.SearchString = '';
     this.conversationsService.JoinGroup(conversation);
@@ -128,7 +151,7 @@ export class ChatComponent implements OnInit {
   }
 
   public CreateDialogWith(user: UserInfo) {
-    this.conversationsService.CreateDialogWith(user);
+    this.conversationsService.CreateDialogWith(user, false);
   }
 
   public async Search() {

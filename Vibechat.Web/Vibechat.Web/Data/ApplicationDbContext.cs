@@ -27,9 +27,10 @@ namespace VibeChat.Web
 
         public DbSet<UsersBansDatamodel> UsersBans { get; set; }
 
-        public DbSet<UserSessionDataModel> UsersSessions { get; set; }
-
         public DbSet<ContactsDataModel> Contacts { get; set; }
+
+        public DbSet<DhPublicKeyDataModel> PublicKeys { get; set; }
+
         #region Constructor
 
         /// <summary>
@@ -38,7 +39,7 @@ namespace VibeChat.Web
         /// <param name="options">The database context options</param>
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
-
+            
         }
 
         #endregion
