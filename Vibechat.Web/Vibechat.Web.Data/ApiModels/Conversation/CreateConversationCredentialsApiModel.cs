@@ -16,5 +16,7 @@
         public bool IsGroup { get; set; }
 
         public bool IsPublic { get; set; }
+
+        public bool IsSecure { get; set; }
     }
 }

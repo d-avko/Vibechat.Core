@@ -1,4 +1,6 @@
-<div *ngIf="! Conversation.isMessagingRestricted" class="messages_wrapper_chat-input">
+<div *ngIf="!Conversation.isMessagingRestricted
+     && ((Conversation.isSecure && Conversation.authKeyId)
+     || (!Conversation.isSecure && !Conversation.authKeyId))" class="messages_wrapper_chat-input">
 
   <img class="rounded-image" src="{{User.imageUrl}}" />
 
@@ -21,5 +23,11 @@
 <div *ngIf="Conversation.isMessagingRestricted" class="banned-input">
   <mat-icon style="color: indianred">report_problem</mat-icon>
   <p class="banned-text">You were banned from writing in this conversation.</p>
+</div>
+
+<!--Wait until keys for private chat are exchanged.-->
+<div *ngIf="Conversation.isSecure && !Conversation.authKeyId" class="banned-input">
+  <mat-icon style="color: cadetblue">report_problem</mat-icon>
+  <p class="banned-text">Wait until {{Conversation.dialogueUser.userName}} is online.</p>
 </div>
 

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using OpenSSL.Crypto;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -155,7 +156,7 @@ namespace VibeChat.Web
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task CreateDialog(UserInfo user)
+        public async Task CreateDialog(UserInfo user, bool secure)
         {
             UserInApplication whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
             await userService.MakeUserOnline(whoSent.Id, Context.ConnectionId);
@@ -168,12 +169,14 @@ namespace VibeChat.Web
                     return;
                 }
 
-                ConversationTemplate created = await conversationsService.CreateConversation(new CreateConversationCredentialsApiModel()
-                {
-                    IsGroup = false,
-                    DialogUserId = user.Id,
-                    CreatorId = whoSent.Id
-                });
+                ConversationTemplate created = await conversationsService
+                    .CreateConversation(new CreateConversationCredentialsApiModel()
+                    {
+                        IsGroup = false,
+                        DialogUserId = user.Id,
+                        CreatorId = whoSent.Id,
+                        IsSecure = secure
+                    });
 
                 if (whoSent.IsOnline)
                 {
@@ -334,7 +337,14 @@ namespace VibeChat.Web
             }
             catch(Exception ex)
             {
-                await SendError(Context.ConnectionId, ex.Message);
+                if (ex is NullReferenceException)
+                {
+                    await SendError(Context.ConnectionId, "Wrong user id was provided.");
+                }
+                else
+                {
+                    await SendError(Context.ConnectionId, ex.Message);
+                }
                 logger.LogError(ex.Message);
             }
         }
@@ -368,20 +378,57 @@ namespace VibeChat.Web
             }
             catch (Exception ex)
             {
-                await SendError(Context.ConnectionId, ex.Message);
+                if(ex is NullReferenceException)
+                {
+                    await SendError(Context.ConnectionId, "Wrong user id was provided.");
+                }
+                else
+                {
+                    await SendError(Context.ConnectionId, ex.Message);
+                }
+
                 logger.LogError(ex.Message);
             }
            
         }
 
-        private async Task StartKeyExchange(string userId, string userConnectionId)
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task SendDhParam(string userId, string param, int chatId)
         {
+            var thisUserId = userProvider.GetUserId(Context);
 
+            try
+            {
+                var user = await userService.GetUserById(userId);
+
+                if (user.IsOnline)
+                {
+                    await SendDhParamTo(user.ConnectionId, param, thisUserId, chatId);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex is NullReferenceException)
+                {
+                    await SendError(Context.ConnectionId, "Wrong user id was provided.");
+                }
+                else
+                {
+                    await SendError(Context.ConnectionId, ex.Message);
+                }
+
+                logger.LogError(ex.Message);
+            }
+        }
+
+        private async Task SendDhParamTo(string connectionId, string param, string sentBy, int chatId)
+        {
+            await Clients.Client(connectionId).SendAsync("ReceiveDhParam", param, sentBy, chatId);
         }
 
         private async Task RemovedFromGroup(string userId, int conversationId)
         {
-            await Clients.Group(conversationId.ToString()).SendAsync("RemovedFromGroup",userId, conversationId);
+            await Clients.Group(conversationId.ToString()).SendAsync("RemovedFromGroup", userId, conversationId);
         }
 
         private async Task AddedToGroup(UserInfo user, ConversationTemplate conversation, bool x)

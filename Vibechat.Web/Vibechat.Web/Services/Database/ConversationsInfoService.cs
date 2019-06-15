@@ -13,8 +13,10 @@ using Vibechat.Web.ApiModels;
 using Vibechat.Web.ChatData.Messages;
 using Vibechat.Web.Data.ApiModels.Conversation;
 using Vibechat.Web.Data.ApiModels.Messages;
+using Vibechat.Web.Data.DataModels;
 using Vibechat.Web.Extensions;
 using Vibechat.Web.Services.ChatDataProviders;
+using Vibechat.Web.Services.Crypto;
 using Vibechat.Web.Services.Extension_methods;
 using Vibechat.Web.Services.FileSystem;
 using Vibechat.Web.Services.Repositories;
@@ -35,7 +37,9 @@ namespace Vibechat.Web.Services
             IAttachmentKindsRepository attachmentKindsRepository,
             IUsersConversationsRepository usersConversationsRepository,
             IConversationRepository conversationRepository,
-            ImagesService imagesService)
+            IDhPublicKeysRepository dh,
+            ImagesService imagesService,
+            CryptoService cryptoService)
         {
             this.chatDataProvider = chatDataProvider;
             this.usersRepository = usersRepository;
@@ -44,7 +48,9 @@ namespace Vibechat.Web.Services
             this.attachmentKindsRepository = attachmentKindsRepository;
             this.usersConversationsRepository = usersConversationsRepository;
             this.conversationRepository = conversationRepository;
+            this.dh = dh;
             ImagesService = imagesService;
+            this.cryptoService = cryptoService;
         }
 
         protected readonly IChatDataProvider chatDataProvider;
@@ -61,13 +67,21 @@ namespace Vibechat.Web.Services
 
         protected readonly IConversationRepository conversationRepository;
 
+        private readonly IDhPublicKeysRepository dh;
+
         private const int MaxThumbnailLengthMB = 5;
 
         private const int MaxNameLength = 200;
 
         protected readonly ImagesService ImagesService;
+        private readonly CryptoService cryptoService;
 
         #region Conversations
+
+        public void UpdateAuthKey(int chatId, string authKeyId, string thisUserId)
+        {
+            
+        }
 
         public async Task<ConversationTemplate> CreateConversation(CreateConversationCredentialsApiModel convInfo)
         {
@@ -106,31 +120,60 @@ namespace Vibechat.Web.Services
                     throw defaultError;
                 }
 
-                if(await usersConversationsRepository.DialogExists(user.Id, SecondDialogueUser.Id))
+                //key to secured conversation could be lost.
+                if(!convInfo.IsSecure && await usersConversationsRepository.DialogExists(user.Id, SecondDialogueUser.Id))
                 {
                     throw new FormatException("Dialog already exists.");
                 }
+                var imageUrl = convInfo.ImageUrl ?? chatDataProvider.GetGroupPictureUrl();
 
-                ConversationToAdd = await conversationRepository.Add(
-                    convInfo.IsGroup,
-                    convInfo.IsGroup ? convInfo.ConversationName : null,
-                    convInfo.ImageUrl ?? chatDataProvider.GetProfilePictureUrl(),
-                    user,
-                    convInfo.IsPublic
-                    );
+                ConversationToAdd = new ConversationDataModel()
+                {
+                    IsGroup = convInfo.IsGroup,
+                    Name = convInfo.IsGroup ? convInfo.ConversationName : null,
+                    FullImageUrl = imageUrl,
+                    ThumbnailUrl = imageUrl,
+                    Creator = user,
+                    IsPublic = convInfo.IsPublic,
+                    IsSecure = convInfo.IsSecure
+                };
 
+               
+                await conversationRepository.Add(ConversationToAdd);
+
+                if (convInfo.IsSecure)
+                {
+                    var generated = cryptoService.GenerateDhPublicKey();
+                    var key = new DhPublicKeyDataModel()
+                    {
+                        Generator = generated.Generator,
+                        Modulus = generated.Modulus
+                    };
+
+                    await dh.Add(key);
+
+                    await conversationRepository.SetPublicKey(ConversationToAdd, key);
+                }
 
                 await usersConversationsRepository.Add(SecondDialogueUser, ConversationToAdd);
             }
             else
             {
-                ConversationToAdd = await conversationRepository.Add(
-                    convInfo.IsGroup,
-                    convInfo.IsGroup ? convInfo.ConversationName : null,
-                    convInfo.ImageUrl ?? chatDataProvider.GetGroupPictureUrl(),
-                    user,
-                    convInfo.IsPublic
-                    );
+                
+                var imageUrl = convInfo.ImageUrl ?? chatDataProvider.GetProfilePictureUrl();
+
+                ConversationToAdd = new ConversationDataModel()
+                {
+                    IsGroup = convInfo.IsGroup,
+                    Name = convInfo.IsGroup ? convInfo.ConversationName : null,
+                    FullImageUrl = imageUrl,
+                    ThumbnailUrl = imageUrl,
+                    Creator = user,
+                    IsPublic = convInfo.IsPublic,
+                    IsSecure = convInfo.IsSecure
+                };
+
+                await conversationRepository.Add(ConversationToAdd);
             }
 
             await usersConversationsRepository.Add(user, ConversationToAdd);
@@ -144,7 +187,7 @@ namespace Vibechat.Web.Services
                 );
         }
 
-        public async Task<int> GetUnreadMessagesInConversation(int conversationId, string userId)
+        public async Task<int> GetUnreadMessagesAmount(int conversationId, string userId)
         {
             ConversationDataModel conversation = conversationRepository.GetById(conversationId);
 

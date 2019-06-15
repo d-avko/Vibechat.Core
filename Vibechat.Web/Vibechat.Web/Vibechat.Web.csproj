@@ -16,6 +16,7 @@
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="2.1.1" />
+    <PackageReference Include="OpenSSL.NETStandard" Version="0.6.1" />
     <PackageReference Include="SkiaSharp" Version="1.68.0" />
   </ItemGroup>
 
@@ -109,6 +110,7 @@
     <None Remove="ClientApp\src\app\Data\UserInfo.ts" />
     <None Remove="ClientApp\src\app\Dialogs\AddGroupDialog.ts" />
     <None Remove="ClientApp\src\app\Dialogs\ChangeNameDialog.ts" />
+    <None Remove="ClientApp\src\app\Dialogs\ChooseContactDialog.ts" />
     <None Remove="ClientApp\src\app\Dialogs\FindUsersDialog.ts" />
     <None Remove="ClientApp\src\app\Dialogs\ForwardMessagesDialog.ts" />
     <None Remove="ClientApp\src\app\Dialogs\GroupInfoDialog.ts" />
@@ -149,6 +151,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\Data\UploadFilesResponse.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Dialogs\AddGroupDialog.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Dialogs\ChangeNameDialog.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Dialogs\ChooseContactDialog.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Dialogs\FindUsersDialog.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Dialogs\ForwardMessagesDialog.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Dialogs\GroupInfoDialog.ts" />

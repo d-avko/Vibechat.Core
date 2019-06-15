@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Vibechat.Web.Data.DataModels;
 using VibeChat.Web;
 
 namespace Vibechat.Web.Services.Repositories
@@ -20,6 +21,7 @@ namespace Vibechat.Web.Services.Repositories
             return mContext
                 .Conversations
                 .Include(x => x.Creator)
+                .Include(x => x.PublicKey)
                 .FirstOrDefault(x => x.ConvID == id);
         }
 
@@ -72,28 +74,23 @@ namespace Vibechat.Web.Services.Repositories
             mContext.SaveChanges();
         }
 
-        public async Task<ConversationDataModel> Add(
-            bool IsGroup,
-            string name,
-            string imageUrl,
-            UserInApplication creator,
-            bool IsPublic)
+        public async Task Add(ConversationDataModel conversation)
         {
-            var ConversationToAdd = new ConversationDataModel()
-            {
-                IsGroup = IsGroup,
-                Name = name,
-                FullImageUrl = imageUrl,
-                ThumbnailUrl = imageUrl,
-                Creator = creator,
-                IsPublic = IsPublic
-            };
-
-            await mContext.Conversations.AddAsync(ConversationToAdd);
+            await mContext.Conversations.AddAsync(conversation);
 
             await mContext.SaveChangesAsync();
+        }
 
-            return ConversationToAdd;
+        public async Task SetPublicKey(ConversationDataModel chat, DhPublicKeyDataModel dh)
+        {
+            chat.PublicKey = dh;
+            await mContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateAuthKey(ConversationDataModel chat, string authKeyId)
+        {
+            chat.AuthKeyId = authKeyId;
+            await mContext.SaveChangesAsync();
         }
     }
 }

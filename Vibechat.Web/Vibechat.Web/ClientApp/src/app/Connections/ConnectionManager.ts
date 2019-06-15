@@ -83,6 +83,10 @@ export class ConnectionManager {
     this.connection.on("ReceiveSecureMessage", (chatId: number, encryptedMessage: string, whoSentId: string) => {
       this.ConversationsService.OnSecureMessageReceived(chatId, encryptedMessage, whoSentId);
     });
+
+    this.connection.on("ReceiveDhParam", (param: string, sentBy: string, chatId: number) => {
+      this.DHServerKeyExchangeService.OnIntermidiateParamsReceived(param, sentBy, chatId);
+    });
   }
 
   public SendMessage(message: ChatMessage, conversation: ConversationTemplate) : void {
@@ -96,6 +100,10 @@ export class ConnectionManager {
       this.connection.send("SendMessageToUser", message, conversation.dialogueUser.id, conversation.conversationID);
 
     }
+  }
+
+  public SendDhParam(param: string, sendTo: string, chatId: number) {
+    this.connection.send("SendDhParam", sendTo, param, chatId);
   }
 
   public SendMessageToSecureChat(encryptedMessage: string, generatedId: number, userId: string, chatId: number) {
@@ -115,8 +123,8 @@ export class ConnectionManager {
     this.connection.send("RemoveFromGroup", userId, conversationId, IsSelf);
   }
 
-  public CreateDialog(user: UserInfo) {
-    this.connection.send("CreateDialog", user);
+  public CreateDialog(user: UserInfo, secure: boolean) {
+    this.connection.send("CreateDialog", user, secure);
   }
 
   public ReadMessage(msgId: number, conversationId: number) {
