@@ -29,8 +29,6 @@ namespace VibeChat.Web
 
         public string AuthKeyId { get; set; }
 
-        public DhPublicKeyDataModel PublicKey { get; set; }
-
         public UserInApplication Creator { get; set; }
     }
 }

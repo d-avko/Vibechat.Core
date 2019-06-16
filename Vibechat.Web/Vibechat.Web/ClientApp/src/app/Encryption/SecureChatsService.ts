@@ -46,10 +46,10 @@ export class SecureChatsService {
     container.keys.push(authKey);
 
     localStorage.removeItem('authKeys');
-    localStorage.setItem(JSON.stringify(container), 'authKeys');
+    localStorage.setItem('authKeys', JSON.stringify(container));
   }
 
-  //auth key is sha256 of first 1024 bits of auth key.
+  //auth key is sha256 of first half of auth key.
 
   public AuthKeyExists(authKeyId: string) : boolean {
     let container = <authKeys>JSON.parse(localStorage.getItem('authKeys'));

@@ -21,7 +21,6 @@ namespace Vibechat.Web.Services.Repositories
             return mContext
                 .Conversations
                 .Include(x => x.Creator)
-                .Include(x => x.PublicKey)
                 .FirstOrDefault(x => x.ConvID == id);
         }
 
@@ -78,12 +77,6 @@ namespace Vibechat.Web.Services.Repositories
         {
             await mContext.Conversations.AddAsync(conversation);
 
-            await mContext.SaveChangesAsync();
-        }
-
-        public async Task SetPublicKey(ConversationDataModel chat, DhPublicKeyDataModel dh)
-        {
-            chat.PublicKey = dh;
             await mContext.SaveChangesAsync();
         }
 

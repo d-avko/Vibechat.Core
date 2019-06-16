@@ -96,14 +96,16 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
 
   public async UpdateMessages() {
 
+    let currentChat = this.CurrentConversation;
+
     if (!this.MessagesLoading && !this.IsConversationHistoryEnd) {
       this.MessagesLoading = true;
 
-      if (this.CurrentConversation.messages == null) {
+      if (currentChat.messages == null) {
         return;
       }
 
-      let result = await this.conversationsService.GetMessagesForCurrentConversation(MessagesComponent.MessagesBufferLength);
+      let result = await this.conversationsService.GetMessagesForConversation(MessagesComponent.MessagesBufferLength, currentChat);
 
       if (result == null || result.length == 0) {
         this.MessagesLoading = false;
@@ -111,13 +113,19 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
         return;
       }
 
-      this.ScrollToMessage(result.length);
+      if (!this.CurrentConversation) {
+        return;
+      }
+
+      if (currentChat.conversationID == this.CurrentConversation.conversationID) {
+        this.ScrollToMessage(result.length);
+      }
     }
 
   }
 
   public async DeleteMessages() {
-    await this.conversationsService.DeleteMessages(this.SelectedMessages);
+    await this.conversationsService.DeleteMessages(this.SelectedMessages, this.CurrentConversation);
   }
 
   public ForwardMessages() {

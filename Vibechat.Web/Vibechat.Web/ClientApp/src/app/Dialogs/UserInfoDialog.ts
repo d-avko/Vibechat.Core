@@ -12,7 +12,7 @@ import { ViewAttachmentsDialogComponent } from "./ViewAttachmentsDialog";
 export interface UserInfoData {
   user: UserInfo;
   currentUser: UserInfo;
-  Conversations: Array<ConversationTemplate>;
+  conversation: ConversationTemplate;
 }
 
 @Component({
@@ -31,15 +31,11 @@ export class UserInfoDialogComponent {
     ) { }
 
   public HasConversationWith() : boolean {
-    if (this.data.Conversations == null) {
-      return false;
-    }
-
-    return this.conversationsService.FindDialogWith(this.data.user) != null;
+    return this.conversationsService.FindDialogWithSecurityCheck(this.data.user, false) != null;
   }
 
   public DeleteConversation(): void {
-    this.conversationsService.RemoveDialogWith(this.data.user);
+    this.conversationsService.RemoveGroup(this.data.conversation);
     this.dialogRef.close();
   }
 
@@ -60,13 +56,11 @@ export class UserInfoDialogComponent {
   }
 
   public ViewAttachments() {
-    let conversation = this.conversationsService.FindDialogWith(this.data.user);
-
-    if (conversation) {
+    if (this.data.conversation) {
       const attachmentsDialogRef = this.dialog.open(ViewAttachmentsDialogComponent, {
         width: '450px',
         data: {
-          conversation: conversation
+          conversation: this.data.conversation
         }
       });
     }

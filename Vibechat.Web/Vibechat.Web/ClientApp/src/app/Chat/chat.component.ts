@@ -79,7 +79,7 @@ export class ChatComponent implements OnInit {
   public async OnViewGroupInfo(group: ConversationTemplate) : Promise<void> {
 
     if (!group.isGroup) {
-      this.OnViewUserInfo(group.dialogueUser);
+      this.OnViewUserInfo(group.dialogueUser, group);
       return;
     }
 
@@ -96,7 +96,7 @@ export class ChatComponent implements OnInit {
 
     groupInfoRef.componentInstance
       .OnViewUserInfo
-      .subscribe((user: UserInfo) => this.OnViewUserInfo(user));
+      .subscribe((user: UserInfo) => this.OnViewUserInfo(user, null));
 
     groupInfoRef.componentInstance
       .OnJoinGroup
@@ -133,7 +133,7 @@ export class ChatComponent implements OnInit {
     this.conversationsService.JoinGroup(conversation);
   }
 
-  public async OnViewUserInfo(user: UserInfo) {
+  public async OnViewUserInfo(user: UserInfo, chat: ConversationTemplate) {
     await this.usersService.UpdateUserInfo(user.id);
 
     const userInfoRef = this.dialog.open(UserInfoDialogComponent, {
@@ -141,13 +141,9 @@ export class ChatComponent implements OnInit {
       data: {
         user: user,
         currentUser: this.auth.User,
-        Conversations: this.conversationsService.Conversations
+        conversation: chat
       }
     });
-  }
-
-  public RemoveDialogWith(user: UserInfo) {
-    this.conversationsService.RemoveDialogWith(user);
   }
 
   public CreateDialogWith(user: UserInfo) {
@@ -163,11 +159,11 @@ export class ChatComponent implements OnInit {
   }
 
   public async OnChangeGroupThumbnail(file: File): Promise<void>{
-    await this.conversationsService.ChangeThumbnail(file);
+    await this.conversationsService.ChangeThumbnail(file, this.conversationsService.CurrentConversation);
   }
 
   public async OnChangeConversationName(name: string) : Promise<void> {
-    await this.conversationsService.ChangeConversationName(name);
+    await this.conversationsService.ChangeConversationName(name, this.conversationsService.CurrentConversation);
   }
 
   public CreateGroup() {
@@ -214,10 +210,10 @@ export class ChatComponent implements OnInit {
   //input events
 
   public async OnSendMessage(message: string) {
-    await this.conversationsService.SendMessage(message);
+    await this.conversationsService.SendMessage(message, this.conversationsService.CurrentConversation);
   }
 
   public async OnUploadImages(files: FileList) {
-    await this.conversationsService.UploadImages(files);
+    await this.conversationsService.UploadImages(files, this.conversationsService.CurrentConversation);
   }
 }

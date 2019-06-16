@@ -127,23 +127,29 @@ namespace VibeChat.Web
             {
                 if (conversation.IsGroup)
                 {
-                    await RemovedFromGroup(conversation.DialogueUser.Id, conversation.ConversationID);
-                    await RemovedFromGroup(whoSent.Id, conversation.ConversationID);
-                }
-                else
-                {
                     List<UserInfo> participants = await conversationsService
                         .GetParticipants(new GetParticipantsApiModel() { ConvId = conversation.ConversationID });
 
-                    foreach(UserInfo user in participants)
+                    foreach (UserInfo user in participants)
                     {
-                        UserInApplication userToSend = await userService.GetUserById(user.Id).ConfigureAwait(false);
+                        UserInApplication userToSend = await userService.GetUserById(user.Id);
 
                         if (userToSend.IsOnline)
                         {
-                            await RemovedFromDialog(user.Id, userToSend.ConnectionId, conversation.ConversationID);
+                            await RemovedFromGroup(user.Id, conversation.ConversationID);
                         }
                     }
+                }
+                else
+                {
+                    UserInApplication userToSend = await userService.GetUserById(conversation.DialogueUser.Id);
+
+                    if (userToSend.IsOnline)
+                    {
+                        await RemovedFromDialog(userToSend.Id, userToSend.ConnectionId, conversation.ConversationID);
+                    }
+
+                    await RemovedFromDialog(whoSent.Id, Context.ConnectionId, conversation.ConversationID);
                 }
 
                 await conversationsService.RemoveConversation(conversation, whoSent.Id);

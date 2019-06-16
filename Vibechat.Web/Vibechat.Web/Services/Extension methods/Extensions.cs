@@ -56,7 +56,8 @@ namespace Vibechat.Web.Extensions
             this ConversationDataModel value, 
             List<UserInfo> participants,
             List<Message> messages,
-            UserInApplication dialogUser)
+            UserInApplication dialogUser,
+            DhPublicKeyDataModel key)
         {
             return new ConversationTemplate()
             {
@@ -71,7 +72,7 @@ namespace Vibechat.Web.Extensions
                 Creator = value.Creator.ToUserInfo(),
                 AuthKeyId = value.AuthKeyId,
                 IsSecure = value.IsSecure,
-                PublicKey = value.PublicKey?.ToDhPublicKey()
+                PublicKey = key?.ToDhPublicKey()
             };
         }
 

@@ -102,21 +102,21 @@
         <h3 matLine>Remove from contacts</h3>
       </mat-list-item>
 
-      <mat-list-item *ngIf="HasConversationWith()" (click)="ViewAttachments()">
+      <mat-list-item *ngIf="HasConversationWith() && data.conversation" (click)="ViewAttachments()">
 
         <mat-icon class="cadetBlue">attach_file</mat-icon>
 
         <h3 matLine>Attachments</h3>
       </mat-list-item>
 
-      <mat-list-item *ngIf="HasConversationWith()" (click)="DeleteConversation()">
+      <mat-list-item *ngIf="HasConversationWith() && data.conversation" (click)="DeleteConversation()">
 
         <mat-icon class="cadetBlue">clear</mat-icon>
 
         <h3 matLine>Delete conversation</h3>
       </mat-list-item>
 
-      <mat-list-item *ngIf="HasConversationWith()" (click)="ClearMessages()">
+      <mat-list-item *ngIf="HasConversationWith() && data.conversation" (click)="ClearMessages()">
 
         <mat-icon class="cadetBlue">
           remove_circle

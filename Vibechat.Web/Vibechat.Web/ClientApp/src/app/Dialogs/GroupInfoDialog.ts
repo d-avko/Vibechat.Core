@@ -62,15 +62,15 @@ export class GroupInfoDialogComponent {
   }
 
   public KickUser(user: UserInfo) {
-    this.conversationsService.KickUser(user);
+    this.conversationsService.KickUser(user, this.data.Conversation);
   }
 
   public async BanUser(user: UserInfo) {
-    await this.conversationsService.BanFromConversation(user);
+    await this.conversationsService.BanFromConversation(user, this.data.Conversation);
   }
 
   public async UnbanUser(user: UserInfo) {
-    await this.conversationsService.UnbanFromConversation(user);
+    await this.conversationsService.UnbanFromConversation(user, this.data.Conversation);
   }
 
   public ViewAttachments() {
@@ -87,7 +87,7 @@ export class GroupInfoDialogComponent {
   }
 
   public async UpdateThumbnail(event: any) {
-    await this.conversationsService.ChangeThumbnail(event.target.files[0]);
+    await this.conversationsService.ChangeThumbnail(event.target.files[0], this.data.Conversation);
   }
 
   public ChangeName() {
@@ -102,7 +102,7 @@ export class GroupInfoDialogComponent {
           return;
         }
 
-        await this.conversationsService.ChangeConversationName(name);
+        await this.conversationsService.ChangeConversationName(name, this.data.Conversation);
       }
     )
   }
