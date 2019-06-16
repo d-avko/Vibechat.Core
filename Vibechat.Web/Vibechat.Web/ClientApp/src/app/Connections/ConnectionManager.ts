@@ -32,7 +32,7 @@ export class ConnectionManager {
 
   constructor(private messagesService: MessageReportingService, private auth: AuthService) {}
 
-  public Start(): void {
+  public async Start(){
 
     this.connection = new signalR.HubConnectionBuilder()
       .withUrl("/hubs/chat", { accessTokenFactory: () => this.auth.token })
@@ -40,14 +40,12 @@ export class ConnectionManager {
 
     this.messagesService.OnConnecting();
 
-    this.connection.start().then(
-      () => {
-        this.InitiateConnections(this.ConversationsService.GetConversationsIds());
-        this.messagesService.OnConnected();
-      });
+    await this.connection.start();
+
+    this.InitiateConnections(this.ConversationsService.GetConversationsIds());
+    this.messagesService.OnConnected();
   
     this.connection.onclose(() => this.messagesService.OnDisconnected());
-
 
     this.connection.on("ReceiveMessage", (senderId: string, message: ChatMessage, conversationId: number, secure: boolean) => {
       this.ConversationsService.OnMessageReceived(new MessageReceivedModel(
@@ -78,10 +76,6 @@ export class ConnectionManager {
 
     this.connection.on("MessageRead", (msgId: number, conversationId: number) => {
       this.ConversationsService.OnMessageRead(msgId, conversationId);
-    });
-
-    this.connection.on("ReceiveSecureMessage", (chatId: number, encryptedMessage: string, whoSentId: string) => {
-      this.ConversationsService.OnSecureMessageReceived(chatId, encryptedMessage, whoSentId);
     });
 
     this.connection.on("ReceiveDhParam", async (param: string, sentBy: string, chatId: number) => {

@@ -17,6 +17,7 @@ import { Injectable } from "@angular/core";
 import { SecureChatsService } from "../Encryption/SecureChatsService";
 import { E2EencryptionService } from "../Encryption/E2EencryptionService";
 import { DHServerKeyExchangeService } from "../Encryption/DHServerKeyExchange";
+import { decreaseElementDepthCount } from "@angular/core/src/render3/state";
 
 @Injectable({
   providedIn: 'root'
@@ -75,21 +76,21 @@ export class ConversationsService {
   }
 
   public CreateSecureChat(user: UserInfo) : boolean {
-    //let dialog = this.FindDialogWithSecurityCheck(user, true);
+    let dialog = this.FindDialogWithSecurityCheck(user, true);
 
-    //if (dialog) {
-    //  return false;
-    //}
+    if (dialog) {
+      return false;
+    }
 
     this.CreateDialogWith(user, true);
     return true;
   }
 
-  public async GetMessagesForCurrentConversation(count: number) {
+  public async GetMessagesForConversation(count: number, chat: ConversationTemplate) {
     let result = await this.requestsBuilder.GetConversationMessages(
-      this.CurrentConversation.messages.length,
+      chat.messages.length,
       count,
-      this.CurrentConversation.conversationID)
+      chat.conversationID)
 
     if (!result.isSuccessfull) {
       return;
@@ -101,14 +102,26 @@ export class ConversationsService {
       return result.response;
     }
 
-    if (this.CurrentConversation.isSecure) {
+    if (chat.isSecure) {
+      let decryptedMessages = [];
+
       result.response.forEach(x => {
+
+        let decrypted = this.encryptionService.Decrypt(chat.dialogueUser.id, x.encryptedPayload);
+
+        if (!decrypted) {
+          this.OnAuthKeyLost(chat);
+          return;
+        }
 
         this.DecryptedMessageToLocalMessage(
           x,
-          this.encryptionService.Decrypt(this.CurrentConversation.dialogueUser.id, x.encryptedPayload));
+          decrypted);
 
-      })
+        decryptedMessages.push(decrypted);
+      });
+
+      result.response = decryptedMessages;
     }
 
     result.response = result.response.sort(this.MessagesSortFunc);
@@ -116,7 +129,7 @@ export class ConversationsService {
     this.dateParser.ParseStringDatesInMessages(result.response);
 
     //append old messages to new ones.
-    this.CurrentConversation.messages = [...result.response.concat(this.CurrentConversation.messages)];
+    chat.messages = [...result.response.concat(chat.messages)];
   }
 
   private DecryptedMessageToLocalMessage(container: ChatMessage, decrypted: ChatMessage) {
@@ -131,20 +144,18 @@ export class ConversationsService {
     return 0;
   }
 
-  public async DeleteMessages(messages: Array<ChatMessage>) {
-    let currentConversationId = this.CurrentConversation.conversationID;
-
+  public async DeleteMessages(messages: Array<ChatMessage>, from: ConversationTemplate) {
     let notLocalMessages = messages.filter(x => x.state != MessageState.Pending)
 
     //delete local unsent messages
-    this.CurrentConversation.messages = this.CurrentConversation.messages
-      .filter(msg => notLocalMessages.findIndex(selected => selected.id == msg.id) == -1);
+    from.messages = from.messages
+      .filter(msg => messages.findIndex(x => x.id == msg.id && x.state == MessageState.Pending));
 
-    if (notLocalMessages.length == 0) {
+    if (!notLocalMessages.length) {
       return;
     }
 
-    let response = await this.requestsBuilder.DeleteMessages(notLocalMessages, this.CurrentConversation.conversationID);
+    let response = await this.requestsBuilder.DeleteMessages(notLocalMessages, from.conversationID);
 
     if (!response.isSuccessfull) {
       return;
@@ -152,9 +163,7 @@ export class ConversationsService {
 
     //delete messages locally
 
-    let conversation = this.Conversations.find(x => x.conversationID == currentConversationId);
-
-    conversation.messages = conversation
+    from.messages = from
       .messages
       .filter(msg => messages.findIndex(selected => selected.id == msg.id) == -1);
 
@@ -168,65 +177,95 @@ export class ConversationsService {
       return;
     }
 
-    if (response.response != null) {
-
-      //parse string date to js Date
-
-      response.response
-        .forEach((conversation) => {
-
-          if (conversation.messages != null) {
-            this.dateParser.ParseStringDatesInMessages(conversation.messages);
-          } else {
-            conversation.messages = new Array<ChatMessage>();
-          }
-
-        })
-
-      let toDeleteIndexes = [];
-      response.response.forEach((x, index) => {
-        //delete secure chats where we've lost auth keys
-        if (x.isSecure) {
-
-          if (x.authKeyId && !this.secureChatsService.AuthKeyExists(x.authKeyId)) {
-            toDeleteIndexes.push(index);
-          } else {
-
-            x.messages.forEach(msg => {
-              this.DecryptedMessageToLocalMessage(
-                msg,
-                this.encryptionService.Decrypt(x.dialogueUser.id, msg.encryptedPayload))
-            });
-
-          }
-        }
-      });
-
-      toDeleteIndexes.forEach(x => response.response.splice(x, 1));
-
-      this.Conversations = response.response;
-
-      this.Conversations.forEach((x) => {
-
-        if (!x.isGroup) {
-          x.isMessagingRestricted = x.dialogueUser.isMessagingRestricted;
-        }
-      });
-
-    } else {
+    if (!response.response) {
       this.Conversations = new Array<ConversationTemplate>();
+      await this.connectionManager.Start();
+      return;
     }
+
+    //parse string date to js Date
+
+    response.response
+      .forEach((conversation) => {
+
+        if (conversation.messages != null) {
+          this.dateParser.ParseStringDatesInMessages(conversation.messages);
+        } else {
+          conversation.messages = new Array<ChatMessage>();
+        }
+
+      })
+
+    let toDeleteIndexes = [];
+    response.response.forEach((x, index) => {
+      //delete secure chats where we've lost auth keys
+      if (x.isSecure) {
+
+        if (x.authKeyId && !this.secureChatsService.AuthKeyExists(x.authKeyId)) {
+          toDeleteIndexes.push(index);
+        } else {
+
+          let decryptedMessages = [];
+
+          x.messages.forEach(msg => {
+
+            let decrypted = this.encryptionService.Decrypt(x.dialogueUser.id, msg.encryptedPayload);
+
+            if (!decrypted) {
+              this.OnAuthKeyLost(x);
+              return;
+            }
+
+            this.DecryptedMessageToLocalMessage(
+              msg,
+              decrypted);
+
+            decryptedMessages.push(decrypted);
+          });
+
+          x.messages = decryptedMessages;
+        }
+      }
+    });
+
+    let chatsToDelete = Array<ConversationTemplate>();
+
+    toDeleteIndexes.forEach(x => {
+      chatsToDelete.push(response.response.splice(x, 1)[0]);
+    });
+
+    this.Conversations = response.response;
+
+    this.Conversations.forEach((x) => {
+
+      if (!x.isGroup) {
+        x.isMessagingRestricted = x.dialogueUser.isMessagingRestricted;
+      }
+    });
 
     //Initiate signalR group connections
 
-    this.connectionManager.Start();
+    await this.connectionManager.Start();
+
+    chatsToDelete.forEach(x => {
+      this.RemoveGroup(x);
+    });
+
   }
 
   public OnMessageReceived(data: MessageReceivedModel): void {
+    let conversation = this.Conversations
+      .find(x => x.conversationID == data.conversationId);
+
+    if (!conversation) {
+      return;
+    }
+
     if (data.secure) {
       let decrypted = this.encryptionService.Decrypt(data.senderId, data.message.encryptedPayload);
 
       if (!decrypted) {
+        this.OnAuthKeyLost(conversation);
         return;
       }
 
@@ -237,33 +276,11 @@ export class ConversationsService {
 
     this.dateParser.ParseStringDateInMessage(data.message);
 
-    let conversation = this.Conversations
-      .find(x => x.conversationID == data.conversationId);
-
     conversation.messages.push(data.message);
 
     conversation.messages = [...conversation.messages];
 
     if (data.senderId != this.authService.User.id) {
-      ++conversation.messagesUnread;
-    }
-  }
-
-  public OnSecureMessageReceived(groupId: number, message: string, senderId: string): void {
-    let conversation = this.Conversations
-      .find(x => x.conversationID == groupId);
-
-    if (!conversation) {
-      return;
-    }
-
-    let decrypted = this.encryptionService.Decrypt(conversation.dialogueUser.id, message);
-
-    conversation.messages.push(decrypted);
-
-    conversation.messages = [...conversation.messages];
-
-    if (senderId != this.authService.User.id) {
       ++conversation.messagesUnread;
     }
   }
@@ -303,8 +320,8 @@ export class ConversationsService {
       });
   }
 
-  public async BanFromConversation(userToBan: UserInfo) : Promise<void> {
-    let result = await this.requestsBuilder.BanFromConversation(userToBan.id, this.CurrentConversation.conversationID);
+  public async BanFromConversation(userToBan: UserInfo, from: ConversationTemplate) : Promise<void> {
+    let result = await this.requestsBuilder.BanFromConversation(userToBan.id, from.conversationID);
 
     if (!result.isSuccessfull) {
       return;
@@ -313,8 +330,8 @@ export class ConversationsService {
     userToBan.isBlockedInConversation = true;
   }
 
-  public async UnbanFromConversation(userToUnban: UserInfo): Promise<void> {
-    let result = await this.requestsBuilder.UnBanFromConversation(userToUnban.id, this.CurrentConversation.conversationID);
+  public async UnbanFromConversation(userToUnban: UserInfo, from: ConversationTemplate): Promise<void> {
+    let result = await this.requestsBuilder.UnBanFromConversation(userToUnban.id, from.conversationID);
 
     if (!result.isSuccessfull) {
       return;
@@ -345,26 +362,37 @@ export class ConversationsService {
     this.dateParser.ParseStringDatesInMessages(result.response);
   }
 
-  public SendMessage(message: string) {
-    let messageToSend = this.BuildMessage(message, this.CurrentConversation.conversationID);
+  public OnAuthKeyLost(chat: ConversationTemplate) {
+    this.RemoveGroup(chat);
+  }
 
-    this.CurrentConversation.messages.push(
+  public SendMessage(message: string, to: ConversationTemplate) {
+    let messageToSend = this.BuildMessage(message, to.conversationID);
+
+    to.messages.push(
       messageToSend
     );
 
     //secure chat
-    if (this.CurrentConversation.isSecure) {
+    if (to.isSecure) {
+
+      let encrypted = this.encryptionService.Encrypt(to.dialogueUser.id, messageToSend);
+
+      if (!encrypted) {
+        this.OnAuthKeyLost(to);
+        return;
+      }
 
       this.connectionManager.SendMessageToSecureChat(
-        this.encryptionService.Encrypt(this.CurrentConversation.dialogueUser.id, messageToSend),
+        encrypted,
         messageToSend.id,
-        this.CurrentConversation.dialogueUser.id,
-        this.CurrentConversation.conversationID);
+        to.dialogueUser.id,
+        to.conversationID);
 
     } else {
       //non-secure chat
 
-      this.connectionManager.SendMessage(messageToSend, this.CurrentConversation);
+      this.connectionManager.SendMessage(messageToSend, to);
     }
   }
 
@@ -403,15 +431,14 @@ export class ConversationsService {
 
   public RemoveDialogWith(user: UserInfo) {
     this.connectionManager.RemoveConversation(this.FindDialogWith(user));
-    this.CurrentConversation = null;
   }
 
   public JoinGroup(group: ConversationTemplate) {
     this.connectionManager.AddUserToConversation(this.authService.User.id, group);
   }
 
-  public KickUser(user: UserInfo) {
-    this.connectionManager.RemoveUserFromConversation(user.id, this.CurrentConversation.conversationID, false);
+  public KickUser(user: UserInfo, from: ConversationTemplate) {
+    this.connectionManager.RemoveUserFromConversation(user.id, from.conversationID, false);
   }
 
   public ExistsIn(id: number) {
@@ -482,31 +509,25 @@ export class ConversationsService {
     this.CurrentConversation = null;
   }
 
-  public async ChangeThumbnail(file: File): Promise<void> {
-    let currentConversationId = this.CurrentConversation.conversationID;
-
-    let result = await this.requestsBuilder.UploadConversationThumbnail(file, this.CurrentConversation.conversationID);
+  public async ChangeThumbnail(file: File, where: ConversationTemplate): Promise<void> {
+    let result = await this.requestsBuilder.UploadConversationThumbnail(file, where.conversationID);
 
     if (!result.isSuccessfull) {
       return;
     }
 
-    let conversation = this.Conversations.find(x => x.conversationID == currentConversationId);
-
-    conversation.thumbnailUrl = result.response.thumbnailUrl;
-    conversation.fullImageUrl = result.response.fullImageUrl;
+    where.thumbnailUrl = result.response.thumbnailUrl;
+    where.fullImageUrl = result.response.fullImageUrl;
   }
 
-  public async ChangeConversationName(name: string): Promise<void> {
-    let currentConversationId = this.CurrentConversation.conversationID;
-
-    let result = await this.requestsBuilder.ChangeConversationName(name, this.CurrentConversation.conversationID);
+  public async ChangeConversationName(name: string, where: ConversationTemplate): Promise<void> {
+    let result = await this.requestsBuilder.ChangeConversationName(name, where.conversationID);
 
     if (!result.isSuccessfull) {
       return;
     }
 
-    this.Conversations.find(x => x.conversationID == currentConversationId).name = name;     
+    where.name = name;     
   }
 
   public InviteUsersToGroup(users: Array<UserInfo>, group: ConversationTemplate) {
@@ -586,14 +607,31 @@ export class ConversationsService {
   }
 
   public OnRemovedFromGroup(data: RemovedFromGroupModel) {
-    //either this client left or creator removed him.
+    let chatIndex = this.Conversations.findIndex(x => x.conversationID == data.conversationId);
 
+    if (chatIndex == -1) {
+      return;
+    }
+
+
+   // if the client received an answer to an API call to remove secure chats with lost
+  //keys quickly enough, do not delete chats twice.
+    if (this.Conversations[chatIndex].isSecure) {
+      return;
+    }
+
+    //either this client left or creator removed him.
     if (data.userId == this.authService.User.id) {
 
-      this.Conversations.splice(this.Conversations.findIndex(x => x.conversationID == data.conversationId), 1);
+      if (this.CurrentConversation.conversationID == data.conversationId) {
+        this.CurrentConversation = null;
+      }
+
+      this.Conversations.splice(chatIndex, 1);
+
     } else {
 
-      let participants = this.Conversations.find(x => x.conversationID == data.conversationId).participants;
+      let participants = this.Conversations[chatIndex].participants;
 
       participants.splice(participants.findIndex(x => x.id == data.userId), 1);
     }
@@ -648,12 +686,12 @@ export class ConversationsService {
     conversation.messages = [...conversation.messages];
   }
 
-  public async UploadImages(files: FileList) {
+  public async UploadImages(files: FileList, to: ConversationTemplate) {
     if (files.length == 0) {
       return;
     }
 
-    let conversationToSend = this.CurrentConversation.conversationID;
+    let conversationToSend = to.conversationID;
 
     let result = await this.requestsBuilder.UploadImages(files)
 
@@ -668,18 +706,26 @@ export class ConversationsService {
         let message = this.BuildMessage(null, conversationToSend, true, file);
 
         //secure chat
-        if (this.CurrentConversation.isSecure) {
+        if (to.isSecure) {
+
+          let encrypted = this.encryptionService.Encrypt(to.dialogueUser.id, message);
+
+          if (!encrypted) {
+            this.OnAuthKeyLost(to);
+            return;
+          }
 
           this.connectionManager.SendMessageToSecureChat(
-            this.encryptionService.Encrypt(this.CurrentConversation.dialogueUser.id, message),
+            encrypted,
             message.id,
-            this.CurrentConversation.dialogueUser.id, conversationToSend);
+            to.dialogueUser.id,
+            to.conversationID);
 
         } else {
-          this.connectionManager.SendMessage(message, this.CurrentConversation);
+          this.connectionManager.SendMessage(message, to);
         }
 
-        this.CurrentConversation.messages.push(message);
+        to.messages.push(message);
       })
   }
 

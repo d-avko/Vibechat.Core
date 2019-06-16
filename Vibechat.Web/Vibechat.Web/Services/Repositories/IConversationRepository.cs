@@ -21,8 +21,6 @@ namespace Vibechat.Web.Services.Repositories
 
         Task ChangePublicState(int conversationId);
 
-        Task SetPublicKey(ConversationDataModel chat, DhPublicKeyDataModel dh);
-
         Task UpdateAuthKey(ConversationDataModel chat, string authKeyId);
     }
 }

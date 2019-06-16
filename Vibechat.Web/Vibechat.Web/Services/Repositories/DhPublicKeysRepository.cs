@@ -21,5 +21,10 @@ namespace Vibechat.Web.Services.Repositories
             mContext.PublicKeys.Add(value);
             await mContext.SaveChangesAsync();
         }
+
+        public async Task<DhPublicKeyDataModel> GetFor(int chatId)
+        {
+            return mContext.PublicKeys.FirstOrDefault(x => x.Chat.ConvID == chatId);
+        }
     }
 }

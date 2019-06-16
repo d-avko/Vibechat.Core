@@ -6,5 +6,7 @@ namespace Vibechat.Web.Services.Repositories
     public interface IDhPublicKeysRepository
     {
         Task Add(DhPublicKeyDataModel value);
+
+        Task<DhPublicKeyDataModel> GetFor(int chatId);
     }
 }

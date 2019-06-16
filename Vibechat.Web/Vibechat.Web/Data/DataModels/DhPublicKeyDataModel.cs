@@ -15,5 +15,7 @@ namespace Vibechat.Web.Data.DataModels
         public string Modulus { get; set; }
 
         public string Generator { get; set; }
+
+        public ConversationDataModel Chat { get; set; }
     }
 }

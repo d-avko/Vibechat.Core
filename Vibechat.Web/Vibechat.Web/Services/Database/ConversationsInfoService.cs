@@ -48,7 +48,7 @@ namespace Vibechat.Web.Services
             this.attachmentKindsRepository = attachmentKindsRepository;
             this.usersConversationsRepository = usersConversationsRepository;
             this.conversationRepository = conversationRepository;
-            this.dh = dh;
+            this.publicKeys = dh;
             ImagesService = imagesService;
             this.cryptoService = cryptoService;
         }
@@ -67,7 +67,7 @@ namespace Vibechat.Web.Services
 
         protected readonly IConversationRepository conversationRepository;
 
-        private readonly IDhPublicKeysRepository dh;
+        private readonly IDhPublicKeysRepository publicKeys;
 
         private const int MaxThumbnailLengthMB = 5;
 
@@ -121,6 +121,7 @@ namespace Vibechat.Web.Services
 
             UserInApplication SecondDialogueUser = null;
             ConversationDataModel ConversationToAdd;
+            var dhPublicKey = new DhPublicKeyDataModel();
 
             if (!convInfo.IsGroup)
             {
@@ -132,8 +133,9 @@ namespace Vibechat.Web.Services
                     throw defaultError;
                 }
 
-                //key to secured conversation could be lost.
-                if(!convInfo.IsSecure && await usersConversationsRepository.DialogExists(user.Id, SecondDialogueUser.Id))
+                //do not allow creating multiple secret dialogs, because clients 
+                //MUST delete dialogs with lost keys by themselves.
+                if(await usersConversationsRepository.DialogExists(user.Id, SecondDialogueUser.Id, convInfo.IsSecure))
                 {
                     throw new FormatException("Dialog already exists.");
                 }
@@ -156,15 +158,14 @@ namespace Vibechat.Web.Services
                 if (convInfo.IsSecure)
                 {
                     var generated = cryptoService.GenerateDhPublicKey();
-                    var key = new DhPublicKeyDataModel()
+                    dhPublicKey = new DhPublicKeyDataModel()
                     {
                         Generator = generated.Generator,
-                        Modulus = generated.Modulus
+                        Modulus = generated.Modulus,
+                        Chat = ConversationToAdd
                     };
 
-                    await dh.Add(key);
-
-                    await conversationRepository.SetPublicKey(ConversationToAdd, key);
+                    await publicKeys.Add(dhPublicKey);
                 }
 
                 await usersConversationsRepository.Add(SecondDialogueUser, ConversationToAdd);
@@ -195,7 +196,8 @@ namespace Vibechat.Web.Services
             return ConversationToAdd.ToConversationTemplate(
                 await GetParticipants(new GetParticipantsApiModel() { ConvId = ConversationToAdd.ConvID }),
                 null,
-                SecondDialogueUser
+                SecondDialogueUser,
+                dhPublicKey
                 );
         }
 
@@ -331,7 +333,8 @@ namespace Vibechat.Web.Services
                     conversation.ToConversationTemplate(
                         await GetParticipants(new GetParticipantsApiModel() { ConvId = conversation.ConvID }),
                         await GetMessages(new GetMessagesApiModel() { ConversationID = conversation.ConvID, Count = 1, MesssagesOffset = 0 }, whoAccessedId),
-                        null
+                        null,
+                        await publicKeys.GetFor(conversation.ConvID)
                     ));
             }
 
@@ -391,7 +394,9 @@ namespace Vibechat.Web.Services
                 throw new FormatException("Wrong conversation to remove.");
             }
 
-            if (conversation.Creator.Id != whoRemoves && conversation.IsGroup)
+            //secure chats may be removed by any of participants.
+
+            if (conversation.Creator.Id != whoRemoves && conversation.IsGroup && !conversation.IsSecure)
             {
                 throw new FormatException("Only creator can remove group.");
             }
@@ -402,7 +407,6 @@ namespace Vibechat.Web.Services
                 {
                     await RemoveUserFromConversation(user.Id, whoRemoves, conversation.ConvID);
                 }
-
 
                 conversationRepository.Remove(conversation);
             }
@@ -418,15 +422,11 @@ namespace Vibechat.Web.Services
                     .Where(x => x.IsAttachment)
                     .Select(x => x.AttachmentInfo)
                     .ToList());
-
-                conversationRepository.Remove(conversation);
             }
         }
 
         public async Task<UserInfo> AddUserToConversation(AddToConversationApiModel UserProvided)
         {
-            //CHECK IF THIS IS EVEN ALLOWED
-
             var defaultError = new FormatException("Invalid credentials were provided.");
 
             var FoundConversation = conversationRepository.GetById(UserProvided.ConvId);
@@ -488,7 +488,9 @@ namespace Vibechat.Web.Services
                          await GetParticipants(new GetParticipantsApiModel() { ConvId = conversation.ConvID }),
                          //only get last message here, client should fetch messages after he opened the conversation.
                          await GetMessages(new GetMessagesApiModel() { ConversationID = conversation.ConvID, Count = 1, MesssagesOffset = 0 }, whoAccessedId),
-                         DialogUser)
+                         DialogUser,
+                         await publicKeys.GetFor(conversation.ConvID)
+                         )
                     );
             }
 
@@ -599,8 +601,7 @@ namespace Vibechat.Web.Services
                 }
             }
 
-            return conversation.ToConversationTemplate(members, null, dialogUser);
-
+            return conversation.ToConversationTemplate(members, null, dialogUser, await publicKeys.GetFor(conversation.ConvID));
         }
 
         public async Task<ConversationTemplate> GetByIdSimplified(int conversationId, string whoAccessedId)

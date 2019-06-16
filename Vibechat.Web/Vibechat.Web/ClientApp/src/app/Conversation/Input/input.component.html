@@ -28,6 +28,6 @@
 <!--Wait until keys for private chat are exchanged.-->
 <div *ngIf="Conversation.isSecure && !Conversation.authKeyId" class="banned-input">
   <mat-icon style="color: cadetblue">report_problem</mat-icon>
-  <p class="banned-text">Wait until {{Conversation.dialogueUser.userName}} is online.</p>
+  <p>Secure chat will be activated after {{Conversation.dialogueUser.userName}} is online.</p>
 </div>
 

@@ -38,7 +38,6 @@ namespace Vibechat.Web.Services.Repositories
         {
             var usersConversations = mContext.UsersConversations
                .Include(x => x.Conversation)
-               .ThenInclude(x => x.PublicKey)
                .Include(y => y.User);
 
             return from userConversation in usersConversations
@@ -64,7 +63,6 @@ namespace Vibechat.Web.Services.Repositories
                 .UsersConversations
                 .Include(x => x.User)
                 .Include(x => x.Conversation)
-                .ThenInclude(x => x.PublicKey)
                 .FirstOrDefaultAsync(x => x.User.Id == userId && x.Conversation.ConvID == conversationId);
         }
 
@@ -100,7 +98,7 @@ namespace Vibechat.Web.Services.Repositories
                 .FirstOrDefaultAsync(x => x.Conversation.ConvID == conversation.ConvID && x.User.Id == user.Id) != default(UsersConversationDataModel);
         }
 
-        public async Task<bool> DialogExists(string firstUserId, string secondUserId)
+        public async Task<bool> DialogExists(string firstUserId, string secondUserId, bool secure)
         {
             IQueryable<UsersConversationDataModel> firstUserConversations = mContext
                .UsersConversations
@@ -114,7 +112,8 @@ namespace Vibechat.Web.Services.Repositories
                     .UsersConversations
                     .AnyAsync(x => 
                     x.Conversation.ConvID == conversation.Conversation.ConvID 
-                    && x.User.Id == secondUserId))
+                    && x.User.Id == secondUserId
+                    && x.Conversation.IsSecure == secure))
                 {
                     return true;
                 }
