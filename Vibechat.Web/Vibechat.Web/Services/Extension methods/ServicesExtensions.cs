@@ -63,6 +63,7 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddSingleton<IHexHashingService, Sha256Service>();
             services.AddSingleton<UniquePathsProvider, UniquePathsProvider>();
             services.AddScoped<CryptoService, CryptoService>();
+            services.AddSingleton<UsersSubsriptionService, UsersSubsriptionService>();
         }
     }
 }

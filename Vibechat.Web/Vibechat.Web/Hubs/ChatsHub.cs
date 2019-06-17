@@ -21,13 +21,13 @@ namespace VibeChat.Web
 {
     public class ChatsHub : Hub
     {
-        private readonly IUsersConversationsRepository usersConversationsRepository;
+        private readonly UsersSubsriptionService subsriptionService;
 
         private ICustomHubUserIdProvider userProvider { get; set; }
 
         private UsersInfoService userService { get; set; }
 
-        private ChatService conversationsService { get; set; }
+        private ChatService chatsService { get; set; }
         public BansService bansService { get; }
         private ILogger<ChatsHub> logger { get; set; }
 
@@ -35,29 +35,46 @@ namespace VibeChat.Web
         public ChatsHub(
             ICustomHubUserIdProvider userProvider, 
             UsersInfoService userService,
-            ChatService conversationsService,
-            IUsersConversationsRepository usersConversationsRepository,
+            ChatService chatsService,
             BansService bansService,
-            ILogger<ChatsHub> logger)
+            ILogger<ChatsHub> logger,
+            UsersSubsriptionService subsriptionService)
         { 
             this.userProvider = userProvider;
             this.userService = userService;
-            this.conversationsService = conversationsService;
-            this.usersConversationsRepository = usersConversationsRepository;
+            this.chatsService = chatsService;
             this.bansService = bansService;
             this.logger = logger;
+            this.subsriptionService = subsriptionService;
         }
 
         public override async Task OnConnectedAsync()
         {
-            await userService.MakeUserOnline(userProvider.GetUserId(Context), Context.ConnectionId);
+            await OnUserOnline();
             await base.OnConnectedAsync();
         }
 
         public override async Task OnDisconnectedAsync(Exception ex)
         {
-            await userService.MakeUserOffline(userProvider.GetUserId(Context));
+            await OnUserOffline();
             await base.OnDisconnectedAsync(ex);
+        }
+
+        public async Task OnUserOnline()
+        {
+            var userId = userProvider.GetUserId(Context);
+            await userService.MakeUserOnline(userId, Context.ConnectionId);
+            var subs = subsriptionService.GetSubscribers(userId);
+
+            foreach (string sub in subs)
+            {
+                await NotifyOfUserOnline(userId, sub);
+            }
+        }
+
+        public async Task OnUserOffline()
+        {
+            await userService.MakeUserOffline(userProvider.GetUserId(Context));
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -68,7 +85,7 @@ namespace VibeChat.Web
 
             try
             {
-                await conversationsService.RemoveUserFromConversation(userToRemoveId, whoSentId, conversationId);
+                await chatsService.RemoveUserFromConversation(userToRemoveId, whoSentId, conversationId);
                 await RemovedFromGroup(userToRemoveId, conversationId);
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, conversationId.ToString());
             }
@@ -77,6 +94,20 @@ namespace VibeChat.Web
                 await SendError(whoSentId, ex.Message);
                 logger.LogError(ex.Message);
             }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task SubsribeToUserOnlineStatusChanges(string userId)
+        {
+            var whoSentId = userProvider.GetUserId(Context);
+            subsriptionService.AddSubsriber(userId, whoSentId);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task UnsubsribeFromUserOnlineStatusChanges(string userId)
+        {
+            var whoSentId = userProvider.GetUserId(Context);
+            subsriptionService.RemoveSubsriber(userId, whoSentId);
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -95,7 +126,7 @@ namespace VibeChat.Web
                     return;
                 }
 
-                var addedUser = await conversationsService.AddUserToConversation(new AddToConversationApiModel()
+                var addedUser = await chatsService.AddUserToConversation(new AddToConversationApiModel()
                 {
                     ConvId = conversation.ConversationID,
                     UserId = userId
@@ -127,7 +158,7 @@ namespace VibeChat.Web
             {
                 if (conversation.IsGroup)
                 {
-                    List<UserInfo> participants = await conversationsService
+                    List<UserInfo> participants = await chatsService
                         .GetParticipants(new GetParticipantsApiModel() { ConvId = conversation.ConversationID });
 
                     foreach (UserInfo user in participants)
@@ -152,7 +183,7 @@ namespace VibeChat.Web
                     await RemovedFromDialog(whoSent.Id, Context.ConnectionId, conversation.ConversationID);
                 }
 
-                await conversationsService.RemoveConversation(conversation, whoSent.Id);
+                await chatsService.RemoveConversation(conversation, whoSent.Id);
             }
             catch (Exception ex)
             {
@@ -175,7 +206,7 @@ namespace VibeChat.Web
                     return;
                 }
 
-                ConversationTemplate created = await conversationsService
+                ConversationTemplate created = await chatsService
                     .CreateConversation(new CreateConversationCredentialsApiModel()
                     {
                         IsGroup = false,
@@ -216,7 +247,7 @@ namespace VibeChat.Web
             {
                 //establish connections only with groups where user exists.
 
-                if (await conversationsService.ExistsInConversation(groupId, whoSent.Id))
+                if (await chatsService.ExistsInConversation(groupId, whoSent.Id))
                 {
                     await Groups.AddToGroupAsync(Context.ConnectionId, groupId.ToString());
                 }
@@ -230,9 +261,9 @@ namespace VibeChat.Web
 
             try
             {
-                await conversationsService.MarkMessageAsRead(msgId, conversationId, whoSent.Id);
+                await chatsService.MarkMessageAsRead(msgId, conversationId, whoSent.Id);
 
-                ConversationTemplate conversation = await conversationsService.GetByIdSimplified(conversationId, whoSent.Id);
+                ConversationTemplate conversation = await chatsService.GetByIdSimplified(conversationId, whoSent.Id);
 
                 if (conversation.IsGroup)
                 {
@@ -257,7 +288,7 @@ namespace VibeChat.Web
 
             try
             {
-                if(!await conversationsService.ExistsInConversation(groupId, whoSent.Id))
+                if(!await chatsService.ExistsInConversation(groupId, whoSent.Id))
                 {
                     await SendError(Context.ConnectionId, "You must join this group to send messages.");
                     return;
@@ -277,11 +308,11 @@ namespace VibeChat.Web
 
                 if (message.IsAttachment)
                 {
-                    created = await conversationsService.AddAttachmentMessage(message, groupId, whoSent.Id);
+                    created = await chatsService.AddAttachmentMessage(message, groupId, whoSent.Id);
                 }
                 else
                 {
-                    created = await conversationsService.AddMessage(message, groupId, whoSent.Id);
+                    created = await chatsService.AddMessage(message, groupId, whoSent.Id);
                 }
 
                 message.TimeReceived = created.TimeReceived.ToUTCString();
@@ -322,11 +353,11 @@ namespace VibeChat.Web
 
                 if (message.IsAttachment)
                 {
-                    created = await conversationsService.AddAttachmentMessage(message, conversationId, whoSent.Id);
+                    created = await chatsService.AddAttachmentMessage(message, conversationId, whoSent.Id);
                 }
                 else
                 {
-                    created = await conversationsService.AddMessage(message, conversationId, whoSent.Id);
+                    created = await chatsService.AddMessage(message, conversationId, whoSent.Id);
                 }
 
                 message.TimeReceived = created.TimeReceived.ToUTCString();
@@ -365,9 +396,9 @@ namespace VibeChat.Web
 
             try
             {
-                await conversationsService.ValidateDialog(whoSent.Id, userId, conversationId);
+                await chatsService.ValidateDialog(whoSent.Id, userId, conversationId);
                 var user = await userService.GetUserById(userId);
-                MessageDataModel created = await conversationsService.AddEncryptedMessage(encryptedMessage, conversationId, whoSent.Id);
+                MessageDataModel created = await chatsService.AddEncryptedMessage(encryptedMessage, conversationId, whoSent.Id);
 
                 var toSend = new Message()
                 {
@@ -426,6 +457,16 @@ namespace VibeChat.Web
                 }
 
                 logger.LogError(ex.Message);
+            }
+        }
+
+        private async Task NotifyOfUserOnline(string userId, string whereTo)
+        {
+            var user = await userService.GetUserById(whereTo);
+
+            if (user.IsOnline)
+            {
+                await Clients.Client(user.ConnectionId).SendAsync("UserOnline", userId);
             }
         }
 
