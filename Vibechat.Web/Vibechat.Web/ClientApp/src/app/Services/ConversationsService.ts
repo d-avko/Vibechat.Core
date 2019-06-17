@@ -17,12 +17,11 @@ import { Injectable } from "@angular/core";
 import { SecureChatsService } from "../Encryption/SecureChatsService";
 import { E2EencryptionService } from "../Encryption/E2EencryptionService";
 import { DHServerKeyExchangeService } from "../Encryption/DHServerKeyExchange";
-import { decreaseElementDepthCount } from "@angular/core/src/render3/state";
 
 @Injectable({
   providedIn: 'root'
 })
-export class ConversationsService {
+export class ChatsService {
   constructor(
     private dateParser: MessagesDateParserService,
     private authService: AuthService,
@@ -623,8 +622,8 @@ export class ConversationsService {
     //either this client left or creator removed him.
     if (data.userId == this.authService.User.id) {
 
-      if (this.CurrentConversation.conversationID == data.conversationId) {
-        this.CurrentConversation = null;
+      if (this.CurrentConversation && this.CurrentConversation.conversationID == data.conversationId) {
+          this.CurrentConversation = null;
       }
 
       this.Conversations.splice(chatIndex, 1);

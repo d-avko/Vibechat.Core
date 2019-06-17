@@ -19,18 +19,20 @@ namespace Vibechat.Web.Services.Repositories
 
         public async Task<MessageAttachmentDataModel> Add(AttachmentKindDataModel attachmentKind, Message message)
         {
-            var val = (await mContext.Attachments.AddAsync(new MessageAttachmentDataModel()
+            var attachment = new MessageAttachmentDataModel()
             {
                 AttachmentKind = attachmentKind,
                 ContentUrl = message.AttachmentInfo.ContentUrl,
                 ImageHeight = message.AttachmentInfo.ImageHeight,
                 ImageWidth = message.AttachmentInfo.ImageWidth,
                 AttachmentName = message.AttachmentInfo.AttachmentName
-            })).Entity;
+            };
+
+            var result = mContext.Attachments.Add(attachment);
 
             await mContext.SaveChangesAsync();
 
-            return val;
+            return result?.Entity;
         }
 
         public async Task Remove(List<MessageAttachmentDataModel> attachments)

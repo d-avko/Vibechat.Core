@@ -58,8 +58,7 @@ namespace Vibechat.Web.Services.Repositories
             UserInApplication whoSent,
             MessageAttachmentDataModel attachment,
             Message message,
-            int groupId,
-            string SenderId)
+            int groupId)
         {
             var addedMessage = mContext.Messages.Add(new MessageDataModel()
             {
@@ -87,6 +86,12 @@ namespace Vibechat.Web.Services.Repositories
                     Message = mContext.Messages.First(msg => msg.MessageID == msgId)
                 }));
 
+            await mContext.SaveChangesAsync();
+        }
+
+        public async Task RemovePermanent(List<MessageDataModel> messages)
+        {
+            mContext.Messages.RemoveRange(messages);
             await mContext.SaveChangesAsync();
         }
 

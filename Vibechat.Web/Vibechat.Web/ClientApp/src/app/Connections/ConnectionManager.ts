@@ -6,7 +6,7 @@ import { MessageReceivedModel } from "../Shared/MessageReceivedModel";
 import { AddedToGroupModel } from "../Shared/AddedToGroupModel";
 import { RemovedFromGroupModel } from "../Shared/RemovedFromGroupModel";
 import { UserInfo } from "../Data/UserInfo";
-import { ConversationsService } from "../Services/ConversationsService";
+import { ChatsService } from "../Services/ConversationsService";
 import { MessageReportingService } from "../Services/MessageReportingService";
 import { AuthService } from "../Auth/AuthService";
 import { DHServerKeyExchangeService } from "../Encryption/DHServerKeyExchange";
@@ -18,11 +18,11 @@ import { DHServerKeyExchangeService } from "../Encryption/DHServerKeyExchange";
 export class ConnectionManager {
   private connection: signalR.HubConnection;
 
-  private ConversationsService: ConversationsService;
+  private ConversationsService: ChatsService;
 
   private DHServerKeyExchangeService: DHServerKeyExchangeService;
 
-  public setConversationsService(service: ConversationsService) {
+  public setConversationsService(service: ChatsService) {
     this.ConversationsService = service;
   }
 

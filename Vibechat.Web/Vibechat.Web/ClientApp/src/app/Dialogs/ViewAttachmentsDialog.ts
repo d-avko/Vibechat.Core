@@ -10,7 +10,7 @@ import { retry } from "rxjs/operators";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { CdkVirtualScrollViewport } from "@angular/cdk/scrolling";
 import { MessagesDateParserService } from "../Services/MessagesDateParserService";
-import { ConversationsService } from "../Services/ConversationsService";
+import { ChatsService } from "../Services/ConversationsService";
 
 export interface AttachmentsData {
   conversation: ConversationTemplate;
@@ -40,7 +40,7 @@ export class ViewAttachmentsDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: AttachmentsData,
     public photoDialog: MatDialog,
     public formatter: ConversationsFormatter,
-    public conversationsService: ConversationsService)
+    public conversationsService: ChatsService)
   {
     this.PhotosWeeks = new Array<Array<ChatMessage>>();
     this.Init();

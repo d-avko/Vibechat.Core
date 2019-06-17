@@ -2,7 +2,7 @@ import { AuthService } from "../Auth/AuthService";
 import { ConnectionManager } from "../Connections/ConnectionManager";
 import { Injectable, EventEmitter } from "@angular/core";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
-import { ConversationsService } from "../Services/ConversationsService";
+import { ChatsService } from "../Services/ConversationsService";
 import { SecureChatsService } from "./SecureChatsService";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { E2EencryptionService } from "./E2EencryptionService";
@@ -39,10 +39,10 @@ export class DHServerKeyExchangeService {
     this.connectionManager.setDHServerKeyExchangeService(this);
   }
 
-  private chatService: ConversationsService;
+  private chatService: ChatsService;
   private PendingParams = new Array<DictionaryEntry<string, KeyExchangeEntry>>();
 
-  public setChatService(c: ConversationsService) {
+  public setChatService(c: ChatsService) {
     this.chatService = c;
   }
 

@@ -6,7 +6,7 @@ import { UserInfo } from "../Data/UserInfo";
 import { ConversationsFormatter } from "../Formatters/ConversationsFormatter";
 import { ChangeNameDialogComponent } from "./ChangeNameDialog";
 import { FindUsersDialogComponent } from "./FindUsersDialog";
-import { ConversationsService } from "../Services/ConversationsService";
+import { ChatsService } from "../Services/ConversationsService";
 import { ViewAttachmentsDialogComponent } from "./ViewAttachmentsDialog";
 
 export interface  GroupInfoData {
@@ -32,7 +32,7 @@ export class GroupInfoDialogComponent {
     public dialog: MatDialog ,
     @Inject(MAT_DIALOG_DATA) public data: GroupInfoData,
     public formatter: ConversationsFormatter,
-    public conversationsService: ConversationsService,
+    public conversationsService: ChatsService,
     public ChangeNameDialog: MatDialog) { }
 
   public ViewUserInfo(user: UserInfo) {
@@ -50,6 +50,7 @@ export class GroupInfoDialogComponent {
 
   public RemoveGroup() {
     this.conversationsService.RemoveGroup(this.data.Conversation);
+    this.dialogRef.close();
   }
 
   public JoinGroup() {

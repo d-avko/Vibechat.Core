@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,5 +20,10 @@ namespace VibeChat.Web.Data.DataModels
         public int ImageHeight { get; set; }
 
         public AttachmentKindDataModel AttachmentKind { get; set; }
+
+        public MessageDataModel Message { get; set; }
+
+        [ForeignKey("MessageId")]
+        public int? MessageId { get; set; }
     }
 }

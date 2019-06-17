@@ -7,7 +7,7 @@ import { AttachmentKinds } from '../../Data/AttachmentKinds';
 import { UserInfo } from '../../Data/UserInfo';
 import { MatDialog } from '@angular/material';
 import { MessageState } from '../../Shared/MessageState';
-import { ConversationsService } from '../../Services/ConversationsService';
+import { ChatsService } from '../../Services/ConversationsService';
 import { ForwardMessagesDialogComponent } from '../../Dialogs/ForwardMessagesDialog';
 import { ConversationTemplate } from '../../Data/ConversationTemplate';
 import { ThemesService } from '../../Theming/ThemesService';
@@ -41,7 +41,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
   constructor(
     public formatter: ConversationsFormatter,
     public dialog: MatDialog,
-    public conversationsService: ConversationsService,
+    public conversationsService: ChatsService,
     private themes: ThemesService) {
     this.SelectedMessages = new Array<ChatMessage>();
   }

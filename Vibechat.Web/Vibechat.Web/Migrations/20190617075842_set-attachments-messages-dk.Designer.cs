@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VibeChat.Web;
 
 namespace Vibechat.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190617075842_set-attachments-messages-dk")]
+    partial class setattachmentsmessagesdk
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -227,9 +229,7 @@ namespace Vibechat.Web.Migrations
 
             modelBuilder.Entity("VibeChat.Web.Data.DataModels.MessageAttachmentDataModel", b =>
                 {
-                    b.Property<int>("AttachmentID")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<int>("AttachmentID");
 
                     b.Property<string>("AttachmentKindName");
 
@@ -241,14 +241,9 @@ namespace Vibechat.Web.Migrations
 
                     b.Property<int>("ImageWidth");
 
-                    b.Property<int>("MessageId");
-
                     b.HasKey("AttachmentID");
 
                     b.HasIndex("AttachmentKindName");
-
-                    b.HasIndex("MessageId")
-                        .IsUnique();
 
                     b.ToTable("Attachments");
                 });
@@ -511,14 +506,14 @@ namespace Vibechat.Web.Migrations
 
             modelBuilder.Entity("VibeChat.Web.Data.DataModels.MessageAttachmentDataModel", b =>
                 {
+                    b.HasOne("VibeChat.Web.MessageDataModel", "Message")
+                        .WithOne("AttachmentInfo")
+                        .HasForeignKey("VibeChat.Web.Data.DataModels.MessageAttachmentDataModel", "AttachmentID")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("VibeChat.Web.Data.DataModels.AttachmentKindDataModel", "AttachmentKind")
                         .WithMany()
                         .HasForeignKey("AttachmentKindName");
-
-                    b.HasOne("VibeChat.Web.MessageDataModel", "Message")
-                        .WithOne("AttachmentInfo")
-                        .HasForeignKey("VibeChat.Web.Data.DataModels.MessageAttachmentDataModel", "MessageId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Vibechat.Web.Data.DataModels.UsersBansDatamodel", b =>
