@@ -81,6 +81,10 @@ export class ConnectionManager {
     this.connection.on("ReceiveDhParam", async (param: string, sentBy: string, chatId: number) => {
       await this.DHServerKeyExchangeService.OnIntermidiateParamsReceived(param, sentBy, chatId);
     });
+
+    this.connection.on("UserOnline", (user: string) => {
+      this.ConversationsService.OnUserOnline(user);
+    });
   }
 
   public SendMessage(message: ChatMessage, conversation: ConversationTemplate) : void {
@@ -102,6 +106,14 @@ export class ConnectionManager {
 
   public SendMessageToSecureChat(encryptedMessage: string, generatedId: number, userId: string, chatId: number) {
     this.connection.send("SendSecureMessage", encryptedMessage, generatedId, userId, chatId);
+  }
+
+  public SubsribeToUserOnlineStatusChanges(user: string) {
+    this.connection.send("SubsribeToUserOnlineStatusChanges", user);
+  }
+
+  public UnsubsribeFromUserOnlineStatusChanges(user: string) {
+    this.connection.send("SubsribeToUserOnlineStatusChanges", user);
   }
 
   public AddUserToConversation(userId: string, conversation: ConversationTemplate) {

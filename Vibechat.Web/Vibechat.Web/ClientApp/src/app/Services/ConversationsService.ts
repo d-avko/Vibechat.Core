@@ -59,6 +59,10 @@ export class ChatsService {
     await this.UpdateExisting(conversation);
   }
 
+  public OnUserOnline(user: string) {
+    //find secure chat, initiate key exchange.
+  }
+
   public async FindGroupsByName(name: string) {
     let result = await this.requestsBuilder.SearchForGroups(name);
 
