@@ -27,9 +27,9 @@ using VibeChat.Web.Data.DataModels;
 
 namespace Vibechat.Web.Services
 {
-    public class ConversationsInfoService
+    public class ChatService
     {
-        public ConversationsInfoService(
+        public ChatService(
             IChatDataProvider chatDataProvider,
             IUsersRepository usersRepository,
             IMessagesRepository messagesRepository,
@@ -407,21 +407,15 @@ namespace Vibechat.Web.Services
                 {
                     await RemoveUserFromConversation(user.Id, whoRemoves, conversation.ConvID);
                 }
-
-                conversationRepository.Remove(conversation);
             }
             else
             {
                 await RemoveUserFromConversation(Conversation.DialogueUser.Id, whoRemoves, conversation.ConvID);
                 await RemoveUserFromConversation(whoRemoves, whoRemoves, conversation.ConvID);
 
-                var messages = messagesRepository.Get(whoRemoves, conversation.ConvID, true);
+                List<MessageDataModel> messages = messagesRepository.Get(whoRemoves, conversation.ConvID, true).ToList();
 
-                await attachmentRepository.Remove(
-                    messages
-                    .Where(x => x.IsAttachment)
-                    .Select(x => x.AttachmentInfo)
-                    .ToList());
+                await messagesRepository.RemovePermanent(messages);
             }
         }
 
@@ -698,9 +692,9 @@ namespace Vibechat.Web.Services
 
             AttachmentKindDataModel attachmentKind = await attachmentKindsRepository.GetById(message.AttachmentInfo.AttachmentKind);
 
-            MessageAttachmentDataModel attachment = await attachmentRepository.Add(attachmentKind, message);
+            var attachment = await attachmentRepository.Add(attachmentKind, message);
 
-            return await messagesRepository.AddAttachment(whoSent, attachment, message, groupId, SenderId);
+            return await messagesRepository.AddAttachment(whoSent, attachment, message, groupId);
         }
 
         public async Task DeleteConversationMessages(DeleteMessagesRequest messagesInfo, string whoAccessedId)

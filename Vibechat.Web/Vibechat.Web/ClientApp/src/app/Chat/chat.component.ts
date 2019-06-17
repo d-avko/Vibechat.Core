@@ -16,7 +16,7 @@ import { UserInfoDialogComponent } from "../Dialogs/UserInfoDialog";
 import { ViewAttachmentsDialogComponent } from "../Dialogs/ViewAttachmentsDialog";
 import { ForwardMessagesDialogComponent } from "../Dialogs/ForwardMessagesDialog";
 import { UsersService } from "../Services/UsersService";
-import { ConversationsService } from "../Services/ConversationsService";
+import { ChatsService } from "../Services/ConversationsService";
 import { ThemesService } from "../Theming/ThemesService";
 import { ChooseContactDialogComponent } from "../Dialogs/ChooseContactDialog";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
@@ -54,7 +54,7 @@ export class ChatComponent implements OnInit {
     public formatter: ConversationsFormatter,
     public auth: AuthService,
     private usersService: UsersService,
-    private conversationsService: ConversationsService,
+    private conversationsService: ChatsService,
     private themesService: ThemesService,
     private snackBar: SnackBarHelper) { }
 

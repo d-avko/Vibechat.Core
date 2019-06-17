@@ -5,7 +5,7 @@ import { UserInfo } from "../Data/UserInfo";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { ConversationsFormatter } from "../Formatters/ConversationsFormatter";
 import { ChangeNameDialogComponent } from "./ChangeNameDialog";
-import { ConversationsService } from "../Services/ConversationsService";
+import { ChatsService } from "../Services/ConversationsService";
 import { UsersService } from "../Services/UsersService";
 import { ViewAttachmentsDialogComponent } from "./ViewAttachmentsDialog";
 
@@ -26,7 +26,7 @@ export class UserInfoDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: UserInfoData,
     public dialog: MatDialog,
     public formatter: ConversationsFormatter,
-    public conversationsService: ConversationsService,
+    public conversationsService: ChatsService,
     public usersService: UsersService
     ) { }
 

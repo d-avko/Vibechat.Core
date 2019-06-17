@@ -20,12 +20,12 @@ namespace VibeChat.Web.Controllers
 {
     public class ConversationsController : Controller
     {
-        protected ConversationsInfoService mConversationService;
+        protected ChatService mConversationService;
 
         public BansService BansService { get; }
 
         public ConversationsController(
-            ConversationsInfoService mDbService,
+            ChatService mDbService,
             BansService bansService)
         {
             this.mConversationService = mDbService;

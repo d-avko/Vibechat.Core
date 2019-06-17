@@ -49,6 +49,11 @@ namespace VibeChat.Web
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<SettingsDataModel>().HasIndex(a => a.Name);
+
+            modelBuilder.Entity<MessageDataModel>()
+                .HasOne(x => x.AttachmentInfo)
+                .WithOne(x => x.Message)
+                .HasForeignKey(typeof(MessageAttachmentDataModel));
         }
     }
 }

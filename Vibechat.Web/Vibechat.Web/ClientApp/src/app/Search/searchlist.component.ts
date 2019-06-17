@@ -2,7 +2,7 @@ import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { UserInfo } from "../Data/UserInfo";
 import { Output, EventEmitter, Component, Input } from "@angular/core";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
-import { ConversationsService } from "../Services/ConversationsService";
+import { ChatsService } from "../Services/ConversationsService";
 import { UsersService } from "../Services/UsersService";
 
 @Component({
@@ -27,7 +27,7 @@ export class SearchListComponent {
   public IsSearchingForGroups: boolean;
   public IsSearchingForUsers: boolean;
 
-  constructor(private conversationsService: ConversationsService, private usersService: UsersService) {
+  constructor(private conversationsService: ChatsService, private usersService: UsersService) {
     this.FoundLocalConversations = new Array<ConversationTemplate>();
   }
 

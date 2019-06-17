@@ -26,7 +26,7 @@ namespace Vibechat.Web.Services.Extension_methods
     {
         public static void AddDefaultServices(this IServiceCollection services)
         {
-            services.AddScoped<ConversationsInfoService, ConversationsInfoService>();
+            services.AddScoped<ChatService, ChatService>();
             services.AddScoped<UsersInfoService, UsersInfoService>();
             services.AddScoped<LoginService, LoginService>();
             services.AddScoped<ImagesService, ImagesService>();
