@@ -54,6 +54,18 @@ namespace VibeChat.Web
                 .HasOne(x => x.AttachmentInfo)
                 .WithOne(x => x.Message)
                 .HasForeignKey(typeof(MessageAttachmentDataModel));
+
+            modelBuilder.Entity<UsersConversationDataModel>()
+                .HasKey(x => new { x.UserID, x.ChatID });
+
+            modelBuilder.Entity<UsersBansDatamodel>()
+                .HasKey(x => new { x.BannedByID, x.BannedID});
+
+            modelBuilder.Entity<ConversationsBansDataModel>()
+                .HasKey(x => new { x.ChatID, x.UserID});
+
+            modelBuilder.Entity<ContactsDataModel>()
+                .HasKey(x => new { x.FirstUserID, x.SecondUserID}); 
         }
     }
 }

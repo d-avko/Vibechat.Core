@@ -7,6 +7,11 @@ namespace Vibechat.Web.Services.Users
 {
     public class UsersSubsriptionService
     {
+        public UsersSubsriptionService()
+        {
+            UsersSubsriptions = new Dictionary<string, List<string>>();
+        }
+
         private Dictionary<string, List<string>> UsersSubsriptions { get; set; }
         
         public List<string> GetSubscribers(string userId)

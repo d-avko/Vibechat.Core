@@ -30,12 +30,12 @@ namespace Vibechat.Web.Services.Repositories
 
         public UsersBansDatamodel Get(string userId, string whoUnbansId)
         {
-            return mContext.UsersBans.FirstOrDefault(x => x.BannedBy.Id == whoUnbansId && x.BannedUser.Id == userId);
+            return mContext.UsersBans.FirstOrDefault(x => x.BannedByID == whoUnbansId && x.BannedID == userId);
         }
 
         public bool IsBanned(string whoId, string byWhomId)
         {
-            return mContext.UsersBans.Any(x => x.BannedUser.Id == whoId && x.BannedBy.Id == byWhomId);
+            return mContext.UsersBans.Any(x => x.BannedID == whoId && x.BannedByID == byWhomId);
         }
     }
 }

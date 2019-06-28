@@ -18,7 +18,7 @@ namespace Vibechat.Web.Services.Repositories
 
         public ConversationsBansDataModel Get(string userId, int conversationId)
         {
-            return mContext.ConversationsBans.FirstOrDefault(x => x.BannedUser.Id == userId && x.Conversation.ConvID == conversationId);
+            return mContext.ConversationsBans.FirstOrDefault(x => x.UserID == userId && x.ChatID == conversationId);
         }
 
         public void BanUserInGroup(UserInApplication banned, ConversationDataModel where)
@@ -35,7 +35,7 @@ namespace Vibechat.Web.Services.Repositories
 
         public bool IsBanned(UserInApplication who, int whereId)
         {
-            return mContext.ConversationsBans.Any(x => x.Conversation.ConvID == whereId && x.BannedUser.Id == who.Id);
+            return mContext.ConversationsBans.Any(x => x.ChatID == whereId && x.UserID == who.Id);
         }
     }
 }

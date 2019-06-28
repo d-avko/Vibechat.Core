@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace VibeChat.Web
 {
@@ -9,9 +10,10 @@ namespace VibeChat.Web
     {
         [Key]
         //deleted message
-        public int Id { get; set; }
+        public int MessageID { get; set; }
 
-        public MessageDataModel Message { get; set; }
+        [ForeignKey("MessageID")]
+        public virtual MessageDataModel Message { get; set; }
       
         //user that deleted that message
         public string UserId { get; set; } 

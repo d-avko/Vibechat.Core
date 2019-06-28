@@ -29,7 +29,7 @@ namespace Vibechat.Web.Services.Repositories
                .Include(x => x.Conversation)
                .Include(y => y.User);
 
-            return UsersConvs.Where(x => x.Conversation.ConvID == convId && x.User.Id != FirstUserInDialogueId)
+            return UsersConvs.Where(x => x.ChatID == convId && x.UserID != FirstUserInDialogueId)
                 .FirstOrDefault()?
                 .User;
         }
@@ -41,7 +41,7 @@ namespace Vibechat.Web.Services.Repositories
                .Include(y => y.User);
 
             return from userConversation in usersConversations
-                   where userConversation.User.Id == userId
+                   where userConversation.UserID == userId
                    select userConversation.Conversation;
         }
 
@@ -53,7 +53,7 @@ namespace Vibechat.Web.Services.Repositories
                 .Include(y => y.Conversation);
 
             return from userConversation in usersConversations
-                   where userConversation.Conversation.ConvID == conversationId
+                   where userConversation.ChatID == conversationId
                    select userConversation.User;
         }
 
@@ -63,13 +63,13 @@ namespace Vibechat.Web.Services.Repositories
                 .UsersConversations
                 .Include(x => x.User)
                 .Include(x => x.Conversation)
-                .FirstOrDefaultAsync(x => x.User.Id == userId && x.Conversation.ConvID == conversationId);
+                .FirstOrDefaultAsync(x => x.UserID == userId && x.ChatID == conversationId);
         }
 
         public async Task<bool> Exists(string userId, int conversationId)
         {
             return await mContext.UsersConversations
-                .FirstOrDefaultAsync(x => x.Conversation.ConvID == conversationId && x.User.Id == userId) != default(UsersConversationDataModel);
+                .FirstOrDefaultAsync(x => x.ChatID == conversationId && x.UserID == userId) != default(UsersConversationDataModel);
         }
 
         public async Task Remove(UsersConversationDataModel entity)
@@ -95,14 +95,14 @@ namespace Vibechat.Web.Services.Repositories
         {
             return await mContext
                 .UsersConversations
-                .FirstOrDefaultAsync(x => x.Conversation.ConvID == conversation.ConvID && x.User.Id == user.Id) != default(UsersConversationDataModel);
+                .FirstOrDefaultAsync(x => x.ChatID == conversation.ConvID && x.UserID == user.Id) != default(UsersConversationDataModel);
         }
 
         public async Task<bool> DialogExists(string firstUserId, string secondUserId, bool secure)
         {
             IQueryable<UsersConversationDataModel> firstUserConversations = mContext
                .UsersConversations
-               .Where(x => x.User.Id == firstUserId && !x.Conversation.IsGroup)
+               .Where(x => x.UserID == firstUserId && !x.Conversation.IsGroup)
                .Include(x => x.Conversation)
                .Include(x => x.User);
 
@@ -111,7 +111,7 @@ namespace Vibechat.Web.Services.Repositories
                 if(await mContext
                     .UsersConversations
                     .AnyAsync(x => 
-                    x.Conversation.ConvID == conversation.Conversation.ConvID 
+                    x.ChatID == conversation.ChatID
                     && x.User.Id == secondUserId
                     && x.Conversation.IsSecure == secure))
                 {
@@ -126,7 +126,7 @@ namespace Vibechat.Web.Services.Repositories
         {
             IQueryable<UsersConversationDataModel> firstUserConversations = mContext
               .UsersConversations
-              .Where(x => x.User.Id == firstUserId && !x.Conversation.IsGroup)
+              .Where(x => x.UserID == firstUserId && !x.Conversation.IsGroup)
               .Include(x => x.Conversation)
               .Include(x => x.User);
 
@@ -134,7 +134,7 @@ namespace Vibechat.Web.Services.Repositories
             {
                 if (await mContext
                     .UsersConversations
-                    .AnyAsync(x => x.Conversation.ConvID == conversation.Conversation.ConvID && x.User.Id == secondUserId))
+                    .AnyAsync(x => x.ChatID == conversation.ChatID && x.UserID == secondUserId))
                 {
                     return conversation;
                 }

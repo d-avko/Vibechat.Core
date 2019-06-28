@@ -18,6 +18,7 @@ using Vibechat.Web.Services.Paths;
 using Vibechat.Web.Services.Repositories;
 using Vibechat.Web.Services.Users;
 using VibeChat.Web;
+using VibeChat.Web.Services.Repositories;
 using VibeChat.Web.UserProviders;
 
 namespace Vibechat.Web.Services.Extension_methods
