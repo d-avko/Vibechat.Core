@@ -1,15 +1,19 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace VibeChat.Web
 {
     public class UsersConversationDataModel
     {
-        [Key]
-        public int UsersConvsID { get; set; }
+        public string UserID { get; set; }
 
-        public UserInApplication User { get; set; }
+        public int ChatID { get; set; }
 
-        public ConversationDataModel Conversation { get; set; }
+        [ForeignKey("UserID")]
+        public virtual UserInApplication User { get; set; }
+
+        [ForeignKey("ChatID")]
+        public virtual ConversationDataModel Conversation { get; set; }
 
     }
 }

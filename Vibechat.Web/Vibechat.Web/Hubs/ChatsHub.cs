@@ -64,7 +64,13 @@ namespace VibeChat.Web
         {
             var userId = userProvider.GetUserId(Context);
             await userService.MakeUserOnline(userId, Context.ConnectionId);
+
             var subs = subsriptionService.GetSubscribers(userId);
+
+            if(subs == null)
+            {
+                return;
+            }
 
             foreach (string sub in subs)
             {

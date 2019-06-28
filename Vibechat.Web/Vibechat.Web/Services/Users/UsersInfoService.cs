@@ -9,8 +9,8 @@ using Vibechat.Web.Extensions;
 using Vibechat.Web.Services.FileSystem;
 using Vibechat.Web.Services.Repositories;
 using VibeChat.Web;
-using VibeChat.Web.ApiModels;
 using VibeChat.Web.ChatData;
+using VibeChat.Web.Services.Repositories;
 using static VibeChat.Web.Controllers.UsersController;
 
 namespace Vibechat.Web.Services.Users
