@@ -7,6 +7,6 @@ namespace Vibechat.Web.Services.Repositories
     {
         Task Add(DhPublicKeyDataModel value);
 
-        Task<DhPublicKeyDataModel> GetFor(int chatId);
+        Task<DhPublicKeyDataModel> GetRandomKey();
     }
 }

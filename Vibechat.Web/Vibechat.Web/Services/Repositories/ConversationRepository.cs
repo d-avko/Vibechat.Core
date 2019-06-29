@@ -21,7 +21,7 @@ namespace Vibechat.Web.Services.Repositories
             return mContext
                 .Conversations
                 .Include(x => x.Creator)
-                .FirstOrDefault(x => x.ConvID == id);
+                .FirstOrDefault(x => x.Id == id);
         }
 
         public void UpdateThumbnail(string thumbnailUrl, string fullimageUrl, ConversationDataModel entity)
@@ -50,7 +50,7 @@ namespace Vibechat.Web.Services.Repositories
             {
                 // search only for conversations where 'whoSearches' doesn't exist.
                 if (participantsProvider
-                .GetConversationParticipants(conversation.ConvID)
+                .GetConversationParticipants(conversation.Id)
                 .FirstOrDefault(x => x.Id == whoSearches.Id) == default(UserInApplication))
                 {
                     finalResult.Add(conversation);

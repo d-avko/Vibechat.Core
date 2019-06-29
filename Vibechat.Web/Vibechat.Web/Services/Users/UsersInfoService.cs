@@ -82,21 +82,15 @@ namespace Vibechat.Web.Services.Users
                 throw new InvalidDataException("Can't add yourself to contacts.");
             }
 
-            UserInApplication contact = await usersRepository.GetById(userId);
-
-            if(contact == null)
+            try
             {
-                throw new ArgumentException("user id was wrong.");
+                await contactsRepository.AddContact(callerId, userId);
             }
-
-            UserInApplication caller = await usersRepository.GetById(callerId);
-
-            if (caller == null)
+            catch (Exception ex)
             {
-                throw new ArgumentException("caller id was wrong.");
-            }
 
-            await contactsRepository.AddContact(caller, contact);
+                throw new InvalidDataException("Wrong caller id or user id", ex);
+            }
         }
 
         public async Task RemoveFromContacts(string userId, string caller)
@@ -162,7 +156,7 @@ namespace Vibechat.Web.Services.Users
                 //thumbnail; fullsized
                thumbnailFull = imagesService.SaveImage(buffer, image.FileName);
 
-                await usersRepository.UpdateThumbnail(thumbnailFull.Item1, thumbnailFull.Item2, userId);
+                await usersRepository.UpdateAvatar(thumbnailFull.Item1, thumbnailFull.Item2, userId);
             }
 
             return new UpdateProfilePictureResponse()
@@ -216,8 +210,6 @@ namespace Vibechat.Web.Services.Users
         {
             await usersRepository.MakeUserOffline(userId);
         }
-
-
 
     }
 }

@@ -78,12 +78,12 @@ namespace Vibechat.Web.Services.Repositories
             await mContext.SaveChangesAsync();
         }
 
-        public async Task<UsersConversationDataModel> Add(UserInApplication user, ConversationDataModel conversation)
+        public async Task<UsersConversationDataModel> Add(string userId, int chatId)
         {
             var res = await mContext.UsersConversations.AddAsync(new UsersConversationDataModel()
             {
-                Conversation = conversation,
-                User = user
+                ChatID = chatId,
+                UserID = userId
             });
 
             await mContext.SaveChangesAsync();
@@ -95,7 +95,7 @@ namespace Vibechat.Web.Services.Repositories
         {
             return await mContext
                 .UsersConversations
-                .FirstOrDefaultAsync(x => x.ChatID == conversation.ConvID && x.UserID == user.Id) != default(UsersConversationDataModel);
+                .FirstOrDefaultAsync(x => x.ChatID == conversation.Id && x.UserID == user.Id) != default(UsersConversationDataModel);
         }
 
         public async Task<bool> DialogExists(string firstUserId, string secondUserId, bool secure)

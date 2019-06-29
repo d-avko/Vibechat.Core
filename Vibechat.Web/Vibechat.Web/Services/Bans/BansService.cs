@@ -131,7 +131,7 @@ namespace Vibechat.Web.Services.Bans
 
             if ((dialog = await usersConversationsRepository.GetDialog(userId, whoUnbans)) != null)
             {
-                ConversationsBansRepository.UnbanUserInGroup(userId, dialog.Conversation.ConvID);
+                ConversationsBansRepository.UnbanUserInGroup(userId, dialog.Conversation.Id);
             }
         }
 

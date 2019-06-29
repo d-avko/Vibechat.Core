@@ -22,9 +22,11 @@ namespace Vibechat.Web.Services.Repositories
             await mContext.SaveChangesAsync();
         }
 
-        public async Task<DhPublicKeyDataModel> GetFor(int chatId)
+        public async Task<DhPublicKeyDataModel> GetRandomKey()
         {
-            return mContext.PublicKeys.FirstOrDefault(x => x.Id == chatId);
+            var r = new Random();
+            var keys = mContext.PublicKeys.ToList();
+            return keys[r.Next(0, keys.Count() + 1)];
         }
     }
 }

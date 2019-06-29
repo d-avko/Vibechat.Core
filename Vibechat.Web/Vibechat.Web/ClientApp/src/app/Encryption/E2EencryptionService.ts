@@ -16,9 +16,9 @@ export class E2EencryptionService {
 
   constructor(private secureChatsService: SecureChatsService) {}
 
-  public DhMinKeyLength: number = 100;
+  public static DhMinKeyLength: number = 200;
 
-  public DhMaxKeyLength: number = 320;
+  public static DhMaxKeyLength: number = 420;
 
   public static keySize = 256;
 
@@ -74,38 +74,12 @@ export class E2EencryptionService {
       mode: crypto.mode.CBC
 
     });
-    let x = decrypted.toString(crypto.enc.Utf8);
     return <ChatMessage>JSON.parse(decrypted.toString(crypto.enc.Utf8));
   }
 
-  ////returns null if no key was found in local storage for provided group or user id.
-  //public Encrypt(userId: string, message: ChatMessage): string {
-  //  let authKey = this.secureChatsService.GetAuthKey(userId);
-  //  if (!authKey) {
-  //    return null;
-  //  }
-
-  //  let secretKey = crypto.SHA256(authKey);
-  //  let encrypted = crypto.AES.encrypt(JSON.stringify(message), secretKey.words, { mode: crypto.mode.CBC });
-  //  return crypto.enc.Base64.stringify(encrypted.ciphertext);
-  //}
-
-  ////returns null if no auth key was found in local storage.
-  //public Decrypt(userId: string, encrypted: string): ChatMessage {
-  //  let authKey = this.secureChatsService.GetAuthKey(userId);
-  //  if (!authKey) {
-  //    return null;
-  //  }
-
-  //  let secretKey = crypto.SHA256(authKey);
-  //  let parsed = crypto.enc.Base64.parse(encrypted);
-  //  let decrypted = crypto.AES.decrypt(parsed.words, secretKey.words, { mode: crypto.mode.CBC }).toString();
-  //  return <ChatMessage>JSON.parse(decrypted);
-  //}
-
   public GenerateDhPrivate(): biginteger.BigInteger {
-    let min = biginteger(2).pow(100);
-    let max = biginteger(2).pow(320);
+    let min = biginteger(2).pow(E2EencryptionService.DhMinKeyLength);
+    let max = biginteger(2).pow(E2EencryptionService.DhMaxKeyLength);
 
     return biginteger.randBetween(min, max);
   }

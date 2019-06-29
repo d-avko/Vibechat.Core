@@ -122,7 +122,7 @@ namespace Vibechat.Web.Services.Repositories
             await mContext.SaveChangesAsync();
         }
 
-        public async Task UpdateThumbnail(string thumbnail, string fullSized, string userId)
+        public async Task UpdateAvatar(string thumbnail, string fullSized, string userId)
         {
             var user = await GetById(userId);
             user.ProfilePicImageURL = thumbnail;
