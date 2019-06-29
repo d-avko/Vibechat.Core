@@ -10,17 +10,11 @@ namespace Vibechat.Web.Data.DataModels
 {
     public class DhPublicKeyDataModel
     {
-        /// <summary>
-        /// Represents a chat where it's used.
-        /// </summary>
         [Key]
         public int Id { get; set; }
 
         public string Modulus { get; set; }
 
         public string Generator { get; set; }
-
-        [ForeignKey("Id")]
-        public virtual ConversationDataModel Chat { get; set; }
     }
 }

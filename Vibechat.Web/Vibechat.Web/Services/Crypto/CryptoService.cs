@@ -15,7 +15,7 @@ namespace Vibechat.Web.Services.Crypto
 
         }
 
-        public const int KeyLength = 1024;
+        public const int KeyLength = 2048;
 
         public DhPublicKey GenerateDhPublicKey()
         {

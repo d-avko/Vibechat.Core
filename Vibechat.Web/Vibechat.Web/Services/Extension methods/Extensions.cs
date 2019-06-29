@@ -62,7 +62,7 @@ namespace Vibechat.Web.Extensions
             return new ConversationTemplate()
             {
                 Name = value.Name,
-                ConversationID = value.ConvID,
+                ConversationID = value.Id,
                 DialogueUser = dialogUser?.ToUserInfo(),
                 IsGroup = value.IsGroup,
                 ThumbnailUrl = value.ThumbnailUrl,

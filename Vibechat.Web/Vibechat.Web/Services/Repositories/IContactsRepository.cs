@@ -6,7 +6,7 @@ namespace VibeChat.Web.Services.Repositories
 {
     public interface IContactsRepository
     {
-        Task AddContact(UserInApplication whoAdds, UserInApplication contact);
+        Task AddContact(string whoAdds, string contact);
         IQueryable<ContactsDataModel> GetContactsOf(string id);
         Task RemoveContact(string whoRemovesId, string contactId);
     }

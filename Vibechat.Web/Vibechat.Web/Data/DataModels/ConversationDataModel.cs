@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Vibechat.Web.Data.DataModels;
 
 namespace VibeChat.Web
@@ -6,7 +7,7 @@ namespace VibeChat.Web
     public class ConversationDataModel
     {
         [Key]
-        public int ConvID { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// Conversation name
@@ -30,5 +31,10 @@ namespace VibeChat.Web
         public string AuthKeyId { get; set; }
 
         public UserInApplication Creator { get; set; }
+
+        public int? PublicKeyId { get; set; }
+
+        [ForeignKey("PublicKeyId")]
+        public virtual DhPublicKeyDataModel PublicKey { get; set; }
     }
 }

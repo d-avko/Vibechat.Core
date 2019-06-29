@@ -21,7 +21,7 @@ namespace Vibechat.Web.Services.Repositories
 
         Task ChangeUserPublicState(string userId);
 
-        Task UpdateThumbnail(string thumbnail, string fullSized, string userId);
+        Task UpdateAvatar(string thumbnail, string fullSized, string userId);
 
         Task ChangeLastName(string newName, string userId);
 

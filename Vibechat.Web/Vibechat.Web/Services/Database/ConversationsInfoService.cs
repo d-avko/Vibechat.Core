@@ -88,26 +88,26 @@ namespace Vibechat.Web.Services
             await conversationRepository.UpdateAuthKey(chat, authKeyId);
         }
 
-        public async Task<ConversationTemplate> CreateConversation(CreateConversationCredentialsApiModel convInfo)
+        public async Task<ConversationTemplate> CreateConversation(CreateConversationCredentialsApiModel credentials)
         {
 
             var defaultError = new FormatException("Error while creating the conversation..");
 
             //if there was no group info or creator info
 
-            if (string.IsNullOrWhiteSpace(convInfo.CreatorId))
+            if (string.IsNullOrWhiteSpace(credentials.CreatorId))
             {
                 throw defaultError;
             }
 
-            var user = await usersRepository.GetById(convInfo.CreatorId).ConfigureAwait(false);
+            var user = await usersRepository.GetById(credentials.CreatorId);
 
             if (user == null)
             {
                 throw defaultError;
             }
 
-            if ((!convInfo.IsGroup) && (convInfo.DialogUserId == null))
+            if ((!credentials.IsGroup) && (credentials.DialogUserId == null))
             {
                 throw new FormatException("No dialogue user was provided...");
             }
@@ -116,78 +116,61 @@ namespace Vibechat.Web.Services
             ConversationDataModel ConversationToAdd;
             var dhPublicKey = new DhPublicKeyDataModel();
 
-            if (!convInfo.IsGroup)
+            if (!credentials.IsGroup)
             {
                 //if this is a dialogue , find a user with whom to create conversation
-                SecondDialogueUser = await usersRepository.GetById(convInfo.DialogUserId);
+                SecondDialogueUser = await usersRepository.GetById(credentials.DialogUserId);
 
                 if (SecondDialogueUser == null)
                 {
                     throw defaultError;
                 }
 
-                //do not allow creating multiple secret dialogs, because clients 
-                //MUST delete dialogs with lost keys by themselves.
-                if(await usersConversationsRepository.DialogExists(user.Id, SecondDialogueUser.Id, convInfo.IsSecure))
-                {
-                    throw new FormatException("Dialog already exists.");
-                }
-                var imageUrl = convInfo.ImageUrl ?? chatDataProvider.GetGroupPictureUrl();
-
+                var imageUrl = credentials.ImageUrl ?? chatDataProvider.GetGroupPictureUrl();
+                
                 ConversationToAdd = new ConversationDataModel()
                 {
-                    IsGroup = convInfo.IsGroup,
-                    Name = convInfo.IsGroup ? convInfo.ConversationName : null,
+                    IsGroup = credentials.IsGroup,
+                    Name = credentials.IsGroup ? credentials.ConversationName : null,
                     FullImageUrl = imageUrl,
                     ThumbnailUrl = imageUrl,
                     Creator = user,
-                    IsPublic = convInfo.IsPublic,
-                    IsSecure = convInfo.IsSecure
+                    IsPublic = credentials.IsPublic,
+                    IsSecure = credentials.IsSecure
                 };
-
-               
+              
                 await conversationRepository.Add(ConversationToAdd);
 
-                if (convInfo.IsSecure)
+                if (credentials.IsSecure)
                 {
-                    var generated = cryptoService.GenerateDhPublicKey();
-                    dhPublicKey = new DhPublicKeyDataModel()
-                    {
-                        Generator = generated.Generator,
-                        Modulus = generated.Modulus,
-                        Chat = ConversationToAdd
-                    };
-
-                    await publicKeys.Add(dhPublicKey);
+                    dhPublicKey = await publicKeys.GetRandomKey();
                 }
 
-                await usersConversationsRepository.Add(SecondDialogueUser, ConversationToAdd);
+                await usersConversationsRepository.Add(credentials.DialogUserId, ConversationToAdd.Id);
             }
             else
             {
                 
-                var imageUrl = convInfo.ImageUrl ?? chatDataProvider.GetProfilePictureUrl();
+                var imageUrl = credentials.ImageUrl ?? chatDataProvider.GetProfilePictureUrl();
 
                 ConversationToAdd = new ConversationDataModel()
                 {
-                    IsGroup = convInfo.IsGroup,
-                    Name = convInfo.IsGroup ? convInfo.ConversationName : null,
+                    IsGroup = credentials.IsGroup,
+                    Name = credentials.IsGroup ? credentials.ConversationName : null,
                     FullImageUrl = imageUrl,
                     ThumbnailUrl = imageUrl,
                     Creator = user,
-                    IsPublic = convInfo.IsPublic,
-                    IsSecure = convInfo.IsSecure
+                    IsPublic = credentials.IsPublic,
+                    IsSecure = credentials.IsSecure
                 };
 
                 await conversationRepository.Add(ConversationToAdd);
             }
 
-            await usersConversationsRepository.Add(user, ConversationToAdd);
+            await usersConversationsRepository.Add(credentials.CreatorId, ConversationToAdd.Id);
 
-            //after saving changes we have Id of our 
-            //created conversation in ConversationToAdd variable
             return ConversationToAdd.ToConversationTemplate(
-                await GetParticipants(new GetParticipantsApiModel() { ConvId = ConversationToAdd.ConvID }),
+                await GetParticipants(new GetParticipantsApiModel() { ConvId = ConversationToAdd.Id }),
                 null,
                 SecondDialogueUser,
                 dhPublicKey
@@ -320,14 +303,14 @@ namespace Vibechat.Web.Services
 
             var result = new List<ConversationTemplate>();
 
-            foreach (var conversation in groups)
+            foreach (ConversationDataModel conversation in groups)
             {
                 result.Add(
                     conversation.ToConversationTemplate(
-                        await GetParticipants(new GetParticipantsApiModel() { ConvId = conversation.ConvID }),
-                        await GetMessages(new GetMessagesApiModel() { ConversationID = conversation.ConvID, Count = 1, MesssagesOffset = 0 }, whoAccessedId),
+                        await GetParticipants(new GetParticipantsApiModel() { ConvId = conversation.Id }),
+                        await GetMessages(new GetMessagesApiModel() { ConversationID = conversation.Id, Count = 1, MesssagesOffset = 0 }, whoAccessedId),
                         null,
-                        await publicKeys.GetFor(conversation.ConvID)
+                        conversation.PublicKey
                     ));
             }
 
@@ -398,15 +381,15 @@ namespace Vibechat.Web.Services
             {
                 foreach(var user in Conversation.Participants)
                 {
-                    await RemoveUserFromConversation(user.Id, whoRemoves, conversation.ConvID);
+                    await RemoveUserFromConversation(user.Id, whoRemoves, conversation.Id);
                 }
             }
             else
             {
-                await RemoveUserFromConversation(Conversation.DialogueUser.Id, whoRemoves, conversation.ConvID);
-                await RemoveUserFromConversation(whoRemoves, whoRemoves, conversation.ConvID);
+                await RemoveUserFromConversation(Conversation.DialogueUser.Id, whoRemoves, conversation.Id);
+                await RemoveUserFromConversation(whoRemoves, whoRemoves, conversation.Id);
 
-                List<MessageDataModel> messages = messagesRepository.Get(whoRemoves, conversation.ConvID, true).ToList();
+                List<MessageDataModel> messages = messagesRepository.Get(whoRemoves, conversation.Id, true).ToList();
 
                 await messagesRepository.RemovePermanent(messages);
             }
@@ -419,19 +402,23 @@ namespace Vibechat.Web.Services
             var FoundConversation = conversationRepository.GetById(UserProvided.ConvId);
 
             if (FoundConversation == null)
+            {
                 throw defaultError;
+            }
 
             var FoundUser = await usersRepository.GetById(UserProvided.UserId).ConfigureAwait(false);
 
             if (FoundUser == null)
+            {
                 throw defaultError;
+            }
 
-            if(await usersConversationsRepository.Exists(FoundUser.Id, FoundConversation.ConvID))
+            if(await usersConversationsRepository.Exists(FoundUser.Id, FoundConversation.Id))
             {
                 throw new FormatException("User already exists in converation.");
             }
 
-            var addedUser = (await usersConversationsRepository.Add(FoundUser, FoundConversation)).User;
+            var addedUser = (await usersConversationsRepository.Add(UserProvided.UserId, UserProvided.ConvId)).User;
 
             return addedUser.ToUserInfo();
         }
@@ -450,16 +437,17 @@ namespace Vibechat.Web.Services
         {
             var defaultError = new FormatException("User info provided was not correct.");
 
-            var unAuthorizedError = new UnauthorizedAccessException("You are unauthorized to do such an action.");
-
             if (whoAccessedId == null)
+            {
                 throw defaultError;
+            }
 
             var user = await usersRepository.GetById(whoAccessedId).ConfigureAwait(false);
 
             if (user == null)
+            {
                 throw defaultError;
-
+            }
 
             IQueryable<ConversationDataModel> conversations = usersConversationsRepository.GetUserConversations(whoAccessedId);
 
@@ -467,16 +455,16 @@ namespace Vibechat.Web.Services
 
             foreach (ConversationDataModel conversation in conversations)
             {
-                UserInApplication DialogUser = conversation.IsGroup ? null : usersConversationsRepository.GetUserInDialog(conversation.ConvID, whoAccessedId);
+                UserInApplication DialogUser = conversation.IsGroup ? null : usersConversationsRepository.GetUserInDialog(conversation.Id, whoAccessedId);
 
                 returnData.Add
                     (
                     conversation.ToConversationTemplate(
-                         await GetParticipants(new GetParticipantsApiModel() { ConvId = conversation.ConvID }),
+                         await GetParticipants(new GetParticipantsApiModel() { ConvId = conversation.Id }),
                          //only get last message here, client should fetch messages after he opened the conversation.
-                         await GetMessages(new GetMessagesApiModel() { ConversationID = conversation.ConvID, Count = 1, MesssagesOffset = 0 }, whoAccessedId),
+                         await GetMessages(new GetMessagesApiModel() { ConversationID = conversation.Id, Count = 1, MesssagesOffset = 0 }, whoAccessedId),
                          DialogUser,
-                         await publicKeys.GetFor(conversation.ConvID)
+                         conversation.PublicKey
                          )
                     );
             }
@@ -491,21 +479,23 @@ namespace Vibechat.Web.Services
             var defaultErrorMessage = new FormatException("Wrong conversation was provided.");
 
             if (convInfo == null)
+            {
                 throw defaultErrorMessage;
+            }
 
             var conversation = conversationRepository.GetById(convInfo.ConvId);
 
             if (conversation == null)
+            {
                 throw defaultErrorMessage;
+            }
 
             var participants = usersConversationsRepository.GetConversationParticipants(convInfo.ConvId);
 
             return (from participant in participants
                     select participant.ToUserInfo()
                                ).ToList();
-
         }
-
 
         public async Task<List<Message>> GetMessages(GetMessagesApiModel convInfo, string whoAccessedId)
         {
@@ -588,7 +578,7 @@ namespace Vibechat.Web.Services
                 }
             }
 
-            return conversation.ToConversationTemplate(members, null, dialogUser, await publicKeys.GetFor(conversation.ConvID));
+            return conversation.ToConversationTemplate(members, null, dialogUser, conversation.PublicKey);
         }
 
         public async Task<ConversationTemplate> GetByIdSimplified(int conversationId, string whoAccessedId)

@@ -10,8 +10,8 @@ using VibeChat.Web;
 namespace Vibechat.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20190616163458_public-keys-fk")]
-    partial class publickeysfk
+    [Migration("20190629190344_new")]
+    partial class @new
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -133,7 +133,7 @@ namespace Vibechat.Web.Migrations
 
             modelBuilder.Entity("VibeChat.Web.ConversationDataModel", b =>
                 {
-                    b.Property<int>("ConvID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -151,11 +151,15 @@ namespace Vibechat.Web.Migrations
 
                     b.Property<string>("Name");
 
+                    b.Property<int?>("PublicKeyId");
+
                     b.Property<string>("ThumbnailUrl");
 
-                    b.HasKey("ConvID");
+                    b.HasKey("Id");
 
                     b.HasIndex("CreatorId");
+
+                    b.HasIndex("PublicKeyId");
 
                     b.ToTable("Conversations");
                 });
@@ -168,42 +172,34 @@ namespace Vibechat.Web.Migrations
                     b.HasKey("Name");
 
                     b.ToTable("AttachmentKinds");
+
+                    b.HasData(
+                        new { Name = "img" }
+                    );
                 });
 
             modelBuilder.Entity("Vibechat.Web.Data.DataModels.ContactsDataModel", b =>
                 {
-                    b.Property<int>("ContactId")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<string>("FirstUserID");
 
-                    b.Property<string>("ContactId1");
+                    b.Property<string>("SecondUserID");
 
-                    b.Property<string>("UserId");
+                    b.HasKey("FirstUserID", "SecondUserID");
 
-                    b.HasKey("ContactId");
-
-                    b.HasIndex("ContactId1");
-
-                    b.HasIndex("UserId");
+                    b.HasIndex("SecondUserID");
 
                     b.ToTable("Contacts");
                 });
 
             modelBuilder.Entity("Vibechat.Web.Data.DataModels.ConversationsBansDataModel", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<int>("ChatID");
 
-                    b.Property<string>("BannedUserId");
+                    b.Property<string>("UserID");
 
-                    b.Property<int?>("ConversationConvID");
+                    b.HasKey("ChatID", "UserID");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("BannedUserId");
-
-                    b.HasIndex("ConversationConvID");
+                    b.HasIndex("UserID");
 
                     b.ToTable("ConversationsBans");
                 });
@@ -214,17 +210,21 @@ namespace Vibechat.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("ChatConvID");
-
                     b.Property<string>("Generator");
 
                     b.Property<string>("Modulus");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ChatConvID");
-
                     b.ToTable("PublicKeys");
+
+                    b.HasData(
+                        new { Id = 1, Generator = "5", Modulus = "30445704021091515043589705032000416743065879523138206374507066714396902967826274025631618229965138647563750555154979126280906579122837150373480202328346842570774085859182345981586646516929523275488501196012664339665000259691166799681559154401985737875054416305014473301299223214280232526356243298947531967598860851745809118777180045083632452217526977904029644599066308131296163393000164130258492650715234142089972808359667482827732851432028411017393736987205804161070813960388610459820505679155787472727171508004197344905155937150738660205704682022704155225348753967503171179256418887643829768064151315264948430447643" },
+                        new { Id = 2, Generator = "5", Modulus = "32263366888482059323243883015844747463965633534460381695780102759488099321032708334304505667666637685300505592369993636530815881102308957048371822607863954733817431065032603081782824700230973378782698023906415337615400031203101471874900241507489668722465641666896931753727311596566091264518919851218789756402628304989296109806612534970945915938124598750842390238411160204981182640889415926127674121044185527248690460313606448767420374921388319398313924659508283461791477125909269820467245948516679916104219176576965841073678423303547601277304956836098698284063305292637873086496892392420324931515705463719457818391903" },
+                        new { Id = 3, Generator = "5", Modulus = "24686716193249294655435300797497114211078959859276664073733717026830954181574388585315694045547212768961613342303599456962906305799342423705644564610104313711924785307130075216907652332970869326682805755857773148743676260028590179245424907542602604826824659365364084160548368532184623254146224405505128422317198793170098375902826740530739724436141448566436832702729067122102229640982472203935696282671800474814097452256414678537282324994774580722689119929861200126328720274469821909551794989267104991749216243041288976425117086205131154327259025718994944932831286131755855732747670825247733961413482774928847145848683" },
+                        new { Id = 4, Generator = "5", Modulus = "20511064139841876696208229254000064895498308708985023576653435535421416417594516774924493827744623544847238987846574744361120463310357785783241148249314307516370165566636708802131190227740623365100379446244224186700951777543056890843857560451632206080364698149346737149295461623896888713887833761226282705077573490187927513477344537509706489902786608552066156656101651000143551974090549989153259917689688908445021764937236819290246070592801026626071949237468671408951883181725105134543274800285933845010517241736518635511601891749900728648705430139444855907139519170754104572729308445072787726322570780369556422739723" },
+                        new { Id = 5, Generator = "5", Modulus = "20850965393100772630721381827467472846769974337484934948485962234352705295662792015939788728305700806819038412100331548613067641292812785261491147385725382284428429766310618521703081552913546975030866816165893472445277829294748965421857329404134415647286470036472641032781856997861782897278603448824696922997054565547655636184219624327030090189311608152965483673354384130916454486847897115874140265827339554177255203771867546072260275858144383592611464594638476890150964299365002135998606866470198012882210416522022871618334038010682652038038493600763843805286318397247480947350931175656728334601366362069270360295443" }
+                    );
                 });
 
             modelBuilder.Entity("VibeChat.Web.Data.DataModels.MessageAttachmentDataModel", b =>
@@ -243,28 +243,28 @@ namespace Vibechat.Web.Migrations
 
                     b.Property<int>("ImageWidth");
 
+                    b.Property<int?>("MessageId");
+
                     b.HasKey("AttachmentID");
 
                     b.HasIndex("AttachmentKindName");
+
+                    b.HasIndex("MessageId")
+                        .IsUnique()
+                        .HasFilter("[MessageId] IS NOT NULL");
 
                     b.ToTable("Attachments");
                 });
 
             modelBuilder.Entity("Vibechat.Web.Data.DataModels.UsersBansDatamodel", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<string>("BannedByID");
 
-                    b.Property<string>("BannedById");
+                    b.Property<string>("BannedID");
 
-                    b.Property<string>("BannedUserId");
+                    b.HasKey("BannedByID", "BannedID");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("BannedById");
-
-                    b.HasIndex("BannedUserId");
+                    b.HasIndex("BannedID");
 
                     b.ToTable("UsersBans");
                 });
@@ -291,17 +291,11 @@ namespace Vibechat.Web.Migrations
 
             modelBuilder.Entity("VibeChat.Web.DeletedMessagesDataModel", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int?>("MessageID");
+                    b.Property<int>("MessageID");
 
                     b.Property<string>("UserId");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("MessageID");
+                    b.HasKey("MessageID");
 
                     b.ToTable("DeletedMessages");
                 });
@@ -311,8 +305,6 @@ namespace Vibechat.Web.Migrations
                     b.Property<int>("MessageID")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int?>("AttachmentInfoAttachmentID");
 
                     b.Property<int>("ConversationID");
 
@@ -331,8 +323,6 @@ namespace Vibechat.Web.Migrations
                     b.Property<string>("UserId");
 
                     b.HasKey("MessageID");
-
-                    b.HasIndex("AttachmentInfoAttachmentID");
 
                     b.HasIndex("ForwardedMessageMessageID");
 
@@ -412,19 +402,13 @@ namespace Vibechat.Web.Migrations
 
             modelBuilder.Entity("VibeChat.Web.UsersConversationDataModel", b =>
                 {
-                    b.Property<int>("UsersConvsID")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<string>("UserID");
 
-                    b.Property<int?>("ConversationConvID");
+                    b.Property<int>("ChatID");
 
-                    b.Property<string>("UserId");
+                    b.HasKey("UserID", "ChatID");
 
-                    b.HasKey("UsersConvsID");
-
-                    b.HasIndex("ConversationConvID");
-
-                    b.HasIndex("UserId");
+                    b.HasIndex("ChatID");
 
                     b.ToTable("UsersConversations");
                 });
@@ -479,35 +463,36 @@ namespace Vibechat.Web.Migrations
                     b.HasOne("VibeChat.Web.UserInApplication", "Creator")
                         .WithMany()
                         .HasForeignKey("CreatorId");
+
+                    b.HasOne("Vibechat.Web.Data.DataModels.DhPublicKeyDataModel", "PublicKey")
+                        .WithMany()
+                        .HasForeignKey("PublicKeyId");
                 });
 
             modelBuilder.Entity("Vibechat.Web.Data.DataModels.ContactsDataModel", b =>
                 {
-                    b.HasOne("VibeChat.Web.UserInApplication", "Contact")
-                        .WithMany()
-                        .HasForeignKey("ContactId1");
-
                     b.HasOne("VibeChat.Web.UserInApplication", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("FirstUserID")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("VibeChat.Web.UserInApplication", "Contact")
+                        .WithMany()
+                        .HasForeignKey("SecondUserID")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Vibechat.Web.Data.DataModels.ConversationsBansDataModel", b =>
                 {
-                    b.HasOne("VibeChat.Web.UserInApplication", "BannedUser")
-                        .WithMany()
-                        .HasForeignKey("BannedUserId");
-
                     b.HasOne("VibeChat.Web.ConversationDataModel", "Conversation")
                         .WithMany()
-                        .HasForeignKey("ConversationConvID");
-                });
+                        .HasForeignKey("ChatID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity("Vibechat.Web.Data.DataModels.DhPublicKeyDataModel", b =>
-                {
-                    b.HasOne("VibeChat.Web.ConversationDataModel", "Chat")
+                    b.HasOne("VibeChat.Web.UserInApplication", "BannedUser")
                         .WithMany()
-                        .HasForeignKey("ChatConvID");
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("VibeChat.Web.Data.DataModels.MessageAttachmentDataModel", b =>
@@ -515,32 +500,35 @@ namespace Vibechat.Web.Migrations
                     b.HasOne("VibeChat.Web.Data.DataModels.AttachmentKindDataModel", "AttachmentKind")
                         .WithMany()
                         .HasForeignKey("AttachmentKindName");
+
+                    b.HasOne("VibeChat.Web.MessageDataModel", "Message")
+                        .WithOne("AttachmentInfo")
+                        .HasForeignKey("VibeChat.Web.Data.DataModels.MessageAttachmentDataModel", "MessageId");
                 });
 
             modelBuilder.Entity("Vibechat.Web.Data.DataModels.UsersBansDatamodel", b =>
                 {
                     b.HasOne("VibeChat.Web.UserInApplication", "BannedBy")
                         .WithMany()
-                        .HasForeignKey("BannedById");
+                        .HasForeignKey("BannedByID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("VibeChat.Web.UserInApplication", "BannedUser")
                         .WithMany()
-                        .HasForeignKey("BannedUserId");
+                        .HasForeignKey("BannedID")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("VibeChat.Web.DeletedMessagesDataModel", b =>
                 {
                     b.HasOne("VibeChat.Web.MessageDataModel", "Message")
                         .WithMany()
-                        .HasForeignKey("MessageID");
+                        .HasForeignKey("MessageID")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("VibeChat.Web.MessageDataModel", b =>
                 {
-                    b.HasOne("VibeChat.Web.Data.DataModels.MessageAttachmentDataModel", "AttachmentInfo")
-                        .WithMany()
-                        .HasForeignKey("AttachmentInfoAttachmentID");
-
                     b.HasOne("VibeChat.Web.MessageDataModel", "ForwardedMessage")
                         .WithMany()
                         .HasForeignKey("ForwardedMessageMessageID");
@@ -554,11 +542,13 @@ namespace Vibechat.Web.Migrations
                 {
                     b.HasOne("VibeChat.Web.ConversationDataModel", "Conversation")
                         .WithMany()
-                        .HasForeignKey("ConversationConvID");
+                        .HasForeignKey("ChatID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("VibeChat.Web.UserInApplication", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

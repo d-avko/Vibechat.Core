@@ -11,13 +11,22 @@
       <img matListAvatar src="{{conversation.dialogueUser.imageUrl}}" alt="Dialogue logo">
     </ng-template>
 
-    <h3 matLine
-        *ngIf="conversation.isGroup; else dialogueHeader"
-        [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}"> {{conversation.name}} </h3>
+    <div matLine class="chat_name_wrapper">
+      <h3 class="chat_name"
+          *ngIf="conversation.isGroup; else dialogueHeader"
+          [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
+        {{conversation.name}}
+      </h3>
+
+      <mat-icon *ngIf="conversation.isSecure" class="secured_icon">lock</mat-icon>
+    </div>
+
 
     <ng-template #dialogueHeader>
-      <h3 matLine
-          [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}"> {{conversation.dialogueUser.userName}} </h3>
+      <h3 class="chat_name"
+          [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
+        {{conversation.dialogueUser.userName}}
+      </h3>
     </ng-template>
 
     <div matLine class="lastmessage_content">
@@ -52,6 +61,22 @@
     display: flex;
     flex-direction: row;
     align-items:flex-start;
+  }
+
+  .chat_name_wrapper{
+    display: flex !important;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .chat_name{
+    margin: 0;
+    font-size: 18px;
+    padding-right: 10px;
+  }
+
+  .secured_icon{
+    color: lightgreen;
   }
 
   .unread_bubble_text{
