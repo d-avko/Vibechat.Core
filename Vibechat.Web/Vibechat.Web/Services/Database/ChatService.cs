@@ -148,7 +148,8 @@ namespace Vibechat.Web.Services
                 Creator = user,
                 IsPublic = credentials.IsPublic,
                 IsSecure = credentials.IsSecure,
-                PublicKeyId = dhPublicKey.Id
+                PublicKeyId = dhPublicKey.Id,
+                PublicKey = dhPublicKey
             };
 
             await conversationRepository.Add(ConversationToAdd);
@@ -346,7 +347,7 @@ namespace Vibechat.Web.Services
                 throw new FormatException("User is not a part of this conversation.");
             }
 
-            if(conversation.Creator.Id != whoRemovedId && !conversation.IsGroup)
+            if(conversation.Creator.Id != whoRemovedId && conversation.IsGroup)
             {
                 throw new FormatException("Only creator can remove users in group.");
             }

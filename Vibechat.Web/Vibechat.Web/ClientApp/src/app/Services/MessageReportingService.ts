@@ -22,4 +22,12 @@ export class MessageReportingService {
   public OnError(error: string): void {
     this.snackbar.openSnackBar(error, 2);
   }
+
+  public OnWaitingForUserToComeOnline() {
+    this.snackbar.openSnackBar("Waiting for user to come online...", 3);
+  }
+
+  public OnFailedToSubsribeToUserStatusChanges() {
+    this.snackbar.openSnackBar("Last operation failed, please re-enter this chat.", 3);
+  }
 }

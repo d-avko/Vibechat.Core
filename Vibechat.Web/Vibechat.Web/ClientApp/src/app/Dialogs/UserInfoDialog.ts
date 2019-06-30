@@ -30,8 +30,14 @@ export class UserInfoDialogComponent {
     public usersService: UsersService
     ) { }
 
-  public HasConversationWith() : boolean {
-    return this.conversationsService.FindDialogWithSecurityCheck(this.data.user, false) != null;
+  public HasConversationWith(): boolean {
+
+    if (!this.data.conversation) {
+      //we are viewing user info outside the chat.
+      return this.conversationsService.FindDialogWithSecurityCheck(this.data.user, false) != null;
+    }
+    //we are viewing user info inside the chat.
+    return this.conversationsService.FindDialogWithSecurityCheck(this.data.user, this.data.conversation.isSecure) != null;
   }
 
   public DeleteConversation(): void {

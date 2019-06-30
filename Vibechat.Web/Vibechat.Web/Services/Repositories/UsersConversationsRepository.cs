@@ -40,9 +40,10 @@ namespace Vibechat.Web.Services.Repositories
                .Include(x => x.Conversation)
                .Include(y => y.User);
 
-            return from userConversation in usersConversations
+            return (from userConversation in usersConversations
                    where userConversation.UserID == userId
-                   select userConversation.Conversation;
+                   select userConversation.Conversation
+                   ).Include(x => x.PublicKey);
         }
 
         public IQueryable<UserInApplication> GetConversationParticipants(int conversationId)
