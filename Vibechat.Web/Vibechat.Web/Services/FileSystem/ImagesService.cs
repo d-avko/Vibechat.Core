@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using Vibechat.Web.ChatData.Messages;
 using Vibechat.Web.Services.Images;
 using Vibechat.Web.Services.Paths;
@@ -77,26 +78,33 @@ namespace Vibechat.Web.Services.FileSystem
         /// <param name="image"></param>
         /// <param name="imageName"></param>
         /// <returns></returns>
-        public Tuple<string,string> SaveImage(MemoryStream image, string imageName)
+        public ValueTuple<string,string> SaveImage(MemoryStream image, string imageName)
         {
             var resized = ImageCompression.Resize(image, ThumbnailWidth, ThumbnailHeight);
             image.Seek(0, SeekOrigin.Begin);
             var uniquePath = PathsProvider.GetUniquePath(imageName);
             Directory.CreateDirectory(StaticFilesLocation + FilesLocationRelative + PathsProvider.GetUniquePath(imageName));
 
-            var uncompressedFileName = StaticFilesLocation 
-                + FilesLocationRelative
-                + uniquePath
-                + Path.GetFileNameWithoutExtension(imageName)
-                + FullSized
-                + Path.GetExtension(imageName);
+            var builder = new StringBuilder();
+            builder.Append(StaticFilesLocation);
+            builder.Append(FilesLocationRelative);
+            builder.Append(uniquePath);
+            builder.Append(Path.GetFileNameWithoutExtension(imageName));
+            builder.Append(FullSized);
+            builder.Append(Path.GetExtension(imageName));
 
-            var compressedFileName = StaticFilesLocation 
-                + FilesLocationRelative
-                + uniquePath
-                + Path.GetFileNameWithoutExtension(imageName)
-                + Compressed
-                + Path.GetExtension(imageName);
+            var uncompressedFileName = builder.ToString();
+
+            builder.Clear();
+
+            builder.Append(StaticFilesLocation);
+            builder.Append(FilesLocationRelative);
+            builder.Append(uniquePath);
+            builder.Append(Path.GetFileNameWithoutExtension(imageName));
+            builder.Append(Compressed);
+            builder.Append(Path.GetExtension(imageName));
+
+            var compressedFileName = builder.ToString();
 
             using (var fStream = new FileStream(uncompressedFileName, FileMode.Create))
             {
@@ -110,7 +118,7 @@ namespace Vibechat.Web.Services.FileSystem
                 resized.CopyTo(fStream);
             }
 
-            return new Tuple<string, string>(compressedFileName.Replace(StaticFilesLocation, ""), uncompressedFileName.Replace(StaticFilesLocation, ""));
+            return new ValueTuple<string, string>(compressedFileName.Replace(StaticFilesLocation, ""), uncompressedFileName.Replace(StaticFilesLocation, ""));
         }
     }
 }

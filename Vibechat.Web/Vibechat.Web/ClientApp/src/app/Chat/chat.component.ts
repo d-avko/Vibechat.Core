@@ -181,7 +181,7 @@ export class ChatComponent implements OnInit {
         return;
       }
 
-      await this.conversationsService.CreateGroup(result.name, result.isPublic);    
+      await this.conversationsService.CreateGroup(result.name, result.isPublic);
     });
   }
 

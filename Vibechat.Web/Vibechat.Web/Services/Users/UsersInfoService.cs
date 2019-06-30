@@ -15,7 +15,7 @@ using static VibeChat.Web.Controllers.UsersController;
 
 namespace Vibechat.Web.Services.Users
 {
-    public class UsersInfoService
+    public class UsersService
     {
         private readonly IUsersRepository usersRepository;
         private readonly ImagesService imagesService;
@@ -24,7 +24,7 @@ namespace Vibechat.Web.Services.Users
         public const int MaxThumbnailLengthMB = 5;
         public const int MaxNameLength = 128;
 
-        public UsersInfoService(
+        public UsersService(
             IUsersRepository usersRepository,
             ImagesService imagesService,
             IContactsRepository contactsRepository)
@@ -146,7 +146,7 @@ namespace Vibechat.Web.Services.Users
                 throw new FormatException("User was not found");
             }
 
-            Tuple<string, string> thumbnailFull;
+            ValueTuple<string, string> thumbnailFull;
 
             using (var buffer = new MemoryStream())
             {

@@ -113,8 +113,9 @@ namespace Vibechat.Web.Services
             }
 
             UserInApplication SecondDialogueUser = null;
-            ConversationDataModel ConversationToAdd;
             var dhPublicKey = new DhPublicKeyDataModel();
+
+            string imageUrl;
 
             if (!credentials.IsGroup)
             {
@@ -126,48 +127,47 @@ namespace Vibechat.Web.Services
                     throw defaultError;
                 }
 
-                var imageUrl = credentials.ImageUrl ?? chatDataProvider.GetGroupPictureUrl();
-                
-                ConversationToAdd = new ConversationDataModel()
-                {
-                    IsGroup = credentials.IsGroup,
-                    Name = credentials.IsGroup ? credentials.ConversationName : null,
-                    FullImageUrl = imageUrl,
-                    ThumbnailUrl = imageUrl,
-                    Creator = user,
-                    IsPublic = credentials.IsPublic,
-                    IsSecure = credentials.IsSecure
-                };
-              
-                await conversationRepository.Add(ConversationToAdd);
+                imageUrl = credentials.ImageUrl ?? chatDataProvider.GetProfilePictureUrl();
 
                 if (credentials.IsSecure)
                 {
                     dhPublicKey = await publicKeys.GetRandomKey();
                 }
-
-                await usersConversationsRepository.Add(credentials.DialogUserId, ConversationToAdd.Id);
             }
             else
             {
-                
-                var imageUrl = credentials.ImageUrl ?? chatDataProvider.GetProfilePictureUrl();
-
-                ConversationToAdd = new ConversationDataModel()
-                {
-                    IsGroup = credentials.IsGroup,
-                    Name = credentials.IsGroup ? credentials.ConversationName : null,
-                    FullImageUrl = imageUrl,
-                    ThumbnailUrl = imageUrl,
-                    Creator = user,
-                    IsPublic = credentials.IsPublic,
-                    IsSecure = credentials.IsSecure
-                };
-
-                await conversationRepository.Add(ConversationToAdd);
+                imageUrl = credentials.ImageUrl ?? chatDataProvider.GetGroupPictureUrl();
             }
 
-            await usersConversationsRepository.Add(credentials.CreatorId, ConversationToAdd.Id);
+            var ConversationToAdd = new ConversationDataModel()
+            {
+                IsGroup = credentials.IsGroup,
+                Name = credentials.IsGroup ? credentials.ConversationName : null,
+                FullImageUrl = imageUrl,
+                ThumbnailUrl = imageUrl,
+                Creator = user,
+                IsPublic = credentials.IsPublic,
+                IsSecure = credentials.IsSecure,
+                PublicKeyId = dhPublicKey.Id
+            };
+
+            await conversationRepository.Add(ConversationToAdd);
+
+            try
+            {
+                if (!credentials.IsGroup)
+                {
+                    await usersConversationsRepository.Add(credentials.DialogUserId, ConversationToAdd.Id);
+                }
+
+                await usersConversationsRepository.Add(credentials.CreatorId, ConversationToAdd.Id);
+            }
+            catch (Exception ex)
+            {
+                conversationRepository.Remove(ConversationToAdd);
+
+                throw new InvalidDataException("Couldn't create group/dialog. Probably there exists one already.", ex);
+            }
 
             return ConversationToAdd.ToConversationTemplate(
                 await GetParticipants(new GetParticipantsApiModel() { ConvId = ConversationToAdd.Id }),
