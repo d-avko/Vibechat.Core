@@ -17,6 +17,7 @@ import { Injectable } from "@angular/core";
 import { SecureChatsService } from "../Encryption/SecureChatsService";
 import { E2EencryptionService } from "../Encryption/E2EencryptionService";
 import { DHServerKeyExchangeService } from "../Encryption/DHServerKeyExchange";
+import { MessageReportingService } from "./MessageReportingService";
 
 @Injectable({
   providedIn: 'root'
@@ -29,6 +30,7 @@ export class ChatsService {
     private connectionManager: ConnectionManager,
     private secureChatsService: SecureChatsService,
     private encryptionService: E2EencryptionService,
+    private messagesService: MessageReportingService,
     private dh: DHServerKeyExchangeService)
   {
     this.connectionManager.setConversationsService(this);
@@ -57,10 +59,36 @@ export class ChatsService {
     this.CurrentConversation = conversation;
 
     await this.UpdateExisting(conversation);
+
+    //creator should wait until other user is online, and initiate key exchange.
+    if (conversation.isSecure && !conversation.authKeyId && conversation.creator.id == this.authService.User.id) {
+
+      if (!conversation.dialogueUser.isOnline) {
+
+        if (!this.connectionManager.SubsribeToUserOnlineStatusChanges(conversation.dialogueUser.id)) {
+          this.messagesService.OnFailedToSubsribeToUserStatusChanges();
+        } else {
+          this.messagesService.OnWaitingForUserToComeOnline()
+        }
+
+      } else {
+
+        this.dh.InitiateKeyExchange(conversation);
+
+      }
+
+    }
   }
 
   public OnUserOnline(user: string) {
-    //find secure chat, initiate key exchange.
+    let dialog = this.FindDialogWithById(user);
+
+    if (!dialog) {
+      return;
+    }
+
+    this.dh.InitiateKeyExchange(dialog);
+    this.connectionManager.UnsubsribeFromUserOnlineStatusChanges(user);
   }
 
   public async FindGroupsByName(name: string) {
@@ -452,9 +480,13 @@ export class ChatsService {
     return this.Conversations.find(x => !x.isGroup && x.dialogueUser.id == user.id);
   }
 
+  public FindDialogWithById(userId: string) {
+    return this.Conversations.find(x => !x.isGroup && x.dialogueUser.id == userId);
+  }
+
   public FindDialogWithSecurityCheck(user: UserInfo, secure: boolean) {
     return this.Conversations.find(x =>
-      !x.isGroup
+        !x.isGroup
         && x.dialogueUser.id == user.id
         && x.isSecure == secure);
   }
@@ -595,13 +627,6 @@ export class ChatsService {
 
       this.Conversations = [...this.Conversations, data.conversation];
 
-      if (data.conversation.isSecure && data.conversation.creator.id == this.authService.User.id) {
-
-        if (data.conversation.dialogueUser.isOnline) {
-          this.dh.InitiateKeyExchange(data.conversation);
-        }
-      }
-
     }
 
     //update data about this conversation.
@@ -611,17 +636,17 @@ export class ChatsService {
 
   public OnRemovedFromGroup(data: RemovedFromGroupModel) {
     let chatIndex = this.Conversations.findIndex(x => x.conversationID == data.conversationId);
-
+    
     if (chatIndex == -1) {
       return;
     }
 
 
-   // if the client received an answer to an API call to remove secure chats with lost
-  //keys quickly enough, do not delete chats twice.
-    if (this.Conversations[chatIndex].isSecure) {
-      return;
-    }
+  // // if the client received an answer to an API call to remove secure chats with lost
+  ////keys quickly enough, do not delete chats twice.
+  //  if (this.Conversations[chatIndex].isSecure) {
+  //    return;
+  //  }
 
     //either this client left or creator removed him.
     if (data.userId == this.authService.User.id) {

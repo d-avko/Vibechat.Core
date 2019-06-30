@@ -103,17 +103,35 @@ namespace VibeChat.Web
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task SubsribeToUserOnlineStatusChanges(string userId)
+        public async Task<bool> SubsribeToUserOnlineStatusChanges(string userId)
         {
-            var whoSentId = userProvider.GetUserId(Context);
-            subsriptionService.AddSubsriber(userId, whoSentId);
+            try
+            {
+                var whoSentId = userProvider.GetUserId(Context);
+                subsriptionService.AddSubsriber(userId, whoSentId);
+                return true;
+            }
+            catch (Exception)
+            {
+
+                return false;
+            }
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task UnsubsribeFromUserOnlineStatusChanges(string userId)
+        public async Task<bool> UnsubsribeFromUserOnlineStatusChanges(string userId)
         {
-            var whoSentId = userProvider.GetUserId(Context);
-            subsriptionService.RemoveSubsriber(userId, whoSentId);
+            try
+            {
+                var whoSentId = userProvider.GetUserId(Context);
+                subsriptionService.RemoveSubsriber(userId, whoSentId);
+                return true;
+            }
+            catch (Exception)
+            {
+
+                return false;
+            }
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]

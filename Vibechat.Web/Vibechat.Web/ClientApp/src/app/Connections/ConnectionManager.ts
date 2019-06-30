@@ -109,11 +109,11 @@ export class ConnectionManager {
   }
 
   public SubsribeToUserOnlineStatusChanges(user: string) {
-    this.connection.send("SubsribeToUserOnlineStatusChanges", user);
+    return this.connection.invoke<boolean>("SubsribeToUserOnlineStatusChanges", user);
   }
 
   public UnsubsribeFromUserOnlineStatusChanges(user: string) {
-    this.connection.send("SubsribeToUserOnlineStatusChanges", user);
+    return this.connection.invoke<boolean>("SubsribeToUserOnlineStatusChanges", user);
   }
 
   public AddUserToConversation(userId: string, conversation: ConversationTemplate) {

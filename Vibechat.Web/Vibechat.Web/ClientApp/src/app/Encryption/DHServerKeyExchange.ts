@@ -72,6 +72,9 @@ export class DHServerKeyExchangeService {
 
     entry.value.busy = true;
     this.connectionManager.SendDhParam(toSend, conversation.dialogueUser.id, conversation.conversationID);
+
+    //if user is not really online or cannot accept incoming requests, allow resending the params.
+    setTimeout(() => entry.value.busy = false, 2000);
   }
 
 
@@ -116,4 +119,5 @@ export class DHServerKeyExchangeService {
     this.secureChatsService.StoreAuthKey(authKey, chat.dialogueUser.id);
     entry.value.busy = false;
   }
+
 }
