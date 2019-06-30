@@ -20,6 +20,7 @@ import { ChatsService } from "../Services/ConversationsService";
 import { ThemesService } from "../Theming/ThemesService";
 import { ChooseContactDialogComponent } from "../Dialogs/ChooseContactDialog";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
+import { UAParser } from "ua-parser-js";
 
 @Component({
   selector: 'chat-root',
@@ -58,6 +59,8 @@ export class ChatComponent implements OnInit {
     private themesService: ThemesService,
     private snackBar: SnackBarHelper) { }
 
+  public isSecureChatsSupported: boolean = false;
+
   async ngOnInit(): Promise<void> {
     await this.auth.TryAuthenticate();
 
@@ -66,6 +69,43 @@ export class ChatComponent implements OnInit {
     await this.usersService.UpdateUserInfo(this.auth.User.id);
 
     await this.usersService.UpdateContacts();
+
+    let browserInfo = new UAParser().getBrowser();
+    let name = browserInfo.name;
+    let versionNumber = Number.parseInt(browserInfo.version.substr(0, browserInfo.version.indexOf(".")));
+
+    switch (name) {
+      case "Chrome": {
+
+        if (versionNumber >= 67) {
+          this.isSecureChatsSupported = true;
+        }
+      }
+      case "Mozilla": {
+        if (versionNumber >= 68) {
+          this.isSecureChatsSupported = true;
+        }
+      }
+      case "Firefox": {
+        if (versionNumber >= 68) {
+          this.isSecureChatsSupported = true;
+        }
+      }
+      case "Opera": {
+        if (versionNumber >= 54) {
+          this.isSecureChatsSupported = true;
+        }
+      }
+      case "Android Browser": {
+        if (versionNumber >= 67) {
+          this.isSecureChatsSupported = true;
+        }
+      }
+      default: {
+        
+      }
+    }
+
   }
 
   public IsDarkTheme() {
