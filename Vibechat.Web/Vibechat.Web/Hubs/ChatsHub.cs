@@ -25,7 +25,7 @@ namespace VibeChat.Web
 
         private ICustomHubUserIdProvider userProvider { get; set; }
 
-        private UsersInfoService userService { get; set; }
+        private UsersService userService { get; set; }
 
         private ChatService chatsService { get; set; }
         public BansService bansService { get; }
@@ -34,7 +34,7 @@ namespace VibeChat.Web
 
         public ChatsHub(
             ICustomHubUserIdProvider userProvider, 
-            UsersInfoService userService,
+            UsersService userService,
             ChatService chatsService,
             BansService bansService,
             ILogger<ChatsHub> logger,

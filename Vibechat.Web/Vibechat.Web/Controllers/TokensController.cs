@@ -18,9 +18,9 @@ namespace Vibechat.Web.Controllers
     {
         protected ITokenValidator tokensValidator { get; set; }
 
-        protected UsersInfoService userService { get; set; }
+        protected UsersService userService { get; set; }
 
-        public TokensController(ITokenValidator tokensValidator, UsersInfoService userService)
+        public TokensController(ITokenValidator tokensValidator, UsersService userService)
         {
             this.tokensValidator = tokensValidator;
             this.userService = userService;

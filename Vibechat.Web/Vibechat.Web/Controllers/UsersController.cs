@@ -18,11 +18,11 @@ namespace VibeChat.Web.Controllers
 {
     public class UsersController : Controller
     {
-        protected UsersInfoService mUsersService;
+        protected UsersService mUsersService;
 
         public BansService BansService { get; }
 
-        public UsersController(UsersInfoService mDbService, BansService bansService)
+        public UsersController(UsersService mDbService, BansService bansService)
         {
             this.mUsersService = mDbService;
             BansService = bansService;
