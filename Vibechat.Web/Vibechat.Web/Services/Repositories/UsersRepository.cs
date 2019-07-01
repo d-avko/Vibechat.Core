@@ -123,7 +123,7 @@ namespace Vibechat.Web.Services.Repositories
         {
             var user = await GetById(userId);
             user.UserName = newName;
-            await mContext.SaveChangesAsync();
+            await mUserManager.UpdateAsync(user);
         }
 
         public async Task<string> GetRefreshToken(string userId)

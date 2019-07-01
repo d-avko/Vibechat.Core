@@ -121,6 +121,16 @@ export class UsersService {
     this.auth.User.name = name;
   }
 
+  public async ChangeUsername(name: string) {
+    let result = await this.requestsBuilder.ChangeUsername(name);
+
+    if (!result.isSuccessfull) {
+      return;
+    }
+
+    this.auth.User.userName = name;
+  }
+
   public async UpdateProfilePicture(file: File) {
     let result = await this.requestsBuilder.UploadUserProfilePicture(file);
 

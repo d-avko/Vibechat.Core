@@ -135,6 +135,13 @@ export class ApiRequestsBuilder {
     ).toPromise();
   }
 
+  public ChangeUsername(newName: string): Promise<ServerResponse<boolean>> {
+    return this.MakeCall<boolean>(
+      { newName: newName },
+      'api/Users/ChangeUsername'
+    ).toPromise();
+  }
+
   public FindUsersByUsername(username: string): Promise<ServerResponse<FoundUsersResponse>> {
     return this.MakeCall<FoundUsersResponse>(
       { UsernameToFind: username },
