@@ -12,9 +12,9 @@ namespace Vibechat.Web.Services.Repositories
     {
         private ApplicationDbContext mContext { get; set; }
 
-        private UserManager<UserInApplication> mUserManager { get; set; }
+        private UserManager<AppUser> mUserManager { get; set; }
 
-        public UsersRepository(ApplicationDbContext dbContext, UserManager<UserInApplication> mUserManager)
+        public UsersRepository(ApplicationDbContext dbContext, UserManager<AppUser> mUserManager)
         {
             this.mContext = dbContext;
             this.mUserManager = mUserManager;
@@ -22,7 +22,7 @@ namespace Vibechat.Web.Services.Repositories
 
         public async Task MakeUserOnline(string userId, string signalRConnectionId)
         {
-            UserInApplication user = await GetById(userId);
+            AppUser user = await GetById(userId);
 
             user.IsOnline = true;
 
@@ -35,7 +35,7 @@ namespace Vibechat.Web.Services.Repositories
 
         public async Task MakeUserOnline(string userId)
         {
-            UserInApplication user = await GetById(userId);
+            AppUser user = await GetById(userId);
 
             user.IsOnline = true;
 
@@ -55,32 +55,42 @@ namespace Vibechat.Web.Services.Repositories
             await mContext.SaveChangesAsync();
         }
 
-        public async Task<UserInApplication> GetById(string id)
+        public async Task<AppUser> GetById(string id)
         {
             return await mUserManager.FindByIdAsync(id);
         }
 
-        public async Task<UserInApplication> GetByEmail(string email)
+        public async Task<AppUser> GetByEmail(string email)
         {
             return await mUserManager.FindByEmailAsync(email);
         }
 
-        public async Task<UserInApplication> GetByUsername(string username)
+        public async Task<AppUser> GetByUsername(string username)
         {
             return await mUserManager.FindByNameAsync(username);
         }
 
-        public async Task<bool> CheckPassword(string password, UserInApplication user)
+        public async Task<bool> CheckPassword(string password, AppUser user)
         {
            return await mUserManager.CheckPasswordAsync(user, password);
         }
 
-        public async Task<IdentityResult> CreateUser(UserInApplication user, string password)
+        public async Task<IdentityResult> CreateUser(AppUser user, string password)
         {
             return await mUserManager.CreateAsync(user, password);
         }
 
-        public async Task<IQueryable<UserInApplication>> FindByUsername(string username)
+        public async Task<IdentityResult> CreateUser(AppUser user)
+        {
+            return await mUserManager.CreateAsync(user);
+        }
+
+        public async Task<IdentityResult> DeleteUser(AppUser user)
+        {
+            return await mUserManager.DeleteAsync(user);
+        }
+
+        public async Task<IQueryable<AppUser>> FindByUsername(string username)
         {
             return mUserManager
                 .Users
@@ -106,6 +116,13 @@ namespace Vibechat.Web.Services.Repositories
         {
             var user = await GetById(userId);
             user.LastName = newName;
+            await mContext.SaveChangesAsync();
+        }
+
+        public async Task ChangeUsername(string newName, string userId)
+        {
+            var user = await GetById(userId);
+            user.UserName = newName;
             await mContext.SaveChangesAsync();
         }
 

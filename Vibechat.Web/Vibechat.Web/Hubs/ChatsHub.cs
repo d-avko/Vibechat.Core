@@ -137,7 +137,7 @@ namespace VibeChat.Web
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task AddToGroup(string userId, ConversationTemplate conversation)
         {
-            UserInApplication whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
+            AppUser whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
             await userService.MakeUserOnline(whoSent.Id, Context.ConnectionId);
 
             try
@@ -175,7 +175,7 @@ namespace VibeChat.Web
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task RemoveConversation(ConversationTemplate conversation)
         {
-            UserInApplication whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
+            AppUser whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
             await userService.MakeUserOnline(whoSent.Id, Context.ConnectionId);
 
             try
@@ -187,7 +187,7 @@ namespace VibeChat.Web
 
                     foreach (UserInfo user in participants)
                     {
-                        UserInApplication userToSend = await userService.GetUserById(user.Id);
+                        AppUser userToSend = await userService.GetUserById(user.Id);
 
                         if (userToSend.IsOnline)
                         {
@@ -197,7 +197,7 @@ namespace VibeChat.Web
                 }
                 else
                 {
-                    UserInApplication userToSend = await userService.GetUserById(conversation.DialogueUser.Id);
+                    AppUser userToSend = await userService.GetUserById(conversation.DialogueUser.Id);
 
                     if (userToSend.IsOnline)
                     {
@@ -219,7 +219,7 @@ namespace VibeChat.Web
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task CreateDialog(UserInfo user, bool secure)
         {
-            UserInApplication whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
+            AppUser whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
             await userService.MakeUserOnline(whoSent.Id, Context.ConnectionId);
 
             try
@@ -239,7 +239,7 @@ namespace VibeChat.Web
                         IsSecure = secure
                     });
 
-                UserInApplication userToSend = await userService.GetUserById(user.Id);
+                AppUser userToSend = await userService.GetUserById(user.Id);
 
                 if (whoSent.IsOnline)
                 {
@@ -265,7 +265,7 @@ namespace VibeChat.Web
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task ConnectToGroups(List<int> groupIds)
         {
-            UserInApplication whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
+            AppUser whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
 
             foreach (var groupId in groupIds)
             {
@@ -281,7 +281,7 @@ namespace VibeChat.Web
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task MessageRead(int msgId, int conversationId)
         {
-            UserInApplication whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
+            AppUser whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
 
             try
             {
@@ -307,7 +307,7 @@ namespace VibeChat.Web
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task SendMessageToGroup(Message message, int groupId)
         {
-            UserInApplication whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
+            AppUser whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
             await userService.MakeUserOnline(whoSent.Id, Context.ConnectionId);
 
             try
@@ -358,7 +358,7 @@ namespace VibeChat.Web
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task SendMessageToUser(Message message, string UserToSendId, int conversationId)
         {
-            UserInApplication whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
+            AppUser whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
             await userService.MakeUserOnline(whoSent.Id, Context.ConnectionId);
 
             try
@@ -415,7 +415,7 @@ namespace VibeChat.Web
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task SendSecureMessage(string encryptedMessage, int generatedMessageId, string userId, int conversationId)
         {
-            UserInApplication whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
+            AppUser whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
             await userService.MakeUserOnline(whoSent.Id, Context.ConnectionId);
 
             try

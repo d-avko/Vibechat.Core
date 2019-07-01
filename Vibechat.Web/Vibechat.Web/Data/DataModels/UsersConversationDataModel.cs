@@ -10,7 +10,7 @@ namespace VibeChat.Web
         public int ChatID { get; set; }
 
         [ForeignKey("UserID")]
-        public virtual UserInApplication User { get; set; }
+        public virtual AppUser User { get; set; }
 
         [ForeignKey("ChatID")]
         public virtual ConversationDataModel Conversation { get; set; }

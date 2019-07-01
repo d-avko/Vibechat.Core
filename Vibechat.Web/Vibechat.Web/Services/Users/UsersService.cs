@@ -63,7 +63,7 @@ namespace Vibechat.Web.Services.Users
 
         public async Task<List<UserInfo>> GetContacts(string callerId)
         {
-            UserInApplication caller = await usersRepository.GetById(callerId);
+            AppUser caller = await usersRepository.GetById(callerId);
 
             if (caller == null)
             {
@@ -115,7 +115,7 @@ namespace Vibechat.Web.Services.Users
             await usersRepository.ChangeLastName(newName, whoCalled);
         }
 
-        public async Task<UserInApplication> GetUserById(string userId)
+        public async Task<AppUser> GetUserById(string userId)
         {
             if (userId == null)
             {

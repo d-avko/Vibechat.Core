@@ -39,7 +39,7 @@ namespace Vibechat.Web.Services.Bans
             }
 
             ConversationDataModel conversation = ConversationRepository.GetById(conversationId);
-            UserInApplication banned = await UsersRepository.GetById(userToBanId);
+            AppUser banned = await UsersRepository.GetById(userToBanId);
 
             if (conversation.Creator.Id != whoAccessedId)
             {
@@ -73,8 +73,8 @@ namespace Vibechat.Web.Services.Bans
                 throw new FormatException("Can't ban yourself.");
             }
 
-            UserInApplication bannedBy = await UsersRepository.GetById(whoAccessedId);
-            UserInApplication banned = await UsersRepository.GetById(UserToBanId);
+            AppUser bannedBy = await UsersRepository.GetById(whoAccessedId);
+            AppUser banned = await UsersRepository.GetById(UserToBanId);
             
             if (banned == null || bannedBy == null)
             {
@@ -143,7 +143,7 @@ namespace Vibechat.Web.Services.Bans
             }
 
             ConversationDataModel conversation = ConversationRepository.GetById(conversationId);
-            UserInApplication banned = await UsersRepository.GetById(userToUnbanId);
+            AppUser banned = await UsersRepository.GetById(userToUnbanId);
 
             if (conversation.Creator.Id != whoAccessedId)
             {

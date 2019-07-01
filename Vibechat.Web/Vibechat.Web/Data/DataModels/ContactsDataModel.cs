@@ -15,9 +15,9 @@ namespace Vibechat.Web.Data.DataModels
         public string SecondUserID { get; set; }
 
         [ForeignKey("FirstUserID")]
-        public virtual UserInApplication User { get; set; }
+        public virtual AppUser User { get; set; }
 
         [ForeignKey("SecondUserID")]
-        public virtual UserInApplication Contact { get; set; }
+        public virtual AppUser Contact { get; set; }
     }
 }

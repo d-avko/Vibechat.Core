@@ -19,7 +19,7 @@ namespace Vibechat.Web.Services.Repositories
             this.mContext = dbContext;
         }
 
-        public async Task<MessageDataModel> Add(UserInApplication whoSent, Message message, int groupId, MessageDataModel forwardedMessage)
+        public async Task<MessageDataModel> Add(AppUser whoSent, Message message, int groupId, MessageDataModel forwardedMessage)
         {
             var addedMessage = mContext.Messages.Add(new MessageDataModel()
             {
@@ -37,7 +37,7 @@ namespace Vibechat.Web.Services.Repositories
             return addedMessage.Entity;
         }
 
-        public async Task<MessageDataModel> AddSecureMessage(UserInApplication whoSent, string message, int groupId)
+        public async Task<MessageDataModel> AddSecureMessage(AppUser whoSent, string message, int groupId)
         {
             var addedMessage = mContext.Messages.Add(new MessageDataModel()
             {
@@ -55,7 +55,7 @@ namespace Vibechat.Web.Services.Repositories
         }
 
         public async Task<MessageDataModel> AddAttachment(
-            UserInApplication whoSent,
+            AppUser whoSent,
             MessageAttachmentDataModel attachment,
             Message message,
             int groupId)

@@ -14,7 +14,7 @@ namespace Vibechat.Web.Extensions
 {
     public static class Extensions
     {
-        public static UserInfo ToUserInfo(this UserInApplication user)
+        public static UserInfo ToUserInfo(this AppUser user)
         {
             return new UserInfo()
             {
@@ -56,7 +56,7 @@ namespace Vibechat.Web.Extensions
             this ConversationDataModel value, 
             List<UserInfo> participants,
             List<Message> messages,
-            UserInApplication dialogUser,
+            AppUser dialogUser,
             DhPublicKeyDataModel key)
         {
             return new ConversationTemplate()

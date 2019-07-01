@@ -35,22 +35,16 @@
           </mat-form-field>
 
           <mat-form-field class="register_input">
-            <mat-label>E-mail:</mat-label>
+            <mat-label>Phone number:</mat-label>
+            <input matInput formControlName="phoneNumber" required>
+            <mat-error>Required</mat-error>
+          </mat-form-field>
+
+          <!--<mat-form-field class="register_input">
+            <mat-label>Email:</mat-label>
             <input matInput formControlName="email" required>
             <mat-error>Required</mat-error>
-          </mat-form-field>
-
-          <mat-form-field class="register_input">
-            <mat-label>Password</mat-label>
-            <input type="password" matInput formControlName="password" required>
-            <mat-error>Required</mat-error>
-          </mat-form-field>
-
-          <mat-form-field class="register_input">
-            <mat-label>Confirm Password</mat-label>
-            <input type="password" matInput formControlName="confirmPassword" required>
-            <mat-error>Required</mat-error>
-          </mat-form-field>
+          </mat-form-field>-->
 
           <div class="validate_wrapper">
             <button [disabled]="! canRegister" class="button" mat-flat-button color="primary" (click)="Register()">Register</button>

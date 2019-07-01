@@ -36,18 +36,18 @@ export class ApiRequestsBuilder {
     this.logger = logger;
   }
 
-  public LoginRequest(credentials: LoginRequest): Observable<ServerResponse<LoginResponse>>{
+  public LoginRequest(credentials: LoginRequest): Promise<ServerResponse<LoginResponse>>{
     return this.MakeCall<LoginResponse>(
       credentials,
       'api/login'
-    );
+    ).toPromise();
   }
 
-  public RegisterRequest(credentials: RegisterRequest): Observable<ServerResponse<string>> {
+  public RegisterRequest(credentials: RegisterRequest): Promise<ServerResponse<string>> {
     return this.MakeCall<string>(
       credentials,
       'api/register'
-    );
+    ).toPromise();
   }
 
   public UpdateConversationsRequest(): Promise<ServerResponse<Array<ConversationTemplate>>> {

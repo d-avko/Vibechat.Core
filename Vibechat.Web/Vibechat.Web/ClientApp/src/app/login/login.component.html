@@ -1,4 +1,4 @@
-<div class="login_cardwrapper">
+<div class="login_cardwrapper" id="main">
 
   <div class="login_head">
 
@@ -17,21 +17,37 @@
 
         <div class="validate_fieldswrapper">
           <mat-form-field appearance="outline">
-            <mat-label>Username or e-mail:</mat-label>
-            <input matInput [formControl]="usernameOrEmail" required>
+            <mat-label>Phone number:</mat-label>
+            <input matInput [formControl]="phoneNumber" required>
             <mat-error>Required</mat-error>
           </mat-form-field>
 
+        </div>
+
+        <div *ngIf="isCodeSent" class="validate_fieldswrapper">
           <mat-form-field appearance="outline">
-            <mat-label>Password</mat-label>
-            <input type="password" matInput [formControl]="password" required>
+            <mat-label>Code from SMS:</mat-label>
+            <input matInput [formControl]="smsCode" required>
             <mat-error>Required</mat-error>
           </mat-form-field>
 
         </div>
 
         <div class="validate_wrapper">
-          <button [disabled]="! canLogIn" class="button" mat-flat-button color="primary" (click)="Login()">Login</button>
+          <button *ngIf="! isCodeSent"
+                  [disabled]="! canLogIn"
+                  class="button"
+                  id="sign-in-button"
+                  mat-flat-button
+                  color="primary"
+                  (click)="SendCode()">Send code</button>
+
+          <button *ngIf="isCodeSent"
+                  [disabled]="! canLogIn"
+                  class="button"
+                  mat-flat-button color="primary"
+                  (click)="SignIn()">Sign in</button>
+
           <button class="button" (click)="GotoRegisterPage()" mat-flat-button color="primary">Register</button>
         </div>
 

@@ -37,7 +37,7 @@ namespace Vibechat.Web.Services.Repositories
             mContext.SaveChanges();
         }
 
-        public async Task<IQueryable<ConversationDataModel>> SearchByName(string name, UserInApplication whoSearches, IUsersConversationsRepository participantsProvider)
+        public async Task<IQueryable<ConversationDataModel>> SearchByName(string name, AppUser whoSearches, IUsersConversationsRepository participantsProvider)
         {
             var result = mContext
                 .Conversations
@@ -51,7 +51,7 @@ namespace Vibechat.Web.Services.Repositories
                 // search only for conversations where 'whoSearches' doesn't exist.
                 if (participantsProvider
                 .GetConversationParticipants(conversation.Id)
-                .FirstOrDefault(x => x.Id == whoSearches.Id) == default(UserInApplication))
+                .FirstOrDefault(x => x.Id == whoSearches.Id) == default(AppUser))
                 {
                     finalResult.Add(conversation);
                 }

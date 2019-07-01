@@ -28,36 +28,35 @@ export class RegisterComponent extends LoginComponent {
     this.registerGroup = new FormGroup(
       {
         username: new FormControl('', Validators.required),
-        email: new FormControl(''),
-        password: new FormControl('', Validators.required),
-        confirmPassword: new FormControl('', Validators.required),
+        phoneNumber: new FormControl(''),
         firstName: new FormControl(''),
-        lastName: new FormControl('')
+        lastName: new FormControl('')//,
+       // email: new FormControl('')
       }
     )
   }
 
-  public Register(): void {
-    let password = this.registerGroup.get('password').value;
-    let confirmedPassword = this.registerGroup.get('confirmPassword').value;
+  public async Register() {
+    let phoneNumber: string = this.registerGroup.get('phoneNumber').value;
 
-    if (password != confirmedPassword) {
-      this.snackbar.openSnackBar("Passwords must match!");
-      return;
+    if (!phoneNumber.startsWith("+")) {
+      phoneNumber = "+" + phoneNumber;
     }
 
     let credentials = new RegisterRequest(
       {
         UserName: this.registerGroup.get('username').value,
-        Password: password,
-        Email: this.registerGroup.get('email').value,
+        PhoneNumber: this.registerGroup.get('phoneNumber').value,
         FirstName: this.registerGroup.get('firstName').value,
-        LastName: this.registerGroup.get('lastName').value,
+        LastName: this.registerGroup.get('lastName').value//,
+        //Email: this.registerGroup.get('email').value
       });
 
     this.canRegister = false;
 
-    this.requestsBuilder.RegisterRequest(credentials).subscribe(result => this.OnRegisterResultReceived(result));
+    let response = await this.requestsBuilder.RegisterRequest(credentials);
+
+    this.OnRegisterResultReceived(response);
   }
 
   public GotoLoginScreen() {
@@ -65,10 +64,7 @@ export class RegisterComponent extends LoginComponent {
   }
 
   private OnRegisterResultReceived(result: ServerResponse<string>) {
-    if (!result.isSuccessfull) {
-      this.snackbar.openSnackBar(result.errorMessage);
-    }
-    else {
+    if (result.isSuccessfull) {
       this.snackbar.openSnackBar("Successfully registered.");
     }
 

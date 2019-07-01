@@ -21,7 +21,7 @@ namespace Vibechat.Web.Services.Repositories
             return mContext.ConversationsBans.FirstOrDefault(x => x.UserID == userId && x.ChatID == conversationId);
         }
 
-        public void BanUserInGroup(UserInApplication banned, ConversationDataModel where)
+        public void BanUserInGroup(AppUser banned, ConversationDataModel where)
         {
             mContext.ConversationsBans.Add(new ConversationsBansDataModel() { BannedUser = banned, Conversation = where });
             mContext.SaveChanges();
@@ -33,7 +33,7 @@ namespace Vibechat.Web.Services.Repositories
             mContext.SaveChanges();
         }
 
-        public bool IsBanned(UserInApplication who, int whereId)
+        public bool IsBanned(AppUser who, int whereId)
         {
             return mContext.ConversationsBans.Any(x => x.ChatID == whereId && x.UserID == who.Id);
         }

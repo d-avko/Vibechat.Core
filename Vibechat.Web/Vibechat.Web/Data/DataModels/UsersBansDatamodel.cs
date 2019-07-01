@@ -14,9 +14,9 @@ namespace Vibechat.Web.Data.DataModels
         public string BannedByID { get; set; }
 
         [ForeignKey("BannedID")]
-        public virtual UserInApplication BannedUser { get; set; }
+        public virtual AppUser BannedUser { get; set; }
 
         [ForeignKey("BannedByID")]
-        public virtual UserInApplication BannedBy { get; set; }
+        public virtual AppUser BannedBy { get; set; }
     }
 }

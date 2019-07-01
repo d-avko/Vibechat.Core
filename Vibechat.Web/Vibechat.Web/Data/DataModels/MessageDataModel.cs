@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using VibeChat.Web.Data.DataModels;
 
 namespace VibeChat.Web
@@ -20,7 +21,7 @@ namespace VibeChat.Web
 
         public MessageState State { get; set; }
 
-        public UserInApplication User { get; set; }
+        public AppUser User { get; set; }
 
         //content of a message: text
 
@@ -35,6 +36,9 @@ namespace VibeChat.Web
         //Id of a conversation where this message was sent 
         
         public int ConversationID { get; set; }
+
+        [ForeignKey("ConversationID")]
+        public virtual ConversationDataModel Chat { get; set; }
 
         //time when this message was received
         public DateTime TimeReceived { get; set; }
