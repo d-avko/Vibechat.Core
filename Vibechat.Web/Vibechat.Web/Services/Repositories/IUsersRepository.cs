@@ -7,13 +7,18 @@ namespace Vibechat.Web.Services.Repositories
 {
     public interface IUsersRepository
     {
-        Task<bool> CheckPassword(string password, UserInApplication user);
+        Task<bool> CheckPassword(string password, AppUser user);
 
-        Task<IdentityResult> CreateUser(UserInApplication user, string password);
-        Task<IQueryable<UserInApplication>> FindByUsername(string username);
-        Task<UserInApplication> GetByUsername(string username);
-        Task<UserInApplication> GetByEmail(string email);
-        Task<UserInApplication> GetById(string id);
+        Task<IdentityResult> CreateUser(AppUser user, string password);
+
+        Task<IdentityResult> CreateUser(AppUser user);
+
+        Task<IdentityResult> DeleteUser(AppUser user);
+
+        Task<IQueryable<AppUser>> FindByUsername(string username);
+        Task<AppUser> GetByUsername(string username);
+        Task<AppUser> GetByEmail(string email);
+        Task<AppUser> GetById(string id);
         Task MakeUserOffline(string userId);
         Task MakeUserOnline(string userId, string signalRConnectionId);
 

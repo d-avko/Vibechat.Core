@@ -95,7 +95,7 @@ export class ChatComponent implements OnInit {
         if (versionNumber >= 54) {
           this.isSecureChatsSupported = true;
         }
-      }
+      } 
       case "Android Browser": {
         if (versionNumber >= 67) {
           this.isSecureChatsSupported = true;

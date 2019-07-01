@@ -3,6 +3,6 @@ export class LoginRequest {
     (<any>Object).assign(this, init);
   }
 
-  public UserNameOrEmail: string;
-  public Password: string
+  public UidToken: string;
+  public PhoneNumber: string;
 }

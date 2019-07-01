@@ -16,7 +16,7 @@ namespace Vibechat.Web.Services.Repositories
             this.mContext = dbContext;
         }
 
-        public void BanUser(UserInApplication banned, UserInApplication bannedBy)
+        public void BanUser(AppUser banned, AppUser bannedBy)
         {
             mContext.UsersBans.Add(new UsersBansDatamodel() { BannedBy = bannedBy, BannedUser = banned });
             mContext.SaveChanges();

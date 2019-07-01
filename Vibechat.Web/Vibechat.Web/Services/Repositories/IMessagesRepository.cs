@@ -10,8 +10,8 @@ namespace Vibechat.Web.Services.Repositories
 {
     public interface IMessagesRepository
     {
-        Task<MessageDataModel> Add(UserInApplication whoSent, Message message, int groupId, MessageDataModel forwardedMessage);
-        Task<MessageDataModel> AddAttachment(UserInApplication whoSent, MessageAttachmentDataModel attachment, Message message, int groupId);
+        Task<MessageDataModel> Add(AppUser whoSent, Message message, int groupId, MessageDataModel forwardedMessage);
+        Task<MessageDataModel> AddAttachment(AppUser whoSent, MessageAttachmentDataModel attachment, Message message, int groupId);
         bool Empty();
         IQueryable<MessageDataModel> GetByIds(List<int> ids);
 
@@ -26,7 +26,7 @@ namespace Vibechat.Web.Services.Repositories
         IIncludableQueryable<MessageDataModel, MessageAttachmentDataModel> GetAttachments(
             string userId, int conversationId, string attachmentKind, int offset, int count);
 
-        Task<MessageDataModel> AddSecureMessage(UserInApplication whoSent, string message, int groupId);
+        Task<MessageDataModel> AddSecureMessage(AppUser whoSent, string message, int groupId);
 
         Task Remove(List<int> messagesIds, string whoRemovedId);
 

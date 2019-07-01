@@ -3,8 +3,7 @@ export class RegisterRequest {
     (<any>Object).assign(this, init);
   }
 
-  public Email: string;
-  public Password: string;
+  public PhoneNumber: string;
   public UserName: string;
   public FirstName: string;
   public LastName: string;

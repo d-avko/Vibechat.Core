@@ -1,3 +1,6 @@
+using FirebaseAdmin;
+using FirebaseAdmin.Auth;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -35,13 +38,13 @@ namespace Vibechat.Web
             services.AddDbContext<ApplicationDbContext>(options =>
               options.UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"]));
 
-            services.AddIdentity<UserInApplication, IdentityRole>()
+            services.AddIdentity<AppUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
             //set usermanager explicitly, to prevent SignalR hub methods from not being executed correctly.
 
-            services.AddScoped<UserManager<UserInApplication>>();
+            services.AddScoped<UserManager<AppUser>>();
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -52,9 +55,7 @@ namespace Vibechat.Web
                 options.Password.RequireLowercase = true;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireNonAlphanumeric = false;
-
-                // Make sure users have unique emails
-                options.User.RequireUniqueEmail = true;
+                options.User.RequireUniqueEmail = false;
             });
 
 
@@ -170,6 +171,11 @@ namespace Vibechat.Web
                 {
                     spa.UseAngularCliServer(npmScript: "start");
                 }
+            });
+
+            FirebaseApp.Create(new AppOptions()
+            {
+                Credential = GoogleCredential.GetApplicationDefault(),
             });
 
             serviceProvider.GetService<ApplicationDbContext>().Database.EnsureCreated();

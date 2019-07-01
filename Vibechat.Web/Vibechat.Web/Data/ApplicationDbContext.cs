@@ -6,7 +6,7 @@ using VibeChat.Web.Data.DataModels;
 
 namespace VibeChat.Web
 {
-    public class ApplicationDbContext : IdentityDbContext<UserInApplication>
+    public class ApplicationDbContext : IdentityDbContext<AppUser>
     {
 
         public DbSet<SettingsDataModel> Settings { get; set; }

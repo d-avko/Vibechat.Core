@@ -4,7 +4,7 @@ namespace Vibechat.Web.Services.Repositories
 {
     public interface IUsersBansRepository
     {
-        void BanUser(UserInApplication banned, UserInApplication bannedBy);
+        void BanUser(AppUser banned, AppUser bannedBy);
         bool IsBanned(string whoId, string byWhomId);
 
         void UnbanUser(string userId, string whoUnbansId);

@@ -112,7 +112,7 @@ namespace Vibechat.Web.Services
                 throw new FormatException("No dialogue user was provided...");
             }
 
-            UserInApplication SecondDialogueUser = null;
+            AppUser SecondDialogueUser = null;
             var dhPublicKey = new DhPublicKeyDataModel();
 
             string imageUrl;
@@ -456,7 +456,7 @@ namespace Vibechat.Web.Services
 
             foreach (ConversationDataModel conversation in conversations)
             {
-                UserInApplication DialogUser = conversation.IsGroup ? null : usersConversationsRepository.GetUserInDialog(conversation.Id, whoAccessedId);
+                AppUser DialogUser = conversation.IsGroup ? null : usersConversationsRepository.GetUserInDialog(conversation.Id, whoAccessedId);
 
                 returnData.Add
                     (
@@ -559,7 +559,7 @@ namespace Vibechat.Web.Services
                 throw new FormatException("No such conversation was found.");
             }
 
-            var dialogUser = new UserInApplication();
+            var dialogUser = new AppUser();
             var members = new List<UserInfo>();
             var messages = new List<Message>();
 
@@ -591,7 +591,7 @@ namespace Vibechat.Web.Services
                 throw new FormatException("No such conversation was found.");
             }
 
-            var dialogUser = new UserInApplication();
+            var dialogUser = new AppUser();
 
             if (!conversation.IsGroup)
             {
@@ -629,7 +629,7 @@ namespace Vibechat.Web.Services
 
         public async Task<MessageDataModel> AddMessage(Message message, int groupId, string SenderId)
         {
-            UserInApplication whoSent = await usersRepository.GetById(SenderId);
+            AppUser whoSent = await usersRepository.GetById(SenderId);
 
             if (whoSent == null)
             {
@@ -655,7 +655,7 @@ namespace Vibechat.Web.Services
 
         public async Task<MessageDataModel> AddEncryptedMessage(string message, int groupId, string SenderId)
         {
-            UserInApplication whoSent = await usersRepository.GetById(SenderId);
+            AppUser whoSent = await usersRepository.GetById(SenderId);
 
             if (whoSent == null)
             {
@@ -667,7 +667,7 @@ namespace Vibechat.Web.Services
 
         public async Task<MessageDataModel> AddAttachmentMessage(Message message, int groupId, string SenderId)
         {
-            UserInApplication whoSent = await usersRepository.GetById(SenderId);
+            AppUser whoSent = await usersRepository.GetById(SenderId);
 
             if (whoSent == null)
             {

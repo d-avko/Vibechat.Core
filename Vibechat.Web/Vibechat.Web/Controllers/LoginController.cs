@@ -49,7 +49,7 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                await loginService.RegisterNewUserAsync(userToRegister);
+                await loginService.RegisterNewUserAsync(userToRegister, false);
 
                 return new ResponseApiModel<string>()
                 {

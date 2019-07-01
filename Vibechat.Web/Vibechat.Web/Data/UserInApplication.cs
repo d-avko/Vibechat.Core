@@ -3,7 +3,7 @@ using System;
 
 namespace VibeChat.Web
 {
-    public class UserInApplication : IdentityUser
+    public class AppUser : IdentityUser
     {
         public string FirstName { get; set; }
 

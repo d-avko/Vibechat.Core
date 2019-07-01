@@ -4,12 +4,26 @@ import { Router } from "@angular/router";
 import { ServerResponse } from "../ApiModels/ServerResponse";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { Injectable } from '@angular/core';
+import * as firebase from "firebase/app";
+import "firebase/auth";
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService {
-  constructor(public router: Router, public requestsBuilder: ApiRequestsBuilder) {}
+export class AuthService  {
+  constructor(public router: Router, public requestsBuilder: ApiRequestsBuilder) {
+    var firebaseConfig = {
+      apiKey: "AIzaSyDqVFEN02Mvb2UU4bcrCDmTtDmV7RMla8E",
+      authDomain: "vibechat-ng.firebaseapp.com",
+      databaseURL: "https://vibechat-ng.firebaseio.com",
+      projectId: "vibechat-ng",
+      storageBucket: "vibechat-ng.appspot.com",
+      messagingSenderId: "105631356118",
+      appId: "1:105631356118:web:7006855db55d021e"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+  }
 
   public User: UserInfo;
 
@@ -19,13 +33,8 @@ export class AuthService {
 
   public IsAuthenticated: boolean;
 
-  public OnUserLoggedIn(credentials: LoginResponse): void {
-    this.User = credentials.info;
-    localStorage.setItem('token', credentials.token);
-    localStorage.setItem('refreshtoken', credentials.refreshToken);
-    localStorage.setItem('user', JSON.stringify(credentials.info));
-    this.IsAuthenticated = true;
-    this.token = credentials.token;
+  public SignIn() {
+
   }
 
   public async TryAuthenticate(): Promise<void> {
@@ -60,6 +69,15 @@ export class AuthService {
     }
 
     return this.requestsBuilder.RefreshJwtToken(refreshToken, this.User.id);
+  }
+
+  public OnUserLoggedIn(credentials: LoginResponse): void {
+    this.User = credentials.info;
+    localStorage.setItem('token', credentials.token);
+    localStorage.setItem('refreshtoken', credentials.refreshToken);
+    localStorage.setItem('user', JSON.stringify(credentials.info));
+    this.IsAuthenticated = true;
+    this.token = credentials.token;
   }
 
   public LogOut(): void {

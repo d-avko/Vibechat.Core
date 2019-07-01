@@ -17,7 +17,7 @@ namespace Vibechat.Web.Services.Repositories
 
         void ChangeName(ConversationDataModel entity, string name);
 
-        Task<IQueryable<ConversationDataModel>> SearchByName(string name, UserInApplication whoSearches, IUsersConversationsRepository participantsProvider);
+        Task<IQueryable<ConversationDataModel>> SearchByName(string name, AppUser whoSearches, IUsersConversationsRepository participantsProvider);
 
         Task ChangePublicState(int conversationId);
 

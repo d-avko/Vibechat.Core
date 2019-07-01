@@ -1,7 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using FirebaseAdmin;
+using FirebaseAdmin.Auth;
+using Microsoft.AspNetCore.Hosting;
+using System;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Vibechat.Web.ApiModels;
 using Vibechat.Web.Extensions;
@@ -9,7 +10,6 @@ using Vibechat.Web.Services.ChatDataProviders;
 using Vibechat.Web.Services.Repositories;
 using VibeChat.Web;
 using VibeChat.Web.ApiModels;
-using VibeChat.Web.ChatData;
 
 namespace Vibechat.Web.Services.Login
 {
@@ -29,92 +29,101 @@ namespace Vibechat.Web.Services.Login
 
         public async Task<LoginResultApiModel> LogInAsync(LoginCredentialsApiModel loginCredentials)
         {
-            var defaultError = new FormatException("Wrong username or password");
+            var auth = FirebaseAuth.GetAuth(FirebaseApp.DefaultInstance);
 
-            if ((loginCredentials?.UserNameOrEmail == null) || (string.IsNullOrWhiteSpace(loginCredentials.UserNameOrEmail)))
+            //this can throw detailed error message.
+            FirebaseToken verified = await auth.VerifyIdTokenAsync(loginCredentials.UidToken);
+
+            AppUser identityUser = await usersRepository.GetById(verified.Uid);
+
+            //user confirmed his phone number, but has not registered yet; 
+            //Register him now in that case 
+
+            if(identityUser == null)
             {
-                throw defaultError;
-            }
+                try
+                {
+                    string username = "Generated_" + Guid.NewGuid().ToString();
 
-            UserInApplication user;
+                    await RegisterNewUserAsync(new RegisterInformationApiModel()
+                    {
+                        PhoneNumber = loginCredentials.PhoneNumber,
+                        UserName = username
+                    }, true);
 
-            if (Regex.Match(loginCredentials.UserNameOrEmail, "[^@]*@[^\\.]\\.(\\w+)").Success)
-            {
-                user = await usersRepository.GetByEmail(loginCredentials.UserNameOrEmail);
+                    identityUser = await usersRepository.GetByUsername(username);
+                }
+                catch (Exception ex)
+                {
+                    throw new FormatException("Couldn't register this user.", ex);
+                }
             }
-            else
-            {
-                user = await usersRepository.GetByUsername(loginCredentials.UserNameOrEmail);
-            }
-
-            if (user == null)
-            {
-                throw defaultError;
-            }
-
-            if (!await usersRepository.CheckPassword(loginCredentials.Password, user))
-            {
-                throw defaultError;
-            }
-
-            //if we are here then have valid password and login of a user
 
             return new LoginResultApiModel()
             {
-                Info = user.ToUserInfo(),
-                Token = user.GenerateToken(),
-                RefreshToken = user.RefreshToken
+                Info = identityUser.ToUserInfo(),
+                Token = identityUser.GenerateToken(),
+                RefreshToken = identityUser.RefreshToken
             };
         }
 
-        public async Task RegisterNewUserAsync(RegisterInformationApiModel userToRegister)
+
+        public async Task RegisterNewUserAsync(RegisterInformationApiModel userToRegister, bool firebaseUserCreated)
         {
+            var auth = FirebaseAuth.GetAuth(FirebaseApp.DefaultInstance);
+
             var defaultError = new FormatException("Check the fields and try again.");
 
-            var EmailFormatError = new FormatException("Email is in wrong format!");
-
             if (userToRegister == null)
-                throw defaultError;
-
-            if (string.IsNullOrWhiteSpace(userToRegister.Email)
-                || string.IsNullOrWhiteSpace(userToRegister.Password)
-                || string.IsNullOrWhiteSpace(userToRegister.UserName))
             {
                 throw defaultError;
             }
 
-            if (userToRegister.UserName.Contains("@") || userToRegister.UserName.Contains("@"))
+            if (string.IsNullOrWhiteSpace(userToRegister.UserName))
             {
-                throw new FormatException("Nickname or Username cannot contain '@'");
+                throw defaultError;
             }
 
-            if (!Regex.Match(userToRegister.Email, "[^@]*@[^\\.]\\.(\\w+)").Success)
+            // if UserName and email is not unique
+
+            if ((await usersRepository.GetByUsername(userToRegister.UserName)) != null)
             {
-                throw EmailFormatError;
+                throw new FormatException("The username is not unique.");
             }
 
-            // if UserName and email are not unique
-
-            if (((await usersRepository.GetByUsername(userToRegister.UserName)) != null) || ((await usersRepository.GetByEmail(userToRegister.Email)) != null))
-            {
-                throw new FormatException("The username or e-mail is not unique.");
-            }
-
-            var userToCreate = new UserInApplication()
+            var userToCreate = new AppUser()
             {
                 UserName = userToRegister.UserName,
-                Email = userToRegister.Email,
                 FirstName = userToRegister.FirstName,
                 LastName = userToRegister.LastName,
                 ProfilePicImageURL = chatDataProvider.GetProfilePictureUrl(),
                 IsPublic = true
             };
 
-            var result = await usersRepository.CreateUser(userToCreate, userToRegister.Password);
+            var result = await usersRepository.CreateUser(userToCreate);
 
             if (!result.Succeeded)
             {
-                throw new FormatException(result.Errors?.ToList()[0].Description);
+                throw new FormatException(result.Errors?.ToList()[0].Description ?? "Couldn't create user because of unexpected error.");
+            }
+
+            if (!firebaseUserCreated)
+            {
+                try
+                {
+                    await auth.CreateUserAsync(new UserRecordArgs()
+                    {
+                        Uid = userToCreate.Id,
+                        PhoneNumber = userToRegister.PhoneNumber
+                    });
+                }
+                catch (Exception ex)
+                {
+                    //failed to create new user; probably wrong phone number.
+                    await usersRepository.DeleteUser(userToCreate);
+
+                    throw new FormatException("Wrong phone number was provided.", ex);
+                }
             }
 
             await usersRepository.UpdateRefreshToken(userToCreate.Id, userToCreate.GenerateRefreshToken());

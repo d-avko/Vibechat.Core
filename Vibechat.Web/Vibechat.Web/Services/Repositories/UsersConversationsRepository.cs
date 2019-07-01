@@ -23,7 +23,7 @@ namespace Vibechat.Web.Services.Repositories
         /// <param name="convId"></param>
         /// <param name="FirstUserInDialogueId"></param>
         /// <returns></returns>
-        public UserInApplication GetUserInDialog(int convId, string FirstUserInDialogueId)
+        public AppUser GetUserInDialog(int convId, string FirstUserInDialogueId)
         {
             var UsersConvs = mContext.UsersConversations
                .Include(x => x.Conversation)
@@ -46,7 +46,7 @@ namespace Vibechat.Web.Services.Repositories
                    ).Include(x => x.PublicKey);
         }
 
-        public IQueryable<UserInApplication> GetConversationParticipants(int conversationId)
+        public IQueryable<AppUser> GetConversationParticipants(int conversationId)
         {
             //Update info from db
             var usersConversations = mContext.UsersConversations
@@ -92,7 +92,7 @@ namespace Vibechat.Web.Services.Repositories
             return res.Entity;
         }
 
-        public async Task<bool> Exists(UserInApplication user, ConversationDataModel conversation)
+        public async Task<bool> Exists(AppUser user, ConversationDataModel conversation)
         {
             return await mContext
                 .UsersConversations
