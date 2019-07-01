@@ -7,7 +7,7 @@
     <mat-drawer #actionsdrawer [mode]="over">
       <div class="chatactions_flex">
 
-        <button mat-button (click)="OnViewUserInfo(this.auth.User)">
+        <button mat-button (click)="OnViewUserInfo(this.auth.User, null)">
           <div class="padding10px flexaligned">
             <mat-icon>sentiment_satisfied</mat-icon>
             <span class="padding5px">My profile</span>
@@ -55,7 +55,7 @@
 
       <mat-card-content class="chat_wrapper_content">
 
-        <div class="conversations_wrapper">
+        <div [ngClass]="{'conversations_wrapper_dark': IsDarkTheme(), 'conversations_wrapper_light': !IsDarkTheme()}">
           <div class="conversations_wrapper_searchbar">
 
             <button mat-button (click)="actionsdrawer.toggle()">
@@ -125,8 +125,12 @@
     justify-content: center;
   }
 
-  .conversations_wrapper{
+  .conversations_wrapper_light{
     border-right: 1px solid #adadad;
+  }
+
+  .conversations_wrapper_dark{
+    border-right: none;
   }
 
 </style>

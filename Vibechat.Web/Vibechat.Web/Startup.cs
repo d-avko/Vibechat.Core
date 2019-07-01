@@ -36,11 +36,13 @@ namespace Vibechat.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
-              options.UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"]));
+              options.UseNpgsql(Configuration["ConnectionStrings:DefaultConnection"]));
 
             services.AddIdentity<AppUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+
+            services.AddEntityFrameworkNpgsql();
 
             //set usermanager explicitly, to prevent SignalR hub methods from not being executed correctly.
 

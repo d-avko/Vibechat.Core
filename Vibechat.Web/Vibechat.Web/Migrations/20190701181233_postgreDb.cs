@@ -1,10 +1,10 @@
 ﻿using System;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Vibechat.Web.Migrations
 {
-    public partial class @new : Migration
+    public partial class postgreDb : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -72,7 +72,7 @@ namespace Vibechat.Web.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Modulus = table.Column<string>(nullable: true),
                     Generator = table.Column<string>(nullable: true)
                 },
@@ -99,7 +99,7 @@ namespace Vibechat.Web.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     RoleId = table.Column<string>(nullable: false),
                     ClaimType = table.Column<string>(nullable: true),
                     ClaimValue = table.Column<string>(nullable: true)
@@ -120,7 +120,7 @@ namespace Vibechat.Web.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     UserId = table.Column<string>(nullable: false),
                     ClaimType = table.Column<string>(nullable: true),
                     ClaimValue = table.Column<string>(nullable: true)
@@ -133,7 +133,7 @@ namespace Vibechat.Web.Migrations
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -153,7 +153,7 @@ namespace Vibechat.Web.Migrations
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -177,7 +177,7 @@ namespace Vibechat.Web.Migrations
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -197,7 +197,7 @@ namespace Vibechat.Web.Migrations
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -215,45 +215,13 @@ namespace Vibechat.Web.Migrations
                         column: x => x.FirstUserID,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Contacts_AspNetUsers_SecondUserID",
                         column: x => x.SecondUserID,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Messages",
-                columns: table => new
-                {
-                    MessageID = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    State = table.Column<int>(nullable: false),
-                    UserId = table.Column<string>(nullable: true),
-                    MessageContent = table.Column<string>(nullable: true),
-                    IsAttachment = table.Column<bool>(nullable: false),
-                    ForwardedMessageMessageID = table.Column<int>(nullable: true),
-                    ConversationID = table.Column<int>(nullable: false),
-                    TimeReceived = table.Column<DateTime>(nullable: false),
-                    EncryptedPayload = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Messages", x => x.MessageID);
-                    table.ForeignKey(
-                        name: "FK_Messages_Messages_ForwardedMessageMessageID",
-                        column: x => x.ForwardedMessageMessageID,
-                        principalTable: "Messages",
-                        principalColumn: "MessageID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Messages_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -271,13 +239,13 @@ namespace Vibechat.Web.Migrations
                         column: x => x.BannedByID,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_UsersBans_AspNetUsers_BannedID",
                         column: x => x.BannedID,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -285,7 +253,7 @@ namespace Vibechat.Web.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Name = table.Column<string>(nullable: true),
                     ThumbnailUrl = table.Column<string>(nullable: true),
                     FullImageUrl = table.Column<string>(nullable: true),
@@ -304,61 +272,13 @@ namespace Vibechat.Web.Migrations
                         column: x => x.CreatorId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Conversations_PublicKeys_PublicKeyId",
                         column: x => x.PublicKeyId,
                         principalTable: "PublicKeys",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Attachments",
-                columns: table => new
-                {
-                    AttachmentID = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    ContentUrl = table.Column<string>(nullable: true),
-                    AttachmentName = table.Column<string>(nullable: true),
-                    ImageWidth = table.Column<int>(nullable: false),
-                    ImageHeight = table.Column<int>(nullable: false),
-                    AttachmentKindName = table.Column<string>(nullable: true),
-                    MessageId = table.Column<int>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Attachments", x => x.AttachmentID);
-                    table.ForeignKey(
-                        name: "FK_Attachments_AttachmentKinds_AttachmentKindName",
-                        column: x => x.AttachmentKindName,
-                        principalTable: "AttachmentKinds",
-                        principalColumn: "Name",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Attachments_Messages_MessageId",
-                        column: x => x.MessageId,
-                        principalTable: "Messages",
-                        principalColumn: "MessageID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "DeletedMessages",
-                columns: table => new
-                {
-                    MessageID = table.Column<int>(nullable: false),
-                    UserId = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DeletedMessages", x => x.MessageID);
-                    table.ForeignKey(
-                        name: "FK_DeletedMessages_Messages_MessageID",
-                        column: x => x.MessageID,
-                        principalTable: "Messages",
-                        principalColumn: "MessageID",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -382,7 +302,45 @@ namespace Vibechat.Web.Migrations
                         column: x => x.UserID,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Messages",
+                columns: table => new
+                {
+                    MessageID = table.Column<int>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    State = table.Column<int>(nullable: false),
+                    UserId = table.Column<string>(nullable: true),
+                    MessageContent = table.Column<string>(nullable: true),
+                    IsAttachment = table.Column<bool>(nullable: false),
+                    ForwardedMessageMessageID = table.Column<int>(nullable: true),
+                    ConversationID = table.Column<int>(nullable: false),
+                    TimeReceived = table.Column<DateTime>(nullable: false),
+                    EncryptedPayload = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Messages", x => x.MessageID);
+                    table.ForeignKey(
+                        name: "FK_Messages_Conversations_ConversationID",
+                        column: x => x.ConversationID,
+                        principalTable: "Conversations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Messages_Messages_ForwardedMessageMessageID",
+                        column: x => x.ForwardedMessageMessageID,
+                        principalTable: "Messages",
+                        principalColumn: "MessageID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Messages_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -406,7 +364,55 @@ namespace Vibechat.Web.Migrations
                         column: x => x.UserID,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Attachments",
+                columns: table => new
+                {
+                    AttachmentID = table.Column<int>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    ContentUrl = table.Column<string>(nullable: true),
+                    AttachmentName = table.Column<string>(nullable: true),
+                    ImageWidth = table.Column<int>(nullable: false),
+                    ImageHeight = table.Column<int>(nullable: false),
+                    AttachmentKindName = table.Column<string>(nullable: true),
+                    MessageId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Attachments", x => x.AttachmentID);
+                    table.ForeignKey(
+                        name: "FK_Attachments_AttachmentKinds_AttachmentKindName",
+                        column: x => x.AttachmentKindName,
+                        principalTable: "AttachmentKinds",
+                        principalColumn: "Name",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Attachments_Messages_MessageId",
+                        column: x => x.MessageId,
+                        principalTable: "Messages",
+                        principalColumn: "MessageID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DeletedMessages",
+                columns: table => new
+                {
+                    MessageID = table.Column<int>(nullable: false),
+                    UserId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DeletedMessages", x => x.MessageID);
+                    table.ForeignKey(
+                        name: "FK_DeletedMessages_Messages_MessageID",
+                        column: x => x.MessageID,
+                        principalTable: "Messages",
+                        principalColumn: "MessageID",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
@@ -435,8 +441,7 @@ namespace Vibechat.Web.Migrations
                 name: "RoleNameIndex",
                 table: "AspNetRoles",
                 column: "NormalizedName",
-                unique: true,
-                filter: "[NormalizedName] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",
@@ -462,8 +467,7 @@ namespace Vibechat.Web.Migrations
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
-                unique: true,
-                filter: "[NormalizedUserName] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Attachments_AttachmentKindName",
@@ -474,8 +478,7 @@ namespace Vibechat.Web.Migrations
                 name: "IX_Attachments_MessageId",
                 table: "Attachments",
                 column: "MessageId",
-                unique: true,
-                filter: "[MessageId] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Contacts_SecondUserID",
@@ -496,6 +499,11 @@ namespace Vibechat.Web.Migrations
                 name: "IX_ConversationsBans_UserID",
                 table: "ConversationsBans",
                 column: "UserID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_ConversationID",
+                table: "Messages",
+                column: "ConversationID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Messages_ForwardedMessageMessageID",

@@ -111,9 +111,14 @@ namespace Vibechat.Web.Services
             {
                 throw new FormatException("No dialogue user was provided...");
             }
+            
+            if(credentials.IsGroup && credentials.ConversationName.Length > MaxNameLength)
+            {
+                throw new FormatException("Chat name was too long...");
+            }
 
             AppUser SecondDialogueUser = null;
-            var dhPublicKey = new DhPublicKeyDataModel();
+            DhPublicKeyDataModel dhPublicKey = null;
 
             string imageUrl;
 
@@ -148,7 +153,7 @@ namespace Vibechat.Web.Services
                 Creator = user,
                 IsPublic = credentials.IsPublic,
                 IsSecure = credentials.IsSecure,
-                PublicKeyId = dhPublicKey.Id,
+                PublicKeyId = dhPublicKey?.Id,
                 PublicKey = dhPublicKey
             };
 
