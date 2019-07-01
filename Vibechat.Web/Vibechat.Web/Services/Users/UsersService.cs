@@ -61,6 +61,23 @@ namespace Vibechat.Web.Services.Users
             await usersRepository.ChangeName(newName, whoCalled);
         }
 
+        public async Task ChangeUsername(string newName, string whoCalled)
+        {
+            if (newName.Length > MaxNameLength)
+            {
+                throw new FormatException("Name was too long.");
+            }
+
+            AppUser foundUser = await usersRepository.GetByUsername(newName);
+
+            if(foundUser != null)
+            {
+                throw new InvalidDataException("New username was not unique.");
+            }
+
+            await usersRepository.ChangeUsername(newName, whoCalled);
+        }
+
         public async Task<List<UserInfo>> GetContacts(string callerId)
         {
             AppUser caller = await usersRepository.GetById(callerId);

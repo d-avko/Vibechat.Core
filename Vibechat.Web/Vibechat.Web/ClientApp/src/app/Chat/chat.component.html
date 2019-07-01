@@ -107,8 +107,26 @@
 
         </div>
 
+        <h4 *ngIf="! IsConversationSelected()" class="no-chat-selected">Choose chat from the left to start chatting...</h4>
+
       </mat-card-content>
 
     </mat-drawer-content>
+
   </mat-drawer-container>
 </mat-card>
+
+<style>
+  .no-chat-selected{
+    font: 400 15px/20px Roboto,"Helvetica Neue",sans-serif;
+    width: 70%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .conversations_wrapper{
+    border-right: 1px solid #adadad;
+  }
+
+</style>

@@ -100,6 +100,22 @@ export class UserInfoDialogComponent {
     )
   }
 
+  public ChangeUsername(): void {
+    const groupInfoRef = this.dialog.open(ChangeNameDialogComponent, {
+      width: '450px'
+    });
+
+    groupInfoRef.afterClosed().subscribe(
+      async (name) => {
+        if (!name) {
+          return;
+        }
+
+        await this.usersService.ChangeUsername(name);
+      }
+    )
+  }
+
   public ChangeLastname(): void {
     const groupInfoRef = this.dialog.open(ChangeNameDialogComponent, {
       width: '450px'
