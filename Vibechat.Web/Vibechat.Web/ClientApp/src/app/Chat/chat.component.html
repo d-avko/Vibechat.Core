@@ -55,14 +55,14 @@
 
       <mat-card-content class="chat_wrapper_content">
 
-        <div [ngClass]="{'conversations_wrapper_dark': IsDarkTheme(), 'conversations_wrapper_light': !IsDarkTheme()}">
+        <div class="conversations_wrapper" [ngClass]="{'conversations_wrapper_dark': IsDarkTheme(), 'conversations_wrapper_light': !IsDarkTheme()}">
           <div class="conversations_wrapper_searchbar">
 
             <button mat-button (click)="actionsdrawer.toggle()">
               <mat-icon>more_vert</mat-icon>
             </button>
 
-            <mat-form-field style="margin-left: 5%;" appearance="standard">
+            <mat-form-field style="margin-left: 5%; width: 60%;" appearance="standard">
               <mat-label>Search</mat-label>
               <input matInput placeholder="Type in something..." type="search" [(ngModel)]="SearchString" (keydown.enter)="Search()">
               <mat-icon matSuffix>search</mat-icon>
@@ -124,6 +124,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .conversations_wrapper{
+    width: 30%;
   }
 
   .conversations_wrapper_light{

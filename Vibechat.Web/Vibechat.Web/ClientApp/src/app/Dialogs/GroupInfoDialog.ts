@@ -89,6 +89,7 @@ export class GroupInfoDialogComponent {
 
   public async UpdateThumbnail(event: any) {
     await this.conversationsService.ChangeThumbnail(event.target.files[0], this.data.Conversation);
+    event.target.files = null;
   }
 
   public ChangeName() {
