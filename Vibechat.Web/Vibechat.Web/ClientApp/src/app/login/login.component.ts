@@ -85,7 +85,7 @@ export class LoginComponent {
       phoneNumber = "+" + phoneNumber;
     }
 
-    firebase.auth().signInWithPhoneNumber(phoneNumber, this.Recaptcha)
+      firebase.auth().signInWithPhoneNumber(phoneNumber, this.Recaptcha)
       .then((confirmationResult) => {
         // SMS sent. 
         this.confirmation = confirmationResult;
@@ -116,7 +116,11 @@ export class LoginComponent {
 
     this.auth.OnUserLoggedIn(result.response);
 
-    this.router.navigateByUrl('/chat');
+    if (result.response.isNewUser) {
+      this.router.navigateByUrl('/register');
+    } else {
+      this.router.navigateByUrl('/chat');
+    }
   }
 
 }

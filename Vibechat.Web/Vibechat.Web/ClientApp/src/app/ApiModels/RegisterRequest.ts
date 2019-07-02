@@ -1,9 +1,9 @@
-export class RegisterRequest {
-  public constructor(init?: Partial<RegisterRequest>) {
+export class ChangeUserInfoRequest {
+  public constructor(init?: Partial<ChangeUserInfoRequest>) {
     (<any>Object).assign(this, init);
   }
 
-  public PhoneNumber: string;
+ // public PhoneNumber: string;
   public UserName: string;
   public FirstName: string;
   public LastName: string;

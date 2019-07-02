@@ -51,6 +51,14 @@ namespace Vibechat.Web.Services.Users
             return FoundUser.ToUserInfo();
         }
 
+
+        public async Task UpdateUserInfo(string username, string firstname, string lastname, string whoCalled)
+        {
+            await ChangeUsername(username, whoCalled);
+            await ChangeName(firstname, whoCalled);
+            await ChangeLastName(lastname, whoCalled);
+        }
+
         public async Task ChangeName(string newName, string whoCalled)
         {
             if(newName.Length > MaxNameLength)

@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var RegisterRequest = /** @class */ (function () {
-    function RegisterRequest(init) {
+var ChangeUserInfoRequest = /** @class */ (function () {
+    function ChangeUserInfoRequest(init) {
         Object.assign(this, init);
     }
-    return RegisterRequest;
+    return ChangeUserInfoRequest;
 }());
-exports.RegisterRequest = RegisterRequest;
+exports.ChangeUserInfoRequest = ChangeUserInfoRequest;
 //# sourceMappingURL=RegisterRequest.js.map

@@ -62,11 +62,12 @@
               <mat-icon>more_vert</mat-icon>
             </button>
 
-            <mat-form-field style="margin-left: 20%;" appearance="fill">
+            <mat-form-field style="margin-left: 5%;" appearance="standard">
               <mat-label>Search</mat-label>
-              <input matInput placeholder="Search..." type="search" [(ngModel)]="SearchString" (keydown.enter)="Search()" >
+              <input matInput placeholder="Type in something..." type="search" [(ngModel)]="SearchString" (keydown.enter)="Search()">
               <mat-icon matSuffix>search</mat-icon>
             </mat-form-field>
+
           </div>
 
           <searchlist-view *ngIf="SearchString != null && SearchString !== ''"
