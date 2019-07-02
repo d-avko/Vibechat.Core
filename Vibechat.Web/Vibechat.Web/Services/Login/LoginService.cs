@@ -1,5 +1,7 @@
 ﻿using FirebaseAdmin;
 using FirebaseAdmin.Auth;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Linq;
@@ -29,7 +31,7 @@ namespace Vibechat.Web.Services.Login
 
         public async Task<LoginResultApiModel> LogInAsync(LoginCredentialsApiModel loginCredentials)
         {
-            var auth = FirebaseAuth.GetAuth(FirebaseApp.DefaultInstance);
+            FirebaseAuth auth = FirebaseAuth.GetAuth(FirebaseApp.DefaultInstance);
 
             //this can throw detailed error message.
             FirebaseToken verified = await auth.VerifyIdTokenAsync(loginCredentials.UidToken);
@@ -38,6 +40,8 @@ namespace Vibechat.Web.Services.Login
 
             //user confirmed his phone number, but has not registered yet; 
             //Register him now in that case 
+
+            bool IsNewUser = false;
 
             if(identityUser == null)
             {
@@ -48,10 +52,12 @@ namespace Vibechat.Web.Services.Login
                     await RegisterNewUserAsync(new RegisterInformationApiModel()
                     {
                         PhoneNumber = loginCredentials.PhoneNumber,
-                        UserName = username
-                    }, true);
+                        UserName = username,
+                        Id = verified.Uid
+                    });
 
                     identityUser = await usersRepository.GetByUsername(username);
+                    IsNewUser = true;
                 }
                 catch (Exception ex)
                 {
@@ -63,12 +69,13 @@ namespace Vibechat.Web.Services.Login
             {
                 Info = identityUser.ToUserInfo(),
                 Token = identityUser.GenerateToken(),
-                RefreshToken = identityUser.RefreshToken
+                RefreshToken = identityUser.RefreshToken,
+                IsNewUser = IsNewUser
             };
         }
 
 
-        public async Task RegisterNewUserAsync(RegisterInformationApiModel userToRegister, bool firebaseUserCreated)
+        private async Task RegisterNewUserAsync(RegisterInformationApiModel userToRegister)
         {
             var auth = FirebaseAuth.GetAuth(FirebaseApp.DefaultInstance);
 
@@ -93,6 +100,7 @@ namespace Vibechat.Web.Services.Login
 
             var userToCreate = new AppUser()
             {
+                Id = userToRegister.Id,
                 UserName = userToRegister.UserName,
                 FirstName = userToRegister.FirstName,
                 LastName = userToRegister.LastName,
@@ -105,25 +113,6 @@ namespace Vibechat.Web.Services.Login
             if (!result.Succeeded)
             {
                 throw new FormatException(result.Errors?.ToList()[0].Description ?? "Couldn't create user because of unexpected error.");
-            }
-
-            if (!firebaseUserCreated)
-            {
-                try
-                {
-                    await auth.CreateUserAsync(new UserRecordArgs()
-                    {
-                        Uid = userToCreate.Id,
-                        PhoneNumber = userToRegister.PhoneNumber
-                    });
-                }
-                catch (Exception ex)
-                {
-                    //failed to create new user; probably wrong phone number.
-                    await usersRepository.DeleteUser(userToCreate);
-
-                    throw new FormatException("Wrong phone number was provided.", ex);
-                }
             }
 
             await usersRepository.UpdateRefreshToken(userToCreate.Id, userToCreate.GenerateRefreshToken());

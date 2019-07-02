@@ -114,6 +114,38 @@ namespace VibeChat.Web.Controllers
             }
         }
 
+        public class UpdateUserInfoRequest
+        {
+            public string UserName { get; set; }
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Users/ChangeInfo")]
+        public async Task<ResponseApiModel<bool>> ChangeUsername([FromBody] UpdateUserInfoRequest request)
+        {
+            try
+            {
+                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+
+                await mUsersService.UpdateUserInfo(request.UserName, request.FirstName, request.LastName, thisUserId);
+
+                return new ResponseApiModel<bool>()
+                {
+                    IsSuccessfull = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<bool>()
+                {
+                    ErrorMessage = ex.Message,
+                    IsSuccessfull = false
+                };
+            }
+        }
+
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Users/ChangeLastName")]
         public async Task<ResponseApiModel<bool>> ChangeLastName([FromBody] ChangeNameRequest request)

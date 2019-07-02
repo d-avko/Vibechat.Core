@@ -3,7 +3,7 @@ import { ServerResponse } from "../ApiModels/ServerResponse";
 import { LoginResponse } from "../ApiModels/LoginResponse";
 import { LoginRequest } from "../ApiModels/LoginRequest";
 import { HttpClient, HttpHeaders, HttpEvent } from "@angular/common/http";
-import { RegisterRequest } from "../ApiModels/RegisterRequest";
+import { ChangeUserInfoRequest } from "../ApiModels/RegisterRequest";
 import { Injectable, Inject } from "@angular/core";
 import { ConversationMessagesResponse } from "../ApiModels/ConversationMessagesResponse";
 import { ChatMessage } from "../Data/ChatMessage";
@@ -43,10 +43,10 @@ export class ApiRequestsBuilder {
     ).toPromise();
   }
 
-  public RegisterRequest(credentials: RegisterRequest): Promise<ServerResponse<string>> {
-    return this.MakeCall<string>(
+  public ChangeUserInfo(credentials: ChangeUserInfoRequest): Promise<ServerResponse<boolean>> {
+    return this.MakeCall<boolean>(
       credentials,
-      'api/register'
+      'api/Users/ChangeInfo'
     ).toPromise();
   }
 
