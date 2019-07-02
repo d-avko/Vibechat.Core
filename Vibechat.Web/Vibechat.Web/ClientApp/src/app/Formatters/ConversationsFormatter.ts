@@ -10,7 +10,7 @@ export class ConversationsFormatter{
 
   constructor(private auth: AuthService) {}
 
-  public static messageMaxLength = 22;
+  public static messageMaxLength = 10;
 
   public GetLastMessageFormatted(conversation: ConversationTemplate): string {
 

@@ -8,6 +8,7 @@ import { ChangeNameDialogComponent } from "./ChangeNameDialog";
 import { ChatsService } from "../Services/ConversationsService";
 import { UsersService } from "../Services/UsersService";
 import { ViewAttachmentsDialogComponent } from "./ViewAttachmentsDialog";
+import { AuthService } from "../Auth/AuthService";
 
 export interface UserInfoData {
   user: UserInfo;
@@ -27,8 +28,14 @@ export class UserInfoDialogComponent {
     public dialog: MatDialog,
     public formatter: ConversationsFormatter,
     public conversationsService: ChatsService,
-    public usersService: UsersService
-    ) { }
+    public usersService: UsersService,
+    public auth: AuthService
+  ){
+    //this check is needed for changes in name/lastname to be displayed correctly.
+    if (this.data.user.id == auth.User.id) {
+      this.data.user = auth.User;
+    }
+  }
 
   public HasConversationWith(): boolean {
 
@@ -82,6 +89,7 @@ export class UserInfoDialogComponent {
 
   public async UpdateThumbnail(event: any) {
     await this.usersService.UpdateProfilePicture(event.target.files[0]);
+    event.target.files = null;
   }
 
   public ChangeName(): void {

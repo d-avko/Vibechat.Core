@@ -37,5 +37,6 @@ export class InputComponent {
 
   public UploadImages(event: any) {
     this.OnUploadImages.emit(event.target.files);
+    event.target.files = null;
   }
 }

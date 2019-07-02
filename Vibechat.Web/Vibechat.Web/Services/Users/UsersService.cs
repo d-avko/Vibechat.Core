@@ -61,6 +61,8 @@ namespace Vibechat.Web.Services.Users
 
         public async Task ChangeName(string newName, string whoCalled)
         {
+            newName = newName.Replace(" ", "");
+
             if(newName.Length > MaxNameLength)
             {
                 throw new FormatException("Name was too long.");
@@ -71,6 +73,8 @@ namespace Vibechat.Web.Services.Users
 
         public async Task ChangeUsername(string newName, string whoCalled)
         {
+            newName = newName.Replace(" ", "");
+
             if (newName.Length > MaxNameLength)
             {
                 throw new FormatException("Name was too long.");
@@ -132,6 +136,8 @@ namespace Vibechat.Web.Services.Users
 
         public async Task ChangeLastName(string newName, string whoCalled)
         {
+            newName = newName.Replace(" ", "");
+
             if (newName.Length > MaxNameLength)
             {
                 throw new FormatException("Name was too long.");

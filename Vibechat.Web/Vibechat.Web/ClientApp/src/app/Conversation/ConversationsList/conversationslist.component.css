@@ -9,12 +9,13 @@ lastmessage_content_lastmessage {
 }
 
 .lastmessage_content_lastmessageDate {
-  width: 30%;
   color: lightgray;
   padding-left: 5%;
+  font-size: 12px;
 }
 
 .lastmessage_content {
   display: flex !important;
   flex-direction: row;
+  align-items: center;
 }

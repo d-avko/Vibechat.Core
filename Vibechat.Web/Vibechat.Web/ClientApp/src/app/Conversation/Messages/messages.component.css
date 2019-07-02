@@ -58,8 +58,10 @@
 }
 
 .message_text {
-  overflow-wrap: break-word;
   font-size: 13px;
+  word-wrap: break-word;
+  line-height: 150%;
+  white-space: pre-wrap;
 }
 
 .image_attachment {
@@ -75,11 +77,11 @@
 
 .message_timereceived-dark {
   color: white;
-  font-size: 12px;
+  font-size: 14px;
 }
 .message_timereceived-light {
   color: dimgray;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .chat_misc {
