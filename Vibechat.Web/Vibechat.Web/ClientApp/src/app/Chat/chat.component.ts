@@ -148,6 +148,7 @@ export class ChatComponent implements OnInit {
 
   public OnLogOut(): void {
     this.auth.LogOut();
+    this.conversationsService.OnLogOut();
   }
 
   public CreateSecureChat() {
