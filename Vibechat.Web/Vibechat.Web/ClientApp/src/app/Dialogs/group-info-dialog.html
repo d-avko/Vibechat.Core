@@ -64,7 +64,7 @@
       <h3 matLine>Remove group</h3>
     </mat-list-item>
 
-    <mat-list-item>
+    <mat-list-item *ngIf="IsJoined()">
       <mat-icon class="cadetBlue">add_photo_alternate</mat-icon>
       <h3 matLine>Change group picture </h3>
       <input *ngIf="!data.Conversation.isMessagingRestricted" type="file" (change)="UpdateThumbnail($event)" accept="image/*" class="thumbnail-input" name="thumbnail" />

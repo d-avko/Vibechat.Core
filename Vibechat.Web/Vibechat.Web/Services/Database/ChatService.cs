@@ -336,7 +336,15 @@ namespace Vibechat.Web.Services
         }
 
 
-        public async Task RemoveUserFromConversation(string userId, string whoRemovedId, int conversationId)
+        /// <summary>
+        /// Should be used once per request as it's quiet expensive.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="whoRemovedId"></param>
+        /// <param name="conversationId"></param>
+        /// <param name="IsSelf"></param>
+        /// <returns></returns>
+        public async Task RemoveUserFromConversation(string userId, string whoRemovedId, int conversationId, bool IsSelf)
         {
             var conversation = conversationRepository.GetById(conversationId);
 
@@ -352,16 +360,15 @@ namespace Vibechat.Web.Services
                 throw new FormatException("User is not a part of this conversation.");
             }
 
-            if(conversation.Creator.Id != whoRemovedId && conversation.IsGroup)
+            if(conversation.Creator.Id != whoRemovedId && conversation.IsGroup && !IsSelf)
             {
                 throw new FormatException("Only creator can remove users in group.");
             }
 
             await usersConversationsRepository.Remove(userConversation);
 
-            //if last user LEAVES the group, remove conversation
-
-            if(usersConversationsRepository.GetConversationParticipants(conversationId).Count().Equals(0))
+            //dumbest thing to do, will fix later. TODO
+            if (usersConversationsRepository.GetConversationParticipants(conversation.Id).Count().Equals(0))
             {
                 conversationRepository.Remove(conversation);
             }
@@ -383,22 +390,8 @@ namespace Vibechat.Web.Services
                 throw new FormatException("Only creator can remove group.");
             }
 
-            if (conversation.IsGroup)
-            {
-                foreach(var user in Conversation.Participants)
-                {
-                    await RemoveUserFromConversation(user.Id, whoRemoves, conversation.Id);
-                }
-            }
-            else
-            {
-                await RemoveUserFromConversation(Conversation.DialogueUser.Id, whoRemoves, conversation.Id);
-                await RemoveUserFromConversation(whoRemoves, whoRemoves, conversation.Id);
-
-                List<MessageDataModel> messages = messagesRepository.Get(whoRemoves, conversation.Id, true).ToList();
-
-                await messagesRepository.RemovePermanent(messages);
-            }
+            //this removes all messages and users-chats links
+            conversationRepository.Remove(conversation);
         }
 
         public async Task<UserInfo> AddUserToConversation(AddToConversationApiModel UserProvided)

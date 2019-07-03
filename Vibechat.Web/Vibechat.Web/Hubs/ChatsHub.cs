@@ -91,13 +91,13 @@ namespace VibeChat.Web
 
             try
             {
-                await chatsService.RemoveUserFromConversation(userToRemoveId, whoSentId, conversationId);
+                await chatsService.RemoveUserFromConversation(userToRemoveId, whoSentId, conversationId, IsSelf);
                 await RemovedFromGroup(userToRemoveId, conversationId);
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, conversationId.ToString());
             }
             catch(Exception ex)
             {
-                await SendError(whoSentId, ex.Message);
+                await SendError(Context.ConnectionId, ex.Message);
                 logger.LogError(ex.Message);
             }
         }
