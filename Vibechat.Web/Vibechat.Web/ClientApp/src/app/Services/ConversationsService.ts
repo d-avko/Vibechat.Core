@@ -80,6 +80,12 @@ export class ChatsService {
     }
   }
 
+  public OnLogOut() {
+    this.Conversations = new Array<ConversationTemplate>();
+    this.CurrentConversation = null;
+    this.PendingReadMessages = new Array<number>();
+  }
+
   public OnUserOnline(user: string) {
     let dialog = this.FindDialogWithById(user);
 

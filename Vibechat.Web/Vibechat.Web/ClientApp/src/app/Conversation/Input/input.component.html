@@ -7,7 +7,7 @@
   <div class="padding20px">
     <!--name must be the same as in UploadFiles method parameter-->
     <input class="button_send-images" type="file" (change)="UploadImages($event)" multiple="multiple" title="Send file" accept="image/*" name="images">
-    <mat-icon style="color: cadetblue">add_a_photo</mat-icon>
+    <mat-icon class="sendimage-icon">add_a_photo</mat-icon>
   </div>
 
   <mat-form-field class="input_field">
@@ -31,3 +31,13 @@
   <p>Secure chat will be activated after {{Conversation.dialogueUser.userName}} is online.</p>
 </div>
 
+<style>
+  .sendimage-icon{
+    transition: ease 0.3s;
+    color:cadetblue;
+  }
+  .sendimage-icon:hover{
+    transition: ease 0.3s;
+    color: #b6d2d3;
+  }
+</style>
