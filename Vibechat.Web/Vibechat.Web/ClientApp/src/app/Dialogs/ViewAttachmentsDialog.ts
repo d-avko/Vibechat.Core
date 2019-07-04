@@ -10,7 +10,7 @@ import { retry } from "rxjs/operators";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { CdkVirtualScrollViewport } from "@angular/cdk/scrolling";
 import { MessagesDateParserService } from "../Services/MessagesDateParserService";
-import { ChatsService } from "../Services/ConversationsService";
+import { ChatsService } from "../Services/ChatsService";
 
 export interface AttachmentsData {
   conversation: ConversationTemplate;

@@ -26,7 +26,7 @@ import { HttpResponseInterceptor } from "../Interceptors/HttpResponseInterceptor
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
 import { ForwardMessagesDialogComponent } from "../Dialogs/ForwardMessagesDialog";
 import { MessagesDateParserService } from "../Services/MessagesDateParserService";
-import { ChatsService } from "../Services/ConversationsService";
+import { ChatsService } from "../Services/ChatsService";
 import { UsersService } from "../Services/UsersService";
 import { MessageReportingService } from "../Services/MessageReportingService";
 import { AuthService } from "../Auth/AuthService";

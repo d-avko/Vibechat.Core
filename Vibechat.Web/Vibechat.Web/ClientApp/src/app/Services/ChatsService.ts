@@ -692,7 +692,8 @@ export class ChatsService {
     conversation.messages = [...conversation.messages];
 
     if (message.user.id != this.authService.User.id) {
-      --conversation.messagesUnread;
+      //this is to prevent values like "-1" (could happen in some rare cases)
+      conversation.messagesUnread = Math.max(0, conversation.messagesUnread - 1);
     }
 
     let pendingIndex = this.PendingReadMessages.findIndex(x => x == message.id);

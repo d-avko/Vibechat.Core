@@ -5,7 +5,7 @@ import { UserInfo } from "../Data/UserInfo";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { ConversationsFormatter } from "../Formatters/ConversationsFormatter";
 import { ChangeNameDialogComponent } from "./ChangeNameDialog";
-import { ChatsService } from "../Services/ConversationsService";
+import { ChatsService } from "../Services/ChatsService";
 import { UsersService } from "../Services/UsersService";
 import { ViewAttachmentsDialogComponent } from "./ViewAttachmentsDialog";
 import { AuthService } from "../Auth/AuthService";

@@ -180,8 +180,6 @@ namespace VibeChat.Web.Controllers
                     user.IsBlockedInConversation = await BansService.IsBannedFromConversation(request.conversationId, user.Id);
                 }
 
-                result.MessagesUnread = await mConversationService.GetUnreadMessagesAmount(result.ConversationID, thisUserId);
-
                 return new ResponseApiModel<ConversationTemplate>()
                 {
                     IsSuccessfull = true,

@@ -31,3 +31,19 @@
   height: 100%;
   width: 100%;
 }
+
+@media screen and (min-width: 881px){
+  .button-goback{
+    display: none;
+  }
+}
+
+@media screen and (max-width: 880px){
+  .button-goback{
+    width: 5%;
+  }
+
+  .conversation-viewinfoButton{
+    width: 95%;
+  }
+}

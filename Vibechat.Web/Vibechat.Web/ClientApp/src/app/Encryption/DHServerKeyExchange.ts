@@ -2,7 +2,7 @@ import { AuthService } from "../Auth/AuthService";
 import { ConnectionManager } from "../Connections/ConnectionManager";
 import { Injectable, EventEmitter } from "@angular/core";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
-import { ChatsService } from "../Services/ConversationsService";
+import { ChatsService } from "../Services/ChatsService";
 import { SecureChatsService } from "./SecureChatsService";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { E2EencryptionService } from "./E2EencryptionService";
