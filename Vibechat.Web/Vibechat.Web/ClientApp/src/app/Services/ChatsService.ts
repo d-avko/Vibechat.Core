@@ -18,6 +18,7 @@ import { SecureChatsService } from "../Encryption/SecureChatsService";
 import { E2EencryptionService } from "../Encryption/E2EencryptionService";
 import { DHServerKeyExchangeService } from "../Encryption/DHServerKeyExchange";
 import { MessageReportingService } from "./MessageReportingService";
+import { ImageScalingService } from "./ImageScalingService";
 
 @Injectable({
   providedIn: 'root'
@@ -31,7 +32,8 @@ export class ChatsService {
     private secureChatsService: SecureChatsService,
     private encryptionService: E2EencryptionService,
     private messagesService: MessageReportingService,
-    private dh: DHServerKeyExchangeService)
+    private dh: DHServerKeyExchangeService,
+    private images: ImageScalingService)
   {
     this.connectionManager.setConversationsService(this);
     this.PendingReadMessages = new Array<number>();
@@ -57,6 +59,10 @@ export class ChatsService {
     }
 
     this.CurrentConversation = conversation;
+
+    if (!this.CurrentConversation) {
+      return;
+    }
 
     await this.UpdateExisting(conversation);
 
@@ -165,6 +171,9 @@ export class ChatsService {
 
     this.dateParser.ParseStringDatesInMessages(result.response);
 
+    //apply scaling to images
+    this.images.ScaleImages(result.response);
+
     //append old messages to new ones.
     chat.messages = [...result.response.concat(chat.messages)];
   }
@@ -220,13 +229,12 @@ export class ChatsService {
       return;
     }
 
-    //parse string date to js Date
-
     response.response
       .forEach((conversation) => {
 
         if (conversation.messages != null) {
           this.dateParser.ParseStringDatesInMessages(conversation.messages);
+          this.images.ScaleImages(conversation.messages);
         } else {
           conversation.messages = new Array<ChatMessage>();
         }
@@ -312,6 +320,8 @@ export class ChatsService {
     }
 
     this.dateParser.ParseStringDateInMessage(data.message);
+
+    this.images.ScaleImage(data.message);
 
     conversation.messages.push(data.message);
 

@@ -43,6 +43,7 @@ namespace Vibechat.Web.Services.FileSystem
         /// <summary>
         /// Takes stream containing image and returns <see cref="MessageAttachment"/> object.
         /// This method doesn't compress image, it just calculates scaled dimensions.
+        /// And saves the image.
         /// </summary>
         /// <param name="image"></param>
         /// <param name="imageName"></param>

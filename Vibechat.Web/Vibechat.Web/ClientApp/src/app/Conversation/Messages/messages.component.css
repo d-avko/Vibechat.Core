@@ -63,6 +63,7 @@
   word-wrap: break-word;
   line-height: 150%;
   white-space: pre-wrap;
+  max-width: 50vw;
 }
 
 .image_attachment {
