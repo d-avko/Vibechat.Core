@@ -259,15 +259,8 @@ namespace Vibechat.Web.Services
                 conversationId,
                 kind,
                 offset,
-                count)
-                .Include(x => x.AttachmentInfo)
-                .ThenInclude(x => x.AttachmentKind)
-                .Include(x => x.User)
-                .Include(x => x.ForwardedMessage)
-                .ThenInclude(x => x.AttachmentInfo)
-                .ThenInclude(x => x.AttachmentKind)
-                .Include(x => x.ForwardedMessage)
-                .ThenInclude(x => x.User);
+                count);
+
 
             return (from msg in messages
                     select msg.ToMessage()).ToList();

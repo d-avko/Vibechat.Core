@@ -25,35 +25,26 @@ namespace Vibechat.Web.Services.Repositories
         /// <returns></returns>
         public AppUser GetUserInDialog(int convId, string FirstUserInDialogueId)
         {
-            var UsersConvs = mContext.UsersConversations
-               .Include(x => x.Conversation)
-               .Include(y => y.User);
 
-            return UsersConvs.Where(x => x.ChatID == convId && x.UserID != FirstUserInDialogueId)
+            return mContext.UsersConversations.Where(x => x.ChatID == convId && x.UserID != FirstUserInDialogueId)
                 .FirstOrDefault()?
                 .User;
         }
 
         public IQueryable<ConversationDataModel> GetUserConversations(string userId)
         {
-            var usersConversations = mContext.UsersConversations
-               .Include(x => x.Conversation)
-               .Include(y => y.User);
 
-            return (from userConversation in usersConversations
-                   where userConversation.UserID == userId
+            return (from userConversation in mContext.UsersConversations
+                    where userConversation.UserID == userId
                    select userConversation.Conversation
-                   ).Include(x => x.PublicKey);
+                   )
+                   .Include(x => x.PublicKey)
+                   .Include(x => x.Creator);
         }
 
         public IQueryable<AppUser> GetConversationParticipants(int conversationId)
         {
-            //Update info from db
-            var usersConversations = mContext.UsersConversations
-                .Include(x => x.User)
-                .Include(y => y.Conversation);
-
-            return from userConversation in usersConversations
+            return from userConversation in mContext.UsersConversations
                    where userConversation.ChatID == conversationId
                    select userConversation.User;
         }
@@ -62,15 +53,14 @@ namespace Vibechat.Web.Services.Repositories
         {
             return await mContext
                 .UsersConversations
-                .Include(x => x.User)
-                .Include(x => x.Conversation)
-                .FirstOrDefaultAsync(x => x.UserID == userId && x.ChatID == conversationId);
+                .Where(x => x.UserID == userId && x.ChatID == conversationId)
+                .SingleOrDefaultAsync();
         }
 
         public async Task<bool> Exists(string userId, int conversationId)
         {
             return await mContext.UsersConversations
-                .FirstOrDefaultAsync(x => x.ChatID == conversationId && x.UserID == userId) != default(UsersConversationDataModel);
+                .SingleOrDefaultAsync(x => x.ChatID == conversationId && x.UserID == userId) != default(UsersConversationDataModel);
         }
 
         public async Task Remove(UsersConversationDataModel entity)
@@ -99,29 +89,6 @@ namespace Vibechat.Web.Services.Repositories
                 .FirstOrDefaultAsync(x => x.ChatID == conversation.Id && x.UserID == user.Id) != default(UsersConversationDataModel);
         }
 
-        public async Task<bool> DialogExists(string firstUserId, string secondUserId, bool secure)
-        {
-            IQueryable<UsersConversationDataModel> firstUserConversations = mContext
-               .UsersConversations
-               .Where(x => x.UserID == firstUserId && !x.Conversation.IsGroup)
-               .Include(x => x.Conversation)
-               .Include(x => x.User);
-
-            foreach(UsersConversationDataModel conversation in firstUserConversations)
-            {
-                if(await mContext
-                    .UsersConversations
-                    .AnyAsync(x => 
-                    x.ChatID == conversation.ChatID
-                    && x.User.Id == secondUserId
-                    && x.Conversation.IsSecure == secure))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
 
         public async Task<UsersConversationDataModel> GetDialog(string firstUserId, string secondUserId)
         {

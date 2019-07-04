@@ -23,7 +23,7 @@ namespace Vibechat.Web.Services.Repositories
 
         IIncludableQueryable<MessageDataModel, MessageAttachmentDataModel> Get(
             string userId, int conversationId, bool AllMessages = false, int offset = 0, int count = 0);
-        IIncludableQueryable<MessageDataModel, MessageAttachmentDataModel> GetAttachments(
+        IIncludableQueryable<MessageDataModel, AppUser> GetAttachments(
             string userId, int conversationId, string attachmentKind, int offset, int count);
 
         Task<MessageDataModel> AddSecureMessage(AppUser whoSent, string message, int groupId);
