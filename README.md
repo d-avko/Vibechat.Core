@@ -1,4 +1,4 @@
-# Vibechat.Web
+# Vibechat - Simple messenger
 ASP.NET Core Messenger: features Groups, dialogs, end-to-end encrypted chats. 
 Uses mobile phone login system (firebase is used as SMS provider) and tokens based authorization.
 
