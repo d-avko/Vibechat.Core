@@ -15,7 +15,7 @@ namespace Vibechat.Web.Services.Repositories
         {
             this.mContext = dbContext;
         }
-
+        [Obsolete("Keys are now seeded via DbContext")]
         public async Task Add(DhPublicKeyDataModel value)
         {
             mContext.PublicKeys.Add(value);
@@ -26,7 +26,7 @@ namespace Vibechat.Web.Services.Repositories
         {
             var r = new Random();
             var keys = mContext.PublicKeys.ToList();
-            return keys[r.Next(0, keys.Count() + 1)];
+            return keys[r.Next(1, keys.Count() + 1)];
         }
     }
 }
