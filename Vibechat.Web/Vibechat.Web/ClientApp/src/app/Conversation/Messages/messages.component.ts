@@ -7,7 +7,7 @@ import { AttachmentKinds } from '../../Data/AttachmentKinds';
 import { UserInfo } from '../../Data/UserInfo';
 import { MatDialog } from '@angular/material';
 import { MessageState } from '../../Shared/MessageState';
-import { ChatsService } from '../../Services/ConversationsService';
+import { ChatsService } from '../../Services/ChatsService';
 import { ForwardMessagesDialogComponent } from '../../Dialogs/ForwardMessagesDialog';
 import { ConversationTemplate } from '../../Data/ConversationTemplate';
 import { ThemesService } from '../../Theming/ThemesService';

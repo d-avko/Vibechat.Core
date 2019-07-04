@@ -119,7 +119,7 @@
     <None Remove="ClientApp\src\app\Modules\LoginModule.ts" />
     <None Remove="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
     <None Remove="ClientApp\src\app\Search\searchlist.component.ts" />
-    <None Remove="ClientApp\src\app\Services\ConversationsService.ts" />
+    <None Remove="ClientApp\src\app\Services\ChatsService.ts" />
     <None Remove="ClientApp\src\app\Services\MessageReportingService.ts" />
     <None Remove="ClientApp\src\app\Services\UsersService.ts" />
     <None Remove="ClientApp\src\app\Shared\AddedToGroupModel.ts" />
@@ -166,7 +166,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\Modules\LoginModule.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Search\searchlist.component.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\Services\ConversationsService.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Services\ChatsService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Services\MessageReportingService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Services\UsersService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\AddedToGroupModel.ts" />

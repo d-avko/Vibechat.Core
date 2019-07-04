@@ -6,7 +6,7 @@ import { UserInfo } from "../Data/UserInfo";
 import { ConversationsFormatter } from "../Formatters/ConversationsFormatter";
 import { ChangeNameDialogComponent } from "./ChangeNameDialog";
 import { FindUsersDialogComponent } from "./FindUsersDialog";
-import { ChatsService } from "../Services/ConversationsService";
+import { ChatsService } from "../Services/ChatsService";
 import { ViewAttachmentsDialogComponent } from "./ViewAttachmentsDialog";
 
 export interface  GroupInfoData {

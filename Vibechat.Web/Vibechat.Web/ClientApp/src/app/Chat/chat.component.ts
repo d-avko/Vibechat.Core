@@ -16,7 +16,7 @@ import { UserInfoDialogComponent } from "../Dialogs/UserInfoDialog";
 import { ViewAttachmentsDialogComponent } from "../Dialogs/ViewAttachmentsDialog";
 import { ForwardMessagesDialogComponent } from "../Dialogs/ForwardMessagesDialog";
 import { UsersService } from "../Services/UsersService";
-import { ChatsService } from "../Services/ConversationsService";
+import { ChatsService } from "../Services/ChatsService";
 import { ThemesService } from "../Theming/ThemesService";
 import { ChooseContactDialogComponent } from "../Dialogs/ChooseContactDialog";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
@@ -146,6 +146,10 @@ export class ChatComponent implements OnInit {
       });
   }
 
+  public ChangeChat(chat: ConversationTemplate) {
+    this.conversationsService.ChangeConversation(chat);
+  }
+
   public OnLogOut(): void {
     this.auth.LogOut();
     this.conversationsService.OnLogOut();
@@ -246,6 +250,10 @@ export class ChatComponent implements OnInit {
     this.SearchString = '';
 
     await this.conversationsService.ChangeConversation(conversation);
+  }
+
+  public IsMobileDevice() {
+    return window.innerWidth < ConversationsFormatter.MinPixelsDesktop;
   }
 
   //input events

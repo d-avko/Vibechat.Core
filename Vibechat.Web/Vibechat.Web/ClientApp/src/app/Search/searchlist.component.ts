@@ -2,7 +2,7 @@ import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { UserInfo } from "../Data/UserInfo";
 import { Output, EventEmitter, Component, Input } from "@angular/core";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
-import { ChatsService } from "../Services/ConversationsService";
+import { ChatsService } from "../Services/ChatsService";
 import { UsersService } from "../Services/UsersService";
 
 @Component({

@@ -55,7 +55,12 @@
 
       <mat-card-content class="chat_wrapper_content">
 
-        <div class="conversations_wrapper" [ngClass]="{'conversations_wrapper_dark': IsDarkTheme(), 'conversations_wrapper_light': !IsDarkTheme()}">
+        <div class="conversations_wrapper"
+             [ngClass]="{
+             'conversations_wrapper_dark': IsDarkTheme(),
+             'conversations_wrapper_light': !IsDarkTheme(),
+             'hidden': IsMobileDevice() && IsConversationSelected()
+             }">
           <div class="conversations_wrapper_searchbar">
 
             <button mat-button (click)="actionsdrawer.toggle()">
@@ -93,6 +98,7 @@
 
           <conversationHeader-view class="messages_wrapper_header"
                                    (OnViewGroupInfo)="OnViewGroupInfo(conversationsService.CurrentConversation)"
+                                   (OnGoback)="ChangeChat(null)"
                                    [Conversation]="conversationsService.CurrentConversation"></conversationHeader-view>
 
           <messages-view class="messages_wrapper_messages"
@@ -108,7 +114,11 @@
 
         </div>
 
-        <h4 *ngIf="! IsConversationSelected()" class="no-chat-selected">Choose chat from the left to start chatting...</h4>
+        <h4  [ngClass]="{
+             'hidden': IsMobileDevice() && !IsConversationSelected()
+             }"
+            *ngIf="! IsConversationSelected()"
+            class="no-chat-selected">Choose chat from the left to start chatting...</h4>
 
       </mat-card-content>
 
@@ -117,25 +127,4 @@
   </mat-drawer-container>
 </mat-card>
 
-<style>
-  .no-chat-selected{
-    font: 400 15px/20px Roboto,"Helvetica Neue",sans-serif;
-    width: 70%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
 
-  .conversations_wrapper{
-    width: 30%;
-  }
-
-  .conversations_wrapper_light{
-    border-right: 1px solid #adadad;
-  }
-
-  .conversations_wrapper_dark{
-    border-right: none;
-  }
-
-</style>

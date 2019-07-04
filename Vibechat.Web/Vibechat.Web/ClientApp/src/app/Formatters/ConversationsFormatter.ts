@@ -10,12 +10,26 @@ export class ConversationsFormatter{
 
   constructor(private auth: AuthService) {}
 
-  public static messageMaxLength = 10;
+  public static MaxSymbols = 38;
+
+  public static MaxPixelsDesktop = 1458;
+
+  public static MinPixelsDesktop = 880;
+
+  public static MaxSymbolsMobile = 20;
 
   public GetLastMessageFormatted(conversation: ConversationTemplate): string {
 
     if (conversation.messages == null || conversation.messages.length == 0) {
       return "No messages for this conversation...";
+    }
+
+    let MaxSymbols = 0;
+
+    if (window.innerWidth < ConversationsFormatter.MinPixelsDesktop) {
+      MaxSymbols = ConversationsFormatter.MaxSymbolsMobile;
+    } else {
+      MaxSymbols = Math.floor((window.innerWidth * ConversationsFormatter.MaxSymbols * 0.75) / ConversationsFormatter.MaxPixelsDesktop);
     }
 
     let message = conversation.messages[conversation.messages.length - 1];
@@ -27,19 +41,23 @@ export class ConversationsFormatter{
     }
 
     if (message.isAttachment) {
-      return user + ": " + this.GetFormattedAttachmentName(message.attachmentInfo.attachmentKind);
+      let msg = user + ": " + this.GetFormattedAttachmentName(message.attachmentInfo.attachmentKind);
+
+      if (msg.length > MaxSymbols) {
+        msg = msg.slice(0, MaxSymbols) + "...";
+      }
+
+      return msg;
     }
 
-    let messageContent = '';
 
-    if (message.messageContent.length <= ConversationsFormatter.messageMaxLength) {
-      messageContent = message.messageContent;
-    }
-    else {
-      messageContent = message.messageContent.slice(0, ConversationsFormatter.messageMaxLength) + "...";
+    let msg = user + ": " + message.messageContent;
+
+    if (msg.length > MaxSymbols) {
+      msg = msg.slice(0, MaxSymbols) + "...";
     }
 
-    return user + ": " + messageContent;
+    return msg;
   }
 
   public GetFormattedAttachmentName(name: string) : string {
