@@ -14,5 +14,7 @@ namespace Vibechat.Web.Services.Images
         /// <param name="image"></param>
         /// <returns>Width, Height</returns>
         ValueTuple<int, int> GetScaledDimensions(MemoryStream image, int maxWidth, int maxHeight);
+
+        ValueTuple<int, int> GetImageOriginalDimensions(MemoryStream image);
     }
 }

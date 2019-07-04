@@ -41,3 +41,9 @@
   color: dimgray;
   font: 500 16px/25px Roboto,"Helvetica Neue",sans-serif;
 }
+
+@media screen and (max-width: 408px) {
+  .input_field{
+    width: 100px;
+  }
+}

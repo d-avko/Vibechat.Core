@@ -60,5 +60,14 @@ namespace Vibechat.Web.Services.Images
 
             return new ValueTuple<int, int>(resultingWidth, resultingHeight);
         }
+
+        public ValueTuple<int, int> GetImageOriginalDimensions(MemoryStream image)
+        {
+            SKCodec codec = SKCodec.Create(image);
+
+            SKImageInfo info = codec.Info;
+
+            return new ValueTuple<int, int>(info.Width, info.Height);
+        }
     }
 }
