@@ -102,9 +102,10 @@ namespace Vibechat.Web.Services.Repositories
 
         public MessageDataModel GetById(int id)
         {
-            return mContext.Messages
+            return mContext
+                .Messages
                 .Include(x => x.User)
-                .FirstOrDefault(x => x.MessageID == id);
+                .SingleOrDefault(x => x.MessageID == id);
         }
 
         public void MarkAsRead(MessageDataModel message)
@@ -144,7 +145,7 @@ namespace Vibechat.Web.Services.Repositories
                 .Include(msg => msg.AttachmentInfo);
         }
 
-        public IIncludableQueryable<MessageDataModel, MessageAttachmentDataModel> GetAttachments(
+        public IIncludableQueryable<MessageDataModel, AppUser> GetAttachments(
             string userId, 
             int conversationId, 
             string attachmentKind,
@@ -165,8 +166,14 @@ namespace Vibechat.Web.Services.Repositories
                 .OrderByDescending(x => x.TimeReceived)
                 .Skip(offset)
                 .Take(count)
-                .Include(msg => msg.User)
-                .Include(msg => msg.AttachmentInfo);
+                .Include(x => x.AttachmentInfo)
+                .ThenInclude(x => x.AttachmentKind)
+                .Include(x => x.User)
+                .Include(x => x.ForwardedMessage)
+                .ThenInclude(x => x.AttachmentInfo)
+                .ThenInclude(x => x.AttachmentKind)
+                .Include(x => x.ForwardedMessage)
+                .ThenInclude(x => x.User);
         }
         
         public int GetUnreadAmount(int conversationId, string userId)
@@ -186,7 +193,7 @@ namespace Vibechat.Web.Services.Repositories
 
         public bool Empty()
         {
-            return mContext.Messages.FirstOrDefault() == null;
+            return mContext.Messages == null;
         }
 
     }
