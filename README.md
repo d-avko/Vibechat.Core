@@ -56,3 +56,9 @@ key exchange will be initiated.
 ```
 3. Send published folder to VM via SSH.
 4. Run.
+
+### Front-end
+
+**Framework**: Angular 7
+
+**UI Components**: Angular material.
