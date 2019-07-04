@@ -429,7 +429,9 @@ namespace VibeChat.Web
                     Id = created.MessageID,
                     EncryptedPayload = created.EncryptedPayload,
                     TimeReceived = created.TimeReceived.ToUTCString(),
-                    State = MessageState.Delivered
+                    State = MessageState.Delivered,
+                    //this is really needed, because if name/lastname of sender will change, it won't be reflected in encrypted payload.
+                    User = whoSent.ToUserInfo()
                 };
 
                 if (user.IsOnline)

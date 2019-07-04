@@ -182,6 +182,7 @@ export class ChatsService {
     decrypted.id = container.id;
     decrypted.state = container.state;
     decrypted.timeReceived = container.timeReceived;
+    decrypted.user = container.user;
   }
 
   private MessagesSortFunc(left: ChatMessage, right: ChatMessage): number {
@@ -770,6 +771,7 @@ export class ChatsService {
           this.connectionManager.SendMessage(message, to);
         }
 
+        this.images.ScaleImage(message);
         to.messages.push(message);
       })
   }
