@@ -31,7 +31,7 @@ export class HttpResponseInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     let token: string = localStorage.getItem('token');
     
-    if (!token) {
+    if (!token || request.headers.has('unauthorized')) {
       return this.handleRequest(request, next);
     }
 
