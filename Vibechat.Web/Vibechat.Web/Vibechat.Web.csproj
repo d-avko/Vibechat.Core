@@ -10,11 +10,14 @@
 
     <!-- Set this to true if you enable server-side prerendering -->
     <BuildServerSideRenderer>false</BuildServerSideRenderer>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="FirebaseAdmin" Version="1.7.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.7.9" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.2.4" />
     <PackageReference Include="OpenSSL.NETStandard" Version="0.6.1" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="1.68.0" />
@@ -31,58 +34,6 @@
   <ItemGroup>
     <EmbeddedResource Remove="ClientApp\src\app\messaging\**" />
     <None Remove="ClientApp\src\app\messaging\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Remove="wwwroot\Assets\401.jpg" />
-    <Content Remove="wwwroot\Assets\Login_Background.jpg" />
-    <Content Remove="wwwroot\Assets\MainLogo.png" />
-    <Content Remove="wwwroot\Assets\Shiba.jpg" />
-    <Content Remove="wwwroot\Groups\pic1.png" />
-    <Content Remove="wwwroot\Groups\pic2.png" />
-    <Content Remove="wwwroot\Groups\pic3.png" />
-    <Content Remove="wwwroot\Groups\pic4.png" />
-    <Content Remove="wwwroot\Groups\pic5.png" />
-    <Content Remove="wwwroot\Uploads\018590A82CECEF4338DC05C413B9F70E28F0267C085F2E889082DB66340C7BCB\401compr.jpg" />
-    <Content Remove="wwwroot\Uploads\018590A82CECEF4338DC05C413B9F70E28F0267C085F2E889082DB66340C7BCB\401full.jpg" />
-    <Content Remove="wwwroot\Uploads\0482585DB519BC950F9B030C9D09A44A13581D520AD3EA64974F101DB0F587CA\401compr.jpg" />
-    <Content Remove="wwwroot\Uploads\0482585DB519BC950F9B030C9D09A44A13581D520AD3EA64974F101DB0F587CA\401full.jpg" />
-    <Content Remove="wwwroot\Uploads\111EB1501718F2F073C191A7CD68C6F6111B8FC6763EA764C03A376F13EEE0A8\Untitledcompr.png" />
-    <Content Remove="wwwroot\Uploads\111EB1501718F2F073C191A7CD68C6F6111B8FC6763EA764C03A376F13EEE0A8\Untitledfull.png" />
-    <Content Remove="wwwroot\Uploads\1379B3640A3EE172D37766ECFEACB8B1ABA0BA7E01ABBB2708B9D977DBFF92C3\401compr.jpg" />
-    <Content Remove="wwwroot\Uploads\1379B3640A3EE172D37766ECFEACB8B1ABA0BA7E01ABBB2708B9D977DBFF92C3\401full.jpg" />
-    <Content Remove="wwwroot\Uploads\14EB258C237B06FB7F097006D51F1E1C65F2179F8C04EF1EB89CC579C4B8D765\Logo_MainLogo.png" />
-    <Content Remove="wwwroot\Uploads\1FA72D213EE20EF47229844C155C8552C57910360764DC3558D81EC8087F565A\Login_MainLogo.png" />
-    <Content Remove="wwwroot\Uploads\312B2896D45403B3D401B33E6ECD53D3E7D444D5F3CA4EE5373332F89E23CC16\006 копияcompr.jpg" />
-    <Content Remove="wwwroot\Uploads\312B2896D45403B3D401B33E6ECD53D3E7D444D5F3CA4EE5373332F89E23CC16\006 копияfull.jpg" />
-    <Content Remove="wwwroot\Uploads\369ED544AA9DE16F19D694D37F9CCF3AFCE7443337F8B547A82047CFEACCD423\discord_wip_shot_by_niivu_dd3x0dncompr.png" />
-    <Content Remove="wwwroot\Uploads\369ED544AA9DE16F19D694D37F9CCF3AFCE7443337F8B547A82047CFEACCD423\discord_wip_shot_by_niivu_dd3x0dnfull.png" />
-    <Content Remove="wwwroot\Uploads\3C3B3A18DE25318E4580D61F4B042FA21D6A61A573F955D5F9D9C917AC3F8D7C\401compr.jpg" />
-    <Content Remove="wwwroot\Uploads\3C3B3A18DE25318E4580D61F4B042FA21D6A61A573F955D5F9D9C917AC3F8D7C\401full.jpg" />
-    <Content Remove="wwwroot\Uploads\48BB1881090947FEFF6EDF7653D5F8B1EC22760691F27D08E7434F7A9C14BCC7\Login_MainLogo.png" />
-    <Content Remove="wwwroot\Uploads\5026AD6CD964D0A94E22FD9D911747B4A705A3BEAC1F34D312C26523381F8488\401.jpg" />
-    <Content Remove="wwwroot\Uploads\61A2FACFE6DEB6628DBAF2836AF4C3AE23D56C52E4926534C8AA90C8C5D57747\401.jpg" />
-    <Content Remove="wwwroot\Uploads\7DE1912B943290B45F27188B1BECBD25994C77F1E3EB7C9431AAAA8640DC55C8\401.jpg" />
-    <Content Remove="wwwroot\Uploads\842876AEA616F8147B6ACAB49737810EF972A8371A6EC57A947038987508708C\discord_wip_shot_by_niivu_dd3x0dn.png" />
-    <Content Remove="wwwroot\Uploads\877C53ADFE144DFCD2F5452D4D51C970B92D479A290B8A6006A14B10A4C32BC3\Screenshot_1.png" />
-    <Content Remove="wwwroot\Uploads\89155064DBE375A52B078E208FA5DBED59D41E21B3DE8ED075205F7EDB487395\Untitled.png" />
-    <Content Remove="wwwroot\Uploads\966D16DBBBAF95C661A41C469E02EAAC7F1C35445870EF6AEAF075FC476A2F59\401compr.jpg" />
-    <Content Remove="wwwroot\Uploads\966D16DBBBAF95C661A41C469E02EAAC7F1C35445870EF6AEAF075FC476A2F59\401full.jpg" />
-    <Content Remove="wwwroot\Uploads\B17A904419B7EE25F074BC239D76D66D4A019B3ABE4F64D0C359CBA796410D22\401compr.jpg" />
-    <Content Remove="wwwroot\Uploads\B17A904419B7EE25F074BC239D76D66D4A019B3ABE4F64D0C359CBA796410D22\401full.jpg" />
-    <Content Remove="wwwroot\Uploads\D865E153AEB6A28A93F0ACFCF9A2D6558E744F84C86013227311F8F054DABE77\Login_MainLogocompr.png" />
-    <Content Remove="wwwroot\Uploads\D865E153AEB6A28A93F0ACFCF9A2D6558E744F84C86013227311F8F054DABE77\Login_MainLogofull.png" />
-    <Content Remove="wwwroot\Uploads\E23FDBF9E0910669F74528F0EE8D72D76B9AD3EA4ECBC2A11F446B79E1A1FB07\discord_wip_shot_by_niivu_dd3x0dncompr.png" />
-    <Content Remove="wwwroot\Uploads\E23FDBF9E0910669F74528F0EE8D72D76B9AD3EA4ECBC2A11F446B79E1A1FB07\discord_wip_shot_by_niivu_dd3x0dnfull.png" />
-    <Content Remove="wwwroot\Uploads\EA5AB9D1EB0B8A73AE107A6015687CE33C75D7396E67F1B33CA410BE355D5378\Logo_MainLogo.png" />
-    <Content Remove="wwwroot\Uploads\F9B8A49F82202BDBEA47AC6480AA31F87518A7275A9E652CB9043EA4D5C4828F\Logo_MainLogo.png" />
-    <Content Remove="wwwroot\Uploads\FD22FD602D6FDDF585E16454420D71F7C36ABAC77FEBD60813A9109AD6F89E18\discord_wip_shot_by_niivu_dd3x0dn.png" />
-    <Content Remove="wwwroot\Uploads\FEB8EBB539DB094092DB67E7852061DB35F97B062F941A15183C5ED7B5E159E0\401.jpg" />
-    <Content Remove="wwwroot\Users\pic1.png" />
-    <Content Remove="wwwroot\Users\pic2.png" />
-    <Content Remove="wwwroot\Users\pic3.png" />
-    <Content Remove="wwwroot\Users\pic4.png" />
-    <Content Remove="wwwroot\Users\pic5.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -180,7 +131,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\uploads\upload.service.ts" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!--<ItemGroup>
     <None Include="wwwroot\Assets\401.jpg" />
     <None Include="wwwroot\Assets\Login_Background.jpg" />
     <None Include="wwwroot\Assets\MainLogo.png" />
@@ -190,50 +141,16 @@
     <None Include="wwwroot\Groups\pic3.png" />
     <None Include="wwwroot\Groups\pic4.png" />
     <None Include="wwwroot\Groups\pic5.png" />
-    <None Include="wwwroot\Uploads\018590A82CECEF4338DC05C413B9F70E28F0267C085F2E889082DB66340C7BCB\401compr.jpg" />
-    <None Include="wwwroot\Uploads\018590A82CECEF4338DC05C413B9F70E28F0267C085F2E889082DB66340C7BCB\401full.jpg" />
-    <None Include="wwwroot\Uploads\0482585DB519BC950F9B030C9D09A44A13581D520AD3EA64974F101DB0F587CA\401compr.jpg" />
-    <None Include="wwwroot\Uploads\0482585DB519BC950F9B030C9D09A44A13581D520AD3EA64974F101DB0F587CA\401full.jpg" />
-    <None Include="wwwroot\Uploads\111EB1501718F2F073C191A7CD68C6F6111B8FC6763EA764C03A376F13EEE0A8\Untitledcompr.png" />
-    <None Include="wwwroot\Uploads\111EB1501718F2F073C191A7CD68C6F6111B8FC6763EA764C03A376F13EEE0A8\Untitledfull.png" />
-    <None Include="wwwroot\Uploads\1379B3640A3EE172D37766ECFEACB8B1ABA0BA7E01ABBB2708B9D977DBFF92C3\401compr.jpg" />
-    <None Include="wwwroot\Uploads\1379B3640A3EE172D37766ECFEACB8B1ABA0BA7E01ABBB2708B9D977DBFF92C3\401full.jpg" />
-    <None Include="wwwroot\Uploads\14EB258C237B06FB7F097006D51F1E1C65F2179F8C04EF1EB89CC579C4B8D765\Logo_MainLogo.png" />
-    <None Include="wwwroot\Uploads\1FA72D213EE20EF47229844C155C8552C57910360764DC3558D81EC8087F565A\Login_MainLogo.png" />
-    <None Include="wwwroot\Uploads\312B2896D45403B3D401B33E6ECD53D3E7D444D5F3CA4EE5373332F89E23CC16\006 копияcompr.jpg" />
-    <None Include="wwwroot\Uploads\312B2896D45403B3D401B33E6ECD53D3E7D444D5F3CA4EE5373332F89E23CC16\006 копияfull.jpg" />
-    <None Include="wwwroot\Uploads\369ED544AA9DE16F19D694D37F9CCF3AFCE7443337F8B547A82047CFEACCD423\discord_wip_shot_by_niivu_dd3x0dncompr.png" />
-    <None Include="wwwroot\Uploads\369ED544AA9DE16F19D694D37F9CCF3AFCE7443337F8B547A82047CFEACCD423\discord_wip_shot_by_niivu_dd3x0dnfull.png" />
-    <None Include="wwwroot\Uploads\3C3B3A18DE25318E4580D61F4B042FA21D6A61A573F955D5F9D9C917AC3F8D7C\401compr.jpg" />
-    <None Include="wwwroot\Uploads\3C3B3A18DE25318E4580D61F4B042FA21D6A61A573F955D5F9D9C917AC3F8D7C\401full.jpg" />
-    <None Include="wwwroot\Uploads\48BB1881090947FEFF6EDF7653D5F8B1EC22760691F27D08E7434F7A9C14BCC7\Login_MainLogo.png" />
-    <None Include="wwwroot\Uploads\5026AD6CD964D0A94E22FD9D911747B4A705A3BEAC1F34D312C26523381F8488\401.jpg" />
-    <None Include="wwwroot\Uploads\61A2FACFE6DEB6628DBAF2836AF4C3AE23D56C52E4926534C8AA90C8C5D57747\401.jpg" />
-    <None Include="wwwroot\Uploads\7DE1912B943290B45F27188B1BECBD25994C77F1E3EB7C9431AAAA8640DC55C8\401.jpg" />
-    <None Include="wwwroot\Uploads\842876AEA616F8147B6ACAB49737810EF972A8371A6EC57A947038987508708C\discord_wip_shot_by_niivu_dd3x0dn.png" />
-    <None Include="wwwroot\Uploads\877C53ADFE144DFCD2F5452D4D51C970B92D479A290B8A6006A14B10A4C32BC3\Screenshot_1.png" />
-    <None Include="wwwroot\Uploads\89155064DBE375A52B078E208FA5DBED59D41E21B3DE8ED075205F7EDB487395\Untitled.png" />
-    <None Include="wwwroot\Uploads\966D16DBBBAF95C661A41C469E02EAAC7F1C35445870EF6AEAF075FC476A2F59\401compr.jpg" />
-    <None Include="wwwroot\Uploads\966D16DBBBAF95C661A41C469E02EAAC7F1C35445870EF6AEAF075FC476A2F59\401full.jpg" />
-    <None Include="wwwroot\Uploads\B17A904419B7EE25F074BC239D76D66D4A019B3ABE4F64D0C359CBA796410D22\401compr.jpg" />
-    <None Include="wwwroot\Uploads\B17A904419B7EE25F074BC239D76D66D4A019B3ABE4F64D0C359CBA796410D22\401full.jpg" />
-    <None Include="wwwroot\Uploads\D865E153AEB6A28A93F0ACFCF9A2D6558E744F84C86013227311F8F054DABE77\Login_MainLogocompr.png" />
-    <None Include="wwwroot\Uploads\D865E153AEB6A28A93F0ACFCF9A2D6558E744F84C86013227311F8F054DABE77\Login_MainLogofull.png" />
-    <None Include="wwwroot\Uploads\E23FDBF9E0910669F74528F0EE8D72D76B9AD3EA4ECBC2A11F446B79E1A1FB07\discord_wip_shot_by_niivu_dd3x0dncompr.png" />
-    <None Include="wwwroot\Uploads\E23FDBF9E0910669F74528F0EE8D72D76B9AD3EA4ECBC2A11F446B79E1A1FB07\discord_wip_shot_by_niivu_dd3x0dnfull.png" />
-    <None Include="wwwroot\Uploads\EA5AB9D1EB0B8A73AE107A6015687CE33C75D7396E67F1B33CA410BE355D5378\Logo_MainLogo.png" />
-    <None Include="wwwroot\Uploads\F9B8A49F82202BDBEA47AC6480AA31F87518A7275A9E652CB9043EA4D5C4828F\Logo_MainLogo.png" />
-    <None Include="wwwroot\Uploads\FD22FD602D6FDDF585E16454420D71F7C36ABAC77FEBD60813A9109AD6F89E18\discord_wip_shot_by_niivu_dd3x0dn.png" />
-    <None Include="wwwroot\Uploads\FEB8EBB539DB094092DB67E7852061DB35F97B062F941A15183C5ED7B5E159E0\401.jpg" />
-    <None Include="wwwroot\Users\pic1.png" />
-    <None Include="wwwroot\Users\pic2.png" />
-    <None Include="wwwroot\Users\pic3.png" />
-    <None Include="wwwroot\Users\pic4.png" />
-    <None Include="wwwroot\Users\pic5.png" />
-  </ItemGroup>
+  </ItemGroup>-->
 
   <ItemGroup>
     <Folder Include="ClientApp\src\app\tokens\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="certificate_combined.pfx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
@@ -246,24 +163,7 @@
     <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
   </Target>
 
-  <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
-    <!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
-    <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
-    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build -- --prod" />
-    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build:ssr -- --prod" Condition=" '$(BuildServerSideRenderer)' == 'true' " />
-
-    <!-- Include the newly-built files in the publish output -->
-    <ItemGroup>
-      <DistFiles Include="$(SpaRoot)dist\**; $(SpaRoot)dist-server\**" />
-      <DistFiles Include="$(SpaRoot)node_modules\**" Condition="'$(BuildServerSideRenderer)' == 'true'" />
-      <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
-        <RelativePath>%(DistFiles.Identity)</RelativePath>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </ResolvedFileToPublish>
-    </ItemGroup>
-  </Target>
-
-  <Import Project="..\Vibechat.Web.Data\Vibechat.Web.Data.projitems" Label="Shared" />
+<!--Add webpack build here-->
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <TypeScriptTarget>ES5</TypeScriptTarget>
@@ -284,5 +184,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <Optimize>false</Optimize>
   </PropertyGroup>
+
+  <Import Project="..\Vibechat.Web.Data\Vibechat.Web.Data.projitems" Label="Shared" />
 
 </Project>

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Vibechat.Web.Services.Repositories;
+using VibeChat.Web;
 
 namespace Vibechat.Web.AuthHelpers
 {
@@ -21,6 +22,13 @@ namespace Vibechat.Web.AuthHelpers
 
         public async Task<bool> Validate(string userId, string refreshToken)
         {
+            AppUser user = await UsersRepository.GetById(userId);
+
+            if(user == null)
+            {
+                return false;
+            }
+
             string token = await UsersRepository.GetRefreshToken(userId);
             
             if(token != refreshToken)

@@ -49,7 +49,7 @@ namespace Vibechat.Web.Services.Login
                 {
                     string username = "Generated_" + Guid.NewGuid().ToString();
 
-                    await RegisterNewUserAsync(new RegisterInformationApiModel()
+                    var token = await RegisterNewUserAsync(new RegisterInformationApiModel()
                     {
                         PhoneNumber = loginCredentials.PhoneNumber,
                         UserName = username,
@@ -57,6 +57,9 @@ namespace Vibechat.Web.Services.Login
                     });
 
                     identityUser = await usersRepository.GetByUsername(username);
+
+                    //prevent reading null
+                    identityUser.RefreshToken = token;
                     IsNewUser = true;
                 }
                 catch (Exception ex)
@@ -74,11 +77,13 @@ namespace Vibechat.Web.Services.Login
             };
         }
 
-
-        private async Task RegisterNewUserAsync(RegisterInformationApiModel userToRegister)
+        /// <summary>
+        /// Registers user and issues a refresh token.
+        /// </summary>
+        /// <param name="userToRegister"></param>
+        /// <returns></returns>
+        private async Task<string> RegisterNewUserAsync(RegisterInformationApiModel userToRegister)
         {
-            var auth = FirebaseAuth.GetAuth(FirebaseApp.DefaultInstance);
-
             var defaultError = new FormatException("Check the fields and try again.");
 
             if (userToRegister == null)
@@ -115,7 +120,11 @@ namespace Vibechat.Web.Services.Login
                 throw new FormatException(result.Errors?.ToList()[0].Description ?? "Couldn't create user because of unexpected error.");
             }
 
-            await usersRepository.UpdateRefreshToken(userToCreate.Id, userToCreate.GenerateRefreshToken());
+            string token = userToCreate.GenerateRefreshToken();
+
+            await usersRepository.UpdateRefreshToken(userToCreate.Id, token);
+
+            return token;
         }
     }
 }

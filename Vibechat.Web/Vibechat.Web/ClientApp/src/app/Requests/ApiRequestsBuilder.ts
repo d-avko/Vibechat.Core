@@ -37,7 +37,7 @@ export class ApiRequestsBuilder {
   }
 
   public LoginRequest(credentials: LoginRequest): Promise<ServerResponse<LoginResponse>>{
-    return this.MakeCall<LoginResponse>(
+    return this.MakeUnauthorizedCall<LoginResponse>(
       credentials,
       'api/login'
     ).toPromise();
@@ -276,4 +276,13 @@ export class ApiRequestsBuilder {
       data);
   }
 
+  private MakeUnauthorizedCall<T>(data: any, url: string): Observable<ServerResponse<T>> {
+    let headers = new HttpHeaders();
+    headers = headers.append('unauthorized', '1');
+
+    return this.httpClient.post<ServerResponse<T>>(
+      this.baseUrl + url,
+      data,
+      { headers: headers });
+  }
 }
