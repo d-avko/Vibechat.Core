@@ -85,16 +85,16 @@ export class LoginComponent {
       phoneNumber = "+" + phoneNumber;
     }
 
-      firebase.auth().signInWithPhoneNumber(phoneNumber, this.Recaptcha)
-      .then((confirmationResult) => {
-        // SMS sent. 
-        this.confirmation = confirmationResult;
-        this.isCodeSent = true;
-        this.canLogIn = true;
-      }).catch((err) => {
-        this.snackbar.openSnackBar("Couldn't send the message.");
-        this.canLogIn = true;
-      });
+    firebase.auth().signInWithPhoneNumber(phoneNumber, this.Recaptcha)
+    .then((confirmationResult) => {
+      // SMS sent. 
+      this.confirmation = confirmationResult;
+      this.isCodeSent = true;
+      this.canLogIn = true;
+    }).catch((err) => {
+      this.snackbar.openSnackBar("Couldn't send the message.");
+      this.canLogIn = true;
+    });
   }
 
   public OnNumberChanged() {

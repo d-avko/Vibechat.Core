@@ -31,6 +31,7 @@ namespace Vibechat.Web
               .AddEnvironmentVariables()
               .Build();
 
+
             var host = WebHost.CreateDefaultBuilder(args)
               .UseConfiguration(config)
               .UseContentRoot(currentDir)
