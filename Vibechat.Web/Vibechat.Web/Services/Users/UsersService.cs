@@ -18,7 +18,7 @@ namespace Vibechat.Web.Services.Users
     public class UsersService
     {
         private readonly IUsersRepository usersRepository;
-        private readonly ImagesService imagesService;
+        private readonly FilesService imagesService;
         private readonly IContactsRepository contactsRepository;
 
         public const int MaxThumbnailLengthMB = 5;
@@ -26,7 +26,7 @@ namespace Vibechat.Web.Services.Users
 
         public UsersService(
             IUsersRepository usersRepository,
-            ImagesService imagesService,
+            FilesService imagesService,
             IContactsRepository contactsRepository)
         {
             this.usersRepository = usersRepository;
@@ -185,7 +185,7 @@ namespace Vibechat.Web.Services.Users
                 buffer.Seek(0, SeekOrigin.Begin);
 
                 //thumbnail; fullsized
-               thumbnailFull = imagesService.SaveImage(buffer, image.FileName);
+               thumbnailFull = imagesService.SaveProfileOrChatPicture(buffer, image.FileName, userId, userId);
 
                 await usersRepository.UpdateAvatar(thumbnailFull.Item1, thumbnailFull.Item2, userId);
             }

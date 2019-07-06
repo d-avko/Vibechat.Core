@@ -31,7 +31,7 @@ namespace Vibechat.Web.Services
             IUsersConversationsRepository usersConversationsRepository,
             IConversationRepository conversationRepository,
             IDhPublicKeysRepository dh,
-            ImagesService imagesService,
+            FilesService imagesService,
             CryptoService cryptoService)
         {
             this.chatDataProvider = chatDataProvider;
@@ -66,7 +66,8 @@ namespace Vibechat.Web.Services
 
         private const int MaxNameLength = 200;
 
-        protected readonly ImagesService ImagesService;
+        protected readonly FilesService ImagesService;
+
         private readonly CryptoService cryptoService;
 
         #region Conversations
@@ -199,7 +200,7 @@ namespace Vibechat.Web.Services
 
             return messagesRepository.GetUnreadAmount(conversationId, userId);
         }
-        public async Task<UpdateThumbnailResponse> UpdateThumbnail(int conversationId, IFormFile image)
+        public async Task<UpdateThumbnailResponse> UpdateThumbnail(int conversationId, IFormFile image, string userId)
         {
             if ((image.Length / (1024 * 1024)) > MaxThumbnailLengthMB)
             {
@@ -217,7 +218,7 @@ namespace Vibechat.Web.Services
             {
                 image.CopyTo(buffer);
                 buffer.Seek(0, SeekOrigin.Begin);
-                var thumbnailFull = ImagesService.SaveImage(buffer, image.FileName);
+                var thumbnailFull = ImagesService.SaveProfileOrChatPicture(buffer, image.FileName, conversationId.ToString(), userId);
 
                 conversationRepository.UpdateThumbnail(thumbnailFull.Item1, thumbnailFull.Item2, conversation);
             }

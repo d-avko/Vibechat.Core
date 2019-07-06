@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace Vibechat.Web.Services.Hashing
 {
-    public class Sha256Service : IHexHashingService
+    public class Sha1Service : IHexHashingService
     {
-        public Sha256Service()
+        public Sha1Service()
         {
-            HashAlgorithm = SHA256.Create();
+            HashAlgorithm = SHA1.Create();
         }
 
         public HashAlgorithm HashAlgorithm { get; set; }

@@ -6,8 +6,14 @@
 
   <div class="padding20px">
     <!--name must be the same as in UploadFiles method parameter-->
-    <input class="button_send-images" type="file" (change)="UploadImages($event)" multiple="multiple" title="Send file" accept="image/*" name="images">
+    <input class="button_send-images" type="file" (change)="UploadImages($event)" multiple="multiple" title="Send images" accept="image/*" name="images">
     <mat-icon class="sendimage-icon">add_a_photo</mat-icon>
+  </div>
+
+  <div class="padding5px">
+    <!--name must be the same as in UploadFiles method parameter-->
+    <input class="button_send-images" type="file" (change)="UploadFile($event)" title="Send file" name="file">
+    <mat-icon class="sendimage-icon">attach_file</mat-icon>
   </div>
 
   <mat-form-field class="input_field">

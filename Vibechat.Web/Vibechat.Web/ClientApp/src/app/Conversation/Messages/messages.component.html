@@ -2,7 +2,8 @@
 
   <!--since virtual scroll doesn't work with items of variable height, load everything-->
 
-  <cdk-virtual-scroll-viewport (scrolledIndexChange)="OnMessagesScrolled($event)"
+  <cdk-virtual-scroll-viewport *ngIf="conversationsService.CurrentConversation.messages && conversationsService.CurrentConversation.messages.length"
+                               (scrolledIndexChange)="OnMessagesScrolled($event)"
                                minBufferPx="120000"
                                maxBufferPx="250000"
                                itemSize="50"
@@ -48,6 +49,10 @@
             </div>
 
             <!--Audio / archive / etc-->
+            <div *ngIf="IsFile(message)" class="file_attachment">
+              
+            </div>
+
             <!--Forwarded message-->
             <div *ngIf="message.forwardedMessage" class="forwarded_message">
 
@@ -110,6 +115,10 @@
     </div>
   </cdk-virtual-scroll-viewport>
 
+  <h4 *ngIf="!conversationsService.CurrentConversation.messages
+      || !conversationsService.CurrentConversation.messages.length "
+      class="no-messages">Empty in here...</h4>
+
   <div class="chat_misc">
     <div (click)="ScrollToStart()" class="chat_misc_backtonow" *ngIf="IsScrollingAssistNeeded" [@slideIn]>
       <mat-icon>keyboard_arrow_down</mat-icon>
@@ -135,39 +144,3 @@
   </div>
 
 </div>
-
-<style>
-  .chat_misc_backtonow{
-    display: flex;
-    flex-direction:row;
-    margin-left: 43%;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 1px 3px 0 rgba(0,0,0,.1);
-    border-radius: 10px;
-    border: solid 1px #cfd9e1;
-    padding: 4px 4px 4px 4px;
-    color: cadetblue;
-    height: 20px;
-    transition: all 0.3s ease 0s;
-    cursor:pointer;
-  }
-  .chat_misc_backtonow:hover{
-    transition: all 0.3s ease 0s;
-    background-color: #f0f6f6;
-  }
-
-  .time-and-states-wrapper{
-    display: flex;
-    flex-direction: column;
-    margin-left: 3%;
-  }
-  .messagestate{
-    color:cadetblue;
-    width: 15px;
-    height: 15px;
-  }
-  .forwarded_message{
-    border-left: 2px solid cadetblue;
-  }
-</style>

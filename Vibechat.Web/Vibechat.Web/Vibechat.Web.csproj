@@ -145,6 +145,7 @@
 
   <ItemGroup>
     <Folder Include="ClientApp\src\app\tokens\" />
+    <Folder Include="wwwroot\Uploads\" />
   </ItemGroup>
 
   <ItemGroup>
