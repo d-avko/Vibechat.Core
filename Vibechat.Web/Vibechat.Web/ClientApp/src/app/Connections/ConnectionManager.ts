@@ -10,6 +10,8 @@ import { ChatsService } from "../Services/ChatsService";
 import { MessageReportingService } from "../Services/MessageReportingService";
 import { AuthService } from "../Auth/AuthService";
 import { DHServerKeyExchangeService } from "../Encryption/DHServerKeyExchange";
+import { ChatComponent } from "../Chat/chat.component";
+import { UAParser } from "ua-parser-js";
 
 @Injectable({
   providedIn: 'root'
@@ -58,6 +60,8 @@ export class ConnectionManager {
         }));
     });
 
+    this.CheckIfSecureChatsSupported();
+
     this.connection.on("AddedToGroup", (conversation: ConversationTemplate, user: UserInfo) => {
       this.ConversationsService.OnAddedToGroup(new AddedToGroupModel({ conversation: conversation, user: user}));
     });
@@ -78,13 +82,54 @@ export class ConnectionManager {
       this.ConversationsService.OnMessageRead(msgId, conversationId);
     });
 
-    this.connection.on("ReceiveDhParam", async (param: string, sentBy: string, chatId: number) => {
-      await this.DHServerKeyExchangeService.OnIntermidiateParamsReceived(param, sentBy, chatId);
-    });
+    if (ChatComponent.isSecureChatsSupported) {
 
-    this.connection.on("UserOnline", (user: string) => {
-      this.ConversationsService.OnUserOnline(user);
-    });
+      this.connection.on("ReceiveDhParam", async (param: string, sentBy: string, chatId: number) => {
+        await this.DHServerKeyExchangeService.OnIntermidiateParamsReceived(param, sentBy, chatId);
+      });
+
+      this.connection.on("UserOnline", (user: string) => {
+        this.ConversationsService.OnUserOnline(user);
+      });
+    }
+  }
+
+  public CheckIfSecureChatsSupported() {
+    let browserInfo = new UAParser().getBrowser();
+    let name = browserInfo.name;
+    let versionNumber = Number.parseInt(browserInfo.version.substr(0, browserInfo.version.indexOf(".")));
+
+    switch (name) {
+      case "Chrome": {
+
+        if (versionNumber >= 67) {
+          ChatComponent.isSecureChatsSupported = true;
+        }
+      }
+      case "Mozilla": {
+        if (versionNumber >= 68) {
+          ChatComponent.isSecureChatsSupported = true;
+        }
+      }
+      case "Firefox": {
+        if (versionNumber >= 68) {
+          ChatComponent.isSecureChatsSupported = true;
+        }
+      }
+      case "Opera": {
+        if (versionNumber >= 54) {
+          ChatComponent.isSecureChatsSupported = true;
+        }
+      }
+      case "Android Browser": {
+        if (versionNumber >= 67) {
+          ChatComponent.isSecureChatsSupported = true;
+        }
+      }
+      default: {
+
+      }
+    }
   }
 
   public SendMessage(message: ChatMessage, conversation: ConversationTemplate) : void {
