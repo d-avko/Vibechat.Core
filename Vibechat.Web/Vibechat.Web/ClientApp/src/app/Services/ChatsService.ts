@@ -732,6 +732,40 @@ export class ChatsService {
     conversation.messages = [...conversation.messages];
   }
 
+  public async UploadFile(file: File, to: ConversationTemplate) {
+
+    let response = await this.requestsBuilder.UploadFile(file, to.conversationID)
+
+    if (!response.isSuccessfull) {
+      return;
+    }
+
+    let message = this.BuildMessage(null, to.conversationID, true, response.response);
+
+    //secure chat
+    if (to.isSecure) {
+
+      let encrypted = this.encryptionService.Encrypt(to.dialogueUser.id, message);
+
+      if (!encrypted) {
+        this.OnAuthKeyLost(to);
+        return;
+      }
+
+      this.connectionManager.SendMessageToSecureChat(
+        encrypted,
+        message.id,
+        to.dialogueUser.id,
+        to.conversationID);
+
+    } else {
+      this.connectionManager.SendMessage(message, to);
+    }
+
+    this.images.ScaleImage(message);
+    to.messages.push(message);
+  }
+
   public async UploadImages(files: FileList, to: ConversationTemplate) {
     if (files.length == 0) {
       return;
@@ -739,9 +773,7 @@ export class ChatsService {
 
     let conversationToSend = to.conversationID;
 
-    let result = await this.requestsBuilder.UploadImages(files)
-
-    let response = (<HttpResponse<ServerResponse<UploadFilesResponse>>>result).body;
+    let response = await this.requestsBuilder.UploadImages(files, to.conversationID)
 
     if (!response.isSuccessfull) {
       return;

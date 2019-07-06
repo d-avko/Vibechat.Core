@@ -15,6 +15,7 @@ import { UploaderService } from "../uploads/upload.service";
 import {
 } from "@angular/material";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
+import { MessageAttachment } from "../Data/MessageAttachment";
 
 @Injectable({
   providedIn: 'root'
@@ -82,29 +83,20 @@ export class ApiRequestsBuilder {
 
   }
 
-  public UploadImages(files: FileList): Promise<HttpEvent<any>> {
-   return this.uploader.uploadImages(files).toPromise();
+  public UploadImages(files: FileList, chatId: number): Promise<ServerResponse<any>> {
+    return this.uploader.uploadImagesToChat(files, chatId.toString()).toPromise();
   }
 
   public UploadConversationThumbnail(thumbnail: File, conversationId: number): Promise<ServerResponse<UpdateThumbnailResponse>> {
-    let data = new FormData();
-    data.append('thumbnail', thumbnail);
-    data.append('conversationId', conversationId.toString());
-
-    return this.MakeCall<UpdateThumbnailResponse>(
-      data,
-      'api/Conversations/UpdateThumbnail'
-    ).toPromise();
+    return this.uploader.uploadChatPicture(thumbnail, conversationId).toPromise();
   }
 
   public UploadUserProfilePicture(picture: File): Promise<ServerResponse<UpdateThumbnailResponse>> {
-    let data = new FormData();
-    data.append('picture', picture);
+    return this.uploader.uploadUserPicture(picture).toPromise();
+  }
 
-    return this.MakeCall<UpdateThumbnailResponse>(
-      data,
-      'api/Users/UpdateProfilePicture'
-    ).toPromise();
+  public UploadFile(file: File, chatId: number) : Promise<ServerResponse<MessageAttachment>> {
+    return this.uploader.uploadFile(file, chatId.toString()).toPromise();
   }
 
   public GetUserById(userId: string): Promise<ServerResponse<UserInfo>> {

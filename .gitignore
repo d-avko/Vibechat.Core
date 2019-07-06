@@ -14,7 +14,7 @@ appsettings.json
 hosting.json
 vibechat-ng-firebase-adminsdk-te5qc-a9cfc0974d.json
 docker-compose.yml
-docker-compose(Production).yml
+docker-compose.production.yml
 wwwroot/
 
 # User-specific files (MonoDevelop/Xamarin Studio)

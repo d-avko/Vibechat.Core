@@ -21,7 +21,7 @@ export class ConversationsFormatter{
   public GetLastMessageFormatted(conversation: ConversationTemplate): string {
 
     if (conversation.messages == null || conversation.messages.length == 0) {
-      return "No messages for this conversation...";
+      return "No messages...";
     }
 
     let MaxSymbols = 0;

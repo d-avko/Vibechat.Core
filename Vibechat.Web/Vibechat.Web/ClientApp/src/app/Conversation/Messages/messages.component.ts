@@ -190,7 +190,11 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
 
   public ScrollToMessage(scrollToMessageIndex: number) {
       requestAnimationFrame(() => {
-      
+
+        if (!this.viewport) {
+          return;
+        }
+
         this.viewport.scrollToOffset(this.CalculateOffsetToMessage(scrollToMessageIndex));
     });
   }
@@ -330,6 +334,15 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     }
 
     return message.attachmentInfo.attachmentKind == AttachmentKinds.Image;
+  }
+
+  public IsFile(message: ChatMessage): boolean {
+
+    if (!message.isAttachment) {
+      return false;
+    }
+
+    return message.attachmentInfo.attachmentKind == AttachmentKinds.File;
   }
 }
 

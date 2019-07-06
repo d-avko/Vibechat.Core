@@ -30,7 +30,7 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddScoped<ChatService, ChatService>();
             services.AddScoped<UsersService, UsersService>();
             services.AddScoped<LoginService, LoginService>();
-            services.AddScoped<ImagesService, ImagesService>();
+            services.AddScoped<FilesService, FilesService>();
             services.AddScoped<BansService, BansService>();
         }
 
@@ -61,7 +61,7 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddSingleton<IChatDataProvider, DefaultChatDataProvider>();
             services.AddSingleton<IImageCompressionService, ImageCompressionService>();
             services.AddSingleton<IImageScalingService, ImageCompressionService>();
-            services.AddSingleton<IHexHashingService, Sha256Service>();
+            services.AddSingleton<IHexHashingService, Sha1Service>();
             services.AddSingleton<UniquePathsProvider, UniquePathsProvider>();
             services.AddScoped<CryptoService, CryptoService>();
             services.AddSingleton<UsersSubsriptionService, UsersSubsriptionService>();
