@@ -7,6 +7,7 @@ import { SecureChatsService } from "./SecureChatsService";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { E2EencryptionService } from "./E2EencryptionService";
 import * as biginteger from "big-integer";
+import { ChatComponent } from "../Chat/chat.component";
 
 class DictionaryEntry<K, V> {
   public constructor(init?: Partial<DictionaryEntry<K, V>>) {
@@ -79,6 +80,11 @@ export class DHServerKeyExchangeService {
 
 
   public async OnIntermidiateParamsReceived(s: string, sentBy: string, chatId: number) {
+
+    if (!ChatComponent.isSecureChatsSupported) {
+      return;
+    }
+
     let entry = this.PendingParams.find(x => x.key == sentBy);
 
     if (!entry) {
