@@ -21,6 +21,7 @@ namespace Vibechat.Web.Services.FileSystem
 
         private static string Compressed = "cmpr";
 
+        private static int MaxFileNameLength = 120;
 
         public FilesService(
             IImageScalingService imageScaling,
@@ -48,6 +49,8 @@ namespace Vibechat.Web.Services.FileSystem
 
             image.Seek(0, SeekOrigin.Begin);
 
+            imageName = imageName.Length > MaxFileNameLength ? imageName.Substring(0, MaxFileNameLength) : imageName;
+
             var resultPath = base.SaveFile(image, imageName, chatOrUserId, sender);
 
             return new MessageAttachment()
@@ -63,6 +66,8 @@ namespace Vibechat.Web.Services.FileSystem
 
         public MessageAttachment SaveFile(MemoryStream file, string filename, string chatOrUserId, string sender)
         {
+            filename = filename.Length > MaxFileNameLength ? filename.Substring(0, MaxFileNameLength) : filename;
+
             var resultPath = base.SaveFile(file, filename, chatOrUserId, sender);
 
             return new MessageAttachment()
@@ -85,6 +90,8 @@ namespace Vibechat.Web.Services.FileSystem
             var resized = ImageCompression.Resize(image, ThumbnailWidth, ThumbnailHeight);
 
             resized.Seek(0, SeekOrigin.Begin);
+
+            imageName = imageName.Length > MaxFileNameLength ? imageName.Substring(0, MaxFileNameLength) : imageName;
 
             var uncompressedFileName = base.SaveFile(image, imageName, chatOrUserId, sender, FullSized);
 

@@ -39,7 +39,8 @@ namespace Vibechat.Web.Extensions
                 ContentUrl = value.ContentUrl,
                 AttachmentName = value.AttachmentName,
                 ImageHeight = value.ImageHeight,
-                ImageWidth = value.ImageWidth
+                ImageWidth = value.ImageWidth,
+                FileSize = value.FileSize
             };
         }
 

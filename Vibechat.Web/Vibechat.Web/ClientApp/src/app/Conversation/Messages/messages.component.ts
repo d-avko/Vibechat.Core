@@ -11,6 +11,7 @@ import { ChatsService } from '../../Services/ChatsService';
 import { ForwardMessagesDialogComponent } from '../../Dialogs/ForwardMessagesDialog';
 import { ConversationTemplate } from '../../Data/ConversationTemplate';
 import { ThemesService } from '../../Theming/ThemesService';
+import { DownloadsService } from '../../downloads/downloads.service';
 
 export class ForwardMessagesModel {
   public forwardTo: Array<number>;
@@ -159,7 +160,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
   }
 
   public ScrollToStart() {
-    this.ScrollToMessage(this.CurrentConversation.messages.length);
+    this.ScrollToMessage(this.CurrentConversation.messages.length - 1);
   }
 
   public ViewUserInfo(event: any, user: UserInfo) {
@@ -343,6 +344,10 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     }
 
     return message.attachmentInfo.attachmentKind == AttachmentKinds.File;
+  }
+
+  public DownloadFile(event: any) {
+    event.stopPropagation();
   }
 }
 

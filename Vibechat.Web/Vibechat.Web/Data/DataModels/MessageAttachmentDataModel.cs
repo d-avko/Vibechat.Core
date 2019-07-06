@@ -25,5 +25,7 @@ namespace VibeChat.Web.Data.DataModels
 
         [ForeignKey("MessageId")]
         public int? MessageId { get; set; }
+
+        public long FileSize { get; set; }
     }
 }
