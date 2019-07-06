@@ -59,6 +59,13 @@ export class ApiRequestsBuilder {
     ).toPromise();
   }
 
+  public async DownloadFile(url: string) {
+   let result = await this.httpClient.get(url, { responseType: 'arraybuffer'})
+      .toPromise();
+
+    return result;
+  }
+
   public GetConversationMessages(offset: number, count: number, conversationId: number): Promise<ServerResponse<Array<ChatMessage>>> {
 
     return this.MakeCall<Array<ChatMessage>>(

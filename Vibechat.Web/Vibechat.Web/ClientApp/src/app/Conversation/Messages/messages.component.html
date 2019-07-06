@@ -50,9 +50,81 @@
 
             <!--Audio / archive / etc-->
             <div *ngIf="IsFile(message)" class="file_attachment">
-              
+              <div class="file-wrapper">
+
+                <div class="file-wrapper_iconwrapper">
+
+                  <div class="file-icon">
+                    <mat-icon class="file-icon_icon">insert_drive_file</mat-icon>
+                  </div>
+
+                </div>
+
+                <div class="file-wrapper_info">
+
+                  <div class="file-name">
+                    <a (click)="DownloadFile($event)" class="file-name_text" href="{{message.attachmentInfo.contentUrl}}" download>{{message.attachmentInfo.attachmentName}}</a>
+                  </div>
+
+                  <div class="file-size">
+                    <p class="file-size_text">{{formatter.GetBytesAmountFormatted(message.attachmentInfo.fileSize)}}</p>
+                  </div>
+
+                </div>
+              </div>
             </div>
 
+            <style>
+              .file-wrapper_info {
+                display: flex;
+                flex-direction: column;
+              }
+
+              .file-name_text {
+                font: 500 14px/18px Roboto,"Helvetica Neue",sans-serif;
+                word-break: break-word;
+              }
+
+              .file-size_text {
+                font: 300 12px/14px Roboto,"Helvetica Neue",sans-serif;
+              }
+
+              .file-size {
+                border-top: 5px solid cadetblue;
+              }
+
+              .file-wrapper_iconwrapper {
+                display: flex;
+                flex-direction: column;
+              }
+
+              .file-wrapper {
+                display: flex;
+                flex-direction: row;
+                width: 54vw;
+                margin-right: 20px;
+              }
+
+              .file-wrapper_iconwrapper {
+                cursor: pointer;
+                margin-right: 2.5%;
+                margin-top: 2.5%;
+              }
+
+              .file-icon {
+                background-color: #335657;
+                border-radius: 20px;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+              }
+
+              .file-icon_icon {
+                color: cadetblue;
+              }
+            </style>
             <!--Forwarded message-->
             <div *ngIf="message.forwardedMessage" class="forwarded_message">
 
@@ -80,6 +152,30 @@
 
                     <!--Audio / archive / etc-->
 
+                    <div *ngIf="IsFile(message)" class="file_attachment">
+                      <div class="file-wrapper">
+
+                        <div class="file-wrapper_iconwrapper">
+
+                          <div class="file-icon">
+                            <mat-icon class="file-icon_icon">insert_drive_file</mat-icon>
+                          </div>
+
+                        </div>
+
+                        <div class="file-wrapper_info">
+
+                          <div class="file-name">
+                            <a (click)="DownloadFile($event)" class="file-name_text" href="{{message.attachmentInfo.contentUrl}}" download>{{message.attachmentInfo.attachmentName}}</a>
+                          </div>
+
+                          <div class="file-size">
+                            <p class="file-size_text">{{formatter.GetBytesAmountFormatted(message.attachmentInfo.fileSize)}}</p>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <span class="message_timereceived" [ngClass]="{'message_timereceived-dark': IsDarkTheme(), 'message_timereceived-light': !IsDarkTheme()}">{{formatter.GetMessageTimeFormatted(message.forwardedMessage)}}</span>
@@ -117,14 +213,16 @@
 
   <h4 *ngIf="!conversationsService.CurrentConversation.messages
       || !conversationsService.CurrentConversation.messages.length "
-      class="no-messages">Empty in here...</h4>
+      class="no-messages">
+    Empty in here...
+  </h4>
+
+  <div (click)="ScrollToStart()" class="chat_misc_backtonow" *ngIf="IsScrollingAssistNeeded" [@slideIn]>
+    <mat-icon>keyboard_arrow_down</mat-icon>
+    <span>Back to now</span>
+  </div>
 
   <div class="chat_misc">
-    <div (click)="ScrollToStart()" class="chat_misc_backtonow" *ngIf="IsScrollingAssistNeeded" [@slideIn]>
-      <mat-icon>keyboard_arrow_down</mat-icon>
-      <span>Back to now</span>
-    </div>
-
     <button mat-button
             color="primary"
             class="marginleft10px"

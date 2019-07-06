@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core"
 import { ChatMessage } from "../Data/ChatMessage";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { AuthService } from "../Auth/AuthService";
+import { AttachmentKinds } from "../Data/AttachmentKinds";
 
 @Injectable({
   providedIn: 'root'
@@ -60,10 +61,30 @@ export class ConversationsFormatter{
     return msg;
   }
 
+  public GetBytesAmountFormatted(amount: number) {
+    switch (true) {
+      case amount < 1024: {
+        return ` ${amount} Bytes.`
+      }
+      case (amount >= 1024) && (amount < 1024 * 1024): {
+        return `${Math.floor(amount / 1024)} kB.`
+      }
+      case (amount >= 1024 * 1024) && (amount < 1024 * 1024 * 1024):{
+        return `${Math.floor(amount / (1024 * 1024))} MB.`
+      }
+      case (amount >= 1024 * 1024 * 1024): {
+        return `${Math.floor(amount / (1024 * 1024 * 1024))} GB.` 
+      }
+    }
+  }
+
   public GetFormattedAttachmentName(name: string) : string {
     switch (name) {
-      case "img": {
+      case AttachmentKinds.Image: {
         return "Image"
+      }
+      case AttachmentKinds.File: {
+        return "File"
       }
       default: {
         return "Unknown attachment"
