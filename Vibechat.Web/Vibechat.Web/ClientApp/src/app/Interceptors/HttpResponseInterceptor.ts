@@ -96,7 +96,6 @@ export class HttpResponseInterceptor implements HttpInterceptor {
               this.handleRefreshTokenResponse(result);
             });
 
-          window.location.reload();
           return;
         }
 

@@ -334,7 +334,7 @@ namespace Vibechat.Web.Migrations
                         column: x => x.ForwardedMessageMessageID,
                         principalTable: "Messages",
                         principalColumn: "MessageID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Messages_AspNetUsers_UserId",
                         column: x => x.UserId,
@@ -394,7 +394,7 @@ namespace Vibechat.Web.Migrations
                         column: x => x.MessageId,
                         principalTable: "Messages",
                         principalColumn: "MessageID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(

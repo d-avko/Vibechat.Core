@@ -265,4 +265,8 @@ export class ChatComponent implements OnInit {
   public async OnUploadImages(files: FileList) {
     await this.conversationsService.UploadImages(files, this.conversationsService.CurrentConversation);
   }
+
+  public async OnUploadFile(file: File) {
+    await this.conversationsService.UploadFile(file, this.conversationsService.CurrentConversation);
+  }
 }

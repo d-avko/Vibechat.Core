@@ -17,14 +17,14 @@ export interface InviteUsersData {
 })
 export class ChooseContactDialogComponent {
 
-  public SelectedUser = new UserInfo();
+  public SelectedUser = null;
 
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
     public auth: AuthService) { }
 
     public onCancelClick() {
-      this.dialogRef.close();
+      this.dialogRef.close(null);
     }
 
   public SelectUser(user: UserInfo) {

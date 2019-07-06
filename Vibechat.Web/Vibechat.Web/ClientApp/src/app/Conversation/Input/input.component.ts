@@ -14,6 +14,8 @@ export class InputComponent {
 
   @Output() public OnUploadImages = new EventEmitter<FileList>();
 
+  @Output() public OnUploadFile = new EventEmitter<File>();
+
   @Input() public User: UserInfo;
 
   @ViewChild(MatFormField) inputfield: MatFormField;
@@ -33,6 +35,11 @@ export class InputComponent {
     this.OnSendMessage.emit(this.inputfield._control.value);
 
     this.inputfield._control.value = '';
+  }
+
+  public UploadFile(event: any) {
+    this.OnUploadFile.emit(event.target.files[0]);
+    event.target.files = null;
   }
 
   public UploadImages(event: any) {

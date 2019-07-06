@@ -68,7 +68,16 @@ namespace VibeChat.Web
                 .HasKey(x => new { x.FirstUserID, x.SecondUserID});
 
             modelBuilder.Entity<AttachmentKindDataModel>().HasData(
-                new[] { new AttachmentKindDataModel() { Name = "img" } });
+                new[] 
+                {
+                new AttachmentKindDataModel()
+                {
+                    Name = "img"
+                },
+                new AttachmentKindDataModel() {
+                    Name = "file"
+                },
+                });
 
             modelBuilder.Entity<DhPublicKeyDataModel>().HasData(
                 new[] {

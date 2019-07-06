@@ -179,7 +179,7 @@ namespace Vibechat.Web
                 Credential = GoogleCredential.GetApplicationDefault(),
             });
 
-            serviceProvider.GetService<ApplicationDbContext>().Database.EnsureCreated();
+            serviceProvider.GetService<ApplicationDbContext>().Database.Migrate();
         }
     }
 }

@@ -6,6 +6,9 @@ namespace Vibechat.Web.ChatData.Messages
 {
     public class MessageAttachment
     {
+        /// <summary>
+        /// Relative url
+        /// </summary>
         public string ContentUrl { get; set; }
 
         public string AttachmentName { get; set; }
@@ -15,5 +18,7 @@ namespace Vibechat.Web.ChatData.Messages
         public int ImageWidth { get; set; }
 
         public int ImageHeight { get; set; }
+
+        public long FileSize { get; set; }
     }
 }

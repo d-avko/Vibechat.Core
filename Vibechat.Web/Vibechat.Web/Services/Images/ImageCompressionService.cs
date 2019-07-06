@@ -11,7 +11,7 @@ namespace Vibechat.Web.Services.Images
         /// </summary>
         /// <param name="imageBytes"></param>
         /// <returns>Image, its width and height</returns>
-        public Stream Resize(MemoryStream imageBytes, int scaleWidth, int scaleHeight)
+        public MemoryStream Resize(MemoryStream imageBytes, int scaleWidth, int scaleHeight)
         {
             SKCodec codec = SKCodec.Create(imageBytes);
 
