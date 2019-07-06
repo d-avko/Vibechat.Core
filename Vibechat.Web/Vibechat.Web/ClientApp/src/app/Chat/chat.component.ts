@@ -260,6 +260,7 @@ export class ChatComponent implements OnInit {
 
   public async OnSendMessage(message: string) {
     await this.conversationsService.SendMessage(message, this.conversationsService.CurrentConversation);
+    this.messages.ScrollToStart();
   }
 
   public async OnUploadImages(files: FileList) {

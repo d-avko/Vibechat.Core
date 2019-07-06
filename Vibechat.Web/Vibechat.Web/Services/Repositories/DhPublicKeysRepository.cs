@@ -26,7 +26,8 @@ namespace Vibechat.Web.Services.Repositories
         {
             var r = new Random();
             var keys = mContext.PublicKeys.ToList();
-            return keys[r.Next(1, keys.Count() + 1)];
+            //ids: 1 - 5, indexes : 0 - 4
+            return keys[r.Next(0, keys.Count())];
         }
     }
 }

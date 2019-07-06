@@ -9,9 +9,9 @@
     <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
 
     <!-- Set this to true if you enable server-side prerendering -->
-    <BuildServerSideRenderer>false</BuildServerSideRenderer>
+    <!--<BuildServerSideRenderer>false</BuildServerSideRenderer>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>-->
   </PropertyGroup>
 
   <ItemGroup>
@@ -62,6 +62,7 @@
     <None Remove="ClientApp\src\app\Dialogs\GroupInfoDialog.ts" />
     <None Remove="ClientApp\src\app\Dialogs\UserInfoDialog.ts" />
     <None Remove="ClientApp\src\app\Dialogs\ViewAttachmentsDialog.ts" />
+    <None Remove="ClientApp\src\app\downloads\downloads.service.ts" />
     <None Remove="ClientApp\src\app\Encryption\DHServerKeyExchange.ts" />
     <None Remove="ClientApp\src\app\Encryption\E2EencryptionService.ts" />
     <None Remove="ClientApp\src\app\Encryption\SecureChatsService.ts" />
@@ -104,6 +105,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\Dialogs\GroupInfoDialog.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Dialogs\UserInfoDialog.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Dialogs\ViewAttachmentsDialog.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\downloads\downloads.service.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Encryption\DHServerKeyExchange.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Encryption\E2EencryptionService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Encryption\SecureChatsService.ts" />

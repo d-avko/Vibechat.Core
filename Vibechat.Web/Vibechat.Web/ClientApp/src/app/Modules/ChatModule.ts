@@ -33,6 +33,7 @@ import { AuthService } from "../Auth/AuthService";
 import { ThemesService } from "../Theming/ThemesService";
 import { ChooseContactDialogComponent } from "../Dialogs/ChooseContactDialog";
 import { ImageScalingService } from "../Services/ImageScalingService";
+import { DownloadsService } from "../downloads/downloads.service";
 
 @NgModule({
   declarations: [
@@ -84,6 +85,7 @@ import { ImageScalingService } from "../Services/ImageScalingService";
     AuthService,
     ThemesService,
     { provide: HTTP_INTERCEPTORS, useClass: HttpResponseInterceptor, multi: true },
-    ImageScalingService]
+    ImageScalingService,
+    DownloadsService]
 })
 export class ChatModule { }

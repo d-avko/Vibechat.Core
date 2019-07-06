@@ -63,8 +63,11 @@ export class ChatsService {
     if (!this.CurrentConversation) {
       return;
     }
-
-    await this.UpdateExisting(conversation);
+    
+    //secure dialog might not even exist on second user side, so update will fail
+    if (!(conversation.isSecure && !conversation.authKeyId)) {
+      await this.UpdateExisting(conversation);
+    } 
 
     //creator should wait until other user is online, and initiate key exchange.
     if (conversation.isSecure && !conversation.authKeyId && conversation.creator.id == this.authService.User.id) {
@@ -615,6 +618,8 @@ export class ChatsService {
 
     if (data.conversation.messages != null) {
       this.dateParser.ParseStringDatesInMessages(data.conversation.messages);
+    } else {
+      data.conversation.messages = new Array<ChatMessage>();
     }
 
     if (data.conversation.isGroup) {
@@ -622,10 +627,6 @@ export class ChatsService {
       //we created new group.
 
       if (data.user.id == this.authService.User.id) {
-
-        if (data.conversation.messages == null) {
-          data.conversation.messages = new Array<ChatMessage>();
-        }
 
         this.Conversations = [...this.Conversations, data.conversation];
       } else {
@@ -638,17 +639,15 @@ export class ChatsService {
       }
     } else {
 
-      if (data.conversation.messages == null) {
-        data.conversation.messages = new Array<ChatMessage>();
-      }
-
       this.Conversations = [...this.Conversations, data.conversation];
 
     }
 
-    //update data about this conversation.
+    //updating info about dialog is pointless.
 
-    await this.UpdateExisting(data.conversation);
+    if (data.conversation.isGroup) {
+      await this.UpdateExisting(data.conversation);
+    }
   }
 
   public OnRemovedFromGroup(data: RemovedFromGroupModel) {

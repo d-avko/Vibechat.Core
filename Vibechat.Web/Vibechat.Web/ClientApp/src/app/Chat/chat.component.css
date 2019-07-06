@@ -1,8 +1,6 @@
 .chat_wrapper {
-  width: 95%;
-  margin-left: 2.5%;
-  margin-top: 1%;
-  min-height: 670px;
+  width: 100%;
+  height: 100vh;
   padding: 0 !important;
 }
 
@@ -49,7 +47,7 @@
 }
 
 .messages_wrapper_messages {
-  height: 70%;
+  height: 75vh;
 }
 
 .flexaligned{

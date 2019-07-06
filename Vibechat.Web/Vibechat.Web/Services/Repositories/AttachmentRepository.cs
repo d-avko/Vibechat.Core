@@ -25,7 +25,8 @@ namespace Vibechat.Web.Services.Repositories
                 ContentUrl = message.AttachmentInfo.ContentUrl,
                 ImageHeight = message.AttachmentInfo.ImageHeight,
                 ImageWidth = message.AttachmentInfo.ImageWidth,
-                AttachmentName = message.AttachmentInfo.AttachmentName
+                AttachmentName = message.AttachmentInfo.AttachmentName,
+                FileSize = message.AttachmentInfo.FileSize
             };
 
             var result = mContext.Attachments.Add(attachment);

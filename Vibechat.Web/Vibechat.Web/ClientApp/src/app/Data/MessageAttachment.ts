@@ -8,4 +8,6 @@ export class MessageAttachment{
   public imageWidth: number;
 
   public imageHeight: number;
+
+  public fileSize: number;
 }
