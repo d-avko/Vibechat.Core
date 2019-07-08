@@ -1,26 +1,21 @@
 import { Component, ViewChild, OnInit, Type } from "@angular/core";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { AuthService } from "../Auth/AuthService";
-import { ServerResponse } from "../ApiModels/ServerResponse";
-import { MatSnackBar, MatDialog, MatDrawer } from "@angular/material";
-import { ChatMessage } from "../Data/ChatMessage";
+import { MatDialog, MatDrawer } from "@angular/material";
 import { trigger, state, style, transition, animate } from "@angular/animations";
 import { ConversationsFormatter } from "../Formatters/ConversationsFormatter";
 import { MessagesComponent } from "../Conversation/Messages/messages.component";
 import { UserInfo } from "../Data/UserInfo";
-import { FindUsersDialogComponent } from "../Dialogs/FindUsersDialog";
 import { AddGroupDialogComponent } from "../Dialogs/AddGroupDialog";
 import { GroupInfoDialogComponent } from "../Dialogs/GroupInfoDialog";
 import { SearchListComponent } from "../Search/searchlist.component";
 import { UserInfoDialogComponent } from "../Dialogs/UserInfoDialog";
-import { ViewAttachmentsDialogComponent } from "../Dialogs/ViewAttachmentsDialog";
-import { ForwardMessagesDialogComponent } from "../Dialogs/ForwardMessagesDialog";
 import { UsersService } from "../Services/UsersService";
 import { ChatsService } from "../Services/ChatsService";
 import { ThemesService } from "../Theming/ThemesService";
 import { ChooseContactDialogComponent } from "../Dialogs/ChooseContactDialog";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
-import { UAParser } from "ua-parser-js";
+import { DeviceService } from "../Services/DeviceService";
 
 @Component({
   selector: 'chat-root',
@@ -57,9 +52,12 @@ export class ChatComponent implements OnInit {
     private usersService: UsersService,
     private conversationsService: ChatsService,
     private themesService: ThemesService,
-    private snackBar: SnackBarHelper) { }
+    private snackBar: SnackBarHelper,
+    private device: DeviceService) { }
 
-  public static isSecureChatsSupported: boolean = false;
+  get IsSecureChatsSupported() {
+    return this.device.isSecureChatsSupported;
+  }
 
   async ngOnInit(): Promise<void> {
     await this.auth.TryAuthenticate();
@@ -91,6 +89,7 @@ export class ChatComponent implements OnInit {
 
     const groupInfoRef = this.dialog.open(GroupInfoDialogComponent, {
       width: '450px',
+      autoFocus: false,
       data: {
         Conversation: group,
         user: this.auth.User,
@@ -147,6 +146,7 @@ export class ChatComponent implements OnInit {
 
     const userInfoRef = this.dialog.open(UserInfoDialogComponent, {
       width: '450px',
+      autoFocus: false,
       data: {
         user: user,
         currentUser: this.auth.User,

@@ -15,6 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.S3" Version="3.3.103" />
     <PackageReference Include="FirebaseAdmin" Version="1.7.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.7.9" />
@@ -62,6 +63,7 @@
     <None Remove="ClientApp\src\app\Dialogs\GroupInfoDialog.ts" />
     <None Remove="ClientApp\src\app\Dialogs\UserInfoDialog.ts" />
     <None Remove="ClientApp\src\app\Dialogs\ViewAttachmentsDialog.ts" />
+    <None Remove="ClientApp\src\app\Dialogs\ViewPhotoService.ts" />
     <None Remove="ClientApp\src\app\downloads\downloads.service.ts" />
     <None Remove="ClientApp\src\app\Encryption\DHServerKeyExchange.ts" />
     <None Remove="ClientApp\src\app\Encryption\E2EencryptionService.ts" />
@@ -72,6 +74,7 @@
     <None Remove="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
     <None Remove="ClientApp\src\app\Search\searchlist.component.ts" />
     <None Remove="ClientApp\src\app\Services\ChatsService.ts" />
+    <None Remove="ClientApp\src\app\Services\DeviceService.ts" />
     <None Remove="ClientApp\src\app\Services\ImageScalingService.ts" />
     <None Remove="ClientApp\src\app\Services\MessageReportingService.ts" />
     <None Remove="ClientApp\src\app\Services\UsersService.ts" />
@@ -105,6 +108,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\Dialogs\GroupInfoDialog.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Dialogs\UserInfoDialog.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Dialogs\ViewAttachmentsDialog.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Dialogs\ViewPhotoService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\downloads\downloads.service.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Encryption\DHServerKeyExchange.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Encryption\E2EencryptionService.ts" />
@@ -121,6 +125,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Search\searchlist.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Services\ChatsService.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Services\DeviceService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Services\ImageScalingService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Services\MessageReportingService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Services\UsersService.ts" />

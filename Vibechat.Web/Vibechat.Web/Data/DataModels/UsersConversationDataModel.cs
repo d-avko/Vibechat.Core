@@ -15,5 +15,10 @@ namespace VibeChat.Web
         [ForeignKey("ChatID")]
         public virtual ConversationDataModel Conversation { get; set; }
 
+        /// <summary>
+        /// Secure chat deviceId
+        /// </summary>
+        public string DeviceId { get; set; }
+
     }
 }

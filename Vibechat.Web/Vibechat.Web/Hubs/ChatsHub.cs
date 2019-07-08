@@ -217,7 +217,7 @@ namespace VibeChat.Web
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task CreateDialog(UserInfo user, bool secure)
+        public async Task CreateDialog(UserInfo user, bool secure, string deviceId)
         {
             AppUser whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
             await userService.MakeUserOnline(whoSent.Id, Context.ConnectionId);
@@ -236,7 +236,8 @@ namespace VibeChat.Web
                         IsGroup = false,
                         DialogUserId = user.Id,
                         CreatorId = whoSent.Id,
-                        IsSecure = secure
+                        IsSecure = secure,
+                        DeviceId = deviceId
                     });
 
                 AppUser userToSend = await userService.GetUserById(user.Id);

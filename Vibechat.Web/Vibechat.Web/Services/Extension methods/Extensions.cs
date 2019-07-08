@@ -73,7 +73,8 @@ namespace Vibechat.Web.Extensions
                 Creator = value.Creator.ToUserInfo(),
                 AuthKeyId = value.AuthKeyId,
                 IsSecure = value.IsSecure,
-                PublicKey = key?.ToDhPublicKey()
+                PublicKey = key?.ToDhPublicKey(),
+                DeviceId = value.DeviceId
             };
         }
 

@@ -18,5 +18,7 @@
         public bool IsPublic { get; set; }
 
         public bool IsSecure { get; set; }
+
+        public string DeviceId { get; set; }
     }
 }
