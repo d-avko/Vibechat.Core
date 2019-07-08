@@ -25,9 +25,10 @@ namespace Vibechat.Web.Services.Repositories
         /// <returns></returns>
         public AppUser GetUserInDialog(int convId, string FirstUserInDialogueId)
         {
-
-            return mContext.UsersConversations.Where(x => x.ChatID == convId && x.UserID != FirstUserInDialogueId)
-                .FirstOrDefault()?
+            return mContext.UsersConversations
+                .Where(x => x.ChatID == convId && x.UserID != FirstUserInDialogueId)
+                .Include(x => x.User)
+                .First()?
                 .User;
         }
 
@@ -81,6 +82,16 @@ namespace Vibechat.Web.Services.Repositories
             await mContext.SaveChangesAsync();
 
             return res.Entity;
+        }
+
+        public void UpdateDeviceId(string deviceId, string userId, int chatId)
+        {
+            var chat = mContext
+                .UsersConversations
+                .Where(x => x.UserID == userId && x.ChatID == chatId).Single();
+
+            chat.DeviceId = deviceId;
+            mContext.SaveChanges();
         }
 
         public async Task<bool> Exists(AppUser user, ConversationDataModel conversation)

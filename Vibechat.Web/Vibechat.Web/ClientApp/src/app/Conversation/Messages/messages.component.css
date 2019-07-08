@@ -15,7 +15,7 @@ a{
 .chat_misc_backtonow {
   display: flex;
   flex-direction: row;
-  margin-left: 30vw;
+  margin-left: 35vw;
   margin-top: 62vh;
   justify-content: center;
   align-items: center;
@@ -24,15 +24,16 @@ a{
   border-radius: 10px;
   border: solid 1px #cfd9e1;
   padding: 4px 4px 4px 4px;
-  color: cadetblue;
+  color: #335657;
   height: 20px;
   transition: all 0.3s ease 0s;
   cursor: pointer;
+  background-color: #f0f6f6;
 }
 
 @media screen and (max-width: 880px) {
   .chat_misc_backtonow{
-    margin-left: 45vw !important;
+    margin-left: 41vw !important;
   }
 }
 
@@ -47,7 +48,7 @@ a{
 
 .chat_misc_backtonow:hover {
   transition: all 0.3s ease 0s;
-  background-color: #f0f6f6;
+  background-color: #99c1c2 !important;
 }
 
 .time-and-states-wrapper {

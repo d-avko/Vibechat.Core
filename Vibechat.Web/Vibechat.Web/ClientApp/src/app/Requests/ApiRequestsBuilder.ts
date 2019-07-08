@@ -204,9 +204,9 @@ export class ApiRequestsBuilder {
     ).toPromise();
   }
 
-  public UpdateAuthKeyId(authKeyId: string, chatId: number) {
+  public UpdateAuthKeyId(authKeyId: string, chatId: number, deviceId: string) {
     return this.MakeCall<boolean>(
-      { chatId: chatId, AuthKeyId: authKeyId },
+      { chatId: chatId, AuthKeyId: authKeyId, deviceId: deviceId },
       'api/Conversations/UpdateAuthKey'
     ).toPromise();
   }

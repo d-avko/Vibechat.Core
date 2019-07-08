@@ -124,12 +124,15 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
       }
 
       if (!this.CurrentConversation) {
+        this.MessagesLoading = false;
         return;
       }
 
       if (currentChat.conversationID == this.CurrentConversation.conversationID) {
         this.ScrollToMessage(result.length);
       }
+
+      this.MessagesLoading = false;
     }
 
   }

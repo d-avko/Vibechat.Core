@@ -114,7 +114,7 @@ namespace Vibechat.Web.Services.Repositories
             mContext.SaveChanges();
         }
 
-        public IIncludableQueryable<MessageDataModel, MessageAttachmentDataModel> Get(
+        public IIncludableQueryable<MessageDataModel, AppUser> Get(
             string userId,
             int conversationId,
             bool AllMessages = false, 
@@ -127,22 +127,38 @@ namespace Vibechat.Web.Services.Repositories
 
             if (AllMessages)
             {
-                return mContext
+               return mContext
                        .Messages
                        .Where(msg => msg.ConversationID == conversationId)
                        .Where(msg => !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID))
                        .Include(msg => msg.User)
-                       .Include(msg => msg.AttachmentInfo);
+                       .Include(msg => msg.AttachmentInfo)
+                       .Include(x => x.AttachmentInfo)
+                        .ThenInclude(x => x.AttachmentKind)
+                        .Include(x => x.User)
+                        .Include(x => x.ForwardedMessage)
+                        .ThenInclude(x => x.AttachmentInfo)
+                        .ThenInclude(x => x.AttachmentKind)
+                        .Include(x => x.ForwardedMessage)
+                        .ThenInclude(x => x.User);
             }
                     
-           return mContext
+           return  mContext
                 .Messages
                 .Where(msg => msg.ConversationID == conversationId && !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID))
                 .OrderByDescending(x => x.TimeReceived)
                 .Skip(offset)
                 .Take(count)
                 .Include(msg => msg.User)
-                .Include(msg => msg.AttachmentInfo);
+                .Include(msg => msg.AttachmentInfo)
+                .Include(x => x.AttachmentInfo)
+                .ThenInclude(x => x.AttachmentKind)
+                .Include(x => x.User)
+                .Include(x => x.ForwardedMessage)
+                .ThenInclude(x => x.AttachmentInfo)
+                .ThenInclude(x => x.AttachmentKind)
+                .Include(x => x.ForwardedMessage)
+                .ThenInclude(x => x.User);
         }
 
         public IIncludableQueryable<MessageDataModel, AppUser> GetAttachments(

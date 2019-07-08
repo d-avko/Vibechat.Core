@@ -21,7 +21,7 @@ namespace Vibechat.Web.Services.Repositories
 
         void MarkAsRead(MessageDataModel message);
 
-        IIncludableQueryable<MessageDataModel, MessageAttachmentDataModel> Get(
+        IIncludableQueryable<MessageDataModel, AppUser> Get(
             string userId, int conversationId, bool AllMessages = false, int offset = 0, int count = 0);
         IIncludableQueryable<MessageDataModel, AppUser> GetAttachments(
             string userId, int conversationId, string attachmentKind, int offset, int count);

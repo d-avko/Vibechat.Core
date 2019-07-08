@@ -1,9 +1,14 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 using Vibechat.Web.ChatData.Messages;
 using Vibechat.Web.Services.Images;
 using Vibechat.Web.Services.Paths;
+using VibeChat.Web;
 
 namespace Vibechat.Web.Services.FileSystem
 {
@@ -43,40 +48,54 @@ namespace Vibechat.Web.Services.FileSystem
         /// <param name="image"></param>
         /// <param name="imageName"></param>
         /// <returns></returns>
-        public MessageAttachment SaveMessagePicture(MemoryStream image, string imageName, string chatOrUserId, string sender)
+        public async Task<MessageAttachment> SaveMessagePicture(IFormFile formFile, MemoryStream image, string imageName, string chatOrUserId, string sender)
         {
-            ValueTuple<int, int> resultDimensions = ImageScaling.GetScaledDimensions(image, MessageImageMaxWidth, MessageImageMaxHeight);
-
-            image.Seek(0, SeekOrigin.Begin);
-
-            imageName = imageName.Length > MaxFileNameLength ? imageName.Substring(0, MaxFileNameLength) : imageName;
-
-            var resultPath = base.SaveFile(image, imageName, chatOrUserId, sender);
-
-            return new MessageAttachment()
+            try
             {
-                AttachmentKind = "img",
-                AttachmentName = imageName,
-                ContentUrl = resultPath.Substring(StaticFilesLocation.Length),
-                ImageHeight = resultDimensions.Item2,
-                ImageWidth = resultDimensions.Item1,
-                FileSize = image.Length
-            };
+                ValueTuple<int, int> resultDimensions = ImageScaling.GetScaledDimensions(image, MessageImageMaxWidth, MessageImageMaxHeight);
+
+                image.Seek(0, SeekOrigin.Begin);
+
+                imageName = imageName.Length > MaxFileNameLength ? imageName.Substring(0, MaxFileNameLength) : imageName;
+
+                var resultPath = await base.SaveFile(formFile, image, imageName, chatOrUserId, sender);
+
+                return new MessageAttachment()
+                {
+                    AttachmentKind = "img",
+                    AttachmentName = imageName,
+                    ContentUrl = DI.Configuration["FileServer:Url"] + resultPath.Substring(StaticFilesLocation.Length),
+                    ImageHeight = resultDimensions.Item2,
+                    ImageWidth = resultDimensions.Item1,
+                    FileSize = image.Length
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to upload this image.", ex);
+            }
         }
 
-        public MessageAttachment SaveFile(MemoryStream file, string filename, string chatOrUserId, string sender)
+        public async Task<MessageAttachment> SaveFile(IFormFile formFile, MemoryStream file, string filename, string chatOrUserId, string sender)
         {
-            filename = filename.Length > MaxFileNameLength ? filename.Substring(0, MaxFileNameLength) : filename;
-
-            var resultPath = base.SaveFile(file, filename, chatOrUserId, sender);
-
-            return new MessageAttachment()
+            try
             {
-                AttachmentKind = "file",
-                AttachmentName = filename,
-                ContentUrl = resultPath.Substring(StaticFilesLocation.Length),
-                FileSize = file.Length
-            };
+                filename = filename.Length > MaxFileNameLength ? filename.Substring(0, MaxFileNameLength) : filename;
+
+                var resultPath = await base.SaveFile(formFile, file, filename, chatOrUserId, sender);
+
+                return new MessageAttachment()
+                {
+                    AttachmentKind = "file",
+                    AttachmentName = filename,
+                    ContentUrl = DI.Configuration["FileServer:Url"] + resultPath.Substring(StaticFilesLocation.Length),
+                    FileSize = file.Length
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to upload this file.", ex);
+            }
         }
 
         /// <summary>
@@ -85,23 +104,64 @@ namespace Vibechat.Web.Services.FileSystem
         /// <param name="image"></param>
         /// <param name="imageName"></param>
         /// <returns></returns>
-        public ValueTuple<string,string> SaveProfileOrChatPicture(MemoryStream image, string imageName, string chatOrUserId, string sender)
+        public async Task<ValueTuple<string,string>> SaveProfileOrChatPicture(IFormFile formFile, MemoryStream image, string imageName, string chatOrUserId, string sender)
         {
-            var resized = ImageCompression.Resize(image, ThumbnailWidth, ThumbnailHeight);
+            try
+            {
+                var resized = ImageCompression.Resize(image, ThumbnailWidth, ThumbnailHeight);
 
-            resized.Seek(0, SeekOrigin.Begin);
-            image.Seek(0, SeekOrigin.Begin);
+                resized.Seek(0, SeekOrigin.Begin);
+                image.Seek(0, SeekOrigin.Begin);
 
-            imageName = imageName.Length > MaxFileNameLength ? imageName.Substring(0, MaxFileNameLength) : imageName;
+                imageName = imageName.Length > MaxFileNameLength ? imageName.Substring(0, MaxFileNameLength) : imageName;
 
-            var uncompressedFileName = base.SaveFile(image, imageName, chatOrUserId, sender, FullSized);
+                var uncompressedFileName = await base.SaveFile(formFile, image, imageName, chatOrUserId, sender, FullSized);
 
-            var compressedFileName = base.SaveFile(resized, imageName, chatOrUserId, sender, Compressed, 
-                Path.GetDirectoryName(uncompressedFileName) + Path.DirectorySeparatorChar);
+                var compressedFileName = await base.SaveFile(formFile, resized, imageName, chatOrUserId, sender, Compressed,
+                    Path.GetDirectoryName(uncompressedFileName) + Path.DirectorySeparatorChar);
 
-            resized.Dispose();
+                resized.Dispose();
 
-            return new ValueTuple<string, string>(compressedFileName.Substring(StaticFilesLocation.Length), uncompressedFileName.Substring(StaticFilesLocation.Length));
+                return new ValueTuple<string, string>(
+                    DI.Configuration["FileServer:Url"] + compressedFileName.Substring(StaticFilesLocation.Length),
+                    DI.Configuration["FileServer:Url"] + uncompressedFileName.Substring(StaticFilesLocation.Length));
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to upload this image.", ex);
+            }
+        }
+
+        public override async Task SaveToStorage(IFormFile formFile, MemoryStream file, string path)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(DI.Configuration["FileServer:Url"]);
+
+                var fileName = ContentDispositionHeaderValue.Parse(formFile.ContentDisposition).FileName.Trim('"');
+
+                using (var content = new MultipartFormDataContent())
+                {
+                    content.Add(new StreamContent(formFile.OpenReadStream())
+                    {
+                        Headers =
+                        {
+                            ContentLength = file.Length,
+                            ContentType = new MediaTypeHeaderValue(formFile.ContentType)
+                        }
+                    }, "file", fileName);
+
+                    content.Add(new StringContent(path), "path");
+
+                    //server responds with either true or false.
+                    HttpResponseMessage response = await client.PostAsync(DI.Configuration["FileServer:UploadFileUrl"], content);
+
+                    if (!bool.Parse(await response.Content.ReadAsStringAsync()))
+                    {
+                        throw new InvalidDataException("Failed to upload this file.");
+                    }
+                }
+            }
         }
     }
 }
