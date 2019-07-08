@@ -118,7 +118,7 @@ export class DHServerKeyExchangeService {
 
     //got response, update authkeyId
     if (chat.creator.id != sentBy) {
-      await this.api.UpdateAuthKeyId(authKeyId, chat.conversationID);
+      await this.api.UpdateAuthKeyId(authKeyId, chat.conversationID, this.device.GetDeviceId());
     }
 
     chat.authKeyId = authKeyId;

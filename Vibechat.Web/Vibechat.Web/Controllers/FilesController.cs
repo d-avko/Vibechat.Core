@@ -82,7 +82,7 @@ namespace Vibechat.Web.Controllers
                         await file.CopyToAsync(buffer);
                         buffer.Seek(0, SeekOrigin.Begin);
 
-                        result.UploadedFiles.Add(filesService.SaveMessagePicture(buffer, file.FileName, request.ChatId, thisUserId));
+                        result.UploadedFiles.Add(await filesService.SaveMessagePicture(file, buffer, file.FileName, request.ChatId, thisUserId));
                     }
                 }
                 catch(Exception ex)
@@ -128,7 +128,7 @@ namespace Vibechat.Web.Controllers
                 await request.file.CopyToAsync(buffer);
                 buffer.Seek(0, SeekOrigin.Begin);
 
-                var savedFile = filesService.SaveFile(buffer, request.file.FileName, request.ChatId, thisUserId);
+                MessageAttachment savedFile = await filesService.SaveFile(request.file, buffer, request.file.FileName, request.ChatId, thisUserId);
 
                 return new ResponseApiModel<MessageAttachment>()
                 {

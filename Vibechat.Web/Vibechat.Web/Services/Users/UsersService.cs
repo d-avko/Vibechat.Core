@@ -185,7 +185,7 @@ namespace Vibechat.Web.Services.Users
                 buffer.Seek(0, SeekOrigin.Begin);
 
                 //thumbnail; fullsized
-               thumbnailFull = imagesService.SaveProfileOrChatPicture(buffer, image.FileName, userId, userId);
+               thumbnailFull = await imagesService.SaveProfileOrChatPicture(image, buffer, image.FileName, userId, userId);
 
                 await usersRepository.UpdateAvatar(thumbnailFull.Item1, thumbnailFull.Item2, userId);
             }

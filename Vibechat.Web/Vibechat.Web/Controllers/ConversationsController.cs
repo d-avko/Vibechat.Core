@@ -63,6 +63,8 @@ namespace VibeChat.Web.Controllers
             public int chatId { get; set; }
 
             public string AuthKeyId { get; set; }
+
+            public string deviceId { get; set; }
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -73,7 +75,7 @@ namespace VibeChat.Web.Controllers
             {
                 var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
-                await mConversationService.UpdateAuthKey(request.chatId, request.AuthKeyId, thisUserId);
+                await mConversationService.UpdateAuthKey(request.chatId, request.AuthKeyId, request.deviceId, thisUserId);
 
                 return new ResponseApiModel<bool>()
                 {
@@ -131,12 +133,15 @@ namespace VibeChat.Web.Controllers
 
                 foreach(ConversationTemplate conversation in result)
                 {
-                    conversation.IsMessagingRestricted = await BansService.IsBannedFromConversation(conversation.ConversationID, thisUserId).ConfigureAwait(false);
-                    conversation.MessagesUnread = await mConversationService.GetUnreadMessagesAmount(conversation.ConversationID, thisUserId).ConfigureAwait(false);
+                    conversation.IsMessagingRestricted = await BansService.IsBannedFromConversation(conversation.ConversationID, thisUserId);
+                    conversation.MessagesUnread = await mConversationService.GetUnreadMessagesAmount(conversation.ConversationID, thisUserId);
 
-                    foreach(UserInfo user in conversation.Participants)
+                    if (conversation.IsGroup)
                     {
-                        user.IsBlockedInConversation = await BansService.IsBannedFromConversation(conversation.ConversationID, user.Id).ConfigureAwait(false);
+                        foreach (UserInfo user in conversation.Participants)
+                        {
+                            user.IsBlockedInConversation = await BansService.IsBannedFromConversation(conversation.ConversationID, user.Id);
+                        }
                     }
                 }
 
@@ -171,13 +176,16 @@ namespace VibeChat.Web.Controllers
             {
                 string thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
-                ConversationTemplate result = await mConversationService.GetById(request.conversationId, thisUserId).ConfigureAwait(false);
+                ConversationTemplate result = await mConversationService.GetById(request.conversationId, thisUserId);
 
-                result.IsMessagingRestricted = await BansService.IsBannedFromConversation(request.conversationId, thisUserId).ConfigureAwait(false);
+                result.IsMessagingRestricted = await BansService.IsBannedFromConversation(request.conversationId, thisUserId);
 
-                foreach (UserInfo user in result.Participants)
+                if (result.IsGroup)
                 {
-                    user.IsBlockedInConversation = await BansService.IsBannedFromConversation(request.conversationId, user.Id);
+                    foreach (UserInfo user in result.Participants)
+                    {
+                        user.IsBlockedInConversation = await BansService.IsBannedFromConversation(request.conversationId, user.Id);
+                    }
                 }
 
                 return new ResponseApiModel<ConversationTemplate>()
@@ -247,7 +255,7 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                List<UserInfo> result = await mConversationService.GetParticipants(convInfo);
+                List<UserInfo> result = await mConversationService.GetParticipants(convInfo.ConvId);
 
                 return new ResponseApiModel<List<UserInfo>>()
                 {
@@ -270,12 +278,14 @@ namespace VibeChat.Web.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/GetMessages")]
-        public async Task<ResponseApiModel<List<Message>>> GetMessages([FromBody] GetMessagesApiModel convInfo)
+        public async Task<ResponseApiModel<List<Message>>> GetMessages([FromBody] GetMessagesApiModel credentials)
         {
             try
             {
                 List<Message> result = await mConversationService.GetMessages(
-                    convInfo,
+                    credentials.ConversationID,
+                    credentials.MesssagesOffset,
+                    credentials.Count,
                      JwtHelper.GetNamedClaimValue(User.Claims));
 
                 return new ResponseApiModel<List<Message>>()
