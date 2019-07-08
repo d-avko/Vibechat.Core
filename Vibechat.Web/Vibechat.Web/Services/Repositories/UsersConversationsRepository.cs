@@ -69,12 +69,13 @@ namespace Vibechat.Web.Services.Repositories
             await mContext.SaveChangesAsync();
         }
 
-        public async Task<UsersConversationDataModel> Add(string userId, int chatId)
+        public async Task<UsersConversationDataModel> Add(string userId, int chatId, string deviceId = null)
         {
             var res = await mContext.UsersConversations.AddAsync(new UsersConversationDataModel()
             {
                 ChatID = chatId,
-                UserID = userId
+                UserID = userId,
+                DeviceId = deviceId
             });
 
             await mContext.SaveChangesAsync();

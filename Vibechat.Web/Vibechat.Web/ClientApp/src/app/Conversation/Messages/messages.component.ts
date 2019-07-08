@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, ViewChild, AfterViewInit, OnChanges,  AfterViewChecked, SimpleChanges, Input } from '@angular/core';
+import { Component, Output, EventEmitter, ViewChild, AfterViewInit, OnChanges,  AfterViewChecked, SimpleChanges, Input, ViewContainerRef } from '@angular/core';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { trigger, state, style, transition, animate } from "@angular/animations";
 import { ChatMessage } from '../../Data/ChatMessage';
@@ -11,7 +11,7 @@ import { ChatsService } from '../../Services/ChatsService';
 import { ForwardMessagesDialogComponent } from '../../Dialogs/ForwardMessagesDialog';
 import { ConversationTemplate } from '../../Data/ConversationTemplate';
 import { ThemesService } from '../../Theming/ThemesService';
-import { DownloadsService } from '../../downloads/downloads.service';
+import { ViewPhotoService } from '../../Dialogs/ViewPhotoService';
 
 export class ForwardMessagesModel {
   public forwardTo: Array<number>;
@@ -43,8 +43,12 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     public formatter: ConversationsFormatter,
     public dialog: MatDialog,
     public conversationsService: ChatsService,
-    private themes: ThemesService) {
+    private themes: ThemesService,
+    private vc: ViewContainerRef,
+    private photos: ViewPhotoService) {
+
     this.SelectedMessages = new Array<ChatMessage>();
+    this.photos.viewContainerRef = this.vc;
   }
 
   @Input() public CurrentConversation: ConversationTemplate;
@@ -93,6 +97,11 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
 
   public IsDarkTheme() {
     return this.themes.currentThemeName == 'dark';
+  }
+
+  public ViewImage(event: Event, image: ChatMessage) {
+    event.stopPropagation();
+    this.photos.ViewPhoto(image, (<HTMLImageElement>event.target).naturalWidth, (<HTMLImageElement>event.target).naturalHeight);
   }
 
   public async UpdateMessages() {

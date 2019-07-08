@@ -53,6 +53,11 @@ namespace VibeChat.Web.ChatData
         /// </summary>
         public string AuthKeyId { get; set; }
 
+        /// <summary>
+        /// If this is secure chat, has value to this user's secure chat deviceId 
+        /// </summary>
+        public string DeviceId { get; set; }
+
         public DhPublicKey PublicKey { get; set; }
 
         /// <summary>

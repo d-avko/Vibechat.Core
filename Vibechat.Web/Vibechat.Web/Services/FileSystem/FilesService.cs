@@ -90,6 +90,7 @@ namespace Vibechat.Web.Services.FileSystem
             var resized = ImageCompression.Resize(image, ThumbnailWidth, ThumbnailHeight);
 
             resized.Seek(0, SeekOrigin.Begin);
+            image.Seek(0, SeekOrigin.Begin);
 
             imageName = imageName.Length > MaxFileNameLength ? imageName.Substring(0, MaxFileNameLength) : imageName;
 

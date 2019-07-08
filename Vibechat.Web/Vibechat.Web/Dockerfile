@@ -37,7 +37,7 @@ RUN npm install -g @angular/cli@7.2.0 --unsafe
 
 COPY Vibechat.Web/ClientApp/. /usr/src/app
 
-RUN npm run build
+RUN npm run build.prod
 
 #End Angular build
 

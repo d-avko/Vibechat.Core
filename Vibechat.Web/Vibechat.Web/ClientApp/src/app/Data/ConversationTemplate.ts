@@ -35,4 +35,6 @@ export class ConversationTemplate {
   public publicKey: DhPublicKey; 
 
   public messagesUnread: number;
+
+  public deviceId: string;
 }

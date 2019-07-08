@@ -12,6 +12,7 @@ import { AuthService } from "../Auth/AuthService";
 import { DHServerKeyExchangeService } from "../Encryption/DHServerKeyExchange";
 import { ChatComponent } from "../Chat/chat.component";
 import { UAParser } from "ua-parser-js";
+import { DeviceService } from "../Services/DeviceService";
 
 @Injectable({
   providedIn: 'root'
@@ -32,7 +33,9 @@ export class ConnectionManager {
     this.DHServerKeyExchangeService = service;
   }
 
-  constructor(private messagesService: MessageReportingService, private auth: AuthService) {}
+  constructor(private messagesService: MessageReportingService,
+    private auth: AuthService,
+    private device: DeviceService) { }
 
   public async Start(){
 
@@ -60,8 +63,6 @@ export class ConnectionManager {
         }));
     });
 
-    this.CheckIfSecureChatsSupported();
-
     this.connection.on("AddedToGroup", (conversation: ConversationTemplate, user: UserInfo) => {
       this.ConversationsService.OnAddedToGroup(new AddedToGroupModel({ conversation: conversation, user: user}));
     });
@@ -82,7 +83,7 @@ export class ConnectionManager {
       this.ConversationsService.OnMessageRead(msgId, conversationId);
     });
 
-    if (ChatComponent.isSecureChatsSupported) {
+    if (this.device.isSecureChatsSupported) {
 
       this.connection.on("ReceiveDhParam", async (param: string, sentBy: string, chatId: number) => {
         await this.DHServerKeyExchangeService.OnIntermidiateParamsReceived(param, sentBy, chatId);
@@ -91,44 +92,6 @@ export class ConnectionManager {
       this.connection.on("UserOnline", (user: string) => {
         this.ConversationsService.OnUserOnline(user);
       });
-    }
-  }
-
-  public CheckIfSecureChatsSupported() {
-    let browserInfo = new UAParser().getBrowser();
-    let name = browserInfo.name;
-    let versionNumber = Number.parseInt(browserInfo.version.substr(0, browserInfo.version.indexOf(".")));
-
-    switch (name) {
-      case "Chrome": {
-
-        if (versionNumber >= 67) {
-          ChatComponent.isSecureChatsSupported = true;
-        }
-      }
-      case "Mozilla": {
-        if (versionNumber >= 68) {
-          ChatComponent.isSecureChatsSupported = true;
-        }
-      }
-      case "Firefox": {
-        if (versionNumber >= 68) {
-          ChatComponent.isSecureChatsSupported = true;
-        }
-      }
-      case "Opera": {
-        if (versionNumber >= 54) {
-          ChatComponent.isSecureChatsSupported = true;
-        }
-      }
-      case "Android Browser": {
-        if (versionNumber >= 67) {
-          ChatComponent.isSecureChatsSupported = true;
-        }
-      }
-      default: {
-
-      }
     }
   }
 
@@ -175,7 +138,11 @@ export class ConnectionManager {
   }
 
   public CreateDialog(user: UserInfo, secure: boolean) {
-    this.connection.send("CreateDialog", user, secure);
+    if (secure) {
+      this.connection.send("CreateDialog", user, secure, this.device.GetDeviceId().toString());
+    } else {
+      this.connection.send("CreateDialog", user, secure, null);
+    }
   }
 
   public ReadMessage(msgId: number, conversationId: number) {
