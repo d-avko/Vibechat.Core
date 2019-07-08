@@ -19,6 +19,10 @@ export class ConversationsFormatter{
 
   public static MaxSymbolsMobile = 20;
 
+  public static IsMobileDevice() {
+    return window.innerWidth < ConversationsFormatter.MinPixelsDesktop;
+  }
+
   public GetLastMessageFormatted(conversation: ConversationTemplate): string {
 
     if (conversation.messages == null || conversation.messages.length == 0) {
@@ -27,7 +31,7 @@ export class ConversationsFormatter{
 
     let MaxSymbols = 0;
 
-    if (window.innerWidth < ConversationsFormatter.MinPixelsDesktop) {
+    if (ConversationsFormatter.IsMobileDevice()) {
       MaxSymbols = ConversationsFormatter.MaxSymbolsMobile;
     } else {
       MaxSymbols = Math.floor((window.innerWidth * ConversationsFormatter.MaxSymbols * 0.75) / ConversationsFormatter.MaxPixelsDesktop);

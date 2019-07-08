@@ -34,6 +34,8 @@ import { ThemesService } from "../Theming/ThemesService";
 import { ChooseContactDialogComponent } from "../Dialogs/ChooseContactDialog";
 import { ImageScalingService } from "../Services/ImageScalingService";
 import { DownloadsService } from "../downloads/downloads.service";
+import { ViewPhotoService, ViewPhotoComponent } from "../Dialogs/ViewPhotoService";
+import { DeviceService } from "../Services/DeviceService";
 
 @NgModule({
   declarations: [
@@ -50,7 +52,8 @@ import { DownloadsService } from "../downloads/downloads.service";
     SearchListComponent,
     ViewAttachmentsDialogComponent,
     ForwardMessagesDialogComponent,
-    ChooseContactDialogComponent
+    ChooseContactDialogComponent,
+    ViewPhotoComponent
   ],
   imports: [
     ScrollDispatchModule,
@@ -72,7 +75,8 @@ import { DownloadsService } from "../downloads/downloads.service";
     UserInfoDialogComponent,
     ViewAttachmentsDialogComponent,
     ForwardMessagesDialogComponent,
-    ChooseContactDialogComponent],
+    ChooseContactDialogComponent,
+    ViewPhotoComponent],
 
   providers: [
     ConversationsFormatter,
@@ -86,6 +90,8 @@ import { DownloadsService } from "../downloads/downloads.service";
     ThemesService,
     { provide: HTTP_INTERCEPTORS, useClass: HttpResponseInterceptor, multi: true },
     ImageScalingService,
-    DownloadsService]
+    DownloadsService,
+    ViewPhotoService,
+    DeviceService]
 })
 export class ChatModule { }

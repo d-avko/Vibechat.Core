@@ -1,4 +1,4 @@
-import { Component, Inject, EventEmitter, Input, Output } from "@angular/core";
+import { Component, Inject, EventEmitter, Input, Output, ViewContainerRef } from "@angular/core";
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from "@angular/material";
 import { ChatComponent } from "../Chat/chat.component";
 import { UserInfo } from "../Data/UserInfo";
@@ -9,6 +9,7 @@ import { ChatsService } from "../Services/ChatsService";
 import { UsersService } from "../Services/UsersService";
 import { ViewAttachmentsDialogComponent } from "./ViewAttachmentsDialog";
 import { AuthService } from "../Auth/AuthService";
+import { ViewPhotoService } from "./ViewPhotoService";
 
 export interface UserInfoData {
   user: UserInfo;
@@ -29,12 +30,16 @@ export class UserInfoDialogComponent {
     public formatter: ConversationsFormatter,
     public conversationsService: ChatsService,
     public usersService: UsersService,
-    public auth: AuthService
+    public auth: AuthService,
+    public viewContainerRef: ViewContainerRef,
+    public photos: ViewPhotoService
   ){
     //this check is needed for changes in name/lastname to be displayed correctly.
     if (this.data.user.id == auth.User.id) {
       this.data.user = auth.User;
     }
+
+    this.photos.viewContainerRef = this.viewContainerRef;
   }
 
   public HasConversationWith(): boolean {
@@ -66,6 +71,10 @@ export class UserInfoDialogComponent {
 
   public async AddToContacts() {
     await this.usersService.AddToContacts(this.data.user);
+  }
+
+  public ViewPicture() {
+    this.photos.ViewProfilePicture(this.data.user.fullImageUrl);
   }
 
   public ViewAttachments() {

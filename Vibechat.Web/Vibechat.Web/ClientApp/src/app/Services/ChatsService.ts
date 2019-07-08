@@ -19,6 +19,9 @@ import { E2EencryptionService } from "../Encryption/E2EencryptionService";
 import { DHServerKeyExchangeService } from "../Encryption/DHServerKeyExchange";
 import { MessageReportingService } from "./MessageReportingService";
 import { ImageScalingService } from "./ImageScalingService";
+import { UAParser } from "ua-parser-js";
+import { ChatComponent } from "../Chat/chat.component";
+import { DeviceService } from "./DeviceService";
 
 @Injectable({
   providedIn: 'root'
@@ -33,7 +36,8 @@ export class ChatsService {
     private encryptionService: E2EencryptionService,
     private messagesService: MessageReportingService,
     private dh: DHServerKeyExchangeService,
-    private images: ImageScalingService)
+    private images: ImageScalingService,
+    private device: DeviceService)
   {
     this.connectionManager.setConversationsService(this);
     this.PendingReadMessages = new Array<number>();
@@ -250,7 +254,7 @@ export class ChatsService {
       //delete secure chats where we've lost auth keys
       if (x.isSecure) {
 
-        if (x.authKeyId && !this.secureChatsService.AuthKeyExists(x.authKeyId)) {
+        if (this.device.GetDeviceId().toString() == x.deviceId && x.authKeyId && !this.secureChatsService.AuthKeyExists(x.authKeyId)) {
           toDeleteIndexes.push(index);
         } else {
 
@@ -417,8 +421,16 @@ export class ChatsService {
     this.RemoveGroup(chat);
   }
 
+  public IsSecureChatAndNoAuthKey(chat: ConversationTemplate) {
+    return chat.isSecure && !chat.authKeyId;
+  }
+
   public SendMessage(message: string, to: ConversationTemplate) {
     let messageToSend = this.BuildMessage(message, to.conversationID);
+
+    if (this.IsSecureChatAndNoAuthKey(to)) {
+      return;
+    }
 
     to.messages.push(
       messageToSend
@@ -528,6 +540,10 @@ export class ChatsService {
 
     destination.forEach(
       (conversation) => {
+
+        if (this.IsSecureChatAndNoAuthKey(conversation)) {
+          return;
+        }
 
         messages.forEach(msg => {
           let messageToSend = this.BuildForwardedMessage(conversation.conversationID, msg.forwardedMessage ? msg.forwardedMessage : msg);

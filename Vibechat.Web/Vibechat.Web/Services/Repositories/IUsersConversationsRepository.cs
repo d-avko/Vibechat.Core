@@ -6,7 +6,7 @@ namespace Vibechat.Web.Services.Repositories
 {
     public interface IUsersConversationsRepository
     {
-        Task<UsersConversationDataModel> Add(string userId, int chatId);
+        Task<UsersConversationDataModel> Add(string userId, int chatId, string deviceId = null);
         Task<UsersConversationDataModel> Get(string userId, int conversationId);
         IQueryable<AppUser> GetConversationParticipants(int conversationId);
         IQueryable<ConversationDataModel> GetUserConversations(string userId);

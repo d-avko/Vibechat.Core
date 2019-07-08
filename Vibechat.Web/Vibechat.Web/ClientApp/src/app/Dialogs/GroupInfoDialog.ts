@@ -1,4 +1,4 @@
-import { Component, Inject, EventEmitter } from "@angular/core";
+import { Component, Inject, EventEmitter, ViewContainerRef } from "@angular/core";
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from "@angular/material";
 import { ChatComponent } from "../Chat/chat.component";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
@@ -8,6 +8,8 @@ import { ChangeNameDialogComponent } from "./ChangeNameDialog";
 import { FindUsersDialogComponent } from "./FindUsersDialog";
 import { ChatsService } from "../Services/ChatsService";
 import { ViewAttachmentsDialogComponent } from "./ViewAttachmentsDialog";
+import { ViewPhotoService } from "./ViewPhotoService";
+import { ViewContainerData } from "@angular/core/src/view";
 
 export interface  GroupInfoData {
   Conversation: ConversationTemplate;
@@ -33,7 +35,9 @@ export class GroupInfoDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: GroupInfoData,
     public formatter: ConversationsFormatter,
     public conversationsService: ChatsService,
-    public ChangeNameDialog: MatDialog) { }
+    public ChangeNameDialog: MatDialog,
+    public photos: ViewPhotoService,
+    public viewContainerRef: ViewContainerRef) { this.photos.viewContainerRef = this.viewContainerRef }
 
   public ViewUserInfo(user: UserInfo) {
     this.OnViewUserInfo.emit(user);
@@ -81,6 +85,10 @@ export class GroupInfoDialogComponent {
         conversation: this.data.Conversation
       }
     });
+  }
+
+  public ViewPicture() {
+    this.photos.ViewProfilePicture(this.data.Conversation.fullImageUrl);
   }
 
   public IsCurrentUserCreatorOfConversation() {

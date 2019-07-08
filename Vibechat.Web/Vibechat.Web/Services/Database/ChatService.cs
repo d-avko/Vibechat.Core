@@ -121,7 +121,7 @@ namespace Vibechat.Web.Services
             AppUser SecondDialogueUser = null;
             DhPublicKeyDataModel dhPublicKey = null;
 
-            string imageUrl;
+            string imageUrl = string.Empty;
 
             if (!credentials.IsGroup)
             {
@@ -132,8 +132,6 @@ namespace Vibechat.Web.Services
                 {
                     throw defaultError;
                 }
-
-                imageUrl = credentials.ImageUrl ?? chatDataProvider.GetProfilePictureUrl();
 
                 if (credentials.IsSecure)
                 {
@@ -167,7 +165,7 @@ namespace Vibechat.Web.Services
                     await usersConversationsRepository.Add(credentials.DialogUserId, ConversationToAdd.Id);
                 }
 
-                await usersConversationsRepository.Add(credentials.CreatorId, ConversationToAdd.Id);
+                await usersConversationsRepository.Add(credentials.CreatorId, ConversationToAdd.Id, credentials.DeviceId);
             }
             catch (Exception ex)
             {
@@ -177,7 +175,7 @@ namespace Vibechat.Web.Services
             }
 
             return ConversationToAdd.ToConversationTemplate(
-                await GetParticipants(new GetParticipantsApiModel() { ConvId = ConversationToAdd.Id }),
+                credentials.IsGroup ? null : new List<UserInfo>() { user.ToUserInfo() },
                 null,
                 SecondDialogueUser,
                 dhPublicKey
@@ -453,7 +451,7 @@ namespace Vibechat.Web.Services
                 returnData.Add
                     (
                     conversation.ToConversationTemplate(
-                         await GetParticipants(new GetParticipantsApiModel() { ConvId = conversation.Id }),
+                         conversation.IsGroup ? null : await GetParticipants(new GetParticipantsApiModel() { ConvId = conversation.Id }),
                          //only get last message here, client should fetch messages after he opened the conversation.
                          await GetMessages(new GetMessagesApiModel() { ConversationID = conversation.Id, Count = 1, MesssagesOffset = 0 }, whoAccessedId),
                          DialogUser,

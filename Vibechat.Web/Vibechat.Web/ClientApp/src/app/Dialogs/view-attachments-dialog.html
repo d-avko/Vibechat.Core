@@ -1,5 +1,5 @@
 <h1 mat-dialog-title>Attachments</h1>
-<mat-tab-group>
+<mat-tab-group (selectedTabChange)="TabChanged($event)">
 
   <mat-tab>
 
@@ -10,7 +10,7 @@
 
     <!--Photos-->
 
-    <cdk-virtual-scroll-viewport (scrolledIndexChange)="OnAttachmentsScrolled($event)"
+    <cdk-virtual-scroll-viewport (scrolledIndexChange)="OnPhotosScrolled($event)"
                                  minBufferPx="120000"
                                  maxBufferPx="250000"
                                  itemSize="50"
@@ -26,14 +26,14 @@
 
           <div *ngFor="let photo of photosInWeek">
 
-            <div class="photo_thumbnail_wrapper" (click)="ViewPhoto(photo.attachmentInfo)">
+            <div class="photo_thumbnail_wrapper" (click)="ViewPhoto($event, photo)">
               <img class="photo" src="{{photo.attachmentInfo.contentUrl}}" />
             </div>
 
           </div>
 
         </div>
-                                                            <!--Last in the list-->
+        <!--Last in the list-->
         <mat-progress-spinner *ngIf="PhotosLoading && PhotosWeeks[PhotosWeeks.length - 1] == photosInWeek"
                               class="load-spinner"
                               diameter="30"
@@ -43,19 +43,81 @@
 
       </div>
 
-</cdk-virtual-scroll-viewport>
+    </cdk-virtual-scroll-viewport>
+
+  </mat-tab>
+
+  <mat-tab>
+
+    <ng-template mat-tab-label>
+      <mat-icon class="example-tab-icon">insert_drive_file</mat-icon>
+      Files
+    </ng-template>
+
+    <!--Photos-->
+
+    <cdk-virtual-scroll-viewport (scrolledIndexChange)="OnFilesScrolled($event)"
+                                 minBufferPx="120000"
+                                 maxBufferPx="250000"
+                                 itemSize="50"
+                                 class="files_scrollable">
+
+      <div *cdkVirtualFor="let filesInWeek of FilesWeeks">
+
+        <div class="photos_break">
+          <span class="photos_break__date">{{formatter.GetFormattedDateForAttachments(filesInWeek)}}</span>
+        </div>
+
+        <div class="files_wrapper">
+
+          <div *ngFor="let file of filesInWeek">
+
+            <div class="file_info_wrapper">
+                  <div class="file-name">
+                    <a (click)="DownloadFile($event)" class="file-name_text" href="{{file.attachmentInfo.contentUrl}}" download>{{file.attachmentInfo.attachmentName}}</a>
+                  </div>
+
+                  <div class="file-size">
+                    <p class="file-size_text">{{formatter.GetBytesAmountFormatted(file.attachmentInfo.fileSize)}}</p>
+                  </div>
+            </div>
+
+          </div>
+
+        </div>
+        <!--Last in the list-->
+        <mat-progress-spinner *ngIf="FilesLoading && FilesWeeks[FilesWeeks.length - 1] == filesInWeek"
+                              class="load-spinner"
+                              diameter="30"
+                              color="Primary"
+                              mode="indeterminate">
+        </mat-progress-spinner>
+
+      </div>
+
+    </cdk-virtual-scroll-viewport>
 
   </mat-tab>
 
 </mat-tab-group>
 
 <style>
+  a{
+  text-decoration: none;
+  color: inherit;
+}
 
+  .files_wrapper,
   .photos_wrapper{
     display: flex;
     flex-direction: row;
     flex-wrap:wrap;
   }
+
+  .files_wrapper{
+    justify-content: center;
+  }
+
   .photos_break{
     padding: 20px;
   }
@@ -74,12 +136,71 @@
     padding: 5px;
     height:50px;
   }
+
+  .file_info_wrapper{
+    padding: 10px;
+    height: 50px;
+    width: 80%;
+    background-color: cadetblue;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+
   .photo{
    width: 50px;
    height: 50px;
    border-radius: 5px;
   }
+  .files_scrollable,
   .photos_scrollable{
-    height:450px;
+    height:350px;
+  }
+
+  .file-wrapper_info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .file-name_text {
+    font: 500 14px/18px Roboto,"Helvetica Neue",sans-serif;
+    word-break: break-word;
+  }
+
+  .file-size_text {
+    font: 300 12px/14px Roboto,"Helvetica Neue",sans-serif;
+    margin: 0;
+    color: midnightblue;
+  }
+
+  .file-wrapper_iconwrapper {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .file-wrapper {
+    display: flex;
+    flex-direction: row;
+    width: 54vw;
+    margin-right: 20px;
+  }
+
+  .file-wrapper_iconwrapper {
+    cursor: pointer;
+    margin-right: 2.5%;
+    margin-top: 2.5%;
+  }
+
+  .file-icon {
+    background-color: #335657;
+    border-radius: 20px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .file-icon_icon {
+    color: cadetblue;
   }
 </style>

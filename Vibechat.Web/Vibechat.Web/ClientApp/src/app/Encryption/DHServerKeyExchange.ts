@@ -1,13 +1,12 @@
-import { AuthService } from "../Auth/AuthService";
 import { ConnectionManager } from "../Connections/ConnectionManager";
-import { Injectable, EventEmitter } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { ChatsService } from "../Services/ChatsService";
 import { SecureChatsService } from "./SecureChatsService";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { E2EencryptionService } from "./E2EencryptionService";
 import * as biginteger from "big-integer";
-import { ChatComponent } from "../Chat/chat.component";
+import { DeviceService } from "../Services/DeviceService";
 
 class DictionaryEntry<K, V> {
   public constructor(init?: Partial<DictionaryEntry<K, V>>) {
@@ -36,7 +35,8 @@ export class DHServerKeyExchangeService {
     private secureChatsService: SecureChatsService,
     private enc: E2EencryptionService,
     private connectionManager: ConnectionManager,
-    private api: ApiRequestsBuilder) {
+    private api: ApiRequestsBuilder,
+    private device: DeviceService) {
     this.connectionManager.setDHServerKeyExchangeService(this);
   }
 
@@ -81,7 +81,7 @@ export class DHServerKeyExchangeService {
 
   public async OnIntermidiateParamsReceived(s: string, sentBy: string, chatId: number) {
 
-    if (!ChatComponent.isSecureChatsSupported) {
+    if (!this.device.isSecureChatsSupported) {
       return;
     }
 

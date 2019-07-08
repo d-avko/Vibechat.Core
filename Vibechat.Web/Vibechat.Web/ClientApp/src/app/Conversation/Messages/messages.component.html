@@ -45,7 +45,10 @@
             <!--Attachments-->
 
             <div *ngIf="IsImage(message)" class="image_attachment">
-              <img class="message_attachment--image" [style.width.px]="message.attachmentInfo.imageWidth" [style.height.px]="message.attachmentInfo.imageHeight" src="{{message.attachmentInfo.contentUrl}}" />
+              <img class="message_attachment--image"
+                   (click)="ViewImage($event, message)"
+                   [style.width.px]="message.attachmentInfo.imageWidth"
+                   [style.height.px]="message.attachmentInfo.imageHeight" src="{{message.attachmentInfo.contentUrl}}" />
             </div>
 
             <!--Audio / archive / etc-->
@@ -125,65 +128,6 @@
                 color: cadetblue;
               }
             </style>
-            <!--Forwarded message-->
-            <div *ngIf="message.forwardedMessage" class="forwarded_message">
-
-              <div>
-
-                <div class="messages_message_content" [ngClass]="{'selected-message-dark': IsMessageSelected(message) && IsDarkTheme(), 'selected-message-light': IsMessageSelected(message) && !IsDarkTheme()}">
-
-                  <div style="width: 35px; height: 35px; margin-right: 15px; cursor:pointer" (click)="ViewUserInfo($event, message.forwardedMessage.user)">
-                    <img class="rounded-chat-image" src="{{message.forwardedMessage.user.imageUrl}}" />
-                  </div>
-
-                  <div class="content_messageAndName">
-                    <span class="message_header">{{message.forwardedMessage.user.userName}}</span>
-
-                    <p *ngIf="! message.forwardedMessage.isAttachment" class="message_text">{{message.forwardedMessage.messageContent}}</p>
-
-                    <!--Attachments-->
-
-                    <div *ngIf="IsImage(message.forwardedMessage)" class="image_attachment">
-                      <img class="message_attachment--image"
-                           [style.width.px]="message.forwardedMessage.attachmentInfo.imageWidth"
-                           [style.height.px]="message.forwardedMessage.attachmentInfo.imageHeight"
-                           src="{{message.forwardedMessage.attachmentInfo.contentUrl}}" />
-                    </div>
-
-                    <!--Audio / archive / etc-->
-
-                    <div *ngIf="IsFile(message)" class="file_attachment">
-                      <div class="file-wrapper">
-
-                        <div class="file-wrapper_iconwrapper">
-
-                          <div class="file-icon">
-                            <mat-icon class="file-icon_icon">insert_drive_file</mat-icon>
-                          </div>
-
-                        </div>
-
-                        <div class="file-wrapper_info">
-
-                          <div class="file-name">
-                            <a (click)="DownloadFile($event)" class="file-name_text" href="{{message.attachmentInfo.contentUrl}}" download>{{message.attachmentInfo.attachmentName}}</a>
-                          </div>
-
-                          <div class="file-size">
-                            <p class="file-size_text">{{formatter.GetBytesAmountFormatted(message.attachmentInfo.fileSize)}}</p>
-                          </div>
-
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <span class="message_timereceived" [ngClass]="{'message_timereceived-dark': IsDarkTheme(), 'message_timereceived-light': !IsDarkTheme()}">{{formatter.GetMessageTimeFormatted(message.forwardedMessage)}}</span>
-                </div>
-              </div>
-
-            </div>
-            <!--Forwarded message end-->
           </div>
 
           <div class="time-and-states-wrapper">
@@ -206,6 +150,70 @@
           </div>
         </div>
 
+        <!--Forwarded message-->
+        <div *ngIf="message.forwardedMessage" class="forwarded_message">
+
+          <div>
+
+            <div class="messages_message_content" [ngClass]="{'selected-message-dark': IsMessageSelected(message) && IsDarkTheme(), 'selected-message-light': IsMessageSelected(message) && !IsDarkTheme()}">
+
+              <div class="forwarded_message_break">
+
+              </div>
+
+              <div style="width: 35px; height: 35px; margin-right: 15px; cursor:pointer" (click)="ViewUserInfo($event, message.forwardedMessage.user)">
+                <img class="rounded-chat-image" src="{{message.forwardedMessage.user.imageUrl}}" />
+              </div>
+
+              <div class="content_messageAndName">
+                <span class="message_header">{{message.forwardedMessage.user.userName}}</span>
+
+                <p *ngIf="! message.forwardedMessage.isAttachment" class="message_text">{{message.forwardedMessage.messageContent}}</p>
+
+                <!--Attachments-->
+
+                <div *ngIf="IsImage(message.forwardedMessage)" class="image_attachment">
+                  <img class="message_attachment--image"
+                       (click)="ViewImage($event, message.forwardedMessage)"
+                       [style.width.px]="message.forwardedMessage.attachmentInfo.imageWidth"
+                       [style.height.px]="message.forwardedMessage.attachmentInfo.imageHeight"
+                       src="{{message.forwardedMessage.attachmentInfo.contentUrl}}" />
+                </div>
+
+                <!--Audio / archive / etc-->
+
+                <div *ngIf="IsFile(message)" class="file_attachment">
+                  <div class="file-wrapper">
+
+                    <div class="file-wrapper_iconwrapper">
+
+                      <div class="file-icon">
+                        <mat-icon class="file-icon_icon">insert_drive_file</mat-icon>
+                      </div>
+
+                    </div>
+
+                    <div class="file-wrapper_info">
+
+                      <div class="file-name">
+                        <a (click)="DownloadFile($event)" class="file-name_text" href="{{message.attachmentInfo.contentUrl}}" download>{{message.attachmentInfo.attachmentName}}</a>
+                      </div>
+
+                      <div class="file-size">
+                        <p class="file-size_text">{{formatter.GetBytesAmountFormatted(message.attachmentInfo.fileSize)}}</p>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <span class="message_timereceived" [ngClass]="{'message_timereceived-dark': IsDarkTheme(), 'message_timereceived-light': !IsDarkTheme()}">{{formatter.GetMessageTimeFormatted(message.forwardedMessage)}}</span>
+            </div>
+          </div>
+
+        </div>
+        <!--Forwarded message end-->
       </div>
 
     </div>

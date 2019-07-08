@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vibechat.Web", "Vibechat.We
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Vibechat.Web.Data", "Vibechat.Web.Data\Vibechat.Web.Data.shproj", "{3F7C5F2D-0E46-4D20-8E94-55F1F2DED94A}"
 EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{76947FCB-DCC9-4299-A0DD-88AD2E0C2463}"
-EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Vibechat.Web.Data\Vibechat.Web.Data.projitems*{3f7c5f2d-0e46-4d20-8e94-55f1f2ded94a}*SharedItemsImports = 13
@@ -22,10 +20,6 @@ Global
 		{67F783F8-99F9-47EC-8414-80B9E6709543}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{67F783F8-99F9-47EC-8414-80B9E6709543}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{67F783F8-99F9-47EC-8414-80B9E6709543}.Release|Any CPU.Build.0 = Release|Any CPU
-		{76947FCB-DCC9-4299-A0DD-88AD2E0C2463}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{76947FCB-DCC9-4299-A0DD-88AD2E0C2463}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{76947FCB-DCC9-4299-A0DD-88AD2E0C2463}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{76947FCB-DCC9-4299-A0DD-88AD2E0C2463}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
