@@ -183,7 +183,7 @@ namespace VibeChat.Web
                 if (conversation.IsGroup)
                 {
                     List<UserInfo> participants = await chatsService
-                        .GetParticipants(new GetParticipantsApiModel() { ConvId = conversation.ConversationID });
+                        .GetParticipants(conversation.ConversationID);
 
                     foreach (UserInfo user in participants)
                     {

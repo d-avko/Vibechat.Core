@@ -72,7 +72,7 @@ namespace Vibechat.Web.Services
 
         #region Conversations
 
-        public async Task UpdateAuthKey(int chatId, string authKeyId, string thisUserId)
+        public async Task UpdateAuthKey(int chatId, string authKeyId, string deviceId, string thisUserId)
         {
             if(!await ExistsInConversation(chatId, thisUserId))
             {
@@ -87,6 +87,7 @@ namespace Vibechat.Web.Services
             }
 
             await conversationRepository.UpdateAuthKey(chat, authKeyId);
+            usersConversationsRepository.UpdateDeviceId(deviceId, thisUserId, chatId);
         }
 
         public async Task<ConversationTemplate> CreateConversation(CreateConversationCredentialsApiModel credentials)
@@ -175,10 +176,11 @@ namespace Vibechat.Web.Services
             }
 
             return ConversationToAdd.ToConversationTemplate(
-                credentials.IsGroup ? null : new List<UserInfo>() { user.ToUserInfo() },
+                credentials.IsGroup ? new List<UserInfo>() { user.ToUserInfo() } : null,
                 null,
                 SecondDialogueUser,
-                dhPublicKey
+                dhPublicKey,
+                credentials.DeviceId
                 );
         }
 
@@ -216,7 +218,7 @@ namespace Vibechat.Web.Services
             {
                 image.CopyTo(buffer);
                 buffer.Seek(0, SeekOrigin.Begin);
-                var thumbnailFull = ImagesService.SaveProfileOrChatPicture(buffer, image.FileName, conversationId.ToString(), userId);
+                var thumbnailFull = await ImagesService.SaveProfileOrChatPicture(image, buffer, image.FileName, conversationId.ToString(), userId);
 
                 conversationRepository.UpdateThumbnail(thumbnailFull.Item1, thumbnailFull.Item2, conversation);
             }
@@ -305,10 +307,11 @@ namespace Vibechat.Web.Services
             {
                 result.Add(
                     conversation.ToConversationTemplate(
-                        await GetParticipants(new GetParticipantsApiModel() { ConvId = conversation.Id }),
-                        await GetMessages(new GetMessagesApiModel() { ConversationID = conversation.Id, Count = 1, MesssagesOffset = 0 }, whoAccessedId),
+                        await GetParticipants(conversation.Id),
+                        await GetMessages(conversation.Id, offset: 0, count: 1, whoAccessedId),
                         null,
-                        conversation.PublicKey
+                        conversation.PublicKey,
+                        null
                     ));
             }
 
@@ -451,11 +454,12 @@ namespace Vibechat.Web.Services
                 returnData.Add
                     (
                     conversation.ToConversationTemplate(
-                         conversation.IsGroup ? null : await GetParticipants(new GetParticipantsApiModel() { ConvId = conversation.Id }),
+                         conversation.IsGroup ? await GetParticipants(conversation.Id) : null,
                          //only get last message here, client should fetch messages after he opened the conversation.
-                         await GetMessages(new GetMessagesApiModel() { ConversationID = conversation.Id, Count = 1, MesssagesOffset = 0 }, whoAccessedId),
+                         await GetMessages(conversation.Id, offset: 0, count: 1, whoAccessedId),
                          DialogUser,
-                         conversation.PublicKey
+                         conversation.PublicKey,
+                         conversation.IsSecure ? await GetDeviceId(conversation.Id, whoAccessedId) : null
                          )
                     );
             }
@@ -464,31 +468,31 @@ namespace Vibechat.Web.Services
 
         }
 
+        private async Task<string> GetDeviceId(int chatId, string userId)
+        {
+            var chat = await usersConversationsRepository.Get(userId, chatId);
+            return chat.DeviceId;
+        }
 
-        public async Task<List<UserInfo>> GetParticipants(GetParticipantsApiModel convInfo)
+        public async Task<List<UserInfo>> GetParticipants(int chatId)
         {
             var defaultErrorMessage = new FormatException("Wrong conversation was provided.");
 
-            if (convInfo == null)
-            {
-                throw defaultErrorMessage;
-            }
-
-            var conversation = conversationRepository.GetById(convInfo.ConvId);
+            var conversation = conversationRepository.GetById(chatId);
 
             if (conversation == null)
             {
                 throw defaultErrorMessage;
             }
 
-            var participants = usersConversationsRepository.GetConversationParticipants(convInfo.ConvId);
+            var participants = usersConversationsRepository.GetConversationParticipants(chatId);
 
             return (from participant in participants
                     select participant.ToUserInfo()
                                ).ToList();
         }
 
-        public async Task<List<Message>> GetMessages(GetMessagesApiModel convInfo, string whoAccessedId)
+        public async Task<List<Message>> GetMessages(int chatId, int offset, int count, string whoAccessedId)
         {
             var defaultErrorMessage = new FormatException("Wrong conversation was provided.");
 
@@ -499,35 +503,28 @@ namespace Vibechat.Web.Services
                 return null;
             }
 
-            if (convInfo == null)
-                throw defaultErrorMessage;
-
-            var conversation = conversationRepository.GetById(convInfo.ConversationID);
+            var conversation = conversationRepository.GetById(chatId);
 
             if (conversation == null)
+            {
                 throw defaultErrorMessage;
+            }
 
-            var members = usersConversationsRepository.GetConversationParticipants(convInfo.ConversationID);
+            var members = usersConversationsRepository.GetConversationParticipants(chatId);
 
             //only member of conversation could request messages of non-public conversation.
 
             if (members.FirstOrDefault(x => x.Id == whoAccessedId) == null && !conversation.IsPublic)
+            {
                 throw unAuthorizedError;
+            }
 
             var messages = messagesRepository.Get(
                 whoAccessedId,
-                convInfo.ConversationID,
+                chatId,
                 false,
-                convInfo.MesssagesOffset,
-                convInfo.Count)
-                .Include(x => x.AttachmentInfo)
-                .ThenInclude(x => x.AttachmentKind)
-                .Include(x => x.User)
-                .Include(x => x.ForwardedMessage)
-                .ThenInclude(x => x.AttachmentInfo)
-                .ThenInclude(x => x.AttachmentKind)
-                .Include(x => x.ForwardedMessage)
-                .ThenInclude(x => x.User);
+                offset,
+                count);
 
             return (from msg in messages
                     select msg.ToMessage()).ToList();
@@ -539,6 +536,12 @@ namespace Vibechat.Web.Services
             return await usersConversationsRepository.Exists(userId, conversationsId);
         }
 
+        /// <summary>
+        /// Gets specified chat info by id. Doesn't support secure chats.
+        /// </summary>
+        /// <param name="conversationId"></param>
+        /// <param name="whoAccessedId"></param>
+        /// <returns></returns>
         public async Task<ConversationTemplate> GetById(int conversationId, string whoAccessedId)
         {
              
@@ -569,7 +572,7 @@ namespace Vibechat.Web.Services
                 }
             }
 
-            return conversation.ToConversationTemplate(members, null, dialogUser, conversation.PublicKey);
+            return conversation.ToConversationTemplate(members, null, dialogUser, conversation.PublicKey, null);
         }
 
         public async Task<ConversationTemplate> GetByIdSimplified(int conversationId, string whoAccessedId)

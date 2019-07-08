@@ -58,7 +58,8 @@ namespace Vibechat.Web.Extensions
             List<UserInfo> participants,
             List<Message> messages,
             AppUser dialogUser,
-            DhPublicKeyDataModel key)
+            DhPublicKeyDataModel key,
+            string deviceId)
         {
             return new ConversationTemplate()
             {
@@ -74,7 +75,7 @@ namespace Vibechat.Web.Extensions
                 AuthKeyId = value.AuthKeyId,
                 IsSecure = value.IsSecure,
                 PublicKey = key?.ToDhPublicKey(),
-                DeviceId = value.DeviceId
+                DeviceId = deviceId
             };
         }
 

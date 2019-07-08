@@ -26,7 +26,7 @@ export class ViewPhotoInjector extends Injector {
 
 }
 
-class ViewPhotoData {
+export class ViewPhotoData {
   photo: ChatMessage;
   url: string;
   imageName: string;
@@ -97,9 +97,9 @@ export class ViewPhotoService {
   templateUrl: 'view-photo.component.html'
 })
 export class ViewPhotoComponent {
-  constructor(@Inject(ViewPhotoData) private data: ViewPhotoData,
-    private images: ImageScalingService,
-    private chats: ChatsService,
+  constructor(@Inject(ViewPhotoData) public data: ViewPhotoData,
+    public images: ImageScalingService,
+    public chats: ChatsService,
     public dialog: MatDialog) {
 
     let dimensions = this.images.AdjustFullSizedImageDimensions(data.width, data.heigth);

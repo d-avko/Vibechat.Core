@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -31,7 +32,7 @@ namespace Vibechat.Web.Services.FileSystem
         /// <param name="additionalPathString">string to insert between filename and extension</param>
         /// <param name="folder">folder to save to. Assumes it's created</param>
         /// <returns></returns>
-        public string SaveFile(MemoryStream file, string filename, string chatOrUserId, string sender, string additionalPathString = null, string folder = null)
+        public async Task<string> SaveFile(IFormFile formFile, MemoryStream file, string filename, string chatOrUserId, string sender, string additionalPathString = null, string folder = null)
         {
             var builder = new StringBuilder();
 
@@ -70,19 +71,28 @@ namespace Vibechat.Web.Services.FileSystem
                 resultPath = builder.ToString();
             }
 
-            using (var fStream = new FileStream(resultPath, FileMode.Create))
+            
+            await SaveToStorage(formFile, file, resultPath);
+
+            return resultPath;
+        }
+
+        public async virtual Task SaveToStorage(IFormFile formFile, MemoryStream file, string path)
+        {
+            using (var fStream = new FileStream(path, FileMode.Create))
             {
                 file.CopyTo(fStream);
             }
-
-            return resultPath;
         }
 
         public string GetUniquePath(string sender, string chatOrUserId, string name)
         {
             var first = PathsProvider.GetUniquePath(sender);
+            first = first.Substring(first.Length / 2);
             var second = PathsProvider.GetUniquePath(chatOrUserId);
+            second = second.Substring(second.Length / 2);
             var third = PathsProvider.GetUniquePath(name);
+            third = third.Substring(third.Length / 2);
 
             return first + second + third;
         }

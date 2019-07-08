@@ -183,6 +183,8 @@ export class ChatsService {
 
     //append old messages to new ones.
     chat.messages = [...result.response.concat(chat.messages)];
+
+    return result.response;
   }
 
   private DecryptedMessageToLocalMessage(container: ChatMessage, decrypted: ChatMessage) {
@@ -250,10 +252,17 @@ export class ChatsService {
       })
 
     let toDeleteIndexes = [];
-    response.response.forEach((x, index) => {
-      //delete secure chats where we've lost auth keys
+    response.response.forEach(async (x, index) => {
       if (x.isSecure) {
 
+        //deviceId is not set, fix it.
+
+        if (x.authKeyId && this.secureChatsService.AuthKeyExists(x.authKeyId) && !x.deviceId) {
+          await this.requestsBuilder.UpdateAuthKeyId(x.authKeyId, x.conversationID, this.device.GetDeviceId());
+          x.deviceId = this.device.GetDeviceId();
+        }
+          
+        //delete secure chats where we've lost auth keys
         if (this.device.GetDeviceId().toString() == x.deviceId && x.authKeyId && !this.secureChatsService.AuthKeyExists(x.authKeyId)) {
           toDeleteIndexes.push(index);
         } else {
@@ -305,6 +314,7 @@ export class ChatsService {
     });
 
   }
+
 
   public OnMessageReceived(data: MessageReceivedModel): void {
     let conversation = this.Conversations
