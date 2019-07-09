@@ -26,7 +26,6 @@ namespace Vibechat.FileServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddScoped<AdminSafeListMiddleware, AdminSafeListMiddleware>();
-          //  AdminSafeListMiddleware._adminSafeList = Configuration["AdminSafeList"];
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
@@ -35,10 +34,10 @@ namespace Vibechat.FileServer
             app.UseHttpsRedirection();
 
             app.UseStaticFiles(new StaticFileOptions() {
-                 FileProvider = new PhysicalFileProvider(Configuration["ContentPath"], ExclusionFilters.None)
+                FileProvider = new PhysicalFileProvider(Configuration["ContentPath"], ExclusionFilters.None),                
             });
 
-         //   app.UseMiddleware<AdminSafeListMiddleware>();
+            app.UseMiddleware<AdminSafeListMiddleware>();
 
             app.UseMvc(routes =>
             {

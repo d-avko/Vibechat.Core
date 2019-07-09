@@ -39,6 +39,6 @@
 }
 
 .login_card--logo {
-  background-image: url('/Assets/MainLogo.png');
+  background-image: url('https://fileserver.denisavko.me/Assets/MainLogo.png');
   background-size:cover;
 }

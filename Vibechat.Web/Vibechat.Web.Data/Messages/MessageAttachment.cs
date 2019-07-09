@@ -15,8 +15,14 @@ namespace Vibechat.Web.ChatData.Messages
 
         public string AttachmentKind { get; set; }
 
+        /// <summary>
+        /// This field is only used on client-side.
+        /// </summary>
         public int ImageWidth { get; set; }
 
+        /// <summary>
+        /// This field is only used on client-side.
+        /// </summary>
         public int ImageHeight { get; set; }
 
         public long FileSize { get; set; }
