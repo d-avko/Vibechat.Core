@@ -9,7 +9,6 @@ import { FindUsersDialogComponent } from "./FindUsersDialog";
 import { ChatsService } from "../Services/ChatsService";
 import { ViewAttachmentsDialogComponent } from "./ViewAttachmentsDialog";
 import { ViewPhotoService } from "./ViewPhotoService";
-import { ViewContainerData } from "@angular/core/src/view";
 
 export interface  GroupInfoData {
   Conversation: ConversationTemplate;
@@ -78,6 +77,15 @@ export class GroupInfoDialogComponent {
     await this.conversationsService.UnbanFromConversation(user, this.data.Conversation);
   }
 
+  public ResetInput(input: HTMLInputElement) {
+    input.value = '';
+
+    if (!/safari/i.test(navigator.userAgent)) {
+      input.type = '';
+      input.type = 'file';
+    }
+  }
+
   public ViewAttachments() {
     const attachmentsDialogRef = this.dialog.open(ViewAttachmentsDialogComponent, {
       width: '450px',
@@ -95,9 +103,9 @@ export class GroupInfoDialogComponent {
     return this.data.user.id == this.data.Conversation.creator.id;
   }
 
-  public async UpdateThumbnail(event: any) {
-    await this.conversationsService.ChangeThumbnail(event.target.files[0], this.data.Conversation);
-    event.target.files = null;
+  public async UpdateThumbnail(event: Event) {
+    await this.conversationsService.ChangeThumbnail((<HTMLInputElement>event.target).files[0], this.data.Conversation);
+    this.ResetInput(<HTMLInputElement>event.target);
   }
 
   public ChangeName() {

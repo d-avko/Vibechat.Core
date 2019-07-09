@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,12 @@ namespace Vibechat.FileServer
 {
     public class AdminSafeListMiddleware : IMiddleware
     {
-        public static string _adminSafeList;
+        private string _adminSafeList { get; set; }
+
+        public AdminSafeListMiddleware(IConfiguration config)
+        {
+            _adminSafeList = config["AdminSafeList"];
+        }
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {

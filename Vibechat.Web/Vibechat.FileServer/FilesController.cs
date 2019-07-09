@@ -21,15 +21,6 @@ namespace Vibechat.FileServer
             this.contentPath = configuration["ContentPath"];
         }
 
-        public class UploadFilesRequest
-        {
-            [FromForm(Name = "files")]
-            public ICollection<IFormFile> files { get; set; }
-
-            [FromForm(Name = "paths")]
-            public List<string> Paths { get; set; }
-        }
-
         public class UploadFileRequest
         {
             [FromForm(Name = "file")]
@@ -44,7 +35,7 @@ namespace Vibechat.FileServer
         {
             try
             {
-                request.Path = request.Path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+                request.Path = request.Path.Replace('\\', '/');
 
                 using (var stream = new MemoryStream())
                 {
