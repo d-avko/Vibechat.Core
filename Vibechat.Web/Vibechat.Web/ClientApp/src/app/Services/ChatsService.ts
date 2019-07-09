@@ -801,7 +801,7 @@ export class ChatsService {
     let response = await this.requestsBuilder.UploadImages(files, to.conversationID)
 
     if (!response.isSuccessfull) {
-      return;
+      this.messagesService.DisplayMessage("Some files were not uploaded.");
     }
 
     response.response.uploadedFiles.forEach(

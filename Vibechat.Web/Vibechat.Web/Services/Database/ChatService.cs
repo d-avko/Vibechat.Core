@@ -214,20 +214,28 @@ namespace Vibechat.Web.Services
                 throw new InvalidDataException($"Wrong conversation id was provided.");
             }
 
-            using (var buffer = new MemoryStream())
+            try
             {
-                image.CopyTo(buffer);
-                buffer.Seek(0, SeekOrigin.Begin);
-                var thumbnailFull = await ImagesService.SaveProfileOrChatPicture(image, buffer, image.FileName, conversationId.ToString(), userId);
+                using (var buffer = new MemoryStream())
+                {
+                    image.CopyTo(buffer);
+                    buffer.Seek(0, SeekOrigin.Begin);
+                    var thumbnailFull = await ImagesService.SaveProfileOrChatPicture(image, buffer, image.FileName, conversationId.ToString(), userId);
 
-                conversationRepository.UpdateThumbnail(thumbnailFull.Item1, thumbnailFull.Item2, conversation);
+                    conversationRepository.UpdateThumbnail(thumbnailFull.Item1, thumbnailFull.Item2, conversation);
+                }
+
+                return new UpdateThumbnailResponse()
+                {
+                    ThumbnailUrl = conversation.ThumbnailUrl,
+                    FullImageUrl = conversation.FullImageUrl
+                };
             }
-
-            return new UpdateThumbnailResponse()
+            catch (Exception ex)
             {
-                ThumbnailUrl = conversation.ThumbnailUrl,
-                FullImageUrl = conversation.FullImageUrl
-            };
+
+                throw new Exception("Failed to update chat image. Try different one." , ex);
+            }
         }
 
         public async Task<List<Message>> GetAttachments(string kind, int conversationId, string whoAccessedId, int offset, int count)

@@ -56,9 +56,7 @@ namespace Vibechat.Web.Services.FileSystem
 
                 image.Seek(0, SeekOrigin.Begin);
 
-                var resized = ImageCompression.Resize(image, resultDimensions.Item1, resultDimensions.Item2);
-
-                resized.Seek(0, SeekOrigin.Begin);  
+                MemoryStream resized = ImageCompression.Resize(image, resultDimensions.Item1, resultDimensions.Item2);
 
                 var imageNameWithoutExt = Path.GetFileNameWithoutExtension(imageName);
 
@@ -76,8 +74,7 @@ namespace Vibechat.Web.Services.FileSystem
                     AttachmentName = imageName,
                     ContentUrl = DI.Configuration["FileServer:Url"] + resultPath,
                     ImageHeight = resultDimensions.Item2,
-                    ImageWidth = resultDimensions.Item1,
-                    FileSize = image.Length
+                    ImageWidth = resultDimensions.Item1
                 };
             }
             catch (Exception ex)
@@ -86,7 +83,7 @@ namespace Vibechat.Web.Services.FileSystem
             }
         }
 
-        public async Task<MessageAttachment> SaveFile(IFormFile formFile, MemoryStream file, string filename, string chatOrUserId, string sender)
+        public async Task<MessageAttachment> SaveMessageFile(IFormFile formFile, MemoryStream file, string filename, string chatOrUserId, string sender)
         {
             try
             {
@@ -150,26 +147,30 @@ namespace Vibechat.Web.Services.FileSystem
 
                 var fileName = ContentDispositionHeaderValue.Parse(formFile.ContentDisposition).FileName.Trim('"');
 
-                using (var content = new MultipartFormDataContent())
+                var content = new MultipartFormDataContent
                 {
-                    content.Add(new StreamContent(file)
                     {
-                        Headers =
+                        new StreamContent(file)
                         {
-                            ContentLength = file.Length,
-                            ContentType = new MediaTypeHeaderValue(formFile.ContentType)
-                        }
-                    }, "file", fileName);
+                            Headers =
+                            {
+                                ContentLength = file.Length,
+                                ContentType = new MediaTypeHeaderValue(formFile.ContentType)
+                            }
+                        },
+                        "file",
+                        fileName
+                    },
 
-                    content.Add(new StringContent(path), "path");
+                    { new StringContent(path), "path" }
+                };
 
-                    //server responds with either true or false.
-                    HttpResponseMessage response = await client.PostAsync(DI.Configuration["FileServer:UploadFileUrl"], content);
+                //server responds with either true or false.
+                HttpResponseMessage response = await client.PostAsync(DI.Configuration["FileServer:UploadFileUrl"], content);
 
-                    if (!bool.Parse(await response.Content.ReadAsStringAsync()))
-                    {
-                        throw new InvalidDataException("Failed to upload this file.");
-                    }
+                if (!bool.Parse(await response.Content.ReadAsStringAsync()))
+                {
+                    throw new InvalidDataException("Failed to upload this file.");
                 }
             }
         }

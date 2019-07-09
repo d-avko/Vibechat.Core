@@ -179,22 +179,29 @@ namespace Vibechat.Web.Services.Users
 
             ValueTuple<string, string> thumbnailFull;
 
-            using (var buffer = new MemoryStream())
+            try
             {
-                image.CopyTo(buffer);
-                buffer.Seek(0, SeekOrigin.Begin);
+                using (var buffer = new MemoryStream())
+                {
+                    image.CopyTo(buffer);
+                    buffer.Seek(0, SeekOrigin.Begin);
 
-                //thumbnail; fullsized
-               thumbnailFull = await imagesService.SaveProfileOrChatPicture(image, buffer, image.FileName, userId, userId);
+                    //thumbnail; fullsized
+                    thumbnailFull = await imagesService.SaveProfileOrChatPicture(image, buffer, image.FileName, userId, userId);
 
-                await usersRepository.UpdateAvatar(thumbnailFull.Item1, thumbnailFull.Item2, userId);
+                    await usersRepository.UpdateAvatar(thumbnailFull.Item1, thumbnailFull.Item2, userId);
+                }
+
+                return new UpdateProfilePictureResponse()
+                {
+                    ThumbnailUrl = thumbnailFull.Item1,
+                    FullImageUrl = thumbnailFull.Item2
+                };
             }
-
-            return new UpdateProfilePictureResponse()
+            catch (Exception ex)
             {
-                ThumbnailUrl = thumbnailFull.Item1,
-                FullImageUrl = thumbnailFull.Item2
-            };
+                throw new Exception("Failed to update profile picture. Try different one.", ex);
+            }
         }
 
         public async Task<UsersByNickNameResultApiModel> FindUsersByNickName(UsersByNickNameApiModel credentials)
