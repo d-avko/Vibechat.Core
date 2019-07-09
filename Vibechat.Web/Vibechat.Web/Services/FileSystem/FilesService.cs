@@ -14,9 +14,9 @@ namespace Vibechat.Web.Services.FileSystem
 {
     public class FilesService : AbstractFilesService
     {
-        private static int MessageImageMaxWidth = 350;
+        private static int MessageImageMaxWidth = 800;
 
-        private static int MessageImageMaxHeight = 350;
+        private static int MessageImageMaxHeight = 800;
 
         private static int ThumbnailHeight = 140;
 
@@ -56,15 +56,25 @@ namespace Vibechat.Web.Services.FileSystem
 
                 image.Seek(0, SeekOrigin.Begin);
 
-                imageName = imageName.Length > MaxFileNameLength ? imageName.Substring(0, MaxFileNameLength) : imageName;
+                var resized = ImageCompression.Resize(image, resultDimensions.Item1, resultDimensions.Item2);
 
-                var resultPath = await base.SaveFile(formFile, image, imageName, chatOrUserId, sender);
+                resized.Seek(0, SeekOrigin.Begin);  
+
+                var imageNameWithoutExt = Path.GetFileNameWithoutExtension(imageName);
+
+                var extension = Path.GetExtension(imageName);
+
+                imageName = imageName.Length > MaxFileNameLength    
+                    ? imageNameWithoutExt.Substring(0, MaxFileNameLength - extension.Length) + extension
+                    : imageName;
+
+                var resultPath = await base.SaveFile(formFile, resized, imageName, chatOrUserId, sender);
 
                 return new MessageAttachment()
                 {
                     AttachmentKind = "img",
                     AttachmentName = imageName,
-                    ContentUrl = DI.Configuration["FileServer:Url"] + resultPath.Substring(StaticFilesLocation.Length),
+                    ContentUrl = DI.Configuration["FileServer:Url"] + resultPath,
                     ImageHeight = resultDimensions.Item2,
                     ImageWidth = resultDimensions.Item1,
                     FileSize = image.Length
@@ -88,7 +98,7 @@ namespace Vibechat.Web.Services.FileSystem
                 {
                     AttachmentKind = "file",
                     AttachmentName = filename,
-                    ContentUrl = DI.Configuration["FileServer:Url"] + resultPath.Substring(StaticFilesLocation.Length),
+                    ContentUrl = DI.Configuration["FileServer:Url"] + resultPath,
                     FileSize = file.Length
                 };
             }
@@ -123,8 +133,8 @@ namespace Vibechat.Web.Services.FileSystem
                 resized.Dispose();
 
                 return new ValueTuple<string, string>(
-                    DI.Configuration["FileServer:Url"] + compressedFileName.Substring(StaticFilesLocation.Length),
-                    DI.Configuration["FileServer:Url"] + uncompressedFileName.Substring(StaticFilesLocation.Length));
+                    DI.Configuration["FileServer:Url"] + compressedFileName,
+                    DI.Configuration["FileServer:Url"] + uncompressedFileName);
             }
             catch (Exception ex)
             {
@@ -142,7 +152,7 @@ namespace Vibechat.Web.Services.FileSystem
 
                 using (var content = new MultipartFormDataContent())
                 {
-                    content.Add(new StreamContent(formFile.OpenReadStream())
+                    content.Add(new StreamContent(file)
                     {
                         Headers =
                         {

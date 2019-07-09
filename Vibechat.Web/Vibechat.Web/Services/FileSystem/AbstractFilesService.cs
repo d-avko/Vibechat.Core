@@ -13,8 +13,6 @@ namespace Vibechat.Web.Services.FileSystem
     {
         protected static string FilesLocationRelative = "Uploads/";
 
-        protected static string StaticFilesLocation = "wwwroot/";
-
         public AbstractFilesService(UniquePathsProvider pathsProvider)
         {
             PathsProvider = pathsProvider;
@@ -39,7 +37,6 @@ namespace Vibechat.Web.Services.FileSystem
             string resultPath;
 
             var uniquePath = GetUniquePath(sender, chatOrUserId, filename);
-            builder.Append(StaticFilesLocation);
             builder.Append(FilesLocationRelative);
             builder.Append(uniquePath);
 

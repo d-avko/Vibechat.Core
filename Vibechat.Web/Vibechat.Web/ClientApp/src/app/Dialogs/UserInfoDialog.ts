@@ -96,9 +96,18 @@ export class UserInfoDialogComponent {
     await this.usersService.UnblockUser(this.data.user);
   }
 
-  public async UpdateThumbnail(event: any) {
-    await this.usersService.UpdateProfilePicture(event.target.files[0]);
-    event.target.files = null;
+  public async UpdateThumbnail(event: Event) {
+    await this.usersService.UpdateProfilePicture((<HTMLInputElement>event.target).files[0]);
+    this.ResetInput(<HTMLInputElement>event.target);
+  }
+
+  public ResetInput(input: HTMLInputElement) {
+    input.value = '';
+
+    if (!/safari/i.test(navigator.userAgent)) {
+      input.type = '';
+      input.type = 'file';
+    }
   }
 
   public ChangeName(): void {

@@ -39,17 +39,26 @@ export class InputComponent {
     this.inputfield._control.value = '';
   }
 
-  public UploadFile(event: any) {
-    this.OnUploadFile.emit(event.target.files[0]);
-    event.target.files = null;
+  public UploadFile(event: Event) {
+    this.OnUploadFile.emit((<HTMLInputElement>event.target).files[0]);
+    this.ResetInput(<HTMLInputElement>event.target);
   }
 
   public ViewUserInfo() {
     this.OnViewUserInfo.emit(this.User);
   }
 
-  public UploadImages(event: any) {
-    this.OnUploadImages.emit(event.target.files);
-    event.target.files = null;
+  public ResetInput(input: HTMLInputElement) {
+    input.value = '';
+
+    if (!/safari/i.test(navigator.userAgent)) {
+      input.type = '';
+      input.type = 'file';
+    }
+  }
+
+  public UploadImages(event: Event) {
+    this.OnUploadImages.emit((<HTMLInputElement>event.target).files);
+    this.ResetInput(<HTMLInputElement>event.target);
   }
 }
