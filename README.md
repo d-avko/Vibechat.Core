@@ -1,10 +1,7 @@
 # Vibechat - Simple messenger
 ASP.NET Core Messenger: features Groups, dialogs, end-to-end encrypted chats. 
 Uses mobile phone login system (firebase is used as SMS provider) and tokens based authorization.
-
-
-![Showcase](https://i.imgur.com/qsJnwc5.png)
-
+Running at https://denisavko.me
 
 Messaging             |  User profiles
 :-------------------------:|:-------------------------:
@@ -20,7 +17,8 @@ Search             |  Start view
 2. Messaging.
 3. End-to-end encrypted chats.
 4. Database.
-5. Publishing.
+5. Storage.
+6. Publishing.
 
 <code> <strong>Front-end: </strong> </code>
 1. Tech stack.
@@ -40,22 +38,21 @@ Public keys are 2048 bits length and pre-generated on server. On secure chat cre
 to server whereupon server fires push event on this client with created secure chat. **Now the client needs to initiate key exchange.** 
 Key exchange could be initiated in 2 ways: immediately(if user in dialog is online), or via subsription system: when second client comes online, 
 key exchange will be initiated.
+### Storage
+For storage, Kestrel with ```PhysicalFileProvider``` was used.
+
 ### Database 
 **EF Core** with **PostgreSQL** provider was used.
 ### Publishing
+##### Deployment of fileserver
+1. ```docker build -t vibechat.fileserver .```
+2. ```docker save -o <Output path> vibechat.fileserver```
+3. On linux VM: ``` docker load --input <filename>; docker run -p 443:443 vibechat.fileserver ```.
 
-1. Publish to folder.
-2. Create hosting.json in root folder with contents similar to:
-``` json
-{
-    "certificateSettings": {
-      "filename": "certificate_combined.pfx",
-      "password": "password"
-    }
-}
-```
-3. Send published folder to VM via SSH.
-4. Run.
+##### Deployment of database, front-end and back-end:
+1. ``` docker-compose build ```
+2. Save database image and back-end image, and load them onto your VM, as shown above.
+3. ``` docker-compose up ```
 
 ### Front-end
 
