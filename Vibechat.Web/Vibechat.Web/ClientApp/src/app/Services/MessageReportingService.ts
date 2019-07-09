@@ -34,4 +34,8 @@ export class MessageReportingService {
   public OnFailedToSubsribeToUserStatusChanges() {
     this.snackbar.openSnackBar("Last operation failed, please re-enter this chat.", 3);
   }
+
+  public DisplayMessage(msg: string) {
+    this.snackbar.openSnackBar(msg, 2);
+  }
 }

@@ -70,7 +70,7 @@ namespace Vibechat.Web.Controllers
                 }
             }
 
-            string Errors = string.Empty;
+            string Error = string.Empty;
             string thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
             foreach (var file in request.images)
@@ -87,14 +87,14 @@ namespace Vibechat.Web.Controllers
                 }
                 catch(Exception ex)
                 {
-                    Errors += ex.Message;
+                    Error = "Some of the files failed to upload. Exception type: " + ex.GetType().Name;
                 }              
             }
 
             return new ResponseApiModel<FilesUploadResponse>()
             {
-                ErrorMessage = Errors == string.Empty ? null : Errors,
-                IsSuccessfull = Errors == string.Empty,
+                ErrorMessage = Error == string.Empty ? null : Error,
+                IsSuccessfull = Error == string.Empty,
                 Response = result
             };
         }
@@ -123,17 +123,28 @@ namespace Vibechat.Web.Controllers
 
             string thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
-            using (var buffer = new MemoryStream())
+            try
             {
-                await request.file.CopyToAsync(buffer);
-                buffer.Seek(0, SeekOrigin.Begin);
+                using (var buffer = new MemoryStream())
+                {
+                    await request.file.CopyToAsync(buffer);
+                    buffer.Seek(0, SeekOrigin.Begin);
 
-                MessageAttachment savedFile = await filesService.SaveFile(request.file, buffer, request.file.FileName, request.ChatId, thisUserId);
+                    MessageAttachment savedFile = await filesService.SaveMessageFile(request.file, buffer, request.file.FileName, request.ChatId, thisUserId);
 
+                    return new ResponseApiModel<MessageAttachment>()
+                    {
+                        IsSuccessfull = true,
+                        Response = savedFile
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
                 return new ResponseApiModel<MessageAttachment>()
                 {
                     IsSuccessfull = true,
-                    Response = savedFile
+                    ErrorMessage = "Failed to upload. Exception type: " + ex.GetType().Name
                 };
             }
         }
