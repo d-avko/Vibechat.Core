@@ -84,7 +84,6 @@
     <None Remove="ClientApp\src\app\Shared\MessageState.ts" />
     <None Remove="ClientApp\src\app\Shared\RemovedFromGroupModel.ts" />
     <None Remove="ClientApp\src\app\Theming\ThemesService.ts" />
-    <None Remove="ClientApp\src\app\tokens\TokensService.ts" />
     <None Remove="ClientApp\src\app\uploads\upload.service.ts" />
   </ItemGroup>
 
@@ -151,7 +150,6 @@
   </ItemGroup>-->
 
   <ItemGroup>
-    <Folder Include="ClientApp\src\app\tokens\" />
     <Folder Include="wwwroot\Uploads\" />
   </ItemGroup>
 
@@ -172,6 +170,23 @@
   </Target>
 
 <!--Add webpack build here-->
+
+  <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
+    <!--As part of publishing, ensure the JS resources are freshly built in production mode-->
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build -- --prod" />
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build:ssr -- --prod" Condition=" '$(BuildServerSideRenderer)' == 'true' " />
+
+    <!--Include the newly-built files in the publish output-->
+    <ItemGroup>
+      <DistFiles Include="$(SpaRoot)dist\**; $(SpaRoot)dist-server\**" />
+      <DistFiles Include="$(SpaRoot)node_modules\**" Condition="'$(BuildServerSideRenderer)' == 'true'" />
+      <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+        <RelativePath>%(DistFiles.Identity)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <TypeScriptTarget>ES5</TypeScriptTarget>

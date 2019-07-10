@@ -121,15 +121,20 @@ namespace VibeChat.Web.Controllers
 
         }
 
+        public class GetChatsRequest
+        {
+            public string deviceId { get; set; }
+        }
+
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/GetAll")]
-        public async Task<ResponseApiModel<List<ConversationTemplate>>> GetAll()
+        public async Task<ResponseApiModel<List<ConversationTemplate>>> GetAll([FromBody] GetChatsRequest request)
         {
             try
             {
                 var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
-                List<ConversationTemplate> result = await mConversationService.GetConversations(thisUserId);
+                List<ConversationTemplate> result = await mConversationService.GetConversations(request.deviceId, thisUserId);
 
                 foreach(ConversationTemplate conversation in result)
                 {

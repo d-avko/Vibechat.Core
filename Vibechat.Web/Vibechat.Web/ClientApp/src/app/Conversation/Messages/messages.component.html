@@ -242,7 +242,7 @@
 
     <button mat-button
             color="primary"
-            *ngIf="SelectedMessages.length !== 0"
+            *ngIf="! conversationsService.CurrentConversation.isSecure && SelectedMessages.length !== 0"
             (click)="ForwardMessages()"
             [@slideIn]>
       Forward messages

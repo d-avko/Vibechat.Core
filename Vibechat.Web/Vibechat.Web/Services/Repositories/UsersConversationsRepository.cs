@@ -32,12 +32,12 @@ namespace Vibechat.Web.Services.Repositories
                 .User;
         }
 
-        public IQueryable<ConversationDataModel> GetUserConversations(string userId)
+        public IQueryable<ConversationDataModel> GetUserConversations(string deviceId, string userId)
         {
 
-            return (from userConversation in mContext.UsersConversations
-                    where userConversation.UserID == userId
-                   select userConversation.Conversation
+            return (from userConversation in mContext.UsersConversations //deviceId could be null because key exchange didn't finish
+                    where userConversation.UserID == userId && (userConversation.DeviceId == deviceId || userConversation.DeviceId == null)
+                    select userConversation.Conversation
                    )
                    .Include(x => x.PublicKey)
                    .Include(x => x.Creator);
