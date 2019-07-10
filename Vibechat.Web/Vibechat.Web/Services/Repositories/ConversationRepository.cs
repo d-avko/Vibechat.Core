@@ -42,7 +42,7 @@ namespace Vibechat.Web.Services.Repositories
             var result = mContext
                 .Conversations
                 .Where(conv => conv.IsPublic)
-                .Where(conv => conv.Name.StartsWith(name, StringComparison.InvariantCultureIgnoreCase));
+                .Where(conv => EF.Functions.Like(conv.Name, name + "%"));
 
             var finalResult = new List<ConversationDataModel>();
 

@@ -66,6 +66,8 @@ namespace Vibechat.Web.Services
 
         private const int MaxNameLength = 200;
 
+        private const int MaxParticipantsToReturn = 200;
+
         protected readonly FilesService ImagesService;
 
         private readonly CryptoService cryptoService;
@@ -316,7 +318,7 @@ namespace Vibechat.Web.Services
             {
                 result.Add(
                     conversation.ToConversationTemplate(
-                        await GetParticipants(conversation.Id),
+                        await GetParticipants(conversation.Id, MaxParticipantsToReturn),
                         await GetMessages(conversation.Id, offset: 0, count: 1, whoAccessedId),
                         null,
                         conversation.PublicKey,
@@ -463,7 +465,7 @@ namespace Vibechat.Web.Services
                 returnData.Add
                     (
                     conversation.ToConversationTemplate(
-                         conversation.IsGroup ? await GetParticipants(conversation.Id) : null,
+                         conversation.IsGroup ? await GetParticipants(conversation.Id, MaxParticipantsToReturn) : null,
                          //only get last message here, client should fetch messages after he opened the conversation.
                          await GetMessages(conversation.Id, offset: 0, count: 1, whoAccessedId),
                          DialogUser,
@@ -483,7 +485,7 @@ namespace Vibechat.Web.Services
             return chat.DeviceId;
         }
 
-        public async Task<List<UserInfo>> GetParticipants(int chatId)
+        public async Task<List<UserInfo>> GetParticipants(int chatId, int maximum = 0)
         {
             var defaultErrorMessage = new FormatException("Wrong conversation was provided.");
 
@@ -496,9 +498,18 @@ namespace Vibechat.Web.Services
 
             var participants = usersConversationsRepository.GetConversationParticipants(chatId);
 
-            return (from participant in participants
+            var users = (from participant in participants
                     select participant.ToUserInfo()
                                ).ToList();
+
+            if (maximum.Equals(0))
+            {
+                return users;
+            }
+            else
+            {
+                return users.Take(maximum).ToList();
+            }
         }
 
         public async Task<List<Message>> GetMessages(int chatId, int offset, int count, string whoAccessedId)
@@ -701,7 +712,14 @@ namespace Vibechat.Web.Services
                 throw unAuthorizedError;
             }
 
-            await messagesRepository.Remove(messagesInfo.MessagesId, whoAccessedId);
+            try
+            {
+                await messagesRepository.Remove(messagesInfo.MessagesId, whoAccessedId);
+            }
+            catch(Exception ex)
+            {
+                throw new MemberAccessException("Failed to delete this message. Probably it was already deleted.", ex);
+            }
         } 
 
         #endregion
