@@ -9,7 +9,7 @@ namespace Vibechat.Web.Services.Repositories
         Task<UsersConversationDataModel> Add(string userId, int chatId, string deviceId = null);
         Task<UsersConversationDataModel> Get(string userId, int conversationId);
         IQueryable<AppUser> GetConversationParticipants(int conversationId);
-        IQueryable<ConversationDataModel> GetUserConversations(string userId);
+        IQueryable<ConversationDataModel> GetUserConversations(string deviceId, string userId);
         AppUser GetUserInDialog(int convId, string FirstUserInDialogueId);
 
         Task<bool> Exists(string userId, int conversationId);

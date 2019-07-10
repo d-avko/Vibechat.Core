@@ -16,9 +16,9 @@ export class E2EencryptionService {
 
   constructor(private secureChatsService: SecureChatsService) {}
 
-  public static DhMinKeyLength: number = 200;
+  public static DhMinKeyLength: number = 512;
 
-  public static DhMaxKeyLength: number = 420;
+  public static DhMaxKeyLength: number = 1024;
 
   public static keySize = 256;
 
