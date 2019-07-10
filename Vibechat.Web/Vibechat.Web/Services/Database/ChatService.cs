@@ -87,6 +87,7 @@ namespace Vibechat.Web.Services
             }
 
             await conversationRepository.UpdateAuthKey(chat, authKeyId);
+
             usersConversationsRepository.UpdateDeviceId(deviceId, thisUserId, chatId);
         }
 
@@ -435,7 +436,7 @@ namespace Vibechat.Web.Services
             }
         }
 
-        public async Task<List<ConversationTemplate>> GetConversations(string whoAccessedId)
+        public async Task<List<ConversationTemplate>> GetConversations(string deviceId, string whoAccessedId)
         {
             var defaultError = new FormatException("User info provided was not correct.");
 
@@ -451,7 +452,7 @@ namespace Vibechat.Web.Services
                 throw defaultError;
             }
 
-            IQueryable<ConversationDataModel> conversations = usersConversationsRepository.GetUserConversations(whoAccessedId);
+            IQueryable<ConversationDataModel> conversations = usersConversationsRepository.GetUserConversations(deviceId, whoAccessedId);
 
             var returnData = new List<ConversationTemplate>();
 

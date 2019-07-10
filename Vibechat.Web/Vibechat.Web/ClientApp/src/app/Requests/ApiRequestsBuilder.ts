@@ -51,10 +51,10 @@ export class ApiRequestsBuilder {
     ).toPromise();
   }
 
-  public UpdateConversationsRequest(): Promise<ServerResponse<Array<ConversationTemplate>>> {
+  public GetChats(deviceId: string): Promise<ServerResponse<Array<ConversationTemplate>>> {
 
     return this.MakeCall<Array<ConversationTemplate>>(
-      null,
+      { deviceId: deviceId},
       'api/Conversations/GetAll'
     ).toPromise();
   }

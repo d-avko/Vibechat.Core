@@ -227,7 +227,7 @@ export class ChatsService {
   }
 
   public async UpdateConversations() {
-    let response = await this.requestsBuilder.UpdateConversationsRequest();
+    let response = await this.requestsBuilder.GetChats(this.device.GetDeviceId());
 
     if (!response.isSuccessfull) {
       return;
@@ -252,6 +252,7 @@ export class ChatsService {
       })
 
     let toDeleteIndexes = [];
+
     response.response.forEach(async (x, index) => {
       if (x.isSecure) {
 
@@ -261,10 +262,12 @@ export class ChatsService {
           await this.requestsBuilder.UpdateAuthKeyId(x.authKeyId, x.conversationID, this.device.GetDeviceId());
           x.deviceId = this.device.GetDeviceId();
         }
-          
+        
         //delete secure chats where we've lost auth keys
-        if (this.device.GetDeviceId().toString() == x.deviceId && x.authKeyId && !this.secureChatsService.AuthKeyExists(x.authKeyId)) {
-          toDeleteIndexes.push(index);
+        if (this.device.GetDeviceId() == x.deviceId && x.authKeyId && !this.secureChatsService.AuthKeyExists(x.authKeyId)) {
+
+            toDeleteIndexes.push(index);
+
         } else {
 
           let decryptedMessages = [];
