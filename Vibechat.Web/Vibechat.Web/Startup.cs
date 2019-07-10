@@ -23,10 +23,12 @@ namespace Vibechat.Web
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly IHostingEnvironment environment;
+
+        public Startup(IConfiguration configuration, IHostingEnvironment environment)
         {
             Configuration = configuration;
-
+            this.environment = environment;
             DI.Configuration = configuration;
         }
 
@@ -35,8 +37,16 @@ namespace Vibechat.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-              options.UseNpgsql(Configuration["ConnectionStrings:DefaultConnection"]));
+            if (environment.IsDevelopment())
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseNpgsql(Configuration["ConnectionStrings:Development"]));
+            }
+            else
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseNpgsql(Configuration["ConnectionStrings:DefaultConnection"]));
+            }
 
             services.AddIdentity<AppUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -47,18 +57,6 @@ namespace Vibechat.Web
             //set usermanager explicitly, to prevent SignalR hub methods from not being executed correctly.
 
             services.AddScoped<UserManager<AppUser>>();
-
-            services.Configure<IdentityOptions>(options =>
-            {
-                // Make weak passwords possible for now
-
-                options.Password.RequireDigit = false;
-                options.Password.RequiredLength = 5;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireUppercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.User.RequireUniqueEmail = false;
-            });
 
 
             services.AddAuthentication(options =>
