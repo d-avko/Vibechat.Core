@@ -593,8 +593,8 @@ export class ChatsService {
     this.CurrentConversation = null;
   }
 
-  public async ChangeThumbnail(file: File, where: ConversationTemplate): Promise<void> {
-    let result = await this.requestsBuilder.UploadConversationThumbnail(file, where.conversationID);
+  public async ChangeThumbnail(file: File, where: ConversationTemplate, progress: (value: number) => void): Promise<void> {
+    let result = await this.requestsBuilder.UploadConversationThumbnail(file, progress, where.conversationID);
 
     if (!result.isSuccessfull) {
       return;
@@ -760,9 +760,9 @@ export class ChatsService {
     conversation.messages = [...conversation.messages];
   }
 
-  public async UploadFile(file: File, to: ConversationTemplate) {
+  public async UploadFile(file: File, progress: (value: number) => void, to: ConversationTemplate) {
 
-    let response = await this.requestsBuilder.UploadFile(file, to.conversationID)
+    let response = await this.requestsBuilder.UploadFile(file, progress, to.conversationID)
 
     if (!response.isSuccessfull) {
       return;
@@ -794,14 +794,14 @@ export class ChatsService {
     to.messages.push(message);
   }
 
-  public async UploadImages(files: FileList, to: ConversationTemplate) {
+  public async UploadImages(files: FileList, progress: (value: number) => void, to: ConversationTemplate) {
     if (files.length == 0) {
       return;
     }
 
     let conversationToSend = to.conversationID;
 
-    let response = await this.requestsBuilder.UploadImages(files, to.conversationID)
+    let response = await this.requestsBuilder.UploadImages(files, progress, to.conversationID)
 
     if (!response.isSuccessfull) {
       this.messagesService.DisplayMessage("Some files were not uploaded.");
