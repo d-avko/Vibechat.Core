@@ -167,14 +167,6 @@ export class ChatComponent implements OnInit {
     await this.searchList.Search();
   }
 
-  public async OnChangeGroupThumbnail(file: File): Promise<void>{
-    await this.conversationsService.ChangeThumbnail(file, this.conversationsService.CurrentConversation);
-  }
-
-  public async OnChangeConversationName(name: string) : Promise<void> {
-    await this.conversationsService.ChangeConversationName(name, this.conversationsService.CurrentConversation);
-  }
-
   public CreateGroup() {
 
     this.sideDrawer.close();
@@ -225,13 +217,5 @@ export class ChatComponent implements OnInit {
   public async OnSendMessage(message: string) {
     await this.conversationsService.SendMessage(message, this.conversationsService.CurrentConversation);
     this.messages.ScrollToStart();
-  }
-
-  public async OnUploadImages(files: FileList) {
-    await this.conversationsService.UploadImages(files, this.conversationsService.CurrentConversation);
-  }
-
-  public async OnUploadFile(file: File) {
-    await this.conversationsService.UploadFile(file, this.conversationsService.CurrentConversation);
   }
 }

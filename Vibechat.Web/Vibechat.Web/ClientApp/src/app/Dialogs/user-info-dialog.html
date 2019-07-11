@@ -7,6 +7,14 @@
 
     <div class="userinfo_header">
 
+      <mat-progress-spinner *ngIf="uploading"
+                            class="load-spinner"
+                            diameter="80"
+                            color="Primary"
+                            mode="determinate"
+                            [value]="uploadProgress">
+      </mat-progress-spinner>
+
       <img src="{{data.user.imageUrl}}" class="user_thumbnail" (click)="ViewPicture()" />
 
       <div class="userinfo_info">
@@ -167,6 +175,10 @@
       height: 80px;
       width: 80px;
       border-radius: 40px;
+    }
+
+    .load-spinner{
+      position: absolute;
     }
 
     .flexrow{

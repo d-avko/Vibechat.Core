@@ -38,6 +38,10 @@ export class GroupInfoDialogComponent {
     public photos: ViewPhotoService,
     public viewContainerRef: ViewContainerRef) { this.photos.viewContainerRef = this.viewContainerRef }
 
+  public uploadProgress: number = 0;
+
+  public uploading: boolean = false;
+
   public ViewUserInfo(user: UserInfo) {
     this.OnViewUserInfo.emit(user);
   }
@@ -103,8 +107,14 @@ export class GroupInfoDialogComponent {
     return this.data.user.id == this.data.Conversation.creator.id;
   }
 
+  public ProgressCallback(value: number) {
+    this.uploadProgress = value;
+  }
+
   public async UpdateThumbnail(event: Event) {
-    await this.conversationsService.ChangeThumbnail((<HTMLInputElement>event.target).files[0], this.data.Conversation);
+    this.uploading = true;
+    await this.conversationsService.ChangeThumbnail((<HTMLInputElement>event.target).files[0], this.data.Conversation, this.ProgressCallback.bind(this));
+    this.uploading = false;
     this.ResetInput(<HTMLInputElement>event.target);
   }
 

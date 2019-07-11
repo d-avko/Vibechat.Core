@@ -3,11 +3,19 @@
 
   <div class="groupinfo_header">
 
-    <img src="{{data.Conversation.thumbnailUrl}}" class="group_thumbnail" (click)="ViewPicture()"/>
+    <mat-progress-spinner class="load-spinner"
+                          diameter="80"
+                          color="Primary"
+                          *ngIf="uploading"
+                          [value]="uploadProgress"
+                          mode="determinate">
+    </mat-progress-spinner>
+
+    <img src="{{data.Conversation.thumbnailUrl}}" class="group_thumbnail" (click)="ViewPicture()" />
 
     <div class="groupinfo_info">
       <p class="subHeader">{{data.Conversation.name}}</p>
-      <p class="subHeader cadetBlue" >{{formatter.GetConversationMembersFormatted(data.Conversation)}}</p>
+      <p class="subHeader cadetBlue">{{formatter.GetConversationMembersFormatted(data.Conversation)}}</p>
     </div>
   </div>
 
@@ -104,6 +112,10 @@
       height: 80px;
       width: 80px;
       border-radius: 40px;
+    }
+
+    .load-spinner{
+      position: absolute;
     }
 
     .viewuser_name{

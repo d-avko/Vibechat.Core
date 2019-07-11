@@ -18,7 +18,7 @@ export class UploaderService {
     private http: HttpClient,
     private logger: SnackBarHelper) { }
 
-  public uploadImagesToChat(files: FileList, chatId: string) : Observable<any> {
+  public uploadImagesToChat(files: FileList, progress: (value: number) => void, chatId: string) : Observable<any> {
     if (!files || files.length == 0) { return; }
 
     for (let i = 0; i < files.length; ++i) {
@@ -40,14 +40,14 @@ export class UploaderService {
 
 
     return <Observable<any>>this.http.request(req).pipe(
-      tap(event => this.showProgress(event, files)),
+      tap(event => this.showProgress(event, progress)),
       last(),
       map(x => (<HttpResponse<any>>x).body),
       catchError(this.handleError(files))
     );
   }
 
-  public uploadChatPicture(file: File, chatId: number) {
+  public uploadChatPicture(file: File, progress: (value: number) => void, chatId: number) {
     if (!file) {
       return;
     }
@@ -65,14 +65,14 @@ export class UploaderService {
     });
 
     return <Observable<any>>this.http.request(req).pipe(
-      tap(event => this.showProgress(event, null, file, true)),
+      tap(event => this.showProgress(event, progress)),
       last(),
       map(x => (<HttpResponse<any>>x).body),
       catchError(this.handleError(null, file, true))
     );
   }
 
-  public uploadUserPicture(file: File) {
+  public uploadUserPicture(file: File, progress: (value: number) => void) {
     if (!file) {
       return;
     }
@@ -89,14 +89,14 @@ export class UploaderService {
     });
 
     return <Observable<any>>this.http.request(req).pipe(
-      tap(event => this.showProgress(event, null, file, true)),
+      tap(event => this.showProgress(event, progress)),
       last(),
       map(x => (<HttpResponse<any>>x).body),
       catchError(this.handleError(null, file, true))
     );
   }
 
-  public uploadFile(file: File, chatId: string) {
+  public uploadFile(file: File, progress: (value: number) => void, chatId: string) {
     if (!file) {
       return;
     }
@@ -114,7 +114,7 @@ export class UploaderService {
     });
 
     return <Observable<any>>this.http.request(req).pipe(
-      tap(event => this.showProgress(event, null, file, true)),
+      tap(event => this.showProgress(event, progress)),
       last(),
       map(x => (<HttpResponse<any>>x).body),
       catchError(this.handleError(null, file, true))
@@ -140,37 +140,19 @@ export class UploaderService {
   }
 
   /** Return distinct message for sent, upload progress, & response events */
-  private getEventMessage(event: HttpEvent<any>, files: FileList, file: File = null, isOneFile: boolean = false) {
+  private getEventProgress(event: HttpEvent<any>): number {
 
-    if (!isOneFile) {
+    switch (event.type) {
+      case HttpEventType.Sent:
+        return 1;
 
-      switch (event.type) {
-        case HttpEventType.Sent:
-          return `Uploading "${files.length}" files.`;
+      case HttpEventType.UploadProgress:
+        // Compute and show the % done:
+        const percentDone = Math.round(100 * event.loaded / event.total);
+        return percentDone;
 
-        case HttpEventType.UploadProgress:
-          // Compute and show the % done:
-          const percentDone = Math.round(100 * event.loaded / event.total);
-          return `Upload progress is ${percentDone}% .`;
-
-        case HttpEventType.Response:
-          return `Files were completely uploaded!`;
-      }
-    } else {
-
-      switch (event.type) {
-        case HttpEventType.Sent:
-          return `Uploading "${file.name}"`;
-
-        case HttpEventType.UploadProgress:
-          // Compute and show the % done:
-          const percentDone = Math.round(100 * event.loaded / event.total);
-          return `Upload progress is ${percentDone}% .`;
-
-        case HttpEventType.Response:
-          return `"${file.name}" was successfully uploaded!`;
-      }
-
+      case HttpEventType.Response:
+        return 100;
     }
   }
 
@@ -199,8 +181,8 @@ export class UploaderService {
     };
   }
 
-  private showProgress(event: HttpEvent<any>, files: FileList, file: File = null, isOneFile: boolean = false) {
-    this.logger.openSnackBar(this.getEventMessage(event, files, file, isOneFile), 0.5);
+  private showProgress(event: HttpEvent<any>, progress: (value: number) => void) {
+    progress(this.getEventProgress(event));
   }
 }
 
