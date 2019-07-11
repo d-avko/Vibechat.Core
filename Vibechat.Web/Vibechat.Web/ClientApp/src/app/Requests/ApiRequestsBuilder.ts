@@ -90,20 +90,20 @@ export class ApiRequestsBuilder {
 
   }
 
-  public UploadImages(files: FileList, chatId: number): Promise<ServerResponse<any>> {
-    return this.uploader.uploadImagesToChat(files, chatId.toString()).toPromise();
+  public UploadImages(files: FileList, progress: (value: number) => void, chatId: number): Promise<ServerResponse<any>> {
+    return this.uploader.uploadImagesToChat(files, progress, chatId.toString()).toPromise();
   }
 
-  public UploadConversationThumbnail(thumbnail: File, conversationId: number): Promise<ServerResponse<UpdateThumbnailResponse>> {
-    return this.uploader.uploadChatPicture(thumbnail, conversationId).toPromise();
+  public UploadConversationThumbnail(thumbnail: File, progress: (value: number) => void, conversationId: number): Promise<ServerResponse<UpdateThumbnailResponse>> {
+    return this.uploader.uploadChatPicture(thumbnail, progress, conversationId).toPromise();
   }
 
-  public UploadUserProfilePicture(picture: File): Promise<ServerResponse<UpdateThumbnailResponse>> {
-    return this.uploader.uploadUserPicture(picture).toPromise();
+  public UploadUserProfilePicture(picture: File, progress: (value: number) => void): Promise<ServerResponse<UpdateThumbnailResponse>> {
+    return this.uploader.uploadUserPicture(picture, progress).toPromise();
   }
 
-  public UploadFile(file: File, chatId: number) : Promise<ServerResponse<MessageAttachment>> {
-    return this.uploader.uploadFile(file, chatId.toString()).toPromise();
+  public UploadFile(file: File, progress: (value: number) => void, chatId: number) : Promise<ServerResponse<MessageAttachment>> {
+    return this.uploader.uploadFile(file, progress, chatId.toString()).toPromise();
   }
 
   public GetUserById(userId: string): Promise<ServerResponse<UserInfo>> {

@@ -131,8 +131,8 @@ export class UsersService {
     this.auth.User.userName = name;
   }
 
-  public async UpdateProfilePicture(file: File) {
-    let result = await this.requestsBuilder.UploadUserProfilePicture(file);
+  public async UpdateProfilePicture(file: File, progressCallback: (value: number) => void) {
+    let result = await this.requestsBuilder.UploadUserProfilePicture(file, progressCallback);
 
     if (!result.isSuccessfull) {
       return;

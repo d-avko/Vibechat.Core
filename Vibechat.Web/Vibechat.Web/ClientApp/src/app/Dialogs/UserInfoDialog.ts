@@ -42,6 +42,10 @@ export class UserInfoDialogComponent {
     this.photos.viewContainerRef = this.viewContainerRef;
   }
 
+  public uploadProgress: number = 0;
+
+  public uploading: boolean = false;
+
   public HasConversationWith(): boolean {
 
     if (!this.data.conversation) {
@@ -96,8 +100,14 @@ export class UserInfoDialogComponent {
     await this.usersService.UnblockUser(this.data.user);
   }
 
+  public ProgressCallback(value: number) {
+    this.uploadProgress = value;
+  }
+
   public async UpdateThumbnail(event: Event) {
-    await this.usersService.UpdateProfilePicture((<HTMLInputElement>event.target).files[0]);
+    this.uploading = true;
+    await this.usersService.UpdateProfilePicture((<HTMLInputElement>event.target).files[0], this.ProgressCallback.bind(this));
+    this.uploading = false;
     this.ResetInput(<HTMLInputElement>event.target);
   }
 

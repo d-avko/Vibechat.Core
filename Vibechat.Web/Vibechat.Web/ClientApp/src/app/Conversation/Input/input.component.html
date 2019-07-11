@@ -1,3 +1,5 @@
+<mat-progress-bar *ngIf="uploading" mode="determinate" [value]="uploadProgress"></mat-progress-bar>
+
 <div *ngIf="!Conversation.isMessagingRestricted
      && ((Conversation.isSecure && Conversation.authKeyId)
      || (!Conversation.isSecure && !Conversation.authKeyId))" class="messages_wrapper_chat-input">
@@ -38,10 +40,11 @@
 </div>
 
 <style>
-  .sendimage-icon{
+  .sendimage-icon {
     transition: ease 0.3s;
-    color:cadetblue;
+    color: cadetblue;
   }
+
   .button_send-images:hover + .sendimage-icon {
     transition: ease 0.3s;
     color: #b6d2d3;
