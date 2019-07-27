@@ -15,7 +15,7 @@
       <h3 class="chat_name"
           *ngIf="conversation.isGroup; else dialogueHeader"
           [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
-        {{conversation.name}}
+        {{ (conversation.name.length > 30)? (conversation.name | slice:0:30)+'..':(conversation.name) }}  
       </h3>
 
       <mat-icon *ngIf="conversation.isSecure" class="secured_icon">lock</mat-icon>
@@ -33,7 +33,7 @@
     <ng-template #dialogueHeader>
       <h3 class="chat_name"
           [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
-        {{conversation.dialogueUser.userName}}
+        {{ (conversation.dialogueUser.userName.length > 30)? (conversation.dialogueUser.userName | slice:0:30)+'..':(conversation.dialogueUser.userName) }}
       </h3>
     </ng-template>
 

@@ -10,7 +10,6 @@ using Vibechat.Web.Services.FileSystem;
 using Vibechat.Web.Services.Repositories;
 using VibeChat.Web;
 using VibeChat.Web.ChatData;
-using VibeChat.Web.Services.Repositories;
 using static VibeChat.Web.Controllers.UsersController;
 
 namespace Vibechat.Web.Services.Users
@@ -20,18 +19,20 @@ namespace Vibechat.Web.Services.Users
         private readonly IUsersRepository usersRepository;
         private readonly FilesService imagesService;
         private readonly IContactsRepository contactsRepository;
-
+        private readonly UnitOfWork unitOfWork;
         public const int MaxThumbnailLengthMB = 5;
         public const int MaxNameLength = 128;
 
         public UsersService(
             IUsersRepository usersRepository,
             FilesService imagesService,
-            IContactsRepository contactsRepository)
+            IContactsRepository contactsRepository,
+            UnitOfWork unitOfWork)
         {
             this.usersRepository = usersRepository;
             this.imagesService = imagesService;
             this.contactsRepository = contactsRepository;
+            this.unitOfWork = unitOfWork;
         }
 
         public async Task<UserInfo> GetUserById(UserByIdApiModel userId)
@@ -69,6 +70,8 @@ namespace Vibechat.Web.Services.Users
             }
 
             await usersRepository.ChangeName(newName, whoCalled);
+
+            await unitOfWork.Commit();
         }
 
         public async Task ChangeUsername(string newName, string whoCalled)
@@ -113,7 +116,8 @@ namespace Vibechat.Web.Services.Users
 
             try
             {
-                await contactsRepository.AddContact(callerId, userId);
+                contactsRepository.AddContact(callerId, userId);
+                await unitOfWork.Commit();
             }
             catch (Exception ex)
             {
@@ -126,7 +130,8 @@ namespace Vibechat.Web.Services.Users
         {
             try
             {
-                await contactsRepository.RemoveContact(caller, userId);
+                contactsRepository.RemoveContact(caller, userId);
+                await unitOfWork.Commit();
             }
             catch (Exception ex)
             {                
@@ -144,6 +149,8 @@ namespace Vibechat.Web.Services.Users
             }
 
             await usersRepository.ChangeLastName(newName, whoCalled);
+
+            await unitOfWork.Commit();
         }
 
         public async Task<AppUser> GetUserById(string userId)
@@ -190,6 +197,8 @@ namespace Vibechat.Web.Services.Users
                     thumbnailFull = await imagesService.SaveProfileOrChatPicture(image, buffer, image.FileName, userId, userId);
 
                     await usersRepository.UpdateAvatar(thumbnailFull.Item1, thumbnailFull.Item2, userId);
+
+                    await unitOfWork.Commit();
                 }
 
                 return new UpdateProfilePictureResponse()
@@ -237,16 +246,19 @@ namespace Vibechat.Web.Services.Users
             }
 
             await usersRepository.ChangeUserPublicState(userId);
+            await unitOfWork.Commit();
         }
 
         public async Task MakeUserOnline(string userId, string signalRConnectionId)
         {
             await usersRepository.MakeUserOnline(userId, signalRConnectionId);
+            await unitOfWork.Commit();
         }
 
         public async Task MakeUserOffline(string userId)
         {
             await usersRepository.MakeUserOffline(userId);
+            await unitOfWork.Commit();
         }
 
     }

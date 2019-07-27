@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Vibechat.Web.Data.Messages;
 using VibeChat.Web;
 using VibeChat.Web.Data.DataModels;
 
@@ -16,9 +17,9 @@ namespace Vibechat.Web.Services.Repositories
             this.mContext = dbContext;
         }
 
-        public async Task<AttachmentKindDataModel> GetById(string id)
+        public Task<AttachmentKindDataModel> GetById(AttachmentKind kind)
         {
-            return await mContext.AttachmentKinds.FindAsync(id);
+            return mContext.AttachmentKinds.FindAsync(kind);
         }
     }
 }

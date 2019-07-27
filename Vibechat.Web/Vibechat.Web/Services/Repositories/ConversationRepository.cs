@@ -20,70 +20,48 @@ namespace Vibechat.Web.Services.Repositories
         {
             return mContext
                 .Conversations
-                .Include(x => x.Creator)
-                .FirstOrDefault(x => x.Id == id);
+                .Where(x => x.Id == id)
+                .Include(x => x.PublicKey)
+                .Single();
         }
 
         public void UpdateThumbnail(string thumbnailUrl, string fullimageUrl, ConversationDataModel entity)
         {
             entity.ThumbnailUrl = thumbnailUrl;
             entity.FullImageUrl = fullimageUrl;
-            mContext.SaveChanges();
         }
 
         public void ChangeName(ConversationDataModel entity, string name)
         {
             entity.Name = name;
-            mContext.SaveChanges();
         }
 
-        public async Task<IQueryable<ConversationDataModel>> SearchByName(string name, AppUser whoSearches, IUsersConversationsRepository participantsProvider)
+        public IQueryable<ConversationDataModel> SearchByName(string name)
         {
-            var result = mContext
+            return mContext
                 .Conversations
                 .Where(conv => conv.IsPublic)
                 .Where(conv => EF.Functions.Like(conv.Name, name + "%"));
-
-            var finalResult = new List<ConversationDataModel>();
-
-            foreach(var conversation in result)
-            {
-                // search only for conversations where 'whoSearches' doesn't exist.
-                if (participantsProvider
-                .GetConversationParticipants(conversation.Id)
-                .FirstOrDefault(x => x.Id == whoSearches.Id) == default(AppUser))
-                {
-                    finalResult.Add(conversation);
-                }
-            }
-
-            return finalResult.AsQueryable();
         }
 
-        public async Task ChangePublicState(int conversationId)
+        public void ChangePublicState(ConversationDataModel chat)
         {
-            var conversation = GetById(conversationId);
-            conversation.IsPublic = !conversation.IsPublic;
-            await mContext.SaveChangesAsync();
+            chat.IsPublic = !chat.IsPublic;
         }
 
         public void Remove(ConversationDataModel entity)
         {
             mContext.Conversations.Remove(entity);
-            mContext.SaveChanges();
         }
 
-        public async Task Add(ConversationDataModel conversation)
+        public void Add(ConversationDataModel conversation)
         {
-            await mContext.Conversations.AddAsync(conversation);
-
-            await mContext.SaveChangesAsync();
+            mContext.Conversations.Add(conversation);
         }
 
-        public async Task UpdateAuthKey(ConversationDataModel chat, string authKeyId)
+        public void UpdateAuthKey(ConversationDataModel chat, string authKeyId)
         {
             chat.AuthKeyId = authKeyId;
-            await mContext.SaveChangesAsync();
         }
     }
 }

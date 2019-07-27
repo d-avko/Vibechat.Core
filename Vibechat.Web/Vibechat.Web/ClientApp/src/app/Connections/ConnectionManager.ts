@@ -13,6 +13,13 @@ import { DHServerKeyExchangeService } from "../Encryption/DHServerKeyExchange";
 import { ChatComponent } from "../Chat/chat.component";
 import { UAParser } from "ua-parser-js";
 import { DeviceService } from "../Services/DeviceService";
+import { TypingService } from "../Services/TypingService";
+import { ChatRole } from "../Roles/ChatRole";
+
+export enum BanEvent {
+  Banned = 0,
+  Unbanned = 1
+}
 
 @Injectable({
   providedIn: 'root'
@@ -21,12 +28,12 @@ import { DeviceService } from "../Services/DeviceService";
 export class ConnectionManager {
   private connection: signalR.HubConnection;
 
-  private ConversationsService: ChatsService;
+  private chats: ChatsService;
 
   private DHServerKeyExchangeService: DHServerKeyExchangeService;
 
   public setConversationsService(service: ChatsService) {
-    this.ConversationsService = service;
+    this.chats = service;
   }
 
   public setDHServerKeyExchangeService(service: DHServerKeyExchangeService) {
@@ -35,7 +42,8 @@ export class ConnectionManager {
 
   constructor(private messagesService: MessageReportingService,
     private auth: AuthService,
-    private device: DeviceService) { }
+    private device: DeviceService,
+    private typing: TypingService) { }
 
   public async Start(){
 
@@ -47,7 +55,7 @@ export class ConnectionManager {
 
     await this.connection.start();
 
-    this.InitiateConnections(this.ConversationsService.GetConversationsIds());
+    this.InitiateConnections(this.chats.GetConversationsIds());
     this.messagesService.OnConnected();
   
     this.connection.onclose(() => {
@@ -57,7 +65,7 @@ export class ConnectionManager {
     });
 
     this.connection.on("ReceiveMessage", (senderId: string, message: ChatMessage, conversationId: number, secure: boolean) => {
-      this.ConversationsService.OnMessageReceived(new MessageReceivedModel(
+      this.chats.OnMessageReceived(new MessageReceivedModel(
         {
           senderId: senderId,
           message: message,
@@ -67,8 +75,8 @@ export class ConnectionManager {
         }));
     });
 
-    this.connection.on("AddedToGroup", (conversation: ConversationTemplate, user: UserInfo) => {
-      this.ConversationsService.OnAddedToGroup(new AddedToGroupModel({ conversation: conversation, user: user}));
+    this.connection.on("AddedToGroup", async (chatId: number, user: UserInfo) => {
+      await this.chats.OnAddedToGroup(new AddedToGroupModel({ chatId: chatId, user: user}));
     });
 
     this.connection.on("Error", (error: string) => {
@@ -76,27 +84,40 @@ export class ConnectionManager {
     });
 
     this.connection.on("RemovedFromGroup", (userId: string, conversationId: number) => {
-      this.ConversationsService.OnRemovedFromGroup(new RemovedFromGroupModel({ userId: userId, conversationId: conversationId }));
+      this.chats.OnRemovedFromGroup(new RemovedFromGroupModel({ userId: userId, conversationId: conversationId }));
     });
 
     this.connection.on("MessageDelivered", (msgId: number, clientMessageId: number, conversationId: number) => {
-      this.ConversationsService.OnMessageDelivered(msgId, clientMessageId, conversationId);
+      this.chats.OnMessageDelivered(msgId, clientMessageId, conversationId);
     });
 
     this.connection.on("MessageRead", (msgId: number, conversationId: number) => {
-      this.ConversationsService.OnMessageRead(msgId, conversationId);
+      this.chats.OnMessageRead(msgId, conversationId);
     });
 
-    if (this.device.isSecureChatsSupported) {
+    this.connection.on("ReceiveDhParam", async (param: string, sentBy: string, chatId: number) => {
+      await this.DHServerKeyExchangeService.OnIntermidiateParamsReceived(param, sentBy, chatId);
+    });
 
-      this.connection.on("ReceiveDhParam", async (param: string, sentBy: string, chatId: number) => {
-        await this.DHServerKeyExchangeService.OnIntermidiateParamsReceived(param, sentBy, chatId);
-      });
+    this.connection.on("UserOnline", (user: string) => {
+      this.chats.OnUserOnline(user);
+    });
 
-      this.connection.on("UserOnline", (user: string) => {
-        this.ConversationsService.OnUserOnline(user);
-      });
-    }
+    this.connection.on("Typing", (userId: string, userFirstName: string, chatId: number) => {
+      this.typing.OnTyping(userFirstName, userId, chatId);
+    });
+
+    this.connection.on("Blocked", (blockedBy: string, banType: BanEvent) => {
+      this.chats.OnBlocked(blockedBy, banType);
+    });
+
+    this.connection.on("BlockedInChat", (chatId: number, userId: string, banType: BanEvent) => {
+      this.chats.OnBannedInChat(chatId, userId, banType);
+    });
+
+    this.connection.on("UserRoleChanged", (userId: string, chatId: number, newRole: ChatRole) => {
+      this.chats.OnUserRoleChanged(chatId, userId, newRole);
+    });
   }
 
   public SendMessage(message: ChatMessage, conversation: ConversationTemplate) : void {
@@ -114,6 +135,15 @@ export class ConnectionManager {
       this.connection.send("SendMessageToUser", message, conversation.dialogueUser.id, conversation.conversationID);
 
     }
+  }
+
+  public async ChangeUserRole(chatId: number, userId: string, newRole: ChatRole) {
+    if (this.connection.state != signalR.HubConnectionState.Connected) {
+      this.messagesService.OnSendWhileDisconnected();
+      return;
+    }
+
+    return await this.connection.invoke<boolean>("ChangeUserRole", userId, chatId, newRole);
   }
 
   public SendDhParam(param: string, sendTo: string, chatId: number) {
@@ -152,13 +182,13 @@ export class ConnectionManager {
     return this.connection.invoke<boolean>("SubsribeToUserOnlineStatusChanges", user);
   }
 
-  public AddUserToConversation(userId: string, conversation: ConversationTemplate) {
+  public async AddUserToConversation(userId: string, conversation: ConversationTemplate) {
     if (this.connection.state != signalR.HubConnectionState.Connected) {
       this.messagesService.OnSendWhileDisconnected();
       return;
     }
 
-    this.connection.send("AddToGroup", userId, conversation);
+    return await this.connection.invoke<boolean>("AddToGroup", userId, conversation.conversationID);
   }
 
   public RemoveConversation(conversation: ConversationTemplate) {
@@ -167,7 +197,7 @@ export class ConnectionManager {
       return;
     }
 
-    this.connection.send("RemoveConversation", conversation);
+    this.connection.send("RemoveConversation", conversation.conversationID);
   }
 
 
@@ -200,6 +230,33 @@ export class ConnectionManager {
     }
 
     this.connection.send("MessageRead", msgId, conversationId);
+  }
+
+  public SendTyping(chatId:number) {
+    if (this.connection.state != signalR.HubConnectionState.Connected) {
+      this.messagesService.OnSendWhileDisconnected();
+      return;
+    }
+    
+    this.connection.send("OnTyping", chatId);
+  }
+
+  public async BlockUser(userId: string, banType: BanEvent) : Promise<boolean> {
+    if (this.connection.state != signalR.HubConnectionState.Connected) {
+      this.messagesService.OnSendWhileDisconnected();
+      return;
+    }
+
+    return await this.connection.invoke<boolean>("BlockUser", userId, banType);
+  }
+
+  public async BlockUserInChat(userId: string, chatId: number, banType: BanEvent) {
+    if (this.connection.state != signalR.HubConnectionState.Connected) {
+      this.messagesService.OnSendWhileDisconnected();
+      return;
+    }
+
+    return await this.connection.invoke<boolean>("BlockUserInChat", userId, chatId, banType);
   }
 
   public InitiateConnections(conversationIds: Array<number>): void {

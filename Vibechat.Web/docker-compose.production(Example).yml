@@ -1,0 +1,22 @@
+version: '3.4'
+
+services:
+  vibechat.web:
+    image: vibechatweb_vibechat.web:latest
+    depends_on:
+     - "vibechat.db"
+    networks:
+      - vibechat-network
+
+  vibechat.db:
+    container_name: 'vibechat.db'
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=<Your_password>
+    networks:
+      - vibechat-network
+
+networks:
+  vibechat-network:
+    driver: bridge

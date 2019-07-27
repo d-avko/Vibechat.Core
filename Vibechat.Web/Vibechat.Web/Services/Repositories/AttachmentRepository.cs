@@ -17,7 +17,7 @@ namespace Vibechat.Web.Services.Repositories
             this.mContext = dbContext;
         }
 
-        public async Task<MessageAttachmentDataModel> Add(AttachmentKindDataModel attachmentKind, Message message)
+        public MessageAttachmentDataModel Add(AttachmentKindDataModel attachmentKind, Message message)
         {
             var attachment = new MessageAttachmentDataModel()
             {
@@ -29,17 +29,15 @@ namespace Vibechat.Web.Services.Repositories
                 FileSize = message.AttachmentInfo.FileSize
             };
 
-            var result = mContext.Attachments.Add(attachment);
-
-            await mContext.SaveChangesAsync();
-
-            return result?.Entity;
+            return mContext.Attachments.Add(attachment)?.Entity;
         }
 
-        public async Task Remove(List<MessageAttachmentDataModel> attachments)
+        public void Remove(List<MessageAttachmentDataModel> attachments)
         {
-            attachments.ForEach((a) => mContext.Attachments.Remove(a));
-            await mContext.SaveChangesAsync();
+            foreach (var attachment in attachments)
+            {
+                mContext.Attachments.Remove(attachment);
+            }
         }
     }
 }

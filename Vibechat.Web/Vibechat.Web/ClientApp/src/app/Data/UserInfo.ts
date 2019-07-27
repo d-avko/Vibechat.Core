@@ -1,3 +1,5 @@
+import { ChatRoleDto } from "../Roles/ChatRoleDto";
+
 export class UserInfo {
 
   public id: string;
@@ -23,4 +25,6 @@ export class UserInfo {
   public isBlocked: boolean;
 
   public isBlockedInConversation: boolean;
+
+  public chatRole: ChatRoleDto;
 }
