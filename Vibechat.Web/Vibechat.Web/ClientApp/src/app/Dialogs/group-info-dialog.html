@@ -14,7 +14,7 @@
     <img src="{{data.Conversation.thumbnailUrl}}" class="group_thumbnail" (click)="ViewPicture()" />
 
     <div class="groupinfo_info">
-      <p class="subHeader">{{data.Conversation.name}}</p>
+      <p class="subHeader">{{ (data.Conversation.name.length > 20 )? (data.Conversation.name | slice:0:20)+'..':(data.Conversation.name) }}</p>
       <p class="subHeader cadetBlue">{{formatter.GetConversationMembersFormatted(data.Conversation)}}</p>
     </div>
   </div>
@@ -78,6 +78,14 @@
       <input *ngIf="!data.Conversation.isMessagingRestricted" type="file" (change)="UpdateThumbnail($event)" accept="image/*" class="thumbnail-input" name="thumbnail" />
     </mat-list-item>
 
+    <mat-list-item *ngIf="IsJoined() && IsModeratorOrCreator()" (click)="ChooseUser()">
+
+      <mat-icon class="cadetBlue">
+        assignment_ind
+      </mat-icon>
+
+      <h3 matLine>Admin panel</h3>
+    </mat-list-item>
   </mat-action-list>
 
   <mat-action-list *ngIf="!data.Conversation.isMessagingRestricted" class="users_in_Conversation_list">
@@ -88,13 +96,11 @@
         <img matListAvatar src="{{user.imageUrl}}" alt="user profile picture">
 
         <h3 class="viewuser_name">
-          {{user.userName}}
+          {{ (user.userName.length > 20 )? (user.userName | slice:0:20)+'..':(user.userName) }}
         </h3>
-      </div>
 
-      <button class="kickButton" *ngIf="IsCurrentUserCreatorOfConversation()" (click)="KickUser(user)" mat-button>Kick</button>
-      <button class="banButon" *ngIf="IsCurrentUserCreatorOfConversation() && !user.isBlockedInConversation" (click)="BanUser(user)" mat-button>Ban</button>
-      <button class="unbanButon" *ngIf="IsCurrentUserCreatorOfConversation() && user.isBlockedInConversation" (click)="UnbanUser(user)" mat-button>Unban</button>
+        <h5 class="role-name">{{formatter.GetUserRoleFormatted(user)}}</h5>
+      </div>
 
     </mat-list-item>
 
@@ -155,12 +161,9 @@
       justify-content:center;
     }
 
-    .unbanButon,
-    .banned-text,
-    .banButon,
-    .bannedicon,
-    .kickButton{
-      color:indianred;
+    .role-name{
+      color: dimgray;
+      margin-left: .5rem;
     }
 
     .banned-text{

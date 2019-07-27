@@ -3,18 +3,53 @@
   <div class="conversation-header">
 
     <button class="button-goback" mat-button (click)="GoBack()">
-      <mat-icon>arrow_back_ios</mat-icon>
+      <mat-icon class="goback-icon">arrow_back_ios</mat-icon>
     </button>
 
     <button mat-button class="conversation-viewinfoButton" (click)="ViewGroupInfo()">
 
-      <span class="conversation-header-name">
-        {{formatter.GetConversationNameFormatted(Conversation)}}
-      </span>
+      <div class="flexrow">
 
-      <span class="conversation-header-participants" *ngIf="Conversation.isGroup">
-        {{formatter.GetConversationMembersFormatted(Conversation)}}
-      </span>
+        <div class="chat-logo">
+          <img class="chat-logo_img" *ngIf="Conversation.isGroup; else dialogue" src="{{Conversation.thumbnailUrl}}" alt="Conversation logo">
+
+          <ng-template #dialogue>
+            <img class="chat-logo_img" matListAvatar src="{{Conversation.dialogueUser.imageUrl}}" alt="Dialogue logo">
+          </ng-template>
+        </div>
+
+        <div class="flexcolumn">
+          <div class="conversation-header-up">
+
+            <span class="conversation-header-name">
+              {{ (formatter.GetConversationNameFormatted(Conversation).length > 20 )? (formatter.GetConversationNameFormatted(Conversation) | slice:0:20)+'..':(formatter.GetConversationNameFormatted(Conversation)) }}
+            </span>
+
+          </div>
+
+          <div class="conversation-header-down">
+            <span *ngIf="formatter.IsAnyUserTyping(Conversation.conversationID)" class="typing-text">
+            {{formatter.GetUsersTypingFormatted(Conversation.conversationID)}}
+            </span>
+
+            <div class="loading-dots" *ngIf="formatter.IsAnyUserTyping(Conversation.conversationID)">
+              <i></i>
+              <i></i>
+              <i></i>
+            </div>
+
+            <span *ngIf="!formatter.IsAnyUserTyping(Conversation.conversationID) && !Conversation.isGroup">
+            {{formatter.GetLastSeenFormatted(Conversation.dialogueUser.lastSeen, Conversation.dialogueUser.isOnline)}}
+            </span>
+
+            <span class="conversation-header-participants" *ngIf="!formatter.IsAnyUserTyping(Conversation.conversationID) && Conversation.isGroup">
+              {{formatter.GetConversationMembersFormatted(Conversation)}}
+            </span>
+          </div>
+        </div>
+
+      </div>
+     
 
     </button>
 

@@ -7,8 +7,8 @@ namespace Vibechat.Web.Services.Repositories
 {
     public interface IAttachmentRepository
     {
-        Task<MessageAttachmentDataModel> Add(AttachmentKindDataModel attachmentKind, Message message);
+        MessageAttachmentDataModel Add(AttachmentKindDataModel attachmentKind, Message message);
 
-        Task Remove(List<MessageAttachmentDataModel> attachments);
+        void Remove(List<MessageAttachmentDataModel> attachments);
     }
 }

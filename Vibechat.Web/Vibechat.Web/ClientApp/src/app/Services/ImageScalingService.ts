@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { ChatMessage } from "../Data/ChatMessage";
-import { AttachmentKinds } from "../Data/AttachmentKinds";
+import { AttachmentKind } from "../Data/AttachmentKinds";
 import { ConversationsFormatter } from "../Formatters/ConversationsFormatter";
 
 export class Dimensions {
@@ -12,6 +12,8 @@ export class Dimensions {
   providedIn: 'root'
 })
 export class ImageScalingService {
+
+  constructor(private formatter: ConversationsFormatter) { }
 
   public chatImageMaxHeightRatio = 0.3;
 
@@ -46,12 +48,12 @@ export class ImageScalingService {
       return false;
     }
       
-    return chat.isAttachment && chat.attachmentInfo.attachmentKind == AttachmentKinds.Image;
+    return chat.isAttachment && chat.attachmentInfo.attachmentKind == AttachmentKind.Image;
   }
 
   public ScaleImage(message: ChatMessage) {
 
-    if (message.isAttachment && message.attachmentInfo.attachmentKind == AttachmentKinds.Image) {
+    if (message.isAttachment && message.attachmentInfo.attachmentKind == AttachmentKind.Image) {
       let d = this.GetChatImageDimensions(message.attachmentInfo.imageWidth, message.attachmentInfo.imageHeight);
       message.attachmentInfo.imageWidth = d.width;
       message.attachmentInfo.imageHeight = d.height;
@@ -62,7 +64,7 @@ export class ImageScalingService {
    * */
   private GetChatImageDimensions(oldWidth: number, oldHeight: number) {
     let d = new Dimensions();
-    let desiredWidth = ConversationsFormatter.IsMobileDevice() ? window.innerWidth * this.chatImageWidthRatioMobile : window.innerWidth * this.chatImageWidthRatioDesktop;
+    let desiredWidth = this.formatter.IsMobileDevice() ? window.innerWidth * this.chatImageWidthRatioMobile : window.innerWidth * this.chatImageWidthRatioDesktop;
     let desiredHeight = window.innerHeight * this.chatImageMaxHeightRatio;
 
     if (oldWidth > oldHeight) {
@@ -86,7 +88,7 @@ export class ImageScalingService {
 /* Method is used to get dimensions of image in full-screen
  * */
   public AdjustFullSizedImageDimensions(imageW: number, imageH: number) {
-    let appropriateHeight = ConversationsFormatter.IsMobileDevice()
+    let appropriateHeight = this.formatter.IsMobileDevice()
       ? Math.floor(window.innerHeight * this.fullScreenImageToScreenMobileRatio)
       : Math.floor(window.innerHeight * this.fullScreenImageToScreenDesktopRatio)
 

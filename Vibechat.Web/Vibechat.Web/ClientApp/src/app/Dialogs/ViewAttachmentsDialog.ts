@@ -3,13 +3,10 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialog, MatTabChangeEvent } from "@an
 import { ChatComponent } from "../Chat/chat.component";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { MessageAttachment } from "../Data/MessageAttachment";
-import { AttachmentKinds } from "../Data/AttachmentKinds";
+import { AttachmentKind } from "../Data/AttachmentKinds";
 import { ChatMessage } from "../Data/ChatMessage";
 import { ConversationsFormatter } from "../Formatters/ConversationsFormatter";
-import { retry } from "rxjs/operators";
-import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { CdkVirtualScrollViewport } from "@angular/cdk/scrolling";
-import { MessagesDateParserService } from "../Services/MessagesDateParserService";
 import { ChatsService } from "../Services/ChatsService";
 import { ViewPhotoService } from "./ViewPhotoService";
 
@@ -136,7 +133,7 @@ export class ViewAttachmentsDialogComponent {
     if (this.data.conversation.messages) {
       let attachments =
         this.data.conversation.messages
-        .filter(x => x.isAttachment && x.attachmentInfo.attachmentKind == AttachmentKinds.Image)
+        .filter(x => x.isAttachment && x.attachmentInfo.attachmentKind == AttachmentKind.Image)
           .reverse();
 
       this.AddPhotos(attachments);
@@ -161,7 +158,7 @@ export class ViewAttachmentsDialogComponent {
     if (this.data.conversation.messages) {
       let attachments =
         this.data.conversation.messages
-          .filter(x => x.isAttachment && x.attachmentInfo.attachmentKind == AttachmentKinds.File)
+          .filter(x => x.isAttachment && x.attachmentInfo.attachmentKind == AttachmentKind.File)
           .reverse();
 
       this.AddFiles(attachments);
@@ -194,7 +191,7 @@ export class ViewAttachmentsDialogComponent {
 
     let result = await this.conversationsService.GetAttachmentsFor(
       this.data.conversation.conversationID,
-      AttachmentKinds.File,
+      AttachmentKind.File,
       offset,
       ViewAttachmentsDialogComponent.attachmentsToLoadAmount);
 
@@ -220,7 +217,7 @@ export class ViewAttachmentsDialogComponent {
 
     let result = await this.conversationsService.GetAttachmentsFor(
       this.data.conversation.conversationID,
-      AttachmentKinds.Image,
+      AttachmentKind.Image,
       offset,
       ViewAttachmentsDialogComponent.attachmentsToLoadAmount);
 

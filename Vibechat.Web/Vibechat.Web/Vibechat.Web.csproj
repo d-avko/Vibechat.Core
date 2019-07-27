@@ -15,7 +15,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.S3" Version="3.3.103" />
     <PackageReference Include="FirebaseAdmin" Version="1.7.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.7.9" />
@@ -56,7 +55,9 @@
     <None Remove="ClientApp\src\app\Data\UploadFilesResponse.ts" />
     <None Remove="ClientApp\src\app\Data\UserInfo.ts" />
     <None Remove="ClientApp\src\app\Dialogs\AddGroupDialog.ts" />
+    <None Remove="ClientApp\src\app\Dialogs\AdminPanelDialog.ts" />
     <None Remove="ClientApp\src\app\Dialogs\ChangeNameDialog.ts" />
+    <None Remove="ClientApp\src\app\Dialogs\ChatUsersDialog.ts" />
     <None Remove="ClientApp\src\app\Dialogs\ChooseContactDialog.ts" />
     <None Remove="ClientApp\src\app\Dialogs\FindUsersDialog.ts" />
     <None Remove="ClientApp\src\app\Dialogs\ForwardMessagesDialog.ts" />
@@ -72,11 +73,14 @@
     <None Remove="ClientApp\src\app\Modules\ChatModule.ts" />
     <None Remove="ClientApp\src\app\Modules\LoginModule.ts" />
     <None Remove="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
+    <None Remove="ClientApp\src\app\Roles\ChatRoleDto.ts" />
     <None Remove="ClientApp\src\app\Search\searchlist.component.ts" />
+    <None Remove="ClientApp\src\app\Services\ChatRole.ts" />
     <None Remove="ClientApp\src\app\Services\ChatsService.ts" />
     <None Remove="ClientApp\src\app\Services\DeviceService.ts" />
     <None Remove="ClientApp\src\app\Services\ImageScalingService.ts" />
     <None Remove="ClientApp\src\app\Services\MessageReportingService.ts" />
+    <None Remove="ClientApp\src\app\Services\TypingService.ts" />
     <None Remove="ClientApp\src\app\Services\UsersService.ts" />
     <None Remove="ClientApp\src\app\Shared\AddedToGroupModel.ts" />
     <None Remove="ClientApp\src\app\Shared\EmptyModel.ts" />
@@ -100,7 +104,9 @@
     <TypeScriptCompile Include="ClientApp\src\app\Data\FoundUsersResponse.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\UploadFilesResponse.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Dialogs\AddGroupDialog.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Dialogs\AdminPanelDialog.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Dialogs\ChangeNameDialog.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Dialogs\ChatUsersDialog.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Dialogs\ChooseContactDialog.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Dialogs\FindUsersDialog.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Dialogs\ForwardMessagesDialog.ts" />
@@ -122,11 +128,14 @@
     <TypeScriptCompile Include="ClientApp\src\app\Modules\ChatModule.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Modules\LoginModule.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Roles\ChatRoleDto.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Search\searchlist.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Roles\ChatRole.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Services\ChatsService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Services\DeviceService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Services\ImageScalingService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Services\MessageReportingService.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Services\TypingService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Services\UsersService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\AddedToGroupModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\EmptyModel.ts" />
@@ -170,7 +179,6 @@
   </Target>
 
 <!--Add webpack build here-->
- 
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <TypeScriptTarget>ES5</TypeScriptTarget>
@@ -189,7 +197,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
   </PropertyGroup>
 
   <Import Project="..\Vibechat.Web.Data\Vibechat.Web.Data.projitems" Label="Shared" />

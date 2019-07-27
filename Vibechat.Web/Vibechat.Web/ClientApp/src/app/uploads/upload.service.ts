@@ -34,10 +34,13 @@ export class UploaderService {
       data.append('ChatId', chatId);
     }
 
-    const req = new HttpRequest('POST', '/Files/UploadImages', data, {
-      reportProgress: true
-    });
+    let headers = new HttpHeaders();
+    headers = headers.append("ngsw-bypass", "");
 
+    const req = new HttpRequest('POST', '/Files/UploadImages', data, {
+      reportProgress: true,
+      headers: headers
+    });
 
     return <Observable<any>>this.http.request(req).pipe(
       tap(event => this.showProgress(event, progress)),
@@ -60,8 +63,12 @@ export class UploaderService {
     data.append('thumbnail', file);
     data.append('conversationId', chatId.toString());
 
+    let headers = new HttpHeaders();
+    headers = headers.append("ngsw-bypass", "");
+
     const req = new HttpRequest('POST', 'api/Conversations/UpdateThumbnail', data, {
-      reportProgress: true
+      reportProgress: true,
+      headers: headers
     });
 
     return <Observable<any>>this.http.request(req).pipe(
@@ -84,8 +91,12 @@ export class UploaderService {
     let data = new FormData();
     data.append('picture', file);
 
+    let headers = new HttpHeaders();
+    headers = headers.append("ngsw-bypass", "");
+
     const req = new HttpRequest('POST', 'api/Users/UpdateProfilePicture', data, {
-      reportProgress: true
+      reportProgress: true,
+      headers: headers
     });
 
     return <Observable<any>>this.http.request(req).pipe(
@@ -109,8 +120,12 @@ export class UploaderService {
     data.append('file', file);
     data.append('ChatId', chatId);
 
+    let headers = new HttpHeaders();
+    headers = headers.append("ngsw-bypass", "");
+
     const req = new HttpRequest('POST', 'Files/UploadFile', data, {
-      reportProgress: true
+      reportProgress: true,
+      headers: headers
     });
 
     return <Observable<any>>this.http.request(req).pipe(
@@ -185,10 +200,3 @@ export class UploaderService {
     progress(this.getEventProgress(event));
   }
 }
-
-
-/*
-Copyright Google LLC. All Rights Reserved.
-Use of this source code is governed by an MIT-style license that
-can be found in the LICENSE file at http://angular.io/license
-*/

@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Vibechat.Web.Data.Conversations;
 using Vibechat.Web.Data.DataModels;
+using Vibechat.Web.Data.Messages;
 using VibeChat.Web.Data;
 using VibeChat.Web.Data.DataModels;
 
@@ -31,6 +33,9 @@ namespace VibeChat.Web
 
         public DbSet<DhPublicKeyDataModel> PublicKeys { get; set; }
 
+        public new DbSet<RoleDataModel> Roles { get; set; }
+
+        public DbSet<ChatRoleDataModel> ChatRoles { get; set; }
         #region Constructor
 
         /// <summary>
@@ -42,7 +47,7 @@ namespace VibeChat.Web
             
         }
 
-        #endregion
+        #endregion 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -67,16 +72,36 @@ namespace VibeChat.Web
             modelBuilder.Entity<ContactsDataModel>()
                 .HasKey(x => new { x.FirstUserID, x.SecondUserID});
 
+            modelBuilder.Entity<ChatRoleDataModel>()
+               .HasKey(x => new { x.ChatId, x.UserId});
+             
             modelBuilder.Entity<AttachmentKindDataModel>().HasData(
                 new[] 
                 {
                 new AttachmentKindDataModel()
                 {
-                    Name = "img"
+                    Kind = AttachmentKind.Image
                 },
                 new AttachmentKindDataModel() {
-                    Name = "file"
+                    Kind = AttachmentKind.File
                 },
+                });
+
+            modelBuilder.Entity<RoleDataModel>().HasData(
+                new[]
+                {
+                new RoleDataModel()
+                {
+                    Id = ChatRole.Creator
+                },
+                new RoleDataModel()
+                {
+                    Id = ChatRole.Moderator
+                },
+                new RoleDataModel()
+                {
+                    Id = ChatRole.NoRole
+                }
                 });
 
             modelBuilder.Entity<DhPublicKeyDataModel>().HasData(

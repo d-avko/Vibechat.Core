@@ -16,13 +16,6 @@ namespace Vibechat.Web.Services.Repositories
             this.mContext = dbContext;
         }
 
-        /// <summary>
-        /// Helper method used to find user with whom 
-        /// current user have a dialogue
-        /// </summary>
-        /// <param name="convId"></param>
-        /// <param name="FirstUserInDialogueId"></param>
-        /// <returns></returns>
         public AppUser GetUserInDialog(int convId, string FirstUserInDialogueId)
         {
             return mContext.UsersConversations
@@ -39,8 +32,7 @@ namespace Vibechat.Web.Services.Repositories
                     where userConversation.UserID == userId && (userConversation.DeviceId == deviceId || userConversation.DeviceId == null)
                     select userConversation.Conversation
                    )
-                   .Include(x => x.PublicKey)
-                   .Include(x => x.Creator);
+                   .Include(x => x.PublicKey);
         }
 
         public IQueryable<AppUser> GetConversationParticipants(int conversationId)
@@ -48,6 +40,14 @@ namespace Vibechat.Web.Services.Repositories
             return from userConversation in mContext.UsersConversations
                    where userConversation.ChatID == conversationId
                    select userConversation.User;
+        }
+
+        public Task<List<AppUser>> FindUsersInChat(string username, int chatId)
+        {
+            return mContext.
+                UsersConversations
+                .Where(x => x.ChatID == chatId && EF.Functions.Like(x.User.UserName, username + "%"))
+                .Select(x => x.User).ToListAsync();
         }
 
         public async Task<UsersConversationDataModel> Get(string userId, int conversationId)
@@ -64,24 +64,19 @@ namespace Vibechat.Web.Services.Repositories
                 .SingleOrDefaultAsync(x => x.ChatID == conversationId && x.UserID == userId) != default(UsersConversationDataModel);
         }
 
-        public async Task Remove(UsersConversationDataModel entity)
+        public void Remove(UsersConversationDataModel entity)
         {
             mContext.UsersConversations.Remove(entity);
-            await mContext.SaveChangesAsync();
         }
 
-        public async Task<UsersConversationDataModel> Add(string userId, int chatId, string deviceId = null)
+        public UsersConversationDataModel Add(string userId, int chatId, string deviceId = null)
         {
-            var res = await mContext.UsersConversations.AddAsync(new UsersConversationDataModel()
+            return mContext.UsersConversations.Add(new UsersConversationDataModel()
             {
                 ChatID = chatId,
                 UserID = userId,
                 DeviceId = deviceId
-            });
-
-            await mContext.SaveChangesAsync();
-
-            return res.Entity;
+            })?.Entity;
         }
 
         public void UpdateDeviceId(string deviceId, string userId, int chatId)
@@ -91,7 +86,6 @@ namespace Vibechat.Web.Services.Repositories
                 .Where(x => x.UserID == userId && x.ChatID == chatId).Single();
 
             chat.DeviceId = deviceId;
-            mContext.SaveChanges();
         }
 
         public async Task<bool> Exists(AppUser user, ConversationDataModel conversation)

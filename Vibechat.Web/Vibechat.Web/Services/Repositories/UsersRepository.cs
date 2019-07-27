@@ -29,8 +29,6 @@ namespace Vibechat.Web.Services.Repositories
             user.LastSeen = DateTime.UtcNow;
 
             user.ConnectionId = signalRConnectionId;
-
-            await mContext.SaveChangesAsync();
         }
 
         public async Task MakeUserOnline(string userId)
@@ -40,8 +38,6 @@ namespace Vibechat.Web.Services.Repositories
             user.IsOnline = true;
 
             user.LastSeen = DateTime.UtcNow;
-
-            await mContext.SaveChangesAsync();
         }
 
         public async Task MakeUserOffline(string userId)
@@ -51,43 +47,41 @@ namespace Vibechat.Web.Services.Repositories
             user.IsOnline = false;
 
             user.ConnectionId = null;
-
-            await mContext.SaveChangesAsync();
         }
 
-        public async Task<AppUser> GetById(string id)
+        public Task<AppUser> GetById(string id)
         {
-            return await mUserManager.FindByIdAsync(id);
+            return mUserManager.FindByIdAsync(id);
         }
 
-        public async Task<AppUser> GetByEmail(string email)
+        public Task<AppUser> GetByEmail(string email)
         {
-            return await mUserManager.FindByEmailAsync(email);
+            return mUserManager.FindByEmailAsync(email);
         }
 
-        public async Task<AppUser> GetByUsername(string username)
+        public Task<AppUser> GetByUsername(string username)
         {
-            return await mUserManager.FindByNameAsync(username);
+            return mUserManager.FindByNameAsync(username);
         }
 
-        public async Task<bool> CheckPassword(string password, AppUser user)
+        public Task<bool> CheckPassword(string password, AppUser user)
         {
-           return await mUserManager.CheckPasswordAsync(user, password);
+           return mUserManager.CheckPasswordAsync(user, password);
         }
 
-        public async Task<IdentityResult> CreateUser(AppUser user, string password)
+        public Task<IdentityResult> CreateUser(AppUser user, string password)
         {
-            return await mUserManager.CreateAsync(user, password);
+            return mUserManager.CreateAsync(user, password);
         }
 
-        public async Task<IdentityResult> CreateUser(AppUser user)
+        public Task<IdentityResult> CreateUser(AppUser user)
         {
-            return await mUserManager.CreateAsync(user);
+            return mUserManager.CreateAsync(user);
         }
 
-        public async Task<IdentityResult> DeleteUser(AppUser user)
+        public Task<IdentityResult> DeleteUser(AppUser user)
         {
-            return await mUserManager.DeleteAsync(user);
+            return mUserManager.DeleteAsync(user);
         }
 
         public async Task<IQueryable<AppUser>> FindByUsername(string username)
@@ -102,21 +96,18 @@ namespace Vibechat.Web.Services.Repositories
         {
             var user = await GetById(userId);
             user.IsPublic = !user.IsPublic;
-            await mContext.SaveChangesAsync();
         }
 
         public async Task ChangeName(string newName, string userId)
         {
             var user = await GetById(userId);
             user.FirstName = newName;
-            await mContext.SaveChangesAsync();
         }
 
         public async Task ChangeLastName(string newName, string userId)
         {
             var user = await GetById(userId);
             user.LastName = newName;
-            await mContext.SaveChangesAsync();
         }
 
         public async Task ChangeUsername(string newName, string userId)
@@ -136,7 +127,6 @@ namespace Vibechat.Web.Services.Repositories
         {
             var user = await GetById(userId);
             user.RefreshToken = token;
-            await mContext.SaveChangesAsync();
         }
 
         public async Task UpdateAvatar(string thumbnail, string fullSized, string userId)
@@ -144,7 +134,6 @@ namespace Vibechat.Web.Services.Repositories
             var user = await GetById(userId);
             user.ProfilePicImageURL = thumbnail;
             user.FullImageUrl = fullSized;
-            await mContext.SaveChangesAsync();
         }
     }
 }

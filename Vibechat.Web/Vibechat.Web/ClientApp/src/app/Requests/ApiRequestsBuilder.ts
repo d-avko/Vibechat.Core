@@ -16,6 +16,8 @@ import {
 } from "@angular/material";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
 import { MessageAttachment } from "../Data/MessageAttachment";
+import { ChatRoleDto } from "../Roles/ChatRoleDto";
+import { AttachmentKind } from "../Data/AttachmentKinds";
 
 @Injectable({
   providedIn: 'root'
@@ -113,9 +115,9 @@ export class ApiRequestsBuilder {
     ).toPromise();
   }
 
-  public GetConversationById(conversationId: number): Promise<ServerResponse<ConversationTemplate>> {
+  public GetConversationById(conversationId: number, updateRoles: boolean): Promise<ServerResponse<ConversationTemplate>> {
     return this.MakeCall<ConversationTemplate>(
-      { conversationId: conversationId },
+      { conversationId: conversationId, updateRoles: updateRoles },
       'api/Conversations/GetById'
     ).toPromise();
   }
@@ -148,7 +150,14 @@ export class ApiRequestsBuilder {
     ).toPromise();
   }
 
-  public GetAttachmentsForConversation(conversationId: number, kind: string, offset: number, count: number) {
+  public FindUsersInChat(username: string, chatId: number): Promise<ServerResponse<FoundUsersResponse>> {
+    return this.MakeCall<FoundUsersResponse>(
+      { UsernameToFind: username, ChatId: chatId },
+      'api/Conversations/FindUsersInChat'
+    ).toPromise();
+  }
+
+  public GetAttachmentsForConversation(conversationId: number, kind: AttachmentKind, offset: number, count: number) {
     return this.MakeCall<Array<ChatMessage>>(
       {
         conversationId: conversationId,

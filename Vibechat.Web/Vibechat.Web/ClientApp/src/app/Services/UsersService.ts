@@ -2,12 +2,13 @@ import { AuthService } from "../Auth/AuthService";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { UserInfo } from "../Data/UserInfo";
 import { Injectable } from "@angular/core";
+import { ConnectionManager, BanEvent } from "../Connections/ConnectionManager";
 
 @Injectable({
   providedIn: 'root'
 })
 export class UsersService {
-  constructor(private requestsBuilder: ApiRequestsBuilder, private auth: AuthService) { }
+  constructor(private requestsBuilder: ApiRequestsBuilder, private connectionManager: ConnectionManager, private auth: AuthService) { }
 
   //Fetches user info of specified user. If current user id specified,
   //updates user entry in AuthService.
@@ -83,9 +84,9 @@ export class UsersService {
   }
 
   public async BlockUser(user: UserInfo) {
-    let result = await this.requestsBuilder.BanUser(user.id);
+    let result = await this.connectionManager.BlockUser(user.id, BanEvent.Banned);
 
-    if (!result.isSuccessfull) {
+    if (!result) {
       return;
     }
 
@@ -93,8 +94,9 @@ export class UsersService {
   }
 
   public async UnblockUser(user: UserInfo) {
-    let result = await this.requestsBuilder.UnbanUser(user.id);
-    if (!result.isSuccessfull) {
+    let result = await this.connectionManager.BlockUser(user.id, BanEvent.Unbanned);
+
+    if (!result) {
       return;
     }
 

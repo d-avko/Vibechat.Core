@@ -7,7 +7,7 @@ namespace Vibechat.Web.Services.Repositories
 {
     public interface IConversationRepository
     {
-        Task Add(ConversationDataModel conversation);
+        void Add(ConversationDataModel conversation);
 
         ConversationDataModel GetById(int id);
 
@@ -17,10 +17,10 @@ namespace Vibechat.Web.Services.Repositories
 
         void ChangeName(ConversationDataModel entity, string name);
 
-        Task<IQueryable<ConversationDataModel>> SearchByName(string name, AppUser whoSearches, IUsersConversationsRepository participantsProvider);
+        IQueryable<ConversationDataModel> SearchByName(string name);
 
-        Task ChangePublicState(int conversationId);
+        void ChangePublicState(ConversationDataModel chat);
 
-        Task UpdateAuthKey(ConversationDataModel chat, string authKeyId);
+        void UpdateAuthKey(ConversationDataModel chat, string authKeyId);
     }
 }

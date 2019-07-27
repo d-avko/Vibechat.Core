@@ -19,7 +19,7 @@
   </div>
 
   <mat-form-field class="input_field">
-    <textarea (keydown.control.enter)="SendMessage()" matInput placeholder="Type in your message..."></textarea>
+    <textarea (input)="SetTyping()" (keydown.control.enter)="SendMessage()" matInput placeholder="Type in your message..."></textarea>
   </mat-form-field>
 
   <button mat-button style="color:cadetblue" (click)="SendMessage()">

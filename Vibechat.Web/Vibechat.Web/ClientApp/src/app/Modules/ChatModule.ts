@@ -21,11 +21,9 @@ import { SearchListComponent } from "../Search/searchlist.component";
 import { UserInfoDialogComponent } from "../Dialogs/UserInfoDialog";
 import { UploaderService } from "../uploads/upload.service";
 import { ViewAttachmentsDialogComponent } from "../Dialogs/ViewAttachmentsDialog";
-import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { HttpResponseInterceptor } from "../Interceptors/HttpResponseInterceptor";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
 import { ForwardMessagesDialogComponent } from "../Dialogs/ForwardMessagesDialog";
-import { MessagesDateParserService } from "../Services/MessagesDateParserService";
 import { ChatsService } from "../Services/ChatsService";
 import { UsersService } from "../Services/UsersService";
 import { MessageReportingService } from "../Services/MessageReportingService";
@@ -36,6 +34,9 @@ import { ImageScalingService } from "../Services/ImageScalingService";
 import { DownloadsService } from "../downloads/downloads.service";
 import { ViewPhotoService, ViewPhotoComponent } from "../Dialogs/ViewPhotoService";
 import { DeviceService } from "../Services/DeviceService";
+import { TypingService } from "../Services/TypingService";
+import { ChatUsersDialogComponent } from "../Dialogs/ChatUsersDialog";
+import { AdminPanelDialog } from "../Dialogs/AdminPanelDialog";
 
 @NgModule({
   declarations: [
@@ -53,6 +54,8 @@ import { DeviceService } from "../Services/DeviceService";
     ViewAttachmentsDialogComponent,
     ForwardMessagesDialogComponent,
     ChooseContactDialogComponent,
+    ChatUsersDialogComponent,
+    AdminPanelDialog,
     ViewPhotoComponent
   ],
   imports: [
@@ -76,11 +79,12 @@ import { DeviceService } from "../Services/DeviceService";
     ViewAttachmentsDialogComponent,
     ForwardMessagesDialogComponent,
     ChooseContactDialogComponent,
+    ChatUsersDialogComponent,
+    AdminPanelDialog,
     ViewPhotoComponent],
 
   providers: [
     ConversationsFormatter,
-    MessagesDateParserService,
     UploaderService,
     SnackBarHelper,
     ChatsService,
@@ -92,6 +96,7 @@ import { DeviceService } from "../Services/DeviceService";
     ImageScalingService,
     DownloadsService,
     ViewPhotoService,
-    DeviceService]
+    DeviceService,
+    TypingService]
 })
 export class ChatModule { }

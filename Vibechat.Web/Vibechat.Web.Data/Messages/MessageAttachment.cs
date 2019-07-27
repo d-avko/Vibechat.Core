@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Vibechat.Web.Data.Messages;
 
 namespace Vibechat.Web.ChatData.Messages
 {
@@ -13,7 +14,7 @@ namespace Vibechat.Web.ChatData.Messages
 
         public string AttachmentName { get; set; }
 
-        public string AttachmentKind { get; set; }
+        public AttachmentKind AttachmentKind { get; set; }
 
         /// <summary>
         /// This field is only used on client-side.

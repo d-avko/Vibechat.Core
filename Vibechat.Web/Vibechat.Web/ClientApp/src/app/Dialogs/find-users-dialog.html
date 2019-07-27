@@ -1,4 +1,4 @@
-<h1 mat-dialog-title>Add user to group.</h1>
+<h1 mat-dialog-title>Select users.</h1>
 <div mat-dialog-content style="overflow: unset !important">
 
   <div class="find-header">
@@ -23,7 +23,7 @@
 
       <h3 matLine
           [ngClass]="{'selected-user': IsUserSelected(user)}">
-        {{user.userName}}
+        {{ (user.userName.length > 20 )? (user.userName | slice:0:20)+'..':(user.userName) }}
       </h3>
 
     </mat-list-item>
@@ -31,7 +31,7 @@
   </mat-action-list>
 
   <div mat-dialog-actions>
-    <button mat-button [mat-dialog-close]="SelectedUsers" cdkFocusInitial>Invite</button>
+    <button mat-button [mat-dialog-close]="SelectedUsers" cdkFocusInitial>Select</button>
     <button mat-button (click)="onCancelClick()">Cancel</button>
   </div>
 
