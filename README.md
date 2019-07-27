@@ -1,5 +1,5 @@
-# Vibechat - Simple messenger
-ASP.NET Core Messenger: features Groups, dialogs, end-to-end encrypted chats. 
+# Vibechat - Simple ASP.NET Core messenger
+ASP.NET Core Messenger: PWA Asp.Net core & Angular messenger that features Groups, dialogs, end-to-end encrypted chats. 
 Uses mobile phone login system (firebase is used as SMS provider) and tokens based authorization.
 Running at https://denisavko.me
 
@@ -22,7 +22,6 @@ Search             |  Start view
 
 <code> <strong>Front-end: </strong> </code>
 1. Tech stack.
-2. Folders overview.
 
 ### Authorization & login system
 * Login system & registration: to register or log in, user must have a valid phone number. 
