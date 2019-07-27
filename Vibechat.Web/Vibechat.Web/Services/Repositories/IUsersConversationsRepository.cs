@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using VibeChat.Web;
 
@@ -6,7 +7,7 @@ namespace Vibechat.Web.Services.Repositories
 {
     public interface IUsersConversationsRepository
     {
-        Task<UsersConversationDataModel> Add(string userId, int chatId, string deviceId = null);
+        UsersConversationDataModel Add(string userId, int chatId, string deviceId = null);
         Task<UsersConversationDataModel> Get(string userId, int conversationId);
         IQueryable<AppUser> GetConversationParticipants(int conversationId);
         IQueryable<ConversationDataModel> GetUserConversations(string deviceId, string userId);
@@ -16,8 +17,10 @@ namespace Vibechat.Web.Services.Repositories
 
         void UpdateDeviceId(string deviceId, string userId, int chatId);
 
-        Task Remove(UsersConversationDataModel entity);
+        void Remove(UsersConversationDataModel entity);
 
         Task<UsersConversationDataModel> GetDialog(string firstUserId, string secondUserId);
+
+        Task<List<AppUser>> FindUsersInChat(string username, int chatId);
     }
 }

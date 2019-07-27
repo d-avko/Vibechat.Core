@@ -2,14 +2,17 @@ import { Injectable } from "@angular/core"
 import { ChatMessage } from "../Data/ChatMessage";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { AuthService } from "../Auth/AuthService";
-import { AttachmentKinds } from "../Data/AttachmentKinds";
+import { AttachmentKind } from "../Data/AttachmentKinds";
+import { TypingService } from "../Services/TypingService";
+import { UserInfo } from "../Data/UserInfo";
+import { ChatRole } from "../Roles/ChatRole";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ConversationsFormatter{
 
-  constructor(private auth: AuthService) {}
+  constructor(private auth: AuthService, private typing: TypingService) {}
 
   public static MaxSymbols = 38;
 
@@ -19,7 +22,9 @@ export class ConversationsFormatter{
 
   public static MaxSymbolsMobile = 20;
 
-  public static IsMobileDevice() {
+  public static MaxSymbolsForNameInTypingStripe = 20;
+
+  public IsMobileDevice() {
     return window.innerWidth < ConversationsFormatter.MinPixelsDesktop;
   }
 
@@ -31,7 +36,7 @@ export class ConversationsFormatter{
 
     let MaxSymbols = 0;
 
-    if (ConversationsFormatter.IsMobileDevice()) {
+    if (this.IsMobileDevice()) {
       MaxSymbols = ConversationsFormatter.MaxSymbolsMobile;
     } else {
       MaxSymbols = Math.floor((window.innerWidth * ConversationsFormatter.MaxSymbols * 0.75) / ConversationsFormatter.MaxPixelsDesktop);
@@ -65,6 +70,41 @@ export class ConversationsFormatter{
     return msg;
   }
 
+  public GetUserRoleFormatted(user: UserInfo) {
+    switch (user.chatRole.role) {
+      case ChatRole.Creator: {
+        return "Creator";
+      }
+      case ChatRole.Moderator: {
+        return "Moderator";
+      }
+      default: {
+        return "";
+      }
+    }
+  }
+
+  public GetUsersTypingFormatted(chatId: number) {
+    let users = this.typing.GetUsersTyping(chatId);
+
+    if (!users || !users.length) {
+      return "";
+    }
+
+    let firstUserName = users[0].firstName.substr(0, ConversationsFormatter.MaxSymbolsForNameInTypingStripe);
+
+    if (users.length === 1) {
+      return firstUserName + " is typing";
+    } else {
+      return `${firstUserName} and ${users.length - 1} more people are typing`;
+    }
+  }
+
+  public IsAnyUserTyping(chatId: number): boolean {
+    let users = this.typing.GetUsersTyping(chatId);
+    return users != null && users.length != 0;
+  }
+
   public GetBytesAmountFormatted(amount: number) {
     switch (true) {
       case amount < 1024: {
@@ -82,12 +122,12 @@ export class ConversationsFormatter{
     }
   }
 
-  public GetFormattedAttachmentName(name: string) : string {
-    switch (name) {
-      case AttachmentKinds.Image: {
+  public GetFormattedAttachmentName(kind: AttachmentKind) : string {
+    switch (kind) {
+      case AttachmentKind.Image: {
         return "Image"
       }
-      case AttachmentKinds.File: {
+      case AttachmentKind.File: {
         return "File"
       }
       default: {
@@ -104,10 +144,18 @@ export class ConversationsFormatter{
 
     let message = conversation.messages[conversation.messages.length - 1];
 
+    if (typeof message.timeReceived !== 'object') {
+      message.timeReceived = new Date(<string>message.timeReceived);
+    }
+
     return this.DaysSinceEventFormatted((<Date>message.timeReceived));
   }
 
-  public GetMessagesDateStripFormatted(message: ChatMessage) : string {
+  public GetMessagesDateStripFormatted(message: ChatMessage): string {
+    if (typeof message.timeReceived !== 'object') {
+      message.timeReceived = new Date(<string>message.timeReceived);
+    }
+
     return this.DaysSinceEventFormatted((<Date>message.timeReceived));
   }
 
@@ -196,7 +244,12 @@ export class ConversationsFormatter{
 
   public GetFormattedDateForAttachments(attachments: Array<ChatMessage>) {
     let date = new Date();
-    let attachmentDate = (<Date>attachments[0].timeReceived);
+
+    if (!<Date>attachments[0].timeReceived) {
+      attachments[0].timeReceived = new Date(<string>attachments[0].timeReceived);
+    }
+
+    let attachmentDate = <Date>attachments[0].timeReceived;
                                       //take zero element, as it's the most recent attachment
     let daysSinceReceived = (date.getTime() - attachmentDate.getTime()) / (1000 * 60 * 60 * 24);
 
@@ -223,9 +276,5 @@ export class ConversationsFormatter{
     }
 
     return conversation.name;
-  }
-
-  public GetMessageTimeFormatted(message: ChatMessage) {
-    return (<Date>message.timeReceived).toLocaleTimeString();
   }
 }

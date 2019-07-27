@@ -1,8 +1,5 @@
 ﻿using FirebaseAdmin;
 using FirebaseAdmin.Auth;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,15 +16,18 @@ namespace Vibechat.Web.Services.Login
     {
         public LoginService(
             IUsersRepository usersRepository,
-            IChatDataProvider chatDataProvider)
+            IChatDataProvider chatDataProvider,
+            UnitOfWork unitOfWork)
         {
             this.usersRepository = usersRepository;
             this.chatDataProvider = chatDataProvider;
+            this.unitOfWork = unitOfWork;
         }
 
         private IUsersRepository usersRepository;
 
         private IChatDataProvider chatDataProvider;
+        private readonly UnitOfWork unitOfWork;
 
         public async Task<LoginResultApiModel> LogInAsync(LoginCredentialsApiModel loginCredentials)
         {
@@ -124,7 +124,7 @@ namespace Vibechat.Web.Services.Login
             string token = userToCreate.GenerateRefreshToken();
 
             await usersRepository.UpdateRefreshToken(userToCreate.Id, token);
-
+            await unitOfWork.Commit();
             return token;
         }
     }

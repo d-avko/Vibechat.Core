@@ -30,8 +30,6 @@ namespace VibeChat.Web
 
         public string AuthKeyId { get; set; }
 
-        public AppUser Creator { get; set; }
-
         public int? PublicKeyId { get; set; }
 
         [ForeignKey("PublicKeyId")]

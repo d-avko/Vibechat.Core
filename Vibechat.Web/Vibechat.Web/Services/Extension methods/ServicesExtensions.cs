@@ -1,11 +1,5 @@
-﻿using Amazon.S3;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
 using Vibechat.Web.AuthHelpers;
 using Vibechat.Web.Middleware;
 using Vibechat.Web.Services.Bans;
@@ -19,7 +13,6 @@ using Vibechat.Web.Services.Paths;
 using Vibechat.Web.Services.Repositories;
 using Vibechat.Web.Services.Users;
 using VibeChat.Web;
-using VibeChat.Web.Services.Repositories;
 using VibeChat.Web.UserProviders;
 
 namespace Vibechat.Web.Services.Extension_methods
@@ -52,6 +45,7 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddScoped<IUsersBansRepository, UsersBansRepository>();
             services.AddScoped<IContactsRepository, ContactsRepository>();
             services.AddScoped<IDhPublicKeysRepository, DhPublicKeysRepository>();
+            services.AddScoped<IChatRolesRepository, ChatRolesRepository>();
         }
 
         public static void AddBusinessLogic(this IServiceCollection services)
@@ -66,6 +60,7 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddSingleton<UniquePathsProvider, UniquePathsProvider>();
             services.AddScoped<CryptoService, CryptoService>();
             services.AddSingleton<UsersSubsriptionService, UsersSubsriptionService>();
+            services.AddScoped<UnitOfWork, UnitOfWork>();
         }
     }
 }

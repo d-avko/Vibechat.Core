@@ -24,13 +24,11 @@ namespace Vibechat.Web.Services.Repositories
         public void BanUserInGroup(AppUser banned, ConversationDataModel where)
         {
             mContext.ConversationsBans.Add(new ConversationsBansDataModel() { BannedUser = banned, Conversation = where });
-            mContext.SaveChanges();
         }
 
         public void UnbanUserInGroup(string userId, int conversationId)
         {
             mContext.ConversationsBans.Remove(Get(userId, conversationId));
-            mContext.SaveChanges();
         }
 
         public bool IsBanned(AppUser who, int whereId)

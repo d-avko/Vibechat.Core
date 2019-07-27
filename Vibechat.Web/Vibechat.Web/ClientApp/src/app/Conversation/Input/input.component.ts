@@ -29,6 +29,10 @@ export class InputComponent {
 
   public uploading: boolean = false;
 
+  public isTypingSent: boolean = false;
+
+  public TypingDelay: number = 1000;
+
   public SendMessage() {
 
     if (this.inputfield._control.value == null || this.inputfield._control.value == '') {
@@ -49,6 +53,15 @@ export class InputComponent {
     await this.chats.UploadFile((<HTMLInputElement>event.target).files[0], this.ProgressCallback.bind(this), this.Conversation);
     this.uploading = false;
     this.ResetInput(<HTMLInputElement>event.target);
+  }
+
+  public SetTyping() {
+    if (this.isTypingSent) {
+      return;
+    }
+
+    this.chats.SetTyping(this.Conversation.conversationID);
+    setTimeout(() => this.isTypingSent = false, this.TypingDelay);
   }
 
   public ViewUserInfo() {

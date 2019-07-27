@@ -1,4 +1,4 @@
-export class AttachmentKinds {
-  public static Image: string = "img";
-  public static File: string = "file";
+export enum AttachmentKind {
+  Image = 0,
+  File = 1
 }

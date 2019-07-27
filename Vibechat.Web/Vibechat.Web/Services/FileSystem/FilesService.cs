@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Vibechat.Web.ChatData.Messages;
+using Vibechat.Web.Data.Messages;
 using Vibechat.Web.Services.Images;
 using Vibechat.Web.Services.Paths;
 using VibeChat.Web;
@@ -70,7 +71,7 @@ namespace Vibechat.Web.Services.FileSystem
 
                 return new MessageAttachment()
                 {
-                    AttachmentKind = "img",
+                    AttachmentKind = AttachmentKind.Image,
                     AttachmentName = imageName,
                     ContentUrl = DI.Configuration["FileServer:Url"] + resultPath,
                     ImageHeight = resultDimensions.Item2,
@@ -93,7 +94,7 @@ namespace Vibechat.Web.Services.FileSystem
 
                 return new MessageAttachment()
                 {
-                    AttachmentKind = "file",
+                    AttachmentKind = AttachmentKind.File,
                     AttachmentName = filename,
                     ContentUrl = DI.Configuration["FileServer:Url"] + resultPath,
                     FileSize = file.Length

@@ -15,6 +15,7 @@ namespace Vibechat.Web.Services.Repositories
         {
             this.mContext = dbContext;
         }
+
         [Obsolete("Keys are now seeded via DbContext")]
         public async Task Add(DhPublicKeyDataModel value)
         {

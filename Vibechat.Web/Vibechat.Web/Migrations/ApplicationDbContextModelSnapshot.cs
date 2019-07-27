@@ -201,8 +201,6 @@ namespace Vibechat.Web.Migrations
 
                     b.Property<string>("AuthKeyId");
 
-                    b.Property<string>("CreatorId");
-
                     b.Property<string>("FullImageUrl");
 
                     b.Property<bool>("IsGroup");
@@ -219,8 +217,6 @@ namespace Vibechat.Web.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatorId");
-
                     b.HasIndex("PublicKeyId");
 
                     b.ToTable("Conversations");
@@ -228,21 +224,20 @@ namespace Vibechat.Web.Migrations
 
             modelBuilder.Entity("VibeChat.Web.Data.DataModels.AttachmentKindDataModel", b =>
                 {
-                    b.Property<string>("Name")
-                        .ValueGeneratedOnAdd();
+                    b.Property<int>("Kind");
 
-                    b.HasKey("Name");
+                    b.HasKey("Kind");
 
                     b.ToTable("AttachmentKinds");
 
                     b.HasData(
                         new
                         {
-                            Name = "img"
+                            Kind = 0
                         },
                         new
                         {
-                            Name = "file"
+                            Kind = 1
                         });
                 });
 
@@ -251,7 +246,7 @@ namespace Vibechat.Web.Migrations
                     b.Property<int>("AttachmentID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("AttachmentKindName");
+                    b.Property<int?>("AttachmentKindKind");
 
                     b.Property<string>("AttachmentName");
 
@@ -267,7 +262,7 @@ namespace Vibechat.Web.Migrations
 
                     b.HasKey("AttachmentID");
 
-                    b.HasIndex("AttachmentKindName");
+                    b.HasIndex("AttachmentKindKind");
 
                     b.HasIndex("MessageId")
                         .IsUnique();
@@ -353,6 +348,23 @@ namespace Vibechat.Web.Migrations
                     b.ToTable("UsersConversations");
                 });
 
+            modelBuilder.Entity("Vibechat.Web.Data.DataModels.ChatRoleDataModel", b =>
+                {
+                    b.Property<int>("ChatId");
+
+                    b.Property<string>("UserId");
+
+                    b.Property<int>("RoleId");
+
+                    b.HasKey("ChatId", "UserId");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ChatRoles");
+                });
+
             modelBuilder.Entity("Vibechat.Web.Data.DataModels.ContactsDataModel", b =>
                 {
                     b.Property<string>("FirstUserID");
@@ -425,6 +437,29 @@ namespace Vibechat.Web.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Vibechat.Web.Data.DataModels.RoleDataModel", b =>
+                {
+                    b.Property<int>("Id");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 0
+                        },
+                        new
+                        {
+                            Id = 1
+                        },
+                        new
+                        {
+                            Id = 2
+                        });
+                });
+
             modelBuilder.Entity("Vibechat.Web.Data.DataModels.UsersBansDatamodel", b =>
                 {
                     b.Property<string>("BannedByID");
@@ -485,10 +520,6 @@ namespace Vibechat.Web.Migrations
 
             modelBuilder.Entity("VibeChat.Web.ConversationDataModel", b =>
                 {
-                    b.HasOne("VibeChat.Web.AppUser", "Creator")
-                        .WithMany()
-                        .HasForeignKey("CreatorId");
-
                     b.HasOne("Vibechat.Web.Data.DataModels.DhPublicKeyDataModel", "PublicKey")
                         .WithMany()
                         .HasForeignKey("PublicKeyId");
@@ -498,7 +529,7 @@ namespace Vibechat.Web.Migrations
                 {
                     b.HasOne("VibeChat.Web.Data.DataModels.AttachmentKindDataModel", "AttachmentKind")
                         .WithMany()
-                        .HasForeignKey("AttachmentKindName");
+                        .HasForeignKey("AttachmentKindKind");
 
                     b.HasOne("VibeChat.Web.MessageDataModel", "Message")
                         .WithOne("AttachmentInfo")
@@ -539,6 +570,24 @@ namespace Vibechat.Web.Migrations
                     b.HasOne("VibeChat.Web.AppUser", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Vibechat.Web.Data.DataModels.ChatRoleDataModel", b =>
+                {
+                    b.HasOne("VibeChat.Web.ConversationDataModel", "Chat")
+                        .WithMany()
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Vibechat.Web.Data.DataModels.RoleDataModel", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("VibeChat.Web.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

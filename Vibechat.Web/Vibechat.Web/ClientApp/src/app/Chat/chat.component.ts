@@ -67,7 +67,6 @@ export class ChatComponent implements OnInit {
     await this.usersService.UpdateUserInfo(this.auth.User.id);
 
     await this.usersService.UpdateContacts();
-
   }
 
   public IsDarkTheme() {
