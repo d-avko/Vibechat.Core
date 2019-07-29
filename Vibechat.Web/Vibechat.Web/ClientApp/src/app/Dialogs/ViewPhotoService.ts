@@ -27,20 +27,11 @@ export class ViewPhotoInjector extends Injector {
 
 }
 
-enum ImageKind {
-  FullSized,
-  ProfileOrGroupPicture
-}
-
 export class ViewPhotoData {
   photo: ChatMessage;
   fullsizedUrl: string;
-  thumbnailImage: HTMLImageElement;
   imageName: string;
-  width: number;
-  heigth: number;
   isForwardSupported: boolean;
-  imageKind: ImageKind;
 }
 
 @Injectable()
@@ -54,7 +45,7 @@ export class ViewPhotoService {
 
   private config: OverlayConfig;
 
-  public ViewPhoto(photo: ChatMessage, imageW: number, imageH: number) {
+  public ViewPhoto(photo: ChatMessage) {
     let overlayRef = this.overlay.create(this.config);
 
     overlayRef.backdropClick().subscribe(() => {
@@ -62,17 +53,14 @@ export class ViewPhotoService {
     });
 
     let data = new ViewPhotoData();
-    data.heigth = imageH;
-    data.width = imageW;
     data.photo = photo;
     data.fullsizedUrl = photo.attachmentInfo.contentUrl;
     data.imageName = photo.attachmentInfo.attachmentName;
     data.isForwardSupported = true;
-    data.imageKind = ImageKind.FullSized;
     overlayRef.attach(new ComponentPortal(ViewPhotoComponent, this.viewContainerRef, this.createInjector(data)));
   }
 
-  public ViewProfilePicture(fullImageUrl: string, thumbnailImage: HTMLImageElement, imageW: number, imageH: number) {
+  public ViewProfilePicture(fullImageUrl: string, imageW: number, imageH: number) {
     let overlayRef = this.overlay.create(this.config);
 
     overlayRef.backdropClick().subscribe(() => {
@@ -81,12 +69,8 @@ export class ViewPhotoService {
 
     let data = new ViewPhotoData();
     data.fullsizedUrl = fullImageUrl;
-    data.thumbnailImage = thumbnailImage;
     data.imageName = '';
     data.isForwardSupported = false;
-    data.width = imageW;
-    data.heigth = imageH;
-    data.imageKind = ImageKind.ProfileOrGroupPicture;
     overlayRef.attach(new ComponentPortal(ViewPhotoComponent, this.viewContainerRef, this.createInjector(data)));
     
   }
@@ -97,8 +81,6 @@ export class ViewPhotoService {
     return new ViewPhotoInjector(injectorTokens);
   }
 }
-
-
 
 @Component({
   selector: 'view-photo',
@@ -147,7 +129,4 @@ export class ViewPhotoComponent implements AfterContentInit {
         this.chats.ForwardMessagesTo(result, forwardArray);
       })
   }
-
-  public width: number;
-  public height: number;
 }
