@@ -165,8 +165,10 @@ export class GroupInfoDialogComponent {
     });
   }
 
-  public ViewPicture() {
-    this.photos.ViewProfilePicture(this.data.Conversation.fullImageUrl);
+  public ViewPicture(image: Event) {
+    this.photos.ViewProfilePicture(this.data.Conversation.fullImageUrl, (<HTMLImageElement>image.target),
+      (<HTMLImageElement>image.target).naturalWidth,
+      (<HTMLImageElement>image.target).naturalHeight);
   }
 
   public IsCurrentUserCreatorOfConversation() {

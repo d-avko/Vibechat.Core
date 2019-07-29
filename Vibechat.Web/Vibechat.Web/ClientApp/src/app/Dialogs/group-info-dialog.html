@@ -11,7 +11,7 @@
                           mode="determinate">
     </mat-progress-spinner>
 
-    <img src="{{data.Conversation.thumbnailUrl}}" class="group_thumbnail" (click)="ViewPicture()" />
+    <img src="{{data.Conversation.thumbnailUrl}}" class="group_thumbnail" (click)="ViewPicture($event)" />
 
     <div class="groupinfo_info">
       <p class="subHeader">{{ (data.Conversation.name.length > 20 )? (data.Conversation.name | slice:0:20)+'..':(data.Conversation.name) }}</p>

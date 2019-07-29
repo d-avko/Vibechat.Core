@@ -1,5 +1,5 @@
 import { Overlay, OverlayConfig } from "@angular/cdk/overlay";
-import { ViewContainerRef, Component, Injector, Type, InjectionToken, InjectFlags, Inject, ViewChild, ElementRef, Injectable } from "@angular/core";
+import { ViewContainerRef, Component, Injector, Type, InjectionToken, InjectFlags, Inject, ViewChild, ElementRef, Injectable, AfterViewInit, AfterViewChecked, AfterContentInit } from "@angular/core";
 import { ChatMessage } from "../Data/ChatMessage";
 import { ComponentPortal } from "@angular/cdk/portal";
 import { createInjector } from "@angular/core/src/view/refs";
@@ -9,6 +9,7 @@ import { ForwardMessagesModel } from "../Conversation/Messages/messages.componen
 import { ForwardMessagesDialogComponent } from "./ForwardMessagesDialog";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { MatDialog } from "@angular/material";
+import { ImageWithLoadProgress } from "../Shared/ImageWithLoadProgress";
 
 export class ViewPhotoInjector extends Injector {
 
@@ -26,13 +27,20 @@ export class ViewPhotoInjector extends Injector {
 
 }
 
+enum ImageKind {
+  FullSized,
+  ProfileOrGroupPicture
+}
+
 export class ViewPhotoData {
   photo: ChatMessage;
-  url: string;
+  fullsizedUrl: string;
+  thumbnailImage: HTMLImageElement;
   imageName: string;
   width: number;
   heigth: number;
   isForwardSupported: boolean;
+  imageKind: ImageKind;
 }
 
 @Injectable()
@@ -57,32 +65,30 @@ export class ViewPhotoService {
     data.heigth = imageH;
     data.width = imageW;
     data.photo = photo;
-    data.url = photo.attachmentInfo.contentUrl;
+    data.fullsizedUrl = photo.attachmentInfo.contentUrl;
     data.imageName = photo.attachmentInfo.attachmentName;
     data.isForwardSupported = true;
-
+    data.imageKind = ImageKind.FullSized;
     overlayRef.attach(new ComponentPortal(ViewPhotoComponent, this.viewContainerRef, this.createInjector(data)));
   }
 
-  public ViewProfilePicture(fullImageUrl: string) {
+  public ViewProfilePicture(fullImageUrl: string, thumbnailImage: HTMLImageElement, imageW: number, imageH: number) {
     let overlayRef = this.overlay.create(this.config);
 
     overlayRef.backdropClick().subscribe(() => {
       overlayRef.dispose();
     });
 
-    let img = new Image();
-    img.onload = () => {
-      let data = new ViewPhotoData();
-      data.url = fullImageUrl;
-      data.imageName = '';
-      data.isForwardSupported = false;
-      data.width = img.width;
-      data.heigth = img.height;
-      overlayRef.attach(new ComponentPortal(ViewPhotoComponent, this.viewContainerRef, this.createInjector(data)));
-    };
-
-    img.src = fullImageUrl;
+    let data = new ViewPhotoData();
+    data.fullsizedUrl = fullImageUrl;
+    data.thumbnailImage = thumbnailImage;
+    data.imageName = '';
+    data.isForwardSupported = false;
+    data.width = imageW;
+    data.heigth = imageH;
+    data.imageKind = ImageKind.ProfileOrGroupPicture;
+    overlayRef.attach(new ComponentPortal(ViewPhotoComponent, this.viewContainerRef, this.createInjector(data)));
+    
   }
 
   private createInjector(data: ViewPhotoData): Injector {
@@ -92,19 +98,33 @@ export class ViewPhotoService {
   }
 }
 
+
+
 @Component({
   selector: 'view-photo',
   templateUrl: 'view-photo.component.html'
 })
-export class ViewPhotoComponent {
+export class ViewPhotoComponent implements AfterContentInit {
+
+  @ViewChild('mainImage') image: ElementRef;
+
   constructor(@Inject(ViewPhotoData) public data: ViewPhotoData,
     public images: ImageScalingService,
     public chats: ChatsService,
     public dialog: MatDialog) {
+    this.loadingImage = null;
+  }
 
-    let dimensions = this.images.AdjustFullSizedImageDimensions(data.width, data.heigth);
-    this.width = dimensions.width;
-    this.height = dimensions.height;
+  ngAfterContentInit() {
+    this.InitProfileOrGroupPicture();
+  }
+
+  public loadingImage: ImageWithLoadProgress;
+
+  private InitProfileOrGroupPicture() {
+    this.loadingImage = new ImageWithLoadProgress(this.images);
+    this.loadingImage.load(this.data.fullsizedUrl);
+    this.image.nativeElement.replaceWith(this.loadingImage.internalImg);
   }
 
   public Forward() {

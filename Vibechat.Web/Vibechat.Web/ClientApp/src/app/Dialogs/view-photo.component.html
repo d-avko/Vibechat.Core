@@ -1,9 +1,15 @@
 <div>
 
   <div class="body">
-    <img [style.width.px]="width"
-         [style.height.px]="height"
-         src="{{data.url}}" />
+    <mat-progress-spinner class="load-spinner"
+                          diameter="100"
+                          color="Primary"
+                          *ngIf="(loadingImage != null) && (loadingImage.isDownloading)"
+                          [value]="loadingImage.completedPercentage"
+                          mode="determinate">
+    </mat-progress-spinner>
+
+    <img #mainImage />
   </div>
 
   <div class="options-bar">
@@ -24,6 +30,10 @@
   a {
     text-decoration: none;
     color: inherit;
+  }
+
+  .load-spinner{
+    position: absolute;
   }
 
   .head_text{
