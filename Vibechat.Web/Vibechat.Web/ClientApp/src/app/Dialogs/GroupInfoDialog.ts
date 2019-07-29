@@ -166,9 +166,8 @@ export class GroupInfoDialogComponent {
   }
 
   public ViewPicture(image: Event) {
-    this.photos.ViewProfilePicture(this.data.Conversation.fullImageUrl, (<HTMLImageElement>image.target),
-      (<HTMLImageElement>image.target).naturalWidth,
-      (<HTMLImageElement>image.target).naturalHeight);
+    this.photos.viewContainerRef = this.viewContainerRef;
+    this.photos.ViewProfilePicture(this.data.Conversation.fullImageUrl);
   }
 
   public IsCurrentUserCreatorOfConversation() {

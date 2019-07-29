@@ -1,5 +1,5 @@
 import { Overlay, OverlayConfig } from "@angular/cdk/overlay";
-import { ViewContainerRef, Component, Injector, Type, InjectionToken, InjectFlags, Inject, ViewChild, ElementRef, Injectable, AfterViewInit, AfterViewChecked, AfterContentInit } from "@angular/core";
+import { ViewContainerRef, Component, Injector, Type, InjectionToken, InjectFlags, Inject, ViewChild, ElementRef, Injectable, AfterContentChecked, AfterContentInit} from "@angular/core";
 import { ChatMessage } from "../Data/ChatMessage";
 import { ComponentPortal } from "@angular/cdk/portal";
 import { createInjector } from "@angular/core/src/view/refs";
@@ -48,31 +48,39 @@ export class ViewPhotoService {
   public ViewPhoto(photo: ChatMessage) {
     let overlayRef = this.overlay.create(this.config);
 
-    overlayRef.backdropClick().subscribe(() => {
-      overlayRef.dispose();
-    });
-
     let data = new ViewPhotoData();
     data.photo = photo;
     data.fullsizedUrl = photo.attachmentInfo.contentUrl;
     data.imageName = photo.attachmentInfo.attachmentName;
     data.isForwardSupported = true;
-    overlayRef.attach(new ComponentPortal(ViewPhotoComponent, this.viewContainerRef, this.createInjector(data)));
-  }
 
-  public ViewProfilePicture(fullImageUrl: string, imageW: number, imageH: number) {
-    let overlayRef = this.overlay.create(this.config);
+    let component = overlayRef.attach(new ComponentPortal(ViewPhotoComponent, this.viewContainerRef, this.createInjector(data)));
 
     overlayRef.backdropClick().subscribe(() => {
+      overlayRef.detach();
       overlayRef.dispose();
+      this.viewContainerRef.clear();
+      component.destroy();
     });
+  }
+
+  public ViewProfilePicture(fullImageUrl: string) {
+    let overlayRef = this.overlay.create(this.config);
 
     let data = new ViewPhotoData();
+    data.photo = null;
     data.fullsizedUrl = fullImageUrl;
     data.imageName = '';
     data.isForwardSupported = false;
-    overlayRef.attach(new ComponentPortal(ViewPhotoComponent, this.viewContainerRef, this.createInjector(data)));
-    
+
+    let component = overlayRef.attach(new ComponentPortal(ViewPhotoComponent, this.viewContainerRef, this.createInjector(data)));
+
+    overlayRef.backdropClick().subscribe(() => {
+      overlayRef.detach();
+      overlayRef.dispose();
+      this.viewContainerRef.clear();
+      component.destroy();
+    });
   }
 
   private createInjector(data: ViewPhotoData): Injector {
@@ -86,7 +94,7 @@ export class ViewPhotoService {
   selector: 'view-photo',
   templateUrl: 'view-photo.component.html'
 })
-export class ViewPhotoComponent implements AfterContentInit {
+export class ViewPhotoComponent implements AfterContentInit  {
 
   @ViewChild('mainImage') image: ElementRef;
 
@@ -97,11 +105,11 @@ export class ViewPhotoComponent implements AfterContentInit {
     this.loadingImage = null;
   }
 
-  ngAfterContentInit() {
-    this.InitProfileOrGroupPicture();
-  }
-
   public loadingImage: ImageWithLoadProgress;
+
+  ngAfterContentInit() {
+    this.InitProfileOrGroupPicture()
+  }
 
   private InitProfileOrGroupPicture() {
     this.loadingImage = new ImageWithLoadProgress(this.images);
