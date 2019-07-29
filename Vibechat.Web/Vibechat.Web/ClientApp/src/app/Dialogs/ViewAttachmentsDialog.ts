@@ -176,7 +176,7 @@ export class ViewAttachmentsDialogComponent {
   }
 
   public ViewPhoto(event: Event, photo: ChatMessage) {
-    this.photos.ViewPhoto(photo, (<HTMLImageElement>event.target).naturalWidth, (<HTMLImageElement>event.target).naturalHeight);
+    this.photos.ViewPhoto(photo);
   }
 
   public async UpdateFiles() {

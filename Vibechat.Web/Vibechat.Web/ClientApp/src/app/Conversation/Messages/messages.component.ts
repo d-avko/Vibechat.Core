@@ -48,7 +48,6 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     private photos: ViewPhotoService) {
 
     this.SelectedMessages = new Array<ChatMessage>();
-    this.photos.viewContainerRef = this.vc;
   }
 
   @Input() public CurrentConversation: ConversationTemplate;
@@ -109,7 +108,8 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
 
   public ViewImage(event: Event, image: ChatMessage) {
     event.stopPropagation();
-    this.photos.ViewPhoto(image, (<HTMLImageElement>event.target).naturalWidth, (<HTMLImageElement>event.target).naturalHeight);
+    this.photos.viewContainerRef = this.vc;
+    this.photos.ViewPhoto(image);
   }
 
   public IsAllSelectedMessagesPending() {

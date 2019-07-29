@@ -78,9 +78,8 @@ export class UserInfoDialogComponent {
   }
 
   public ViewPicture(image: Event) {
-    this.photos.ViewProfilePicture(this.data.user.fullImageUrl, (<HTMLImageElement>image.target),
-      (<HTMLImageElement>image.target).naturalWidth,
-      (<HTMLImageElement>image.target).naturalHeight);
+    this.photos.viewContainerRef = this.viewContainerRef;
+    this.photos.ViewProfilePicture(this.data.user.fullImageUrl);
   }
 
   public ViewAttachments() {
