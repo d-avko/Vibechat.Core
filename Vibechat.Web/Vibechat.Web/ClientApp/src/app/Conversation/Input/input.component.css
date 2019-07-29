@@ -25,6 +25,10 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  height: 12vh;
+}
+.input-textarea {
+  max-height: 80px !important;
 }
 
 .banned-input {
@@ -44,5 +48,9 @@
 @media screen and (max-width: 408px) {
   .input_field{
     width: 100px;
+  }
+
+  .input-currentuser {
+    display: none;
   }
 }

@@ -103,14 +103,16 @@ namespace Vibechat.Web.Services.Login
                 throw new FormatException("The username is not unique.");
             }
 
+            var imageUrl = chatDataProvider.GetProfilePictureUrl();
+
             var userToCreate = new AppUser()
             {
                 Id = userToRegister.Id,
                 UserName = userToRegister.UserName,
                 FirstName = userToRegister.FirstName,
                 LastName = userToRegister.LastName,
-                ProfilePicImageURL = chatDataProvider.GetProfilePictureUrl(),
-                FullImageUrl = chatDataProvider.GetProfilePictureUrl(),
+                ProfilePicImageURL = imageUrl,
+                FullImageUrl = imageUrl,
                 IsPublic = true
             };
 

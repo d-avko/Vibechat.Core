@@ -4,7 +4,7 @@
      && ((Conversation.isSecure && Conversation.authKeyId)
      || (!Conversation.isSecure && !Conversation.authKeyId))" class="messages_wrapper_chat-input">
 
-  <img class="rounded-image" src="{{User.imageUrl}}" />
+  <img class="input-currentuser rounded-image" src="{{User.imageUrl}}" />
 
   <div class="padding20px">
     <!--name must be the same as in UploadFiles method parameter-->
@@ -19,7 +19,7 @@
   </div>
 
   <mat-form-field class="input_field">
-    <textarea (input)="SetTyping()" (keydown.control.enter)="SendMessage()" matInput placeholder="Type in your message..."></textarea>
+    <textarea class="input-textarea" cdkTextareaAutosize (input)="SetTyping()" (keydown.control.enter)="SendMessage()" matInput placeholder="Type in your message..."></textarea>
   </mat-form-field>
 
   <button mat-button style="color:cadetblue" (click)="SendMessage()">

@@ -77,8 +77,10 @@ export class UserInfoDialogComponent {
     await this.usersService.AddToContacts(this.data.user);
   }
 
-  public ViewPicture() {
-    this.photos.ViewProfilePicture(this.data.user.fullImageUrl);
+  public ViewPicture(image: Event) {
+    this.photos.ViewProfilePicture(this.data.user.fullImageUrl, (<HTMLImageElement>image.target),
+      (<HTMLImageElement>image.target).naturalWidth,
+      (<HTMLImageElement>image.target).naturalHeight);
   }
 
   public ViewAttachments() {

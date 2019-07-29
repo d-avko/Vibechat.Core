@@ -15,7 +15,7 @@
                             [value]="uploadProgress">
       </mat-progress-spinner>
 
-      <img src="{{data.user.imageUrl}}" class="user_thumbnail" (click)="ViewPicture()" />
+      <img src="{{data.user.imageUrl}}" class="user_thumbnail" (click)="ViewPicture($event)" />
 
       <div class="userinfo_info">
 
@@ -74,7 +74,7 @@
     <div class="userinfo_header">
 
 
-      <img src="{{data.user.imageUrl}}" class="user_thumbnail" />
+      <img src="{{data.user.imageUrl}}" class="user_thumbnail" (click)="ViewPicture($event)" />
 
       <div class="userinfo_info">
 

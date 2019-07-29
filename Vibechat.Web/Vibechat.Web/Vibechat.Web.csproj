@@ -84,6 +84,7 @@
     <None Remove="ClientApp\src\app\Services\UsersService.ts" />
     <None Remove="ClientApp\src\app\Shared\AddedToGroupModel.ts" />
     <None Remove="ClientApp\src\app\Shared\EmptyModel.ts" />
+    <None Remove="ClientApp\src\app\Shared\ImageWithLoadProgress.ts" />
     <None Remove="ClientApp\src\app\Shared\MessageReceivedModel.ts" />
     <None Remove="ClientApp\src\app\Shared\MessageState.ts" />
     <None Remove="ClientApp\src\app\Shared\RemovedFromGroupModel.ts" />
@@ -139,6 +140,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\Services\UsersService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\AddedToGroupModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\EmptyModel.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Shared\ImageWithLoadProgress.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\MessageReceivedModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\MessageState.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\RemovedFromGroupModel.ts" />
@@ -197,7 +199,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
   </PropertyGroup>
 
   <Import Project="..\Vibechat.Web.Data\Vibechat.Web.Data.projitems" Label="Shared" />

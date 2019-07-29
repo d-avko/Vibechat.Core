@@ -68,7 +68,7 @@ export class AuthService  {
       return;
     }
 
-    return this.requestsBuilder.RefreshJwtToken(refreshToken, this.User.id);
+    return await this.requestsBuilder.RefreshJwtToken(refreshToken, this.User.id);
   }
 
   public OnUserLoggedIn(credentials: LoginResponse): void {

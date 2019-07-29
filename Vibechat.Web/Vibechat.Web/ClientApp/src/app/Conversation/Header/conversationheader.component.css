@@ -22,6 +22,7 @@
 .conversation-header {
   display: flex;
   flex-direction: row;
+  align-items:center;
 }
 
 .loading-dots {
@@ -171,16 +172,11 @@
 }
 
 @media screen and (max-width: 880px){
-  .button-goback {
-    padding: 5px;
-    min-width: 32px;
-  }
   .conversation-viewinfoButton {
-    height: 11vh;
+    height: 65px;
   }
-
-  .goback-icon{
-    font-size: 16px;
+  .button-goback {
+    margin-left: .3rem;
   }
   .chat-logo_img {
     width: 40px;
