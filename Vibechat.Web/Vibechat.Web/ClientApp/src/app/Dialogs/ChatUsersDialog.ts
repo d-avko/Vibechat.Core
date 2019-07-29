@@ -3,9 +3,8 @@ import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material";
 import { ChatComponent } from "../Chat/chat.component";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
 import { UserInfo } from "../Data/UserInfo";
-import { UsersService } from "../Services/UsersService";
 import { ChatsService } from "../Services/ChatsService";
-import { ChatRole } from "../Roles/ChatRole";
+import { AuthService } from "../Auth/AuthService";
 
 export interface ChatUsersDialogData {
   conversationId: number;
@@ -25,7 +24,7 @@ export class ChatUsersDialogComponent {
 
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ChatUsersDialogData, public chats: ChatsService, public snackBar: SnackBarHelper) { }
+    @Inject(MAT_DIALOG_DATA) public data: ChatUsersDialogData, public chats: ChatsService, public snackBar: SnackBarHelper, public auth: AuthService) { }
 
   public async OnFindUsers(): Promise<void> {
 
@@ -42,6 +41,7 @@ export class ChatUsersDialogComponent {
       this.FoundUsers = new Array<UserInfo>();
 
     } else {
+      users = users.filter(x => x.id != this.auth.User.id);
       this.FoundUsers = [...users];
     }
 

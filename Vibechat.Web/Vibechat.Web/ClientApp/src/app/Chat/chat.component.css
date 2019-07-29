@@ -47,7 +47,7 @@
 }
 
 .messages_wrapper_messages {
-  height: 75vh;
+  height: calc(100vh - 12vh - 65px);
 }
 
 .flexaligned{
