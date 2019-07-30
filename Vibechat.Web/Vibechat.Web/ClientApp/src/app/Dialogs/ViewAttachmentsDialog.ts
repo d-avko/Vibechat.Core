@@ -26,7 +26,7 @@ export class ViewAttachmentsDialogComponent {
 
   public FilesWeeks: Array<Array<ChatMessage>>;
 
-  @ViewChild(CdkVirtualScrollViewport) scroll: CdkVirtualScrollViewport;
+  @ViewChild(CdkVirtualScrollViewport, { static: true }) scroll: CdkVirtualScrollViewport;
 
   private static attachmentsToLoadAmount: number = 50;
 
