@@ -2,20 +2,15 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Vibechat.Web.ApiModels;
 using Vibechat.Web.ChatData.Messages;
 using Vibechat.Web.Data.ApiModels.Files;
 using Vibechat.Web.Services.FileSystem;
-using Vibechat.Web.Services.Hashing;
-using Vibechat.Web.Services.Images;
-using Vibechat.Web.Services.Paths;
 using VibeChat.Web;
 
 namespace Vibechat.Web.Controllers
@@ -73,23 +68,33 @@ namespace Vibechat.Web.Controllers
             string Error = string.Empty;
             string thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
-            foreach (var file in request.images)
+            var errorLock = new object();
+            var resultLock = new object();
+
+            Parallel.ForEach(request.images, file => 
             {
                 try
                 {
                     using (var buffer = new MemoryStream())
                     {
-                        await file.CopyToAsync(buffer);
+                        file.CopyTo(buffer);
                         buffer.Seek(0, SeekOrigin.Begin);
+                        var uploadedFile = filesService.SaveMessagePicture(file, buffer, file.FileName, request.ChatId, thisUserId).GetAwaiter().GetResult();
 
-                        result.UploadedFiles.Add(await filesService.SaveMessagePicture(file, buffer, file.FileName, request.ChatId, thisUserId));
+                        lock (resultLock)
+                        {
+                            result.UploadedFiles.Add(uploadedFile);
+                        }
+                    }   
+                }
+                catch (Exception ex)
+                {
+                    lock (errorLock)
+                    {
+                        Error = "Some of the files failed to upload. Exception type for last file was: " + ex.GetType().ToString();
                     }
                 }
-                catch(Exception ex)
-                {
-                    Error = "Some of the files failed to upload. Exception type: " + ex.GetType().Name;
-                }              
-            }
+            });
 
             return new ResponseApiModel<FilesUploadResponse>()
             {

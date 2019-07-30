@@ -27,22 +27,22 @@ namespace Vibechat.FileServer
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddScoped<AdminSafeListMiddleware, AdminSafeListMiddleware>();
             services.AddCors(options =>
             {
                 options.AddPolicy(OriginsPolicyName,
                 builder =>
                 {
                     builder.AllowAnyOrigin();
+                    builder.AllowAnyMethod();
+                    builder.AllowAnyHeader();
                 });
             });
+            services.AddScoped<AdminSafeListMiddleware, AdminSafeListMiddleware>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
         public void Configure(IApplicationBuilder app)
         {
-            app.UseHttpsRedirection();
-
             app.UseCors(OriginsPolicyName);
 
             app.UseStaticFiles(new StaticFileOptions() {
@@ -50,6 +50,8 @@ namespace Vibechat.FileServer
             });
 
             app.UseMiddleware<AdminSafeListMiddleware>();
+
+            app.UseHttpsRedirection();
 
             app.UseMvc(routes =>
             {

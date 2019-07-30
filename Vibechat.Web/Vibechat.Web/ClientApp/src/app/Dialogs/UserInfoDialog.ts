@@ -106,10 +106,13 @@ export class UserInfoDialogComponent {
   }
 
   public async UpdateThumbnail(event: Event) {
-    this.uploading = true;
-    await this.usersService.UpdateProfilePicture((<HTMLInputElement>event.target).files[0], this.ProgressCallback.bind(this));
-    this.uploading = false;
-    this.ResetInput(<HTMLInputElement>event.target);
+    try {
+      this.uploading = true;
+      await this.usersService.UpdateProfilePicture((<HTMLInputElement>event.target).files[0], this.ProgressCallback.bind(this));
+    } finally {
+      this.uploading = false;
+      this.ResetInput(<HTMLInputElement>event.target);
+    }
   }
 
   public ResetInput(input: HTMLInputElement) {

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Net.Http;
@@ -15,27 +16,31 @@ namespace Vibechat.Web.Services.FileSystem
 {
     public class FilesService : AbstractFilesService
     {
-        private static int MessageImageMaxWidth = 800;
+        private static readonly int MessageImageMaxWidth = 800;
 
-        private static int MessageImageMaxHeight = 800;
+        private static readonly int MessageImageMaxHeight = 800;
 
-        private static int ThumbnailHeight = 140;
+        private static readonly int ThumbnailHeight = 140;
 
-        private static int ThumbnailWidth = 140;
+        private static readonly int ThumbnailWidth = 140;
 
-        private static string FullSized = "full";
+        private static readonly string FullSized = "full";
 
-        private static string Compressed = "cmpr";
+        private static readonly string Compressed = "cmpr";
 
-        private static int MaxFileNameLength = 120;
+        private static readonly int MaxFileNameLength = 120;
+
+        private readonly ILogger<FilesService> logger;
 
         public FilesService(
             IImageScalingService imageScaling,
             UniquePathsProvider pathsProvider,
-            IImageCompressionService imageCompression) : base(pathsProvider)
+            IImageCompressionService imageCompression,
+            ILogger<FilesService> logger) : base(pathsProvider)
         {
             ImageScaling = imageScaling;
             ImageCompression = imageCompression;
+            this.logger = logger;
         }
 
         public IImageScalingService ImageScaling { get; }
@@ -78,8 +83,15 @@ namespace Vibechat.Web.Services.FileSystem
                     ImageWidth = resultDimensions.Item1
                 };
             }
+            catch(ArgumentException e)
+            {
+                logger.LogError(e, "While resizing an image.");
+
+                throw new Exception("Failed to upload this image.", e);
+            }
             catch (Exception ex)
             {
+                logger.LogError(ex, "While resizing an image.");
                 throw new Exception("Failed to upload this image.", ex);
             }
         }
@@ -100,9 +112,13 @@ namespace Vibechat.Web.Services.FileSystem
                     FileSize = file.Length
                 };
             }
+            catch(ArgumentException ex)
+            {
+                throw new Exception("Failed to upload this image.", ex);
+            }
             catch (Exception ex)
             {
-                throw new Exception("Failed to upload this file.", ex);
+                throw new Exception("Failed to upload this image.", ex);
             }
         }
 
@@ -133,6 +149,10 @@ namespace Vibechat.Web.Services.FileSystem
                 return new ValueTuple<string, string>(
                     DI.Configuration["FileServer:Url"] + compressedFileName,
                     DI.Configuration["FileServer:Url"] + uncompressedFileName);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new Exception("Failed to upload this image.", ex);
             }
             catch (Exception ex)
             {

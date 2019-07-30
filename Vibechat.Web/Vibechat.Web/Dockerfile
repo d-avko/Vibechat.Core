@@ -45,9 +45,14 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app .
 RUN mkdir -p /app/ClientApp/dist
-#Add skiasharp references
-RUN apt-get update
-RUN apt-get install -y libfreetype6
-RUN apt-get install -y libfontconfig1
+
+# install libgdiplus for System.Drawing
+RUN apt-get update && \
+    apt-get install -y --allow-unauthenticated libgdiplus libc6-dev
+
+# install x11 for System.Drawing
+RUN apt-get update && \
+    apt-get install -y --allow-unauthenticated libx11-dev
+
 COPY --from=nodebuilder /usr/src/app/dist/. /app/ClientApp/dist/
 ENTRYPOINT ["dotnet", "Vibechat.Web.dll"]
