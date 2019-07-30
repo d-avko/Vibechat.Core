@@ -99,20 +99,16 @@ export class ViewPhotoComponent implements AfterContentInit  {
   @ViewChild('mainImage') image: ElementRef;
 
   constructor(@Inject(ViewPhotoData) public data: ViewPhotoData,
+    public loadingImage: ImageWithLoadProgress,
     public images: ImageScalingService,
     public chats: ChatsService,
-    public dialog: MatDialog) {
-    this.loadingImage = null;
-  }
-
-  public loadingImage: ImageWithLoadProgress;
+    public dialog: MatDialog) { }
 
   ngAfterContentInit() {
     this.InitProfileOrGroupPicture()
   }
 
   private InitProfileOrGroupPicture() {
-    this.loadingImage = new ImageWithLoadProgress(this.images);
     this.loadingImage.load(this.data.fullsizedUrl);
     this.image.nativeElement.replaceWith(this.loadingImage.internalImg);
   }

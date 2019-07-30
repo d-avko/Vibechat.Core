@@ -179,10 +179,13 @@ export class GroupInfoDialogComponent {
   }
 
   public async UpdateThumbnail(event: Event) {
-    this.uploading = true;
-    await this.chats.ChangeThumbnail((<HTMLInputElement>event.target).files[0], this.data.Conversation, this.ProgressCallback.bind(this));
-    this.uploading = false;
-    this.ResetInput(<HTMLInputElement>event.target);
+    try {
+      this.uploading = true;
+      await this.chats.ChangeThumbnail((<HTMLInputElement>event.target).files[0], this.data.Conversation, this.ProgressCallback.bind(this));
+    } finally {
+      this.uploading = false;
+      this.ResetInput(<HTMLInputElement>event.target);
+    }
   }
 
   public ChangeName() {
