@@ -5,7 +5,7 @@ Running at https://denisavko.me
 
 Messaging             |  User profiles
 :-------------------------:|:-------------------------:
-![1](https://i.imgur.com/cjcfl13.png)  |  ![2](https://i.imgur.com/WSAXiZX.png)
+![1](https://i.imgur.com/6EFSCQg.png)  |  ![2](https://i.imgur.com/M0PiMuT.png)
 Side drawer             |  Group profiles
 ![3](https://i.imgur.com/MldmHIO.png)  |  ![4](https://i.imgur.com/MHthF61.png)
 Search             |  Start view
@@ -46,7 +46,7 @@ For storage, Kestrel with ```PhysicalFileProvider``` was used.
 ##### Deployment of fileserver
 1. ```docker build -t vibechat.fileserver .```
 2. ```docker save -o <Output path> vibechat.fileserver```
-3. On linux VM: ``` docker load --input <filename>; docker run -p 443:443 vibechat.fileserver ```.
+3. On linux VM: ``` docker load --input <filename>; sudo docker run -d -p 443:443 --mount source=fileserver_volume,target=/app vibechat.fileserver ```.
 
 ##### Deployment of database, front-end and back-end:
 1. ``` docker-compose build ```
