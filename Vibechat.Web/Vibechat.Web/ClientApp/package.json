@@ -19,7 +19,7 @@
     "@angular/material": "7.2.1",
     "@angular/platform-browser": "7.2.14",
     "@angular/platform-browser-dynamic": "7.2.14",
-    "@angular/pwa": "^0.13.8",
+    "@angular/pwa": "^0.13.9",
     "@angular/router": "7.2.14",
     "@angular/service-worker": "7.2.14",
     "@aspnet/signalr": "^1.1.4",
@@ -48,7 +48,7 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^0.13.9",
-    "@angular/cli": "7.2.1",
+    "@angular/cli": "8.1.2",
     "@angular/compiler-cli": "7.2.14",
     "@angular/language-service": "7.2.14",
     "@angular/platform-server": "7.2.14",

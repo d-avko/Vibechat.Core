@@ -17,7 +17,7 @@ import { environment } from '../environments/environment';
     AppRoutersModule,
     ChatModule,
     LoginModule,
-    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
+    ServiceWorkerModule.register('ngsw-worker.js', { enabled: true })
   ],
   providers: [ApiRequestsBuilder, AuthService],
   bootstrap: [AppComponent]
