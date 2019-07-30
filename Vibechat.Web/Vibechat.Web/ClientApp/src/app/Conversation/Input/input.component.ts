@@ -17,7 +17,7 @@ export class InputComponent {
 
   @Input() public User: UserInfo;
 
-  @ViewChild(MatFormField) inputfield: MatFormField;
+  @ViewChild(MatFormField, { static: false }) inputfield: MatFormField;
 
   constructor(private chats: ChatsService) {
 

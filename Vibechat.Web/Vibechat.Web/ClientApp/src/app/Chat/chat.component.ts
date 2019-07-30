@@ -40,9 +40,9 @@ export class ChatComponent implements OnInit {
 
   public SearchString: string;
 
-  @ViewChild(MessagesComponent) messages: MessagesComponent;
-  @ViewChild(MatDrawer) sideDrawer: MatDrawer;
-  @ViewChild(SearchListComponent) searchList: SearchListComponent;
+  @ViewChild(MessagesComponent, { static: false }) messages: MessagesComponent;
+  @ViewChild(MatDrawer, { static: true }) sideDrawer: MatDrawer;
+  @ViewChild(SearchListComponent, { static: false }) searchList: SearchListComponent;
   over: any;
 
   constructor(

@@ -16,7 +16,6 @@ import {
 } from "@angular/material";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
 import { MessageAttachment } from "../Data/MessageAttachment";
-import { ChatRoleDto } from "../Roles/ChatRoleDto";
 import { AttachmentKind } from "../Data/AttachmentKinds";
 
 @Injectable({
