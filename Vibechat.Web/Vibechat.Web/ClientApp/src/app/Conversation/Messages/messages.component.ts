@@ -66,7 +66,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
 
   public static MessagesBufferLength: number = 50;
 
-  @ViewChild(CdkVirtualScrollViewport) viewport: CdkVirtualScrollViewport;
+  @ViewChild(CdkVirtualScrollViewport, { static: false }) viewport: CdkVirtualScrollViewport;
   
   public SelectedMessages: Array<ChatMessage>;
 

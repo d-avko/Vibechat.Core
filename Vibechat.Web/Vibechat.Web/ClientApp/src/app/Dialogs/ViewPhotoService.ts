@@ -1,11 +1,14 @@
 import { Overlay, OverlayConfig } from "@angular/cdk/overlay";
-import { ViewContainerRef, Component, Injector, Type, InjectionToken, InjectFlags, Inject, ViewChild, ElementRef, Injectable, AfterContentChecked, AfterContentInit} from "@angular/core";
+import {
+  ViewContainerRef,
+  Component,
+  Injector, Type, InjectionToken, InjectFlags, Inject, ViewChild, ElementRef, Injectable,
+  AfterContentInit
+} from "@angular/core";
 import { ChatMessage } from "../Data/ChatMessage";
 import { ComponentPortal } from "@angular/cdk/portal";
-import { createInjector } from "@angular/core/src/view/refs";
 import { ImageScalingService } from "../Services/ImageScalingService";
 import { ChatsService } from "../Services/ChatsService";
-import { ForwardMessagesModel } from "../Conversation/Messages/messages.component";
 import { ForwardMessagesDialogComponent } from "./ForwardMessagesDialog";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { MatDialog } from "@angular/material";
@@ -96,7 +99,7 @@ export class ViewPhotoService {
 })
 export class ViewPhotoComponent implements AfterContentInit  {
 
-  @ViewChild('mainImage') image: ElementRef;
+  @ViewChild('mainImage', { static: true }) image: ElementRef;
 
   constructor(@Inject(ViewPhotoData) public data: ViewPhotoData,
     public loadingImage: ImageWithLoadProgress,

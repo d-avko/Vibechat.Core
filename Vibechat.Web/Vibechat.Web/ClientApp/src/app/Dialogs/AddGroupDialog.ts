@@ -10,7 +10,7 @@ export class AddGroupDialogComponent {
 
   public GroupName: string;
 
-  @ViewChild(MatCheckbox) public IsPublic: MatCheckbox;
+  @ViewChild(MatCheckbox, { static: true }) public IsPublic: MatCheckbox;
 
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>) { }
