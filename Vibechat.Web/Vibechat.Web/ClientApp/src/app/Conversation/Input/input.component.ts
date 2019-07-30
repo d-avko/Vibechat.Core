@@ -49,10 +49,13 @@ export class InputComponent {
   }
 
   public async UploadFile(event: Event) {
-    this.uploading = true;
-    await this.chats.UploadFile((<HTMLInputElement>event.target).files[0], this.ProgressCallback.bind(this), this.Conversation);
-    this.uploading = false;
-    this.ResetInput(<HTMLInputElement>event.target);
+    try {
+      this.uploading = true;
+      await this.chats.UploadFile((<HTMLInputElement>event.target).files[0], this.ProgressCallback.bind(this), this.Conversation);
+    } finally {
+      this.ResetInput(<HTMLInputElement>event.target);
+      this.uploading = false;
+    }
   }
 
   public SetTyping() {
@@ -78,9 +81,12 @@ export class InputComponent {
   }
 
   public async UploadImages(event: Event) {
-    this.uploading = true;
-    await this.chats.UploadImages((<HTMLInputElement>event.target).files, this.ProgressCallback.bind(this), this.Conversation);
-    this.uploading = false;
-    this.ResetInput(<HTMLInputElement>event.target);
+    try {
+      this.uploading = true;
+      await this.chats.UploadImages((<HTMLInputElement>event.target).files, this.ProgressCallback.bind(this), this.Conversation);
+    } finally {
+      this.uploading = false;
+      this.ResetInput(<HTMLInputElement>event.target);
+    }
   }
 }

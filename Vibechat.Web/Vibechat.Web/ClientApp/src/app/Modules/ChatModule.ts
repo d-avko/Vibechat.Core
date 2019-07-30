@@ -37,6 +37,7 @@ import { DeviceService } from "../Services/DeviceService";
 import { TypingService } from "../Services/TypingService";
 import { ChatUsersDialogComponent } from "../Dialogs/ChatUsersDialog";
 import { AdminPanelDialog } from "../Dialogs/AdminPanelDialog";
+import { ImageWithLoadProgress } from "../Shared/ImageWithLoadProgress";
 
 @NgModule({
   declarations: [
@@ -97,6 +98,7 @@ import { AdminPanelDialog } from "../Dialogs/AdminPanelDialog";
     DownloadsService,
     ViewPhotoService,
     DeviceService,
-    TypingService]
+    TypingService,
+    ImageWithLoadProgress]
 })
 export class ChatModule { }

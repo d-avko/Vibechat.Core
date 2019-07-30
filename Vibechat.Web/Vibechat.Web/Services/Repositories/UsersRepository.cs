@@ -10,13 +10,10 @@ namespace Vibechat.Web.Services.Repositories
 {
     public class UsersRepository : IUsersRepository
     {
-        private ApplicationDbContext mContext { get; set; }
-
         private UserManager<AppUser> mUserManager { get; set; }
 
-        public UsersRepository(ApplicationDbContext dbContext, UserManager<AppUser> mUserManager)
+        public UsersRepository(UserManager<AppUser> mUserManager)
         {
-            this.mContext = dbContext;
             this.mUserManager = mUserManager;
         }
 

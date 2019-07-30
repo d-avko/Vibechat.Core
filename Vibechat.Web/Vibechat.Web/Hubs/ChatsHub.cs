@@ -66,25 +66,39 @@ namespace VibeChat.Web
 
         public async Task OnUserOnline()
         {
-            var userId = userProvider.GetUserId(Context);
-            await userService.MakeUserOnline(userId, Context.ConnectionId);
-
-            var subs = subsriptionService.GetSubscribers(userId);
-
-            if(subs == null)
+            try
             {
-                return;
+                var userId = userProvider.GetUserId(Context);
+                await userService.MakeUserOnline(userId, Context.ConnectionId);
+
+                var subs = subsriptionService.GetSubscribers(userId);
+
+                if (subs == null)
+                {
+                    return;
+                }
+
+                foreach (string sub in subs)
+                {
+                    await NotifyOfUserOnline(userId, sub);
+                }
             }
-
-            foreach (string sub in subs)
+            catch(Exception ex)
             {
-                await NotifyOfUserOnline(userId, sub);
+                logger.LogError("Error while updating user state!", ex.Message);
             }
         }
 
         public async Task OnUserOffline()
         {
-            await userService.MakeUserOffline(userProvider.GetUserId(Context));
+            try
+            {
+                await userService.MakeUserOffline(userProvider.GetUserId(Context));
+            }
+            catch (Exception ex)
+            {
+                logger.LogError("Error while updating user state!", ex.Message);
+            }
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]

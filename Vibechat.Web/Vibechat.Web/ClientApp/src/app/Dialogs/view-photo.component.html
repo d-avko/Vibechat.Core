@@ -1,13 +1,12 @@
 <div>
 
   <div class="body">
-    <mat-progress-spinner class="load-spinner"
+    <mat-spinner class="load-spinner"
                           diameter="100"
                           color="Primary"
                           *ngIf="(loadingImage != null) && (loadingImage.isDownloading)"
-                          [value]="loadingImage.completedPercentage"
-                          mode="determinate">
-    </mat-progress-spinner>
+                          mode="indeterminate">
+    </mat-spinner> 
 
     <img #mainImage />
   </div>

@@ -14,6 +14,7 @@ var ImageWithLoadProgress = /** @class */ (function () {
         this.xmlHTTP = new XMLHttpRequest();
         this.xmlHTTP.open('GET', url, true);
         this.xmlHTTP.responseType = 'arraybuffer';
+        this.xmlHTTP.setRequestHeader('ngsw-bypass', '');
         this.xmlHTTP.onload = function (e) {
             var blob = new Blob([this.response]);
             internalThis.onload = function () {

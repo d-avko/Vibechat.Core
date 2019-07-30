@@ -1,55 +1,23 @@
 import { ImageScalingService } from "../Services/ImageScalingService";
+import { Inject, Injectable } from "@angular/core";
 
+@Injectable()
 export class ImageWithLoadProgress {
-  constructor(private scaling: ImageScalingService) {
-    this.internalImg = new Image();
-  }
+  constructor(private scaling: ImageScalingService) { }
 
   public internalImg: HTMLImageElement;
-  public completedPercentage: number = 0;
   public isDownloading: boolean = false;
   public xmlHTTP: XMLHttpRequest;
 
   public load(url: string) {
-    var internalThis = this.internalImg;
-    var thisImg = this;
-
-    this.xmlHTTP = new XMLHttpRequest();
-
-    this.xmlHTTP.open('GET', url, true);
-    this.xmlHTTP.responseType = 'arraybuffer';
-
-    this.xmlHTTP.onload = function (e) {
-      var blob = new Blob([this.response]);
-
-      internalThis.onload = () => {
-        let d = thisImg.scaling.AdjustFullSizedImageDimensions(internalThis.width, internalThis.height);
-        internalThis.width = d.width;
-        internalThis.height = d.height;
-      }
-
-      internalThis.src = window.URL.createObjectURL(blob);
-
-      setTimeout(() => thisImg.isDownloading = false, 500);
-    };
-
-    this.xmlHTTP.onprogress = (e) => {
-      this.completedPercentage = (e.loaded / e.total) * 100;
-    };
-
-    this.xmlHTTP.onloadstart = () => {
-      this.completedPercentage = 0;
-      this.isDownloading = true;
-    };
-
-    this.xmlHTTP.onerror = () => {
-      this.isDownloading = false;
+    this.isDownloading = true;
+    this.internalImg = new Image();
+    this.internalImg.onload = () => {
+      let d = this.scaling.AdjustFullSizedImageDimensions(this.internalImg.width, this.internalImg.height);
+      this.internalImg.width = d.width;
+      this.internalImg.height = d.height;
+      setTimeout(() => this.isDownloading = false, 500);
     }
-
-    this.xmlHTTP.onabort = () => {
-      this.isDownloading = false;
-    }
-
-    this.xmlHTTP.send();
+    this.internalImg.src = url;
   }
 }

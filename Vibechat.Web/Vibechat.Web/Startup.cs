@@ -136,7 +136,6 @@ namespace Vibechat.Web
             }
             else
             {
-                app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
             app.UseHttpsRedirection();
