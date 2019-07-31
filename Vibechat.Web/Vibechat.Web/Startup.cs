@@ -1,5 +1,4 @@
 using FirebaseAdmin;
-using FirebaseAdmin.Auth;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -16,7 +15,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Vibechat.Web.Middleware;
 using Vibechat.Web.Services.Extension_methods;
-using Vibechat.Web.Services.Repositories;
 using VibeChat.Web;
 
 namespace Vibechat.Web

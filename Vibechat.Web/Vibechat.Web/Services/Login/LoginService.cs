@@ -4,9 +4,9 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Vibechat.Web.ApiModels;
+using Vibechat.Web.Data.Repositories;
 using Vibechat.Web.Extensions;
 using Vibechat.Web.Services.ChatDataProviders;
-using Vibechat.Web.Services.Repositories;
 using VibeChat.Web;
 using VibeChat.Web.ApiModels;
 
