@@ -8,6 +8,9 @@ import { LoginModule } from './Modules/LoginModule';
 import { AuthService } from './Auth/AuthService';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
+import { LoadingScreenService } from './Loading/LoadingScreenService';
+import { MaterialModule } from './material.module';
+import { BrowserModule } from '@angular/platform-browser';
 
 @NgModule({
   declarations: [
@@ -15,11 +18,13 @@ import { environment } from '../environments/environment';
   ],
   imports: [
     AppRoutersModule,
+    BrowserModule,
     ChatModule,
     LoginModule,
+    MaterialModule,
     ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
   ],
-  providers: [ApiRequestsBuilder, AuthService],
+  providers: [ApiRequestsBuilder, AuthService, LoadingScreenService],
   bootstrap: [AppComponent]
 })
 export class AppModule {}

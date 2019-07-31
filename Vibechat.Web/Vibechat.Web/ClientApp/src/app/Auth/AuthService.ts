@@ -6,6 +6,7 @@ import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { Injectable } from '@angular/core';
 import * as firebase from "firebase/app";
 import "firebase/auth";
+import { LoginRequest } from "../ApiModels/LoginRequest";
 
 @Injectable({
   providedIn: 'root'
@@ -31,13 +32,67 @@ export class AuthService  {
 
   public token: string;
 
+  public static SMSCODE_LENGTH = 6;
+
+  public static PHONENUMBER_LENGTH = 13;
+
   public IsAuthenticated: boolean;
 
-  public SignIn() {
+  private confirmation: firebase.auth.ConfirmationResult;
 
+  private phoneNumberToConfirm: string;
+
+  public async SendSmsCode(phoneNumber: string, recaptcha: firebase.auth.RecaptchaVerifier) : Promise<boolean> {
+    phoneNumber = this.NormalizeMobilePhone(phoneNumber);
+
+    try {
+      this.confirmation = await firebase.auth().signInWithPhoneNumber(phoneNumber, recaptcha);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
-  public async TryAuthenticate(): Promise<void> {
+  public async SignIn(smsCode: string) {
+    try {
+      let result = await this.confirmation.confirm(smsCode);
+      let token = await result.user.getIdToken();
+
+      let credentials = new LoginRequest({ UidToken: token, PhoneNumber: this.phoneNumberToConfirm });
+
+      let identity = await this.requestsBuilder.LoginRequest(credentials);
+      return this.OnLoginResultReceived(identity);
+
+    } catch (e) {
+      return false;
+    }
+  }
+
+  private OnLoginResultReceived(result: ServerResponse<LoginResponse>): boolean {
+
+    if (!result.isSuccessfull) {
+      return false;
+    }
+
+    this.OnUserLoggedIn(result.response);
+
+    if (result.response.isNewUser) {
+      this.router.navigateByUrl('/register');
+    } else {
+      this.router.navigateByUrl('/chat');
+    }
+
+    return true;
+  }
+
+  private NormalizeMobilePhone(phoneNumber: string) {
+    if (!phoneNumber.startsWith("+")) {
+      phoneNumber = "+" + phoneNumber;
+    }
+    return phoneNumber;
+  }
+
+  public async RefreshLocalData(): Promise<void> {
     let refreshToken = localStorage.getItem('refreshtoken');
     let user = <UserInfo>JSON.parse(localStorage.getItem('user'));
     if (user == null || refreshToken == null) {

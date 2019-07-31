@@ -16,6 +16,8 @@ import { ThemesService } from "../Theming/ThemesService";
 import { ChooseContactDialogComponent } from "../Dialogs/ChooseContactDialog";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
 import { DeviceService } from "../Services/DeviceService";
+import { userInfo } from "os";
+import { Router } from "@angular/router";
 
 @Component({
   selector: 'chat-root',
@@ -53,14 +55,15 @@ export class ChatComponent implements OnInit {
     private conversationsService: ChatsService,
     private themesService: ThemesService,
     private snackBar: SnackBarHelper,
-    private device: DeviceService) { }
+    private device: DeviceService,
+    private router: Router) { }
 
   get IsSecureChatsSupported() {
     return this.device.isSecureChatsSupported;
   }
 
   async ngOnInit(): Promise<void> {
-    await this.auth.TryAuthenticate();
+    await this.auth.RefreshLocalData();
 
     await this.UpdateConversations();
 
@@ -84,8 +87,6 @@ export class ChatComponent implements OnInit {
       return;
     }
 
-    await this.conversationsService.UpdateExisting(group);
-
     const groupInfoRef = this.dialog.open(GroupInfoDialogComponent, {
       width: '450px',
       autoFocus: false,
@@ -94,6 +95,16 @@ export class ChatComponent implements OnInit {
         user: this.auth.User,
         ExistsInThisGroup: this.conversationsService.ExistsIn(group.conversationID)
       }
+    });
+
+    groupInfoRef.afterOpened().subscribe(async () => {
+      await this.conversationsService.UpdateExisting(group);
+
+      if (!groupInfoRef.componentInstance) {
+        return;
+      }
+
+      groupInfoRef.componentInstance.data.Conversation = group;
     });
 
     groupInfoRef.componentInstance
@@ -141,8 +152,6 @@ export class ChatComponent implements OnInit {
   }
 
   public async OnViewUserInfo(user: UserInfo, chat: ConversationTemplate) {
-    await this.usersService.UpdateUserInfo(user.id);
-
     const userInfoRef = this.dialog.open(UserInfoDialogComponent, {
       width: '450px',
       autoFocus: false,
@@ -150,6 +159,24 @@ export class ChatComponent implements OnInit {
         user: user,
         currentUser: this.auth.User,
         conversation: chat
+      }
+    });
+
+    userInfoRef.afterOpened().subscribe(async () => {
+      let updatedUser = await this.usersService.UpdateUserInfo(user.id);
+
+      if (!updatedUser) {
+        return;
+      }
+
+      if (!userInfoRef.componentInstance) {
+        return;
+      }
+
+      if (this.auth.User.id == updatedUser.id) {
+        userInfoRef.componentInstance.data.currentUser = updatedUser;
+      } else {
+        userInfoRef.componentInstance.data.user = updatedUser;
       }
     });
   }
@@ -173,7 +200,6 @@ export class ChatComponent implements OnInit {
     const dialogRef = this.dialog.open(AddGroupDialogComponent, {
       width: '250px'
     });
-
 
     dialogRef.beforeClosed().subscribe(async result => {
 
@@ -215,6 +241,6 @@ export class ChatComponent implements OnInit {
 
   public async OnSendMessage(message: string) {
     await this.conversationsService.SendMessage(message, this.conversationsService.CurrentConversation);
-    this.messages.ScrollToStart();
+    this.messages.ScrollToLastMessage();
   }
 }

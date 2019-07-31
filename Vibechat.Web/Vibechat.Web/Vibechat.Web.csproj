@@ -37,6 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ClientApp\dist\favicon.ico" />
     <None Remove="ClientApp\src\app\ApiModels\ConversationMessagesResponse.ts" />
     <None Remove="ClientApp\src\app\ApiModels\ConversationRequest.ts" />
     <None Remove="ClientApp\src\app\ApiModels\ConversationResponse.ts" />
@@ -70,6 +71,7 @@
     <None Remove="ClientApp\src\app\Encryption\E2EencryptionService.ts" />
     <None Remove="ClientApp\src\app\Encryption\SecureChatsService.ts" />
     <None Remove="ClientApp\src\app\Interceptors\HttpResponseInterceptor.ts" />
+    <None Remove="ClientApp\src\app\Loading\LoadingScreenService.ts" />
     <None Remove="ClientApp\src\app\Modules\ChatModule.ts" />
     <None Remove="ClientApp\src\app\Modules\LoginModule.ts" />
     <None Remove="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
@@ -90,6 +92,12 @@
     <None Remove="ClientApp\src\app\Shared\RemovedFromGroupModel.ts" />
     <None Remove="ClientApp\src\app\Theming\ThemesService.ts" />
     <None Remove="ClientApp\src\app\uploads\upload.service.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="ClientApp\dist\favicon.ico">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -126,6 +134,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\Data\MessageAttachment.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\UserInfo.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Interceptors\HttpResponseInterceptor.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Loading\LoadingScreenService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Modules\ChatModule.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Modules\LoginModule.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />

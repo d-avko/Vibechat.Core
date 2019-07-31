@@ -22,6 +22,8 @@ export class UsersService {
     if (result.response.id == this.auth.User.id) {
       this.auth.User = result.response;
     }
+    
+    return result.response;
   }
 
   public async FindUsersByUsername(name: string): Promise<Array<UserInfo>>{
