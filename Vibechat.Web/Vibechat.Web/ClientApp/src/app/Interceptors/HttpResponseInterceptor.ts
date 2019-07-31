@@ -101,7 +101,7 @@ export class HttpResponseInterceptor implements HttpInterceptor {
           //Gateway timeout
           case 504:
           case 0: {
-            this.errorsLogger.openSnackBar('There is no internet connection at the moment.');
+            this.errorsLogger.openSnackBar('Server is down or there is no internet connection at the moment.');
             break;
           }
           default: {

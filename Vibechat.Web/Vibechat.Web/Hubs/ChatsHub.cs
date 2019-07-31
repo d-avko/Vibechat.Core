@@ -410,7 +410,7 @@ namespace VibeChat.Web
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task MessageRead(int msgId, int conversationId)
+        public async Task<bool> MessageRead(int msgId, int conversationId)
         {
             AppUser whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
 
@@ -428,10 +428,13 @@ namespace VibeChat.Web
                 {
                     await MessageReadInDialog(conversation.DialogueUser.IsOnline ? conversation.DialogueUser.ConnectionId : null, Context.ConnectionId, msgId, conversationId);
                 }
+
+                return true;
             }
             catch(Exception ex)
             {
                 await SendError(Context.ConnectionId, ex.Message);
+                return false;
             }
         }
 

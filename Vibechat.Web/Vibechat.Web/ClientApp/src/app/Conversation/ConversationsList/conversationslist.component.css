@@ -1,5 +1,5 @@
 .selected-conversation {
-  background-color: cadetblue;
+  background-color: cadetblue !important;
   color: white;
 }
 
