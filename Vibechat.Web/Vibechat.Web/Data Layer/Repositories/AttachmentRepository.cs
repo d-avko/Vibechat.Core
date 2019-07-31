@@ -6,7 +6,7 @@ using VibeChat.Web;
 using VibeChat.Web.ChatData;
 using VibeChat.Web.Data.DataModels;
 
-namespace Vibechat.Web.Services.Repositories
+namespace Vibechat.Web.Data.Repositories
 {
     public class AttachmentRepository : IAttachmentRepository
     {

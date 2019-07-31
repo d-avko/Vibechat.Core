@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using VibeChat.Web;
 
-namespace Vibechat.Web.Services.Repositories
+namespace Vibechat.Web.Data.Repositories
 {
     public interface IUsersRepository
     {

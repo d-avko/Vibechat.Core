@@ -6,8 +6,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using VibeChat.Web;
 
-namespace Vibechat.Web.Services.Repositories
-{
+namespace Vibechat.Web.Data.Repositories
+{ 
     public class UsersRepository : IUsersRepository
     {
         private UserManager<AppUser> mUserManager { get; set; }

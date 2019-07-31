@@ -7,7 +7,7 @@ using Vibechat.Web.Data.Conversations;
 using Vibechat.Web.Data.DataModels;
 using VibeChat.Web;
 
-namespace Vibechat.Web.Services.Repositories
+namespace Vibechat.Web.Data.Repositories
 {
     public class ChatRolesRepository : IChatRolesRepository
     {

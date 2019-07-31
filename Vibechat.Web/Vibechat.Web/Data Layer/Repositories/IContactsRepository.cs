@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Vibechat.Web.Data.DataModels;
 
-namespace Vibechat.Web.Services.Repositories
+namespace Vibechat.Web.Data.Repositories
 {
     public interface IContactsRepository
     {

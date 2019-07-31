@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Vibechat.Web.Data.Conversations;
 using Vibechat.Web.Data.DataModels;
 
-namespace Vibechat.Web.Services.Repositories
+namespace Vibechat.Web.Data.Repositories
 {
     public interface IChatRolesRepository
     {
