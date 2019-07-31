@@ -5,7 +5,7 @@ Running at https://denisavko.me
 
 Messaging             |  User profiles
 :-------------------------:|:-------------------------:
-![1](https://i.imgur.com/6EFSCQg.png)  |  ![2](https://i.imgur.com/M0PiMuT.png)
+![1](https://i.imgur.com/6EFSCQg.png)  |  ![2](https://i.imgur.com/bzqi9a0_d.jpg?maxwidth=640&shape=thumb&fidelity=medium)
 Side drawer             |  Group profiles
 ![3](https://i.imgur.com/MldmHIO.png)  |  ![4](https://i.imgur.com/MHthF61.png)
 Search             |  Start view
