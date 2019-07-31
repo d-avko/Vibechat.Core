@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Vibechat.Web.Data.ApiModels.Bans;
 using Vibechat.Web.Data.Conversations;
-using Vibechat.Web.Services.Repositories;
+using Vibechat.Web.Data.Repositories;
 using VibeChat.Web;
 
 namespace Vibechat.Web.Services.Bans

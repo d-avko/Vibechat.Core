@@ -1,6 +1,6 @@
 ﻿using VibeChat.Web;
 
-namespace Vibechat.Web.Services.Repositories
+namespace Vibechat.Web.Data.Repositories
 {
     public interface IUsersBansRepository
     {
