@@ -174,21 +174,42 @@ export class ConversationsFormatter{
     }
   }
 
+  public static DAYS_IN_A_WEEK = 7;
+
+  public static MAX_FORMATTABLE_DAYS = 5;
+
   private DaysSinceEventFormatted(eventDate: Date): string {
     let currentTime = new Date();
-    let hoursSinceReceived = (currentTime.getTime() - eventDate.getTime()) / (1000 * 60 * 60);
-    let daysSinceReceived = hoursSinceReceived / 24;
+    let hoursSinceReceived = Math.floor((currentTime.getTime() - eventDate.getTime()) / (1000 * 60 * 60));
+    let daysSinceReceived = Math.floor(hoursSinceReceived / 24);
     let hoursSinceMidnight = currentTime.getHours();
 
-    switch (true) {                 // this is for the case when user've sent message right in 00:00:00
+    switch (true) {    // this is for the case when user've sent message right in 00:00:00
       case hoursSinceReceived <= hoursSinceMidnight + 0.001: {
         return "Today"
       }
-      case daysSinceReceived <= 2: {
-        return "Yesterday";
+      case daysSinceReceived <= ConversationsFormatter.MAX_FORMATTABLE_DAYS: {
+        let currentDay = currentTime.getDay();
+        let eventDay = eventDate.getDay();
+        let realDaysBetween : number;
+
+        if (currentDay < eventDay) {
+          realDaysBetween = currentDay + Math.abs(eventDay - ConversationsFormatter.DAYS_IN_A_WEEK);
+        } else {
+          realDaysBetween = currentDay - eventDay;
+        }
+
+        switch (realDaysBetween) {
+          case 1: {
+            return "Yesterday";
+          }
+          default: {
+            return realDaysBetween.toString() + " days ago";
+          }
+        }
       }
-      case daysSinceReceived > 2: {
-        return Math.floor(daysSinceReceived).toString() + " days ago";
+      default: {
+        return eventDate.toLocaleDateString();
       }
     }
   }

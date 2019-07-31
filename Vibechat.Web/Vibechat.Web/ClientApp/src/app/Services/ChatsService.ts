@@ -544,7 +544,7 @@ export class ChatsService {
     return result.response.usersFound;
   }
 
-  public ReadMessage(message: ChatMessage) {
+  public async ReadMessage(message: ChatMessage) {
 
     if (message.user.id == this.authService.User.id) {
       return;
@@ -556,7 +556,13 @@ export class ChatsService {
 
     this.PendingReadMessages.push(message.id);
 
-    this.connectionManager.ReadMessage(message.id, message.conversationID);
+    let result = await this.connectionManager.ReadMessage(message.id, message.conversationID);
+
+    if (!result) {
+      return;
+    }
+
+    message.state = MessageState.Read;
   }
 
   public async CreateGroup(name: string, isPublic: boolean) {

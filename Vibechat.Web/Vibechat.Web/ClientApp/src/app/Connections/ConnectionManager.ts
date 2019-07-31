@@ -229,7 +229,7 @@ export class ConnectionManager {
       return;
     }
 
-    this.connection.send("MessageRead", msgId, conversationId);
+    return this.connection.invoke<boolean>("MessageRead", msgId, conversationId);
   }
 
   public SendTyping(chatId:number) {

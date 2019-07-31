@@ -99,7 +99,9 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
       return;
     }
 
-    this.ScrollToMessage(this.CurrentConversation.messages.length - 1);
+    requestAnimationFrame(() => {
+      this.viewport.elementRef.nativeElement.scrollTop = this.viewport.elementRef.nativeElement.scrollHeight;
+    });
   }
 
   public IsDarkTheme() {
@@ -193,10 +195,6 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     if (this.CurrentConversation.messages.length <= 1) {
       this.UpdateMessages();
     }
-  }
-
-  public ScrollToStart() {
-    this.ScrollToMessage(this.CurrentConversation.messages.length - 1);
   }
 
   public ViewUserInfo(event: any, user: UserInfo) {

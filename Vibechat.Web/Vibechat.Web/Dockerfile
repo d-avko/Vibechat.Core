@@ -31,7 +31,7 @@ ENV PATH /usr/src/app/node_modules/.bin:$PATH
 # install and cache app dependencies
 COPY Vibechat.Web/ClientApp/package.json /usr/src/app/package.json
 RUN npm install
-RUN npm install -g @angular/cli@7.2.0 --unsafe
+RUN npm install -g @angular/cli@8.1.3 --unsafe
 
 # add app
 

@@ -225,7 +225,7 @@
     Empty in here...
   </h4>
 
-  <div (click)="ScrollToStart()" class="chat_misc_backtonow" *ngIf="IsScrollingAssistNeeded" [@slideIn]>
+  <div (click)="ScrollToLastMessage()" class="chat_misc_backtonow" *ngIf="IsScrollingAssistNeeded" [@slideIn]>
     <mat-icon>keyboard_arrow_down</mat-icon>
     <span>Back to now</span>
   </div>

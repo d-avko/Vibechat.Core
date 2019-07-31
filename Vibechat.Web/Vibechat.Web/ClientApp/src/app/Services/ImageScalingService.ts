@@ -64,8 +64,16 @@ export class ImageScalingService {
    * */
   private GetChatImageDimensions(oldWidth: number, oldHeight: number) {
     let d = new Dimensions();
-    let desiredWidth = this.formatter.IsMobileDevice() ? window.innerWidth * this.chatImageWidthRatioMobile : window.innerWidth * this.chatImageWidthRatioDesktop;
-    let desiredHeight = window.innerHeight * this.chatImageMaxHeightRatio;
+
+    let desiredWidth;
+
+    if (this.formatter.IsMobileDevice()) {
+      desiredWidth = document.documentElement.clientWidth * this.chatImageWidthRatioMobile;
+    } else {
+      desiredWidth = document.documentElement.clientWidth * this.chatImageWidthRatioDesktop;
+    }
+
+    let desiredHeight = document.documentElement.clientHeight * this.chatImageMaxHeightRatio;
 
     if (oldWidth > oldHeight) {
       d.width = desiredWidth;
@@ -89,8 +97,8 @@ export class ImageScalingService {
  * */
   public AdjustFullSizedImageDimensions(imageW: number, imageH: number) {
     let appropriateHeight = this.formatter.IsMobileDevice()
-      ? Math.floor(window.innerHeight * this.fullScreenImageToScreenMobileRatio)
-      : Math.floor(window.innerHeight * this.fullScreenImageToScreenDesktopRatio)
+      ? Math.floor(document.documentElement.clientHeight * this.fullScreenImageToScreenMobileRatio)
+      : Math.floor(document.documentElement.clientHeight * this.fullScreenImageToScreenDesktopRatio)
 
     let d = new Dimensions();
     d.height = appropriateHeight;
