@@ -1,3 +1,5 @@
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -13,17 +15,18 @@ using System.Text;
 using System.Threading.Tasks;
 using Vibechat.Web.Middleware;
 using Vibechat.Web.Services.Extension_methods;
-using Vibechat.Web.Services.Repositories;
 using VibeChat.Web;
 
 namespace Vibechat.Web
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly IHostingEnvironment environment;
+
+        public Startup(IConfiguration configuration, IHostingEnvironment environment)
         {
             Configuration = configuration;
-
+            this.environment = environment;
             DI.Configuration = configuration;
         }
 
@@ -32,30 +35,26 @@ namespace Vibechat.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-              options.UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"]));
+            if (environment.IsDevelopment())
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseNpgsql(Configuration["ConnectionStrings:Development"]));
+            }
+            else
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseNpgsql(Configuration["ConnectionStrings:DefaultConnection"]));
+            }
 
-            services.AddIdentity<UserInApplication, IdentityRole>()
+            services.AddIdentity<AppUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+            services.AddEntityFrameworkNpgsql();
+
             //set usermanager explicitly, to prevent SignalR hub methods from not being executed correctly.
 
-            services.AddScoped<UserManager<UserInApplication>>();
-
-            services.Configure<IdentityOptions>(options =>
-            {
-                // Make weak passwords possible for now
-
-                options.Password.RequireDigit = false;
-                options.Password.RequiredLength = 5;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireUppercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-
-                // Make sure users have unique emails
-                options.User.RequireUniqueEmail = true;
-            });
+            services.AddScoped<UserManager<AppUser>>();
 
 
             services.AddAuthentication(options =>
@@ -135,13 +134,14 @@ namespace Vibechat.Web
             }
             else
             {
-                app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
-
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseSpaStaticFiles();
+            app.UseSpaStaticFiles(new StaticFileOptions
+            {
+                ServeUnknownFileTypes = true
+            });
 
             app.UseAuthentication();
 
@@ -165,14 +165,19 @@ namespace Vibechat.Web
                 // see https://go.microsoft.com/fwlink/?linkid=864501
 
                 spa.Options.SourcePath = "ClientApp";
-
+                spa.Options.StartupTimeout = TimeSpan.FromMinutes(5);
                 if (env.IsDevelopment())
                 {
                     spa.UseAngularCliServer(npmScript: "start");
                 }
             });
 
-            serviceProvider.GetService<ApplicationDbContext>().Database.EnsureCreated();
+            FirebaseApp.Create(new AppOptions()
+            {
+                Credential = GoogleCredential.GetApplicationDefault(),
+            });
+
+            serviceProvider.GetService<ApplicationDbContext>().Database.Migrate();
         }
     }
 }

@@ -1,4 +1,3 @@
-import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { UserInfo } from "../Data/UserInfo";
 
 export class AddedToGroupModel {
@@ -6,6 +5,6 @@ export class AddedToGroupModel {
     (<any>Object).assign(this, init);
   }
 
-  public conversation: ConversationTemplate
+  public chatId: number;
   public user: UserInfo;
 }

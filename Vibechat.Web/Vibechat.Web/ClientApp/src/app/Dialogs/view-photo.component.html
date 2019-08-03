@@ -1,0 +1,70 @@
+<div>
+
+  <div class="body">
+    <mat-spinner class="load-spinner"
+                          diameter="100"
+                          color="Primary"
+                          *ngIf="(loadingImage != null) && (loadingImage.isDownloading)"
+                          mode="indeterminate">
+    </mat-spinner> 
+
+    <img #mainImage />
+  </div>
+
+  <div class="options-bar">
+    <p class="head_text">{{data.imageName}}</p>
+
+    <a class="button-download" mat-button href="{{data.fullsizedUrl}}" download>
+      <mat-icon>get_app</mat-icon>
+    </a>
+
+    <button *ngIf="data.isForwardSupported" class="button-forward" mat-button (click)="Forward()">
+      <mat-icon>reply</mat-icon>
+    </button>
+  </div>
+</div>
+
+<style>
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .load-spinner{
+    position: absolute;
+  }
+
+  .head_text{
+    font: 500 12px/14px Roboto,"Helvetica Neue",sans-serif;
+    word-break: break-word;
+  }
+
+  .body{
+    height: 60vh;
+    margin-top: 2.5%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 5%;
+    width: 100vw;
+  }
+  .options-bar{
+    height: 10vh;
+    background-color: dimgray;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .button-forward,
+  .button-download{
+    color:#AFAFAF;
+  }
+
+  .button-download:hover,
+  .button-forward:hover{
+    color: #EBEBEB;
+  }
+</style>

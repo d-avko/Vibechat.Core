@@ -16,7 +16,7 @@ namespace VibeChat.Web
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public static string GenerateRefreshToken(this UserInApplication user)
+        public static string GenerateRefreshToken(this AppUser user)
         {
             var claims = new[]
             {
@@ -42,7 +42,7 @@ namespace VibeChat.Web
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public static string GenerateToken(this UserInApplication user)
+        public static string GenerateToken(this AppUser user)
         {
             var claims = new[]
            {

@@ -12,7 +12,7 @@
 
       <h3 matLine
           [ngClass]="{'selected-user': SelectedUser && SelectedUser.id == user.id}">
-        {{user.userName}}
+        {{ (user.userName.length > 20 )? (user.userName | slice:0:20)+'..':(user.userName) }}
       </h3>
 
     </mat-list-item>
@@ -27,7 +27,7 @@
   <style>
     .selected-user {
       color: white;
-      background-color: cadetblue;
+      background-color: cadetblue !important;
     }
 
     .find-header {

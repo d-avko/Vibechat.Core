@@ -2,13 +2,14 @@
 
   <!--since virtual scroll doesn't work with items of variable height, load everything-->
 
-  <cdk-virtual-scroll-viewport (scrolledIndexChange)="OnMessagesScrolled($event)"
+  <cdk-virtual-scroll-viewport *ngIf="chatsService.CurrentConversation.messages && chatsService.CurrentConversation.messages.length"
+                               (scrolledIndexChange)="OnMessagesScrolled($event)"
                                minBufferPx="120000"
                                maxBufferPx="250000"
                                itemSize="50"
                                class="messages_main">
 
-    <div *cdkVirtualFor="let message of conversationsService.CurrentConversation.messages;">
+    <div *cdkVirtualFor="let message of chatsService.CurrentConversation.messages;">
 
       <div (click)="SelectMessage(message)">
 
@@ -44,50 +45,94 @@
             <!--Attachments-->
 
             <div *ngIf="IsImage(message)" class="image_attachment">
-              <img class="message_attachment--image" [style.width.px]="message.attachmentInfo.imageWidth" [style.height.px]="message.attachmentInfo.imageHeight" src="{{message.attachmentInfo.contentUrl}}" />
+              <img class="message_attachment--image"
+                   (click)="ViewImage($event, message)"
+                   [style.width.px]="message.attachmentInfo.imageWidth"
+                   [style.height.px]="message.attachmentInfo.imageHeight" src="{{message.attachmentInfo.contentUrl}}" />
             </div>
 
             <!--Audio / archive / etc-->
-            <!--Forwarded message-->
-            <div *ngIf="message.forwardedMessage" class="forwarded_message">
+            <div *ngIf="IsFile(message)" class="file_attachment">
+              <div class="file-wrapper">
 
-              <div>
+                <div class="file-wrapper_iconwrapper">
 
-                <div class="messages_message_content" [ngClass]="{'selected-message-dark': IsMessageSelected(message) && IsDarkTheme(), 'selected-message-light': IsMessageSelected(message) && !IsDarkTheme()}">
-
-                  <div style="width: 35px; height: 35px; margin-right: 15px; cursor:pointer" (click)="ViewUserInfo($event, message.forwardedMessage.user)">
-                    <img class="rounded-chat-image" src="{{message.forwardedMessage.user.imageUrl}}" />
+                  <div class="file-icon">
+                    <mat-icon class="file-icon_icon">insert_drive_file</mat-icon>
                   </div>
 
-                  <div class="content_messageAndName">
-                    <span class="message_header">{{message.forwardedMessage.user.userName}}</span>
+                </div>
 
-                    <p *ngIf="! message.forwardedMessage.isAttachment" class="message_text">{{message.forwardedMessage.messageContent}}</p>
+                <div class="file-wrapper_info">
 
-                    <!--Attachments-->
-
-                    <div *ngIf="IsImage(message.forwardedMessage)" class="image_attachment">
-                      <img class="message_attachment--image"
-                           [style.width.px]="message.forwardedMessage.attachmentInfo.imageWidth"
-                           [style.height.px]="message.forwardedMessage.attachmentInfo.imageHeight"
-                           src="{{message.forwardedMessage.attachmentInfo.contentUrl}}" />
-                    </div>
-
-                    <!--Audio / archive / etc-->
-
+                  <div class="file-name">
+                    <a (click)="DownloadFile($event)" class="file-name_text" href="{{message.attachmentInfo.contentUrl}}" download>{{message.attachmentInfo.attachmentName}}</a>
                   </div>
 
-                  <span [ngClass]="{'message_timereceived-dark': IsDarkTheme(), 'message_timereceived-light': !IsDarkTheme()}">{{formatter.GetMessageTimeFormatted(message.forwardedMessage)}}</span>
+                  <div class="file-size">
+                    <p class="file-size_text">{{formatter.GetBytesAmountFormatted(message.attachmentInfo.fileSize)}}</p>
+                  </div>
+
                 </div>
               </div>
-
             </div>
-            <!--Forwarded message end-->
+
+            <style>
+              .file-wrapper_info {
+                display: flex;
+                flex-direction: column;
+              }
+
+              .file-name_text {
+                font: 500 14px/18px Roboto,"Helvetica Neue",sans-serif;
+                word-break: break-word;
+              }
+
+              .file-size_text {
+                font: 300 12px/14px Roboto,"Helvetica Neue",sans-serif;
+              }
+
+              .file-size {
+                border-top: 5px solid cadetblue;
+              }
+
+              .file-wrapper_iconwrapper {
+                display: flex;
+                flex-direction: column;
+              }
+
+              .file-wrapper {
+                display: flex;
+                flex-direction: row;
+                width: 54vw;
+                margin-right: 20px;
+              }
+
+              .file-wrapper_iconwrapper {
+                cursor: pointer;
+                margin-right: 2.5%;
+                margin-top: 2.5%;
+              }
+
+              .file-icon {
+                background-color: #335657;
+                border-radius: 20px;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+              }
+
+              .file-icon_icon {
+                color: cadetblue;
+              }
+            </style>
           </div>
 
           <div class="time-and-states-wrapper">
 
-            <span [ngClass]="{'message_timereceived-dark': IsDarkTheme(), 'message_timereceived-light': !IsDarkTheme()}">{{formatter.GetMessageTimeFormatted(message)}}</span>
+            <span [ngClass]="{'message_timereceived-dark': IsDarkTheme(), 'message_timereceived-light': !IsDarkTheme()}">{{message.timeReceived | date: 'shortTime'}}</span>
             <!--read, delivered etc.-->
 
             <mat-icon class="messagestate" *ngIf="message.state == 0">
@@ -105,68 +150,126 @@
           </div>
         </div>
 
+        <!--Forwarded message-->
+        <div *ngIf="message.forwardedMessage" class="forwarded_message">
+
+          <div>
+
+            <div class="messages_message_content" [ngClass]="{'selected-message-dark': IsMessageSelected(message) && IsDarkTheme(), 'selected-message-light': IsMessageSelected(message) && !IsDarkTheme()}">
+
+              <div class="forwarded_message_break">
+
+              </div>
+
+              <div style="width: 35px; height: 35px; margin-right: 15px; cursor:pointer" (click)="ViewUserInfo($event, message.forwardedMessage.user)">
+                <img class="rounded-chat-image" src="{{message.forwardedMessage.user.imageUrl}}" />
+              </div>
+
+              <div class="content_messageAndName">
+                <span class="message_header">{{message.forwardedMessage.user.userName}}</span>
+
+                <p *ngIf="! message.forwardedMessage.isAttachment" class="message_text">{{message.forwardedMessage.messageContent}}</p>
+
+                <!--Attachments-->
+
+                <div *ngIf="IsImage(message.forwardedMessage)" class="image_attachment">
+                  <img class="message_attachment--image"
+                       (click)="ViewImage($event, message.forwardedMessage)"
+                       [style.width.px]="message.forwardedMessage.attachmentInfo.imageWidth"
+                       [style.height.px]="message.forwardedMessage.attachmentInfo.imageHeight"
+                       src="{{message.forwardedMessage.attachmentInfo.contentUrl}}" />
+                </div>
+
+                <!--Audio / archive / etc-->
+
+                <div *ngIf="IsFile(message)" class="file_attachment">
+                  <div class="file-wrapper">
+
+                    <div class="file-wrapper_iconwrapper">
+
+                      <div class="file-icon">
+                        <mat-icon class="file-icon_icon">insert_drive_file</mat-icon>
+                      </div>
+
+                    </div>
+
+                    <div class="file-wrapper_info">
+
+                      <div class="file-name">
+                        <a (click)="DownloadFile($event)" class="file-name_text" href="{{message.attachmentInfo.contentUrl}}" download>{{message.attachmentInfo.attachmentName}}</a>
+                      </div>
+
+                      <div class="file-size">
+                        <p class="file-size_text">{{formatter.GetBytesAmountFormatted(message.attachmentInfo.fileSize)}}</p>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <span class="message_timereceived" [ngClass]="{'message_timereceived-dark': IsDarkTheme(), 'message_timereceived-light': !IsDarkTheme()}">{{message.forwardedMessage.timeReceived | date: 'shortTime'}}</span>
+            </div>
+          </div>
+
+        </div>
+        <!--Forwarded message end-->
       </div>
 
     </div>
   </cdk-virtual-scroll-viewport>
 
-  <div class="chat_misc">
-    <div (click)="ScrollToStart()" class="chat_misc_backtonow" *ngIf="IsScrollingAssistNeeded" [@slideIn]>
-      <mat-icon>keyboard_arrow_down</mat-icon>
-      <span>Back to now</span>
-    </div>
+  <h4 *ngIf="!chatsService.CurrentConversation.messages
+      || !chatsService.CurrentConversation.messages.length "
+      class="no-messages">
+    Empty in here...
+  </h4>
 
+  <div (click)="ScrollToLastMessage()" class="chat_misc_backtonow" *ngIf="IsScrollingAssistNeeded" [@slideIn]>
+    <mat-icon>keyboard_arrow_down</mat-icon>
+    <span>Back to now</span>
+  </div>
+
+  <div class="chat_misc">
     <button mat-button
             color="primary"
             class="marginleft10px"
             *ngIf="SelectedMessages.length !== 0"
             (click)="DeleteMessages()"
             [@slideIn]>
-      Delete messages
+      <span  *ngIf="!formatter.IsMobileDevice()">Delete messages</span>
+
+      <mat-icon>
+        highlight_off
+      </mat-icon>
+
     </button>
 
     <button mat-button
             color="primary"
-            *ngIf="SelectedMessages.length !== 0"
+            *ngIf="! chatsService.CurrentConversation.isSecure && SelectedMessages.length !== 0"
             (click)="ForwardMessages()"
             [@slideIn]>
-      Forward messages
+      <span *ngIf="!formatter.IsMobileDevice()">Forward messages</span>
+
+      <mat-icon>
+        reply
+      </mat-icon>
+    </button>
+
+    <button mat-button
+            color="primary"
+            *ngIf="IsAllSelectedMessagesPending()"
+            (click)="ResendMessages()"
+            [@slideIn]>
+      <span *ngIf="!formatter.IsMobileDevice()">Resend messages</span>
+
+      <mat-icon 
+                color="primary"
+                [@slideIn]>
+        restore
+      </mat-icon>
     </button>
   </div>
 
 </div>
-
-<style>
-  .chat_misc_backtonow{
-    display: flex;
-    flex-direction:row;
-    margin-left: 43%;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 1px 3px 0 rgba(0,0,0,.1);
-    border-radius: 10px;
-    border: solid 1px #cfd9e1;
-    padding: 4px 4px 4px 4px;
-    color: cadetblue;
-    height: 20px;
-    transition: all 0.3s ease 0s;
-    cursor:pointer;
-  }
-  .chat_misc_backtonow:hover{
-    transition: all 0.3s ease 0s;
-    background-color: #f0f6f6;
-  }
-
-  .time-and-states-wrapper{
-    display: flex;
-    flex-direction: column;
-  }
-  .messagestate{
-    color:cadetblue;
-    width: 15px;
-    height: 15px;
-  }
-  .forwarded_message{
-    border-left: 2px solid cadetblue;
-  }
-</style>

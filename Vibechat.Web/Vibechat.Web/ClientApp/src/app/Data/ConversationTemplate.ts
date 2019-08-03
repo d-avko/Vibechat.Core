@@ -1,5 +1,6 @@
 import { UserInfo } from "./UserInfo";
 import { ChatMessage } from "./ChatMessage";
+import { ChatRoleDto } from "../Roles/ChatRoleDto";
 
 export class DhPublicKey {
   public modulus: string;
@@ -20,13 +21,13 @@ export class ConversationTemplate {
 
   public isGroup: boolean;
 
-  public creator: UserInfo;
-
   public messages: Array<ChatMessage>;
 
   public participants: Array<UserInfo>;
 
   public isMessagingRestricted: boolean;
+
+  public chatRole: ChatRoleDto;
 
   public isSecure: boolean;
 
@@ -35,4 +36,6 @@ export class ConversationTemplate {
   public publicKey: DhPublicKey; 
 
   public messagesUnread: number;
+
+  public deviceId: string;
 }

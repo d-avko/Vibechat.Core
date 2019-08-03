@@ -1,13 +1,15 @@
-import { Component, Inject, EventEmitter, Input, Output } from "@angular/core";
+import { Component, Inject, EventEmitter, Input, Output, ViewContainerRef } from "@angular/core";
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from "@angular/material";
 import { ChatComponent } from "../Chat/chat.component";
 import { UserInfo } from "../Data/UserInfo";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { ConversationsFormatter } from "../Formatters/ConversationsFormatter";
 import { ChangeNameDialogComponent } from "./ChangeNameDialog";
-import { ChatsService } from "../Services/ConversationsService";
+import { ChatsService } from "../Services/ChatsService";
 import { UsersService } from "../Services/UsersService";
 import { ViewAttachmentsDialogComponent } from "./ViewAttachmentsDialog";
+import { AuthService } from "../Auth/AuthService";
+import { ViewPhotoService } from "./ViewPhotoService";
 
 export interface UserInfoData {
   user: UserInfo;
@@ -27,8 +29,22 @@ export class UserInfoDialogComponent {
     public dialog: MatDialog,
     public formatter: ConversationsFormatter,
     public conversationsService: ChatsService,
-    public usersService: UsersService
-    ) { }
+    public usersService: UsersService,
+    public auth: AuthService,
+    public viewContainerRef: ViewContainerRef,
+    public photos: ViewPhotoService
+  ){
+    //this check is needed for changes in name/lastname to be displayed correctly.
+    if (this.data.user.id == auth.User.id) {
+      this.data.user = auth.User;
+    }
+
+    this.photos.viewContainerRef = this.viewContainerRef;
+  }
+
+  public uploadProgress: number = 0;
+
+  public uploading: boolean = false;
 
   public HasConversationWith(): boolean {
 
@@ -61,6 +77,11 @@ export class UserInfoDialogComponent {
     await this.usersService.AddToContacts(this.data.user);
   }
 
+  public ViewPicture(image: Event) {
+    this.photos.viewContainerRef = this.viewContainerRef;
+    this.photos.ViewProfilePicture(this.data.user.fullImageUrl);
+  }
+
   public ViewAttachments() {
     if (this.data.conversation) {
       const attachmentsDialogRef = this.dialog.open(ViewAttachmentsDialogComponent, {
@@ -80,8 +101,27 @@ export class UserInfoDialogComponent {
     await this.usersService.UnblockUser(this.data.user);
   }
 
-  public async UpdateThumbnail(event: any) {
-    await this.usersService.UpdateProfilePicture(event.target.files[0]);
+  public ProgressCallback(value: number) {
+    this.uploadProgress = value;
+  }
+
+  public async UpdateThumbnail(event: Event) {
+    try {
+      this.uploading = true;
+      await this.usersService.UpdateProfilePicture((<HTMLInputElement>event.target).files[0], this.ProgressCallback.bind(this));
+    } finally {
+      this.uploading = false;
+      this.ResetInput(<HTMLInputElement>event.target);
+    }
+  }
+
+  public ResetInput(input: HTMLInputElement) {
+    input.value = '';
+
+    if (!/safari/i.test(navigator.userAgent)) {
+      input.type = '';
+      input.type = 'file';
+    }
   }
 
   public ChangeName(): void {
@@ -96,6 +136,22 @@ export class UserInfoDialogComponent {
         }
 
         await this.usersService.ChangeName(name);
+      }
+    )
+  }
+
+  public ChangeUsername(): void {
+    const groupInfoRef = this.dialog.open(ChangeNameDialogComponent, {
+      width: '450px'
+    });
+
+    groupInfoRef.afterClosed().subscribe(
+      async (name) => {
+        if (!name) {
+          return;
+        }
+
+        await this.usersService.ChangeUsername(name);
       }
     )
   }

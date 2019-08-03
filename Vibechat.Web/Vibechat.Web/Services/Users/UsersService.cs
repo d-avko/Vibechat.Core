@@ -5,12 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Vibechat.Web.ApiModels;
+using Vibechat.Web.Data.Repositories;
 using Vibechat.Web.Extensions;
 using Vibechat.Web.Services.FileSystem;
-using Vibechat.Web.Services.Repositories;
 using VibeChat.Web;
 using VibeChat.Web.ChatData;
-using VibeChat.Web.Services.Repositories;
 using static VibeChat.Web.Controllers.UsersController;
 
 namespace Vibechat.Web.Services.Users
@@ -18,20 +17,22 @@ namespace Vibechat.Web.Services.Users
     public class UsersService
     {
         private readonly IUsersRepository usersRepository;
-        private readonly ImagesService imagesService;
+        private readonly FilesService imagesService;
         private readonly IContactsRepository contactsRepository;
-
+        private readonly UnitOfWork unitOfWork;
         public const int MaxThumbnailLengthMB = 5;
         public const int MaxNameLength = 128;
 
         public UsersService(
             IUsersRepository usersRepository,
-            ImagesService imagesService,
-            IContactsRepository contactsRepository)
+            FilesService imagesService,
+            IContactsRepository contactsRepository,
+            UnitOfWork unitOfWork)
         {
             this.usersRepository = usersRepository;
             this.imagesService = imagesService;
             this.contactsRepository = contactsRepository;
+            this.unitOfWork = unitOfWork;
         }
 
         public async Task<UserInfo> GetUserById(UserByIdApiModel userId)
@@ -51,19 +52,50 @@ namespace Vibechat.Web.Services.Users
             return FoundUser.ToUserInfo();
         }
 
+
+        public async Task UpdateUserInfo(string username, string firstname, string lastname, string whoCalled)
+        {
+            await ChangeUsername(username, whoCalled);
+            await ChangeName(firstname, whoCalled);
+            await ChangeLastName(lastname, whoCalled);
+        }
+
         public async Task ChangeName(string newName, string whoCalled)
         {
+            newName = newName.Replace(" ", "");
+
             if(newName.Length > MaxNameLength)
             {
                 throw new FormatException("Name was too long.");
             }
 
             await usersRepository.ChangeName(newName, whoCalled);
+
+            await unitOfWork.Commit();
+        }
+
+        public async Task ChangeUsername(string newName, string whoCalled)
+        {
+            newName = newName.Replace(" ", "");
+
+            if (newName.Length > MaxNameLength)
+            {
+                throw new FormatException("Name was too long.");
+            }
+
+            AppUser foundUser = await usersRepository.GetByUsername(newName);
+
+            if(foundUser != null)
+            {
+                throw new InvalidDataException("New username was not unique.");
+            }
+
+            await usersRepository.ChangeUsername(newName, whoCalled);
         }
 
         public async Task<List<UserInfo>> GetContacts(string callerId)
         {
-            UserInApplication caller = await usersRepository.GetById(callerId);
+            AppUser caller = await usersRepository.GetById(callerId);
 
             if (caller == null)
             {
@@ -84,7 +116,8 @@ namespace Vibechat.Web.Services.Users
 
             try
             {
-                await contactsRepository.AddContact(callerId, userId);
+                contactsRepository.AddContact(callerId, userId);
+                await unitOfWork.Commit();
             }
             catch (Exception ex)
             {
@@ -97,7 +130,8 @@ namespace Vibechat.Web.Services.Users
         {
             try
             {
-                await contactsRepository.RemoveContact(caller, userId);
+                contactsRepository.RemoveContact(caller, userId);
+                await unitOfWork.Commit();
             }
             catch (Exception ex)
             {                
@@ -107,15 +141,19 @@ namespace Vibechat.Web.Services.Users
 
         public async Task ChangeLastName(string newName, string whoCalled)
         {
+            newName = newName.Replace(" ", "");
+
             if (newName.Length > MaxNameLength)
             {
                 throw new FormatException("Name was too long.");
             }
 
             await usersRepository.ChangeLastName(newName, whoCalled);
+
+            await unitOfWork.Commit();
         }
 
-        public async Task<UserInApplication> GetUserById(string userId)
+        public async Task<AppUser> GetUserById(string userId)
         {
             if (userId == null)
             {
@@ -148,22 +186,31 @@ namespace Vibechat.Web.Services.Users
 
             ValueTuple<string, string> thumbnailFull;
 
-            using (var buffer = new MemoryStream())
+            try
             {
-                image.CopyTo(buffer);
-                buffer.Seek(0, SeekOrigin.Begin);
+                using (var buffer = new MemoryStream())
+                {
+                    image.CopyTo(buffer);
+                    buffer.Seek(0, SeekOrigin.Begin);
 
-                //thumbnail; fullsized
-               thumbnailFull = imagesService.SaveImage(buffer, image.FileName);
+                    //thumbnail; fullsized
+                    thumbnailFull = await imagesService.SaveProfileOrChatPicture(image, buffer, image.FileName, userId, userId);
 
-                await usersRepository.UpdateAvatar(thumbnailFull.Item1, thumbnailFull.Item2, userId);
+                    await usersRepository.UpdateAvatar(thumbnailFull.Item1, thumbnailFull.Item2, userId);
+
+                    await unitOfWork.Commit();
+                }
+
+                return new UpdateProfilePictureResponse()
+                {
+                    ThumbnailUrl = thumbnailFull.Item1,
+                    FullImageUrl = thumbnailFull.Item2
+                };
             }
-
-            return new UpdateProfilePictureResponse()
+            catch (Exception ex)
             {
-                ThumbnailUrl = thumbnailFull.Item1,
-                FullImageUrl = thumbnailFull.Item2
-            };
+                throw new Exception("Failed to update profile picture. Try different one.", ex);
+            }
         }
 
         public async Task<UsersByNickNameResultApiModel> FindUsersByNickName(UsersByNickNameApiModel credentials)
@@ -199,16 +246,19 @@ namespace Vibechat.Web.Services.Users
             }
 
             await usersRepository.ChangeUserPublicState(userId);
+            await unitOfWork.Commit();
         }
 
         public async Task MakeUserOnline(string userId, string signalRConnectionId)
         {
             await usersRepository.MakeUserOnline(userId, signalRConnectionId);
+            await unitOfWork.Commit();
         }
 
         public async Task MakeUserOffline(string userId)
         {
             await usersRepository.MakeUserOffline(userId);
+            await unitOfWork.Commit();
         }
 
     }

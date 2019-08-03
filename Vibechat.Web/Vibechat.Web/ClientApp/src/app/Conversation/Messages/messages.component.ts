@@ -1,16 +1,17 @@
-import { Component, Output, EventEmitter, ViewChild, AfterViewInit, OnChanges,  AfterViewChecked, SimpleChanges, Input } from '@angular/core';
+import { Component, Output, EventEmitter, ViewChild, AfterViewInit, OnChanges,  AfterViewChecked, SimpleChanges, Input, ViewContainerRef } from '@angular/core';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { trigger, state, style, transition, animate } from "@angular/animations";
 import { ChatMessage } from '../../Data/ChatMessage';
 import { ConversationsFormatter } from '../../Formatters/ConversationsFormatter';
-import { AttachmentKinds } from '../../Data/AttachmentKinds';
+import { AttachmentKind } from '../../Data/AttachmentKinds';
 import { UserInfo } from '../../Data/UserInfo';
 import { MatDialog } from '@angular/material';
 import { MessageState } from '../../Shared/MessageState';
-import { ChatsService } from '../../Services/ConversationsService';
+import { ChatsService } from '../../Services/ChatsService';
 import { ForwardMessagesDialogComponent } from '../../Dialogs/ForwardMessagesDialog';
 import { ConversationTemplate } from '../../Data/ConversationTemplate';
 import { ThemesService } from '../../Theming/ThemesService';
+import { ViewPhotoService } from '../../Dialogs/ViewPhotoService';
 
 export class ForwardMessagesModel {
   public forwardTo: Array<number>;
@@ -41,8 +42,11 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
   constructor(
     public formatter: ConversationsFormatter,
     public dialog: MatDialog,
-    public conversationsService: ChatsService,
-    private themes: ThemesService) {
+    public chatsService: ChatsService,
+    private themes: ThemesService,
+    private vc: ViewContainerRef,
+    private photos: ViewPhotoService) {
+
     this.SelectedMessages = new Array<ChatMessage>();
   }
 
@@ -62,12 +66,12 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
 
   public static MessagesBufferLength: number = 50;
 
-  @ViewChild(CdkVirtualScrollViewport) viewport: CdkVirtualScrollViewport;
+  @ViewChild(CdkVirtualScrollViewport, { static: false }) viewport: CdkVirtualScrollViewport;
   
   public SelectedMessages: Array<ChatMessage>;
 
   ngAfterViewInit() {
-    this.ScrollToMessage(this.CurrentConversation.messages.length - 1);
+    this.ScrollToLastMessage();
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -77,7 +81,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
       this.IsConversationHistoryEnd = false;
       this.SelectedMessages = new Array<ChatMessage>();
       this.UpdateMessagesIfNotUpdated();
-      this.ScrollToMessage(this.CurrentConversation.messages.length - 1);
+      this.ScrollToLastMessage();
     }
   } 
 
@@ -90,8 +94,38 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     this.ReadMessagesInViewport();
   }
 
+  ScrollToLastMessage() {
+    if (!this.CurrentConversation.messages) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      this.viewport.elementRef.nativeElement.scrollTop = this.viewport.elementRef.nativeElement.scrollHeight;
+    });
+  }
+
   public IsDarkTheme() {
     return this.themes.currentThemeName == 'dark';
+  }
+
+  public ViewImage(event: Event, image: ChatMessage) {
+    event.stopPropagation();
+    this.photos.viewContainerRef = this.vc;
+    this.photos.ViewPhoto(image);
+  }
+
+  public IsAllSelectedMessagesPending() {
+    if (!this.SelectedMessages.length) {
+      return false;
+    }
+
+    return this.SelectedMessages.every(x => x.state == MessageState.Pending);
+  }
+
+  public ResendMessages() {
+    this.SelectedMessages.splice(0, this.SelectedMessages.length);
+
+    this.chatsService.ResendMessages(this.SelectedMessages, this.CurrentConversation);
   }
 
   public async UpdateMessages() {
@@ -105,7 +139,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
         return;
       }
 
-      let result = await this.conversationsService.GetMessagesForConversation(MessagesComponent.MessagesBufferLength, currentChat);
+      let result = await this.chatsService.UpdateMessagesForConversation(MessagesComponent.MessagesBufferLength, currentChat);
 
       if (result == null || result.length == 0) {
         this.MessagesLoading = false;
@@ -114,18 +148,21 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
       }
 
       if (!this.CurrentConversation) {
+        this.MessagesLoading = false;
         return;
       }
 
       if (currentChat.conversationID == this.CurrentConversation.conversationID) {
         this.ScrollToMessage(result.length);
       }
+
+      this.MessagesLoading = false;
     }
 
   }
 
   public async DeleteMessages() {
-    await this.conversationsService.DeleteMessages(this.SelectedMessages, this.CurrentConversation);
+    await this.chatsService.DeleteMessages(this.SelectedMessages, this.CurrentConversation);
   }
 
   public ForwardMessages() {
@@ -133,7 +170,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
       ForwardMessagesDialogComponent,
       {
         data: {
-          conversations: this.conversationsService.Conversations
+          conversations: this.chatsService.Conversations
         }
       }
     );
@@ -142,24 +179,22 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
       .beforeClosed()
       .subscribe((result: Array<ConversationTemplate>) => {
 
-        this.conversationsService.ForwardMessagesTo(result, this.SelectedMessages);
+        this.chatsService.ForwardMessagesTo(result, this.SelectedMessages);
       })
   }
 
   
   public UpdateMessagesIfNotUpdated() {
 
-    if (this.CurrentConversation.messages == null) {
+    if (!this.CurrentConversation.messages) {
+      this.CurrentConversation.messages = new Array<ChatMessage>();
+      this.UpdateMessages();
       return;
     }
     
     if (this.CurrentConversation.messages.length <= 1) {
       this.UpdateMessages();
     }
-  }
-
-  public ScrollToStart() {
-    this.ScrollToMessage(this.CurrentConversation.messages.length);
   }
 
   public ViewUserInfo(event: any, user: UserInfo) {
@@ -173,7 +208,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
 
     for (let i = boundaries[0]; i < boundaries[1] + 1; ++i) {
       if (this.CurrentConversation.messages[i].state == MessageState.Delivered) {
-        this.conversationsService.ReadMessage(this.CurrentConversation.messages[i]);
+        this.chatsService.ReadMessage(this.CurrentConversation.messages[i]);
       }
     }
   }
@@ -190,7 +225,11 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
 
   public ScrollToMessage(scrollToMessageIndex: number) {
       requestAnimationFrame(() => {
-      
+
+        if (!this.viewport) {
+          return;
+        }
+
         this.viewport.scrollToOffset(this.CalculateOffsetToMessage(scrollToMessageIndex));
     });
   }
@@ -290,6 +329,14 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
       return true;
     }
 
+    if (typeof message.timeReceived !== 'object') {
+      message.timeReceived = new Date(<string>message.timeReceived);
+    }
+
+    if (typeof this.CurrentConversation.messages[messageIndex - 1].timeReceived !== 'object') {
+      this.CurrentConversation.messages[messageIndex - 1].timeReceived = new Date(<string>this.CurrentConversation.messages[messageIndex - 1].timeReceived);
+    }
+
     return (<Date>message.timeReceived).getDay() != (<Date>this.CurrentConversation.messages[messageIndex - 1].timeReceived).getDay();
   }
 
@@ -329,7 +376,20 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
       return false;
     }
 
-    return message.attachmentInfo.attachmentKind == AttachmentKinds.Image;
+    return message.attachmentInfo.attachmentKind == AttachmentKind.Image;
+  }
+
+  public IsFile(message: ChatMessage): boolean {
+
+    if (!message.isAttachment) {
+      return false;
+    }
+
+    return message.attachmentInfo.attachmentKind == AttachmentKind.File;
+  }
+
+  public DownloadFile(event: any) {
+    event.stopPropagation();
   }
 }
 

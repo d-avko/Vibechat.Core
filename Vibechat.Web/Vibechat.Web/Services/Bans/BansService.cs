@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Vibechat.Web.Data.ApiModels.Bans;
-using Vibechat.Web.Services.Repositories;
+using Vibechat.Web.Data.Conversations;
+using Vibechat.Web.Data.Repositories;
 using VibeChat.Web;
 
 namespace Vibechat.Web.Services.Bans
@@ -11,19 +9,25 @@ namespace Vibechat.Web.Services.Bans
     public class BansService
     {
         private readonly IUsersConversationsRepository usersConversationsRepository;
+        private readonly UnitOfWork unitOfWork;
+        private readonly IChatRolesRepository rolesRepository;
 
         public BansService(
             IUsersBansRepository usersBansRepository, 
             IConversationsBansRepository conversationsBansRepository,
             IUsersRepository usersRepository,
             IConversationRepository conversationRepository,
-            IUsersConversationsRepository usersConversationsRepository)
+            IUsersConversationsRepository usersConversationsRepository,
+            UnitOfWork unitOfWork,
+            IChatRolesRepository rolesRepository)  
         {
             UsersBansRepository = usersBansRepository;
             ConversationsBansRepository = conversationsBansRepository;
             UsersRepository = usersRepository;
             ConversationRepository = conversationRepository;
             this.usersConversationsRepository = usersConversationsRepository;
+            this.unitOfWork = unitOfWork;
+            this.rolesRepository = rolesRepository;
         }
 
         public IUsersBansRepository UsersBansRepository { get; }
@@ -39,11 +43,13 @@ namespace Vibechat.Web.Services.Bans
             }
 
             ConversationDataModel conversation = ConversationRepository.GetById(conversationId);
-            UserInApplication banned = await UsersRepository.GetById(userToBanId);
+            AppUser banned = await UsersRepository.GetById(userToBanId);
 
-            if (conversation.Creator.Id != whoAccessedId)
+            var userRole = await rolesRepository.GetAsync(conversationId, whoAccessedId);
+
+            if (userRole.RoleId != ChatRole.Moderator && userRole.RoleId != ChatRole.Creator)
             {
-                throw new FormatException("Only creator can ban users.");
+                throw new FormatException("Only creator / moderator can ban users.");
             }
 
             if(banned == null)
@@ -59,6 +65,7 @@ namespace Vibechat.Web.Services.Bans
             try
             {
                 ConversationsBansRepository.BanUserInGroup(banned, conversation);
+                await unitOfWork.Commit();
             }
             catch
             {
@@ -73,8 +80,8 @@ namespace Vibechat.Web.Services.Bans
                 throw new FormatException("Can't ban yourself.");
             }
 
-            UserInApplication bannedBy = await UsersRepository.GetById(whoAccessedId);
-            UserInApplication banned = await UsersRepository.GetById(UserToBanId);
+            AppUser bannedBy = await UsersRepository.GetById(whoAccessedId);
+            AppUser banned = await UsersRepository.GetById(UserToBanId);
             
             if (banned == null || bannedBy == null)
             {
@@ -96,6 +103,8 @@ namespace Vibechat.Web.Services.Bans
             {
                 ConversationsBansRepository.BanUserInGroup(banned, dialog.Conversation);
             }
+
+            await unitOfWork.Commit();
         }
 
         public async Task<bool> IsBannedFromConversation(int conversationId, string Who)
@@ -133,6 +142,8 @@ namespace Vibechat.Web.Services.Bans
             {
                 ConversationsBansRepository.UnbanUserInGroup(userId, dialog.Conversation.Id);
             }
+
+            await unitOfWork.Commit();
         }
 
         public async Task UnbanUserFromConversation(int conversationId, string userToUnbanId, string whoAccessedId)
@@ -143,11 +154,13 @@ namespace Vibechat.Web.Services.Bans
             }
 
             ConversationDataModel conversation = ConversationRepository.GetById(conversationId);
-            UserInApplication banned = await UsersRepository.GetById(userToUnbanId);
+            AppUser banned = await UsersRepository.GetById(userToUnbanId);
 
-            if (conversation.Creator.Id != whoAccessedId)
+            var userRole = await rolesRepository.GetAsync(conversationId, whoAccessedId);
+
+            if (userRole.RoleId != ChatRole.Moderator && userRole.RoleId != ChatRole.Creator)
             {
-                throw new FormatException("Only creator can unban users.");
+                throw new FormatException("Only creator / moderator can unban users.");
             }
 
             if (banned == null)
@@ -163,6 +176,7 @@ namespace Vibechat.Web.Services.Bans
             try
             {
                 ConversationsBansRepository.UnbanUserInGroup(userToUnbanId, conversationId);
+                await unitOfWork.Commit();
             }
             catch
             {

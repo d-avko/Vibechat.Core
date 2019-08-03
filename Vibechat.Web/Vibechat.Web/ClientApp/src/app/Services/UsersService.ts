@@ -2,12 +2,13 @@ import { AuthService } from "../Auth/AuthService";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { UserInfo } from "../Data/UserInfo";
 import { Injectable } from "@angular/core";
+import { ConnectionManager, BanEvent } from "../Connections/ConnectionManager";
 
 @Injectable({
   providedIn: 'root'
 })
 export class UsersService {
-  constructor(private requestsBuilder: ApiRequestsBuilder, private auth: AuthService) { }
+  constructor(private requestsBuilder: ApiRequestsBuilder, private connectionManager: ConnectionManager, private auth: AuthService) { }
 
   //Fetches user info of specified user. If current user id specified,
   //updates user entry in AuthService.
@@ -21,6 +22,8 @@ export class UsersService {
     if (result.response.id == this.auth.User.id) {
       this.auth.User = result.response;
     }
+    
+    return result.response;
   }
 
   public async FindUsersByUsername(name: string): Promise<Array<UserInfo>>{
@@ -83,9 +86,9 @@ export class UsersService {
   }
 
   public async BlockUser(user: UserInfo) {
-    let result = await this.requestsBuilder.BanUser(user.id);
+    let result = await this.connectionManager.BlockUser(user.id, BanEvent.Banned);
 
-    if (!result.isSuccessfull) {
+    if (!result) {
       return;
     }
 
@@ -93,8 +96,9 @@ export class UsersService {
   }
 
   public async UnblockUser(user: UserInfo) {
-    let result = await this.requestsBuilder.UnbanUser(user.id);
-    if (!result.isSuccessfull) {
+    let result = await this.connectionManager.BlockUser(user.id, BanEvent.Unbanned);
+
+    if (!result) {
       return;
     }
 
@@ -121,8 +125,18 @@ export class UsersService {
     this.auth.User.name = name;
   }
 
-  public async UpdateProfilePicture(file: File) {
-    let result = await this.requestsBuilder.UploadUserProfilePicture(file);
+  public async ChangeUsername(name: string) {
+    let result = await this.requestsBuilder.ChangeUsername(name);
+
+    if (!result.isSuccessfull) {
+      return;
+    }
+
+    this.auth.User.userName = name;
+  }
+
+  public async UpdateProfilePicture(file: File, progressCallback: (value: number) => void) {
+    let result = await this.requestsBuilder.UploadUserProfilePicture(file, progressCallback);
 
     if (!result.isSuccessfull) {
       return;

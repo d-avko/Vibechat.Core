@@ -1,11 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
 using Vibechat.Web.AuthHelpers;
+using Vibechat.Web.Data.Repositories;
 using Vibechat.Web.Middleware;
 using Vibechat.Web.Services.Bans;
 using Vibechat.Web.Services.ChatDataProviders;
@@ -15,10 +11,8 @@ using Vibechat.Web.Services.Hashing;
 using Vibechat.Web.Services.Images;
 using Vibechat.Web.Services.Login;
 using Vibechat.Web.Services.Paths;
-using Vibechat.Web.Services.Repositories;
 using Vibechat.Web.Services.Users;
 using VibeChat.Web;
-using VibeChat.Web.Services.Repositories;
 using VibeChat.Web.UserProviders;
 
 namespace Vibechat.Web.Services.Extension_methods
@@ -30,7 +24,7 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddScoped<ChatService, ChatService>();
             services.AddScoped<UsersService, UsersService>();
             services.AddScoped<LoginService, LoginService>();
-            services.AddScoped<ImagesService, ImagesService>();
+            services.AddScoped<FilesService, FilesService>();
             services.AddScoped<BansService, BansService>();
         }
 
@@ -51,6 +45,7 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddScoped<IUsersBansRepository, UsersBansRepository>();
             services.AddScoped<IContactsRepository, ContactsRepository>();
             services.AddScoped<IDhPublicKeysRepository, DhPublicKeysRepository>();
+            services.AddScoped<IChatRolesRepository, ChatRolesRepository>();
         }
 
         public static void AddBusinessLogic(this IServiceCollection services)
@@ -61,10 +56,11 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddSingleton<IChatDataProvider, DefaultChatDataProvider>();
             services.AddSingleton<IImageCompressionService, ImageCompressionService>();
             services.AddSingleton<IImageScalingService, ImageCompressionService>();
-            services.AddSingleton<IHexHashingService, Sha256Service>();
+            services.AddSingleton<IHexHashingService, Sha1Service>();
             services.AddSingleton<UniquePathsProvider, UniquePathsProvider>();
             services.AddScoped<CryptoService, CryptoService>();
             services.AddSingleton<UsersSubsriptionService, UsersSubsriptionService>();
+            services.AddScoped<UnitOfWork, UnitOfWork>();
         }
     }
 }

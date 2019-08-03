@@ -1,13 +1,13 @@
 import { Component, Inject } from "@angular/core";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material";
 import { ChatComponent } from "../Chat/chat.component";
-import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
 import { UserInfo } from "../Data/UserInfo";
 import { UsersService } from "../Services/UsersService";
 
 export interface InviteUsersData {
   conversationId: number;
+  isMultiSelect: boolean;
 }
 
 @Component({
@@ -67,6 +67,10 @@ export class FindUsersDialogComponent {
       this.SelectedUsers.splice(this.SelectedUsers.findIndex((x) => x.id == user.id), 1);
       return;
 
+    }
+
+    if (!this.data.isMultiSelect) {
+      this.SelectedUsers.splice(0, 1);
     }
 
     this.SelectedUsers.push(user);

@@ -14,13 +14,13 @@
       <h3 matLine
           *ngIf="conversation.isGroup"
           [ngClass]="{'selected-user': IsConversationSelected(conversation)}">
-        {{conversation.name}}
+        {{conversation.name}}{{ (conversation.name.length > 20 )? (conversation.name | slice:0:20)+'..':(conversation.name) }}
       </h3>
 
       <h3 matLine
           *ngIf="!conversation.isGroup"
           [ngClass]="{'selected-user': IsConversationSelected(conversation)}">
-        {{conversation.dialogueUser.userName}}
+        {{ (conversation.dialogueUser.userName.length > 20 )? (conversation.dialogueUser.userName | slice:0:20)+'..':(conversation.dialogueUser.userName) }}
       </h3>
 
     </mat-list-item>
@@ -35,7 +35,7 @@
   <style>
     .selected-user {
       color: white;
-      background-color: cadetblue;
+      background-color: cadetblue !important;
     }
 
     .find-header {

@@ -6,10 +6,20 @@ import { MessageReceivedModel } from "../Shared/MessageReceivedModel";
 import { AddedToGroupModel } from "../Shared/AddedToGroupModel";
 import { RemovedFromGroupModel } from "../Shared/RemovedFromGroupModel";
 import { UserInfo } from "../Data/UserInfo";
-import { ChatsService } from "../Services/ConversationsService";
+import { ChatsService } from "../Services/ChatsService";
 import { MessageReportingService } from "../Services/MessageReportingService";
 import { AuthService } from "../Auth/AuthService";
 import { DHServerKeyExchangeService } from "../Encryption/DHServerKeyExchange";
+import { ChatComponent } from "../Chat/chat.component";
+import { UAParser } from "ua-parser-js";
+import { DeviceService } from "../Services/DeviceService";
+import { TypingService } from "../Services/TypingService";
+import { ChatRole } from "../Roles/ChatRole";
+
+export enum BanEvent {
+  Banned = 0,
+  Unbanned = 1
+}
 
 @Injectable({
   providedIn: 'root'
@@ -18,19 +28,22 @@ import { DHServerKeyExchangeService } from "../Encryption/DHServerKeyExchange";
 export class ConnectionManager {
   private connection: signalR.HubConnection;
 
-  private ConversationsService: ChatsService;
+  private chats: ChatsService;
 
   private DHServerKeyExchangeService: DHServerKeyExchangeService;
 
   public setConversationsService(service: ChatsService) {
-    this.ConversationsService = service;
+    this.chats = service;
   }
 
   public setDHServerKeyExchangeService(service: DHServerKeyExchangeService) {
     this.DHServerKeyExchangeService = service;
   }
 
-  constructor(private messagesService: MessageReportingService, private auth: AuthService) {}
+  constructor(private messagesService: MessageReportingService,
+    private auth: AuthService,
+    private device: DeviceService,
+    private typing: TypingService) { }
 
   public async Start(){
 
@@ -42,13 +55,17 @@ export class ConnectionManager {
 
     await this.connection.start();
 
-    this.InitiateConnections(this.ConversationsService.GetConversationsIds());
+    this.InitiateConnections(this.chats.GetConversationsIds());
     this.messagesService.OnConnected();
   
-    this.connection.onclose(() => this.messagesService.OnDisconnected());
+    this.connection.onclose(() => {
+      this.messagesService.OnDisconnected();
+
+      setTimeout(() => this.Start(), 1000);
+    });
 
     this.connection.on("ReceiveMessage", (senderId: string, message: ChatMessage, conversationId: number, secure: boolean) => {
-      this.ConversationsService.OnMessageReceived(new MessageReceivedModel(
+      this.chats.OnMessageReceived(new MessageReceivedModel(
         {
           senderId: senderId,
           message: message,
@@ -58,8 +75,8 @@ export class ConnectionManager {
         }));
     });
 
-    this.connection.on("AddedToGroup", (conversation: ConversationTemplate, user: UserInfo) => {
-      this.ConversationsService.OnAddedToGroup(new AddedToGroupModel({ conversation: conversation, user: user}));
+    this.connection.on("AddedToGroup", async (chatId: number, user: UserInfo) => {
+      await this.chats.OnAddedToGroup(new AddedToGroupModel({ chatId: chatId, user: user}));
     });
 
     this.connection.on("Error", (error: string) => {
@@ -67,15 +84,15 @@ export class ConnectionManager {
     });
 
     this.connection.on("RemovedFromGroup", (userId: string, conversationId: number) => {
-      this.ConversationsService.OnRemovedFromGroup(new RemovedFromGroupModel({ userId: userId, conversationId: conversationId }));
+      this.chats.OnRemovedFromGroup(new RemovedFromGroupModel({ userId: userId, conversationId: conversationId }));
     });
 
     this.connection.on("MessageDelivered", (msgId: number, clientMessageId: number, conversationId: number) => {
-      this.ConversationsService.OnMessageDelivered(msgId, clientMessageId, conversationId);
+      this.chats.OnMessageDelivered(msgId, clientMessageId, conversationId);
     });
 
     this.connection.on("MessageRead", (msgId: number, conversationId: number) => {
-      this.ConversationsService.OnMessageRead(msgId, conversationId);
+      this.chats.OnMessageRead(msgId, conversationId);
     });
 
     this.connection.on("ReceiveDhParam", async (param: string, sentBy: string, chatId: number) => {
@@ -83,11 +100,31 @@ export class ConnectionManager {
     });
 
     this.connection.on("UserOnline", (user: string) => {
-      this.ConversationsService.OnUserOnline(user);
+      this.chats.OnUserOnline(user);
+    });
+
+    this.connection.on("Typing", (userId: string, userFirstName: string, chatId: number) => {
+      this.typing.OnTyping(userFirstName, userId, chatId);
+    });
+
+    this.connection.on("Blocked", (blockedBy: string, banType: BanEvent) => {
+      this.chats.OnBlocked(blockedBy, banType);
+    });
+
+    this.connection.on("BlockedInChat", (chatId: number, userId: string, banType: BanEvent) => {
+      this.chats.OnBannedInChat(chatId, userId, banType);
+    });
+
+    this.connection.on("UserRoleChanged", (userId: string, chatId: number, newRole: ChatRole) => {
+      this.chats.OnUserRoleChanged(chatId, userId, newRole);
     });
   }
 
   public SendMessage(message: ChatMessage, conversation: ConversationTemplate) : void {
+    if (this.connection.state != signalR.HubConnectionState.Connected) {
+      this.messagesService.OnSendWhileDisconnected();
+      return;
+    }
 
     if (conversation.isGroup) {
 
@@ -100,44 +137,134 @@ export class ConnectionManager {
     }
   }
 
+  public async ChangeUserRole(chatId: number, userId: string, newRole: ChatRole) {
+    if (this.connection.state != signalR.HubConnectionState.Connected) {
+      this.messagesService.OnSendWhileDisconnected();
+      return;
+    }
+
+    return await this.connection.invoke<boolean>("ChangeUserRole", userId, chatId, newRole);
+  }
+
   public SendDhParam(param: string, sendTo: string, chatId: number) {
+    if (this.connection.state != signalR.HubConnectionState.Connected) {
+      this.messagesService.OnSendWhileDisconnected();
+      return;
+    }
+
     this.connection.send("SendDhParam", sendTo, param, chatId);
   }
 
   public SendMessageToSecureChat(encryptedMessage: string, generatedId: number, userId: string, chatId: number) {
+    if (this.connection.state != signalR.HubConnectionState.Connected) {
+      this.messagesService.OnSendWhileDisconnected();
+      return;
+    }
+
     this.connection.send("SendSecureMessage", encryptedMessage, generatedId, userId, chatId);
   }
 
   public SubsribeToUserOnlineStatusChanges(user: string) {
+    if (this.connection.state != signalR.HubConnectionState.Connected) {
+      this.messagesService.OnSendWhileDisconnected();
+      return;
+    }
+
     return this.connection.invoke<boolean>("SubsribeToUserOnlineStatusChanges", user);
   }
 
   public UnsubsribeFromUserOnlineStatusChanges(user: string) {
+    if (this.connection.state != signalR.HubConnectionState.Connected) {
+      this.messagesService.OnSendWhileDisconnected();
+      return;
+    }
+
     return this.connection.invoke<boolean>("SubsribeToUserOnlineStatusChanges", user);
   }
 
-  public AddUserToConversation(userId: string, conversation: ConversationTemplate) {
-    this.connection.send("AddToGroup", userId, conversation);
+  public async AddUserToConversation(userId: string, conversation: ConversationTemplate) {
+    if (this.connection.state != signalR.HubConnectionState.Connected) {
+      this.messagesService.OnSendWhileDisconnected();
+      return;
+    }
+
+    return await this.connection.invoke<boolean>("AddToGroup", userId, conversation.conversationID);
   }
 
   public RemoveConversation(conversation: ConversationTemplate) {
-    this.connection.send("RemoveConversation", conversation);
+    if (this.connection.state != signalR.HubConnectionState.Connected) {
+      this.messagesService.OnSendWhileDisconnected();
+      return;
+    }
+
+    this.connection.send("RemoveConversation", conversation.conversationID);
   }
 
 
   public RemoveUserFromConversation(userId: string, conversationId: number, IsSelf: boolean) {
+    if (this.connection.state != signalR.HubConnectionState.Connected) {
+      this.messagesService.OnSendWhileDisconnected();
+      return;
+    }
+
     this.connection.send("RemoveFromGroup", userId, conversationId, IsSelf);
   }
 
   public CreateDialog(user: UserInfo, secure: boolean) {
-    this.connection.send("CreateDialog", user, secure);
+    if (this.connection.state != signalR.HubConnectionState.Connected) {
+      this.messagesService.OnSendWhileDisconnected();
+      return;
+    }
+
+    if (secure) {
+      this.connection.send("CreateDialog", user, secure, this.device.GetDeviceId().toString());
+    } else {
+      this.connection.send("CreateDialog", user, secure, null);
+    }
   }
 
   public ReadMessage(msgId: number, conversationId: number) {
-    this.connection.send("MessageRead", msgId, conversationId);
+    if (this.connection.state != signalR.HubConnectionState.Connected) {
+      this.messagesService.OnSendWhileDisconnected();
+      return;
+    }
+
+    return this.connection.invoke<boolean>("MessageRead", msgId, conversationId);
   }
 
-  public InitiateConnections(conversationIds: Array<number>) : void {
+  public SendTyping(chatId:number) {
+    if (this.connection.state != signalR.HubConnectionState.Connected) {
+      this.messagesService.OnSendWhileDisconnected();
+      return;
+    }
+    
+    this.connection.send("OnTyping", chatId);
+  }
+
+  public async BlockUser(userId: string, banType: BanEvent) : Promise<boolean> {
+    if (this.connection.state != signalR.HubConnectionState.Connected) {
+      this.messagesService.OnSendWhileDisconnected();
+      return;
+    }
+
+    return await this.connection.invoke<boolean>("BlockUser", userId, banType);
+  }
+
+  public async BlockUserInChat(userId: string, chatId: number, banType: BanEvent) {
+    if (this.connection.state != signalR.HubConnectionState.Connected) {
+      this.messagesService.OnSendWhileDisconnected();
+      return;
+    }
+
+    return await this.connection.invoke<boolean>("BlockUserInChat", userId, chatId, banType);
+  }
+
+  public InitiateConnections(conversationIds: Array<number>): void {
+    if (this.connection.state != signalR.HubConnectionState.Connected) {
+      this.messagesService.OnSendWhileDisconnected();
+      return;
+    }
+
     this.connection.send("ConnectToGroups", conversationIds);
   }
 }
