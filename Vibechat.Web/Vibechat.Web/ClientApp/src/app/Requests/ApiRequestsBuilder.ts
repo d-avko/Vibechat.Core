@@ -3,7 +3,7 @@ import { ServerResponse } from "../ApiModels/ServerResponse";
 import { LoginResponse } from "../ApiModels/LoginResponse";
 import { LoginRequest } from "../ApiModels/LoginRequest";
 import { HttpClient, HttpHeaders, HttpEvent } from "@angular/common/http";
-import { RegisterRequest } from "../ApiModels/RegisterRequest";
+import { ChangeUserInfoRequest } from "../ApiModels/RegisterRequest";
 import { Injectable, Inject } from "@angular/core";
 import { ConversationMessagesResponse } from "../ApiModels/ConversationMessagesResponse";
 import { ChatMessage } from "../Data/ChatMessage";
@@ -15,6 +15,8 @@ import { UploaderService } from "../uploads/upload.service";
 import {
 } from "@angular/material";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
+import { MessageAttachment } from "../Data/MessageAttachment";
+import { AttachmentKind } from "../Data/AttachmentKinds";
 
 @Injectable({
   providedIn: 'root'
@@ -36,26 +38,33 @@ export class ApiRequestsBuilder {
     this.logger = logger;
   }
 
-  public LoginRequest(credentials: LoginRequest): Observable<ServerResponse<LoginResponse>>{
-    return this.MakeCall<LoginResponse>(
+  public LoginRequest(credentials: LoginRequest): Promise<ServerResponse<LoginResponse>>{
+    return this.MakeUnauthorizedCall<LoginResponse>(
       credentials,
       'api/login'
-    );
+    ).toPromise();
   }
 
-  public RegisterRequest(credentials: RegisterRequest): Observable<ServerResponse<string>> {
-    return this.MakeCall<string>(
+  public ChangeUserInfo(credentials: ChangeUserInfoRequest): Promise<ServerResponse<boolean>> {
+    return this.MakeCall<boolean>(
       credentials,
-      'api/register'
-    );
+      'api/Users/ChangeInfo'
+    ).toPromise();
   }
 
-  public UpdateConversationsRequest(): Promise<ServerResponse<Array<ConversationTemplate>>> {
+  public GetChats(deviceId: string): Promise<ServerResponse<Array<ConversationTemplate>>> {
 
     return this.MakeCall<Array<ConversationTemplate>>(
-      null,
+      { deviceId: deviceId},
       'api/Conversations/GetAll'
     ).toPromise();
+  }
+
+  public async DownloadFile(url: string) {
+   let result = await this.httpClient.get(url, { responseType: 'arraybuffer'})
+      .toPromise();
+
+    return result;
   }
 
   public GetConversationMessages(offset: number, count: number, conversationId: number): Promise<ServerResponse<Array<ChatMessage>>> {
@@ -82,29 +91,20 @@ export class ApiRequestsBuilder {
 
   }
 
-  public UploadImages(files: FileList): Promise<HttpEvent<any>> {
-   return this.uploader.uploadImages(files).toPromise();
+  public UploadImages(files: FileList, progress: (value: number) => void, chatId: number): Promise<ServerResponse<any>> {
+    return this.uploader.uploadImagesToChat(files, progress, chatId.toString()).toPromise();
   }
 
-  public UploadConversationThumbnail(thumbnail: File, conversationId: number): Promise<ServerResponse<UpdateThumbnailResponse>> {
-    let data = new FormData();
-    data.append('thumbnail', thumbnail);
-    data.append('conversationId', conversationId.toString());
-
-    return this.MakeCall<UpdateThumbnailResponse>(
-      data,
-      'api/Conversations/UpdateThumbnail'
-    ).toPromise();
+  public UploadConversationThumbnail(thumbnail: File, progress: (value: number) => void, conversationId: number): Promise<ServerResponse<UpdateThumbnailResponse>> {
+    return this.uploader.uploadChatPicture(thumbnail, progress, conversationId).toPromise();
   }
 
-  public UploadUserProfilePicture(picture: File): Promise<ServerResponse<UpdateThumbnailResponse>> {
-    let data = new FormData();
-    data.append('picture', picture);
+  public UploadUserProfilePicture(picture: File, progress: (value: number) => void): Promise<ServerResponse<UpdateThumbnailResponse>> {
+    return this.uploader.uploadUserPicture(picture, progress).toPromise();
+  }
 
-    return this.MakeCall<UpdateThumbnailResponse>(
-      data,
-      'api/Users/UpdateProfilePicture'
-    ).toPromise();
+  public UploadFile(file: File, progress: (value: number) => void, chatId: number) : Promise<ServerResponse<MessageAttachment>> {
+    return this.uploader.uploadFile(file, progress, chatId.toString()).toPromise();
   }
 
   public GetUserById(userId: string): Promise<ServerResponse<UserInfo>> {
@@ -114,9 +114,9 @@ export class ApiRequestsBuilder {
     ).toPromise();
   }
 
-  public GetConversationById(conversationId: number): Promise<ServerResponse<ConversationTemplate>> {
+  public GetConversationById(conversationId: number, updateRoles: boolean): Promise<ServerResponse<ConversationTemplate>> {
     return this.MakeCall<ConversationTemplate>(
-      { conversationId: conversationId },
+      { conversationId: conversationId, updateRoles: updateRoles },
       'api/Conversations/GetById'
     ).toPromise();
   }
@@ -135,6 +135,13 @@ export class ApiRequestsBuilder {
     ).toPromise();
   }
 
+  public ChangeUsername(newName: string): Promise<ServerResponse<boolean>> {
+    return this.MakeCall<boolean>(
+      { newName: newName },
+      'api/Users/ChangeUsername'
+    ).toPromise();
+  }
+
   public FindUsersByUsername(username: string): Promise<ServerResponse<FoundUsersResponse>> {
     return this.MakeCall<FoundUsersResponse>(
       { UsernameToFind: username },
@@ -142,7 +149,14 @@ export class ApiRequestsBuilder {
     ).toPromise();
   }
 
-  public GetAttachmentsForConversation(conversationId: number, kind: string, offset: number, count: number) {
+  public FindUsersInChat(username: string, chatId: number): Promise<ServerResponse<FoundUsersResponse>> {
+    return this.MakeCall<FoundUsersResponse>(
+      { UsernameToFind: username, ChatId: chatId },
+      'api/Conversations/FindUsersInChat'
+    ).toPromise();
+  }
+
+  public GetAttachmentsForConversation(conversationId: number, kind: AttachmentKind, offset: number, count: number) {
     return this.MakeCall<Array<ChatMessage>>(
       {
         conversationId: conversationId,
@@ -198,9 +212,9 @@ export class ApiRequestsBuilder {
     ).toPromise();
   }
 
-  public UpdateAuthKeyId(authKeyId: string, chatId: number) {
+  public UpdateAuthKeyId(authKeyId: string, chatId: number, deviceId: string) {
     return this.MakeCall<boolean>(
-      { chatId: chatId, AuthKeyId: authKeyId },
+      { chatId: chatId, AuthKeyId: authKeyId, deviceId: deviceId },
       'api/Conversations/UpdateAuthKey'
     ).toPromise();
   }
@@ -269,4 +283,13 @@ export class ApiRequestsBuilder {
       data);
   }
 
+  private MakeUnauthorizedCall<T>(data: any, url: string): Observable<ServerResponse<T>> {
+    let headers = new HttpHeaders();
+    headers = headers.append('unauthorized', '1');
+
+    return this.httpClient.post<ServerResponse<T>>(
+      this.baseUrl + url,
+      data,
+      { headers: headers });
+  }
 }

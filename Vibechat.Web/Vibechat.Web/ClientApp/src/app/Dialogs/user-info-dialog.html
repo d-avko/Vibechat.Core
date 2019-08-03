@@ -7,19 +7,27 @@
 
     <div class="userinfo_header">
 
-      <img src="{{data.user.imageUrl}}" class="user_thumbnail" />
+      <mat-progress-spinner *ngIf="uploading"
+                            class="load-spinner"
+                            diameter="80"
+                            color="Primary"
+                            mode="determinate"
+                            [value]="uploadProgress">
+      </mat-progress-spinner>
+
+      <img src="{{data.user.imageUrl}}" class="user_thumbnail" (click)="ViewPicture($event)" />
 
       <div class="userinfo_info">
 
         <div class="flexrow centered">
           <mat-icon class="cadetBlue">info</mat-icon>
-          <p class="subHeader firstname-lastname">{{data.user.name}}</p>
-          <p class="subHeader firstname-lastname">{{data.user.lastName}}</p>
+          <p class="subHeader firstname-lastname">{{ (data.user.name.length > 20 )? (data.user.name | slice:0:20)+'..':(data.user.name) }} </p>
+          <p class="subHeader firstname-lastname"> {{ (data.user.lastName.length > 20 )? (data.user.lastName | slice:0:20)+'..':(data.user.lastName) }}</p>
         </div>
 
         <div class="flexrow centered">
           <mat-icon class="cadetBlue">alternate_email</mat-icon>
-          <p class="subHeader cadetBlue username">{{data.user.userName}}</p>
+          <p class="subHeader cadetBlue username">{{ (data.user.userName.length > 20 )? (data.user.userName | slice:0:20)+'..':(data.user.userName) }}</p>
         </div>
 
         <p class="subHeader last-seen">{{formatter.GetLastSeenFormatted(data.currentUser.lastSeen, data.currentUser.isOnline)}}</p>
@@ -28,6 +36,13 @@
     </div>
 
     <mat-action-list>
+
+      <mat-list-item (click)="ChangeUsername()">
+
+        <mat-icon class="cadetBlue">edit</mat-icon>
+
+        <h3 matLine>Change username(@)</h3>
+      </mat-list-item>
 
       <mat-list-item (click)="ChangeName()">
 
@@ -59,19 +74,19 @@
     <div class="userinfo_header">
 
 
-      <img src="{{data.user.imageUrl}}" class="user_thumbnail" />
+      <img src="{{data.user.imageUrl}}" class="user_thumbnail" (click)="ViewPicture($event)" />
 
       <div class="userinfo_info">
 
         <div class="flexrow centered">
           <mat-icon class="cadetBlue">info</mat-icon>
-          <p class="subHeader firstname-lastname">{{data.user.name}}</p>
-          <p class="subHeader firstname-lastname">{{data.user.lastName}}</p>
+          <p class="subHeader firstname-lastname">{{ (data.user.name.length > 20 )? (data.user.name | slice:0:20)+'..':(data.user.name) }} </p>
+          <p class="subHeader firstname-lastname"> {{ (data.user.lastName.length > 20 )? (data.user.lastName | slice:0:20)+'..':(data.user.lastName) }}</p>
         </div>
 
         <div class="flexrow centered">
           <mat-icon class="cadetBlue">alternate_email</mat-icon>
-          <p class="subHeader cadetBlue username">{{data.user.userName}}</p>
+          <p class="subHeader cadetBlue username">{{ (data.user.userName.length > 20 )? (data.user.userName | slice:0:20)+'..':(data.user.userName) }}</p>
         </div>
 
         <p class="subHeader last-seen">{{formatter.GetLastSeenFormatted(data.user.lastSeen, data.user.isOnline)}}</p>
@@ -162,6 +177,10 @@
       border-radius: 40px;
     }
 
+    .load-spinner{
+      position: absolute;
+    }
+
     .flexrow{
       display: flex;
       flex-direction: row;
@@ -180,7 +199,7 @@
     }
 
     .firstname-lastname{
-      margin-left: 10px;
+      margin-left: 5px;
     }
 
     .username{

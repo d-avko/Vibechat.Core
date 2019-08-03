@@ -25,7 +25,10 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  height: 17%;
+  height: 12vh;
+}
+.input-textarea {
+  max-height: 80px !important;
 }
 
 .banned-input {
@@ -40,4 +43,14 @@
   margin-left: 10px;
   color: dimgray;
   font: 500 16px/25px Roboto,"Helvetica Neue",sans-serif;
+}
+
+@media screen and (max-width: 408px) {
+  .input_field{
+    width: 100px;
+  }
+
+  .input-currentuser {
+    display: none;
+  }
 }

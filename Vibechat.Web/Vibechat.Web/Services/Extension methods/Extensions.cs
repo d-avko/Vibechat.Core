@@ -14,7 +14,7 @@ namespace Vibechat.Web.Extensions
 {
     public static class Extensions
     {
-        public static UserInfo ToUserInfo(this UserInApplication user)
+        public static UserInfo ToUserInfo(this AppUser user)
         {
             return new UserInfo()
             {
@@ -35,11 +35,12 @@ namespace Vibechat.Web.Extensions
         {
             return new MessageAttachment()
             {
-                AttachmentKind = value.AttachmentKind.Name,
+                AttachmentKind = value.AttachmentKind.Kind,
                 ContentUrl = value.ContentUrl,
                 AttachmentName = value.AttachmentName,
                 ImageHeight = value.ImageHeight,
-                ImageWidth = value.ImageWidth
+                ImageWidth = value.ImageWidth,
+                FileSize = value.FileSize
             };
         }
 
@@ -56,8 +57,10 @@ namespace Vibechat.Web.Extensions
             this ConversationDataModel value, 
             List<UserInfo> participants,
             List<Message> messages,
-            UserInApplication dialogUser,
-            DhPublicKeyDataModel key)
+            AppUser dialogUser,
+            DhPublicKeyDataModel key,
+            ChatRoleDataModel chatRole,
+            string deviceId)
         {
             return new ConversationTemplate()
             {
@@ -69,10 +72,11 @@ namespace Vibechat.Web.Extensions
                 FullImageUrl = value.FullImageUrl,
                 Participants = participants,
                 Messages = messages,
-                Creator = value.Creator.ToUserInfo(),
                 AuthKeyId = value.AuthKeyId,
                 IsSecure = value.IsSecure,
-                PublicKey = key?.ToDhPublicKey()
+                PublicKey = key?.ToDhPublicKey(),
+                DeviceId = deviceId,
+                ChatRole = chatRole.ToChatRole()
             };
         }
 
@@ -90,6 +94,15 @@ namespace Vibechat.Web.Extensions
                 ForwardedMessage = value.ForwardedMessage?.ToMessage(),
                 State = value.State,
                 EncryptedPayload = value.EncryptedPayload
+            };
+        }
+
+        public static ChatRoleDto ToChatRole(this ChatRoleDataModel value)
+        {
+            return new ChatRoleDto()
+            {
+                ChatId = value.ChatId,
+                Role = value.RoleId
             };
         }
     }

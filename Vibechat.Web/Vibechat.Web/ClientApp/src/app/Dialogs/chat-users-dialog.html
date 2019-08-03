@@ -1,0 +1,52 @@
+<h1 mat-dialog-title>Select user(s).</h1>
+<div mat-dialog-content style="overflow: unset !important">
+
+  <div class="find-header">
+    <mat-form-field appearance="standard">
+      <mat-label>Type in username...</mat-label>
+      <input matInput (keydown.enter)="OnFindUsers()" [(ngModel)]="usernameToFind">
+    </mat-form-field>
+
+    <button mat-button (click)="OnFindUsers()">
+      <mat-icon matSuffix>search</mat-icon>
+    </button>
+  </div>
+
+  <mat-action-list style="height: 200px; overflow-y: scroll;">
+    <h3 mat-subheader>Found users</h3>
+
+    <mat-list-item *ngFor="let user of FoundUsers"
+                   (click)="SelectUser(user)"
+                   [ngClass]="{'selected-user': IsUserSelected(user)}">
+
+      <img matListAvatar src="{{user.imageUrl}}" alt="Dialogue logo">
+
+      <h3 matLine
+          [ngClass]="{'selected-user': IsUserSelected(user)}">
+        {{ (user.userName.length > 20 )? (user.userName | slice:0:20)+'..':(user.userName) }}
+      </h3>
+
+    </mat-list-item>
+
+  </mat-action-list>
+
+  <div mat-dialog-actions>
+    <button mat-button [mat-dialog-close]="SelectedUser" cdkFocusInitial>Select</button>
+    <button mat-button (click)="onCancelClick()">Cancel</button>
+  </div>
+
+  <style>
+
+    .selected-user {
+      color: white;
+      background-color: cadetblue !important;
+    }
+
+    .find-header {
+      display: flex;
+      flex-direction: row;
+      align-items: baseline;
+    }
+  </style>
+
+</div>

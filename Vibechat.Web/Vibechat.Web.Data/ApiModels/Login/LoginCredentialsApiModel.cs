@@ -11,8 +11,8 @@ namespace Vibechat.Web.ApiModels
     /// </summary>
     public class LoginCredentialsApiModel
     {
-        public string UserNameOrEmail { get; set; }
+        public string UidToken { get; set; }
 
-        public string Password { get; set; }
+        public string PhoneNumber { get; set; }
     }
 }

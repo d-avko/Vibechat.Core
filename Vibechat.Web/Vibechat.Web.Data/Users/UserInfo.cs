@@ -1,4 +1,5 @@
 ﻿using System;
+using Vibechat.Web.Data.Conversations;
 
 namespace VibeChat.Web.ChatData
 {
@@ -63,5 +64,10 @@ namespace VibeChat.Web.ChatData
         /// indicating whether user was banned in specific conversation.
         /// </summary>
         public bool IsBlockedInConversation { get; set; }
+
+        /// <summary>
+        /// Role of user in specific chat.
+        /// </summary>
+        public ChatRoleDto ChatRole { get; set; }
     }
 }

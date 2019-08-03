@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using Vibechat.Web.ApiModels;
 using Vibechat.Web.Data.ApiModels.Conversation;
 using Vibechat.Web.Data.ApiModels.Messages;
+using Vibechat.Web.Data.Conversations;
+using Vibechat.Web.Data.Messages;
 using Vibechat.Web.Services;
 using Vibechat.Web.Services.Bans;
 using Vibechat.Web.Services.FileSystem;
@@ -38,6 +40,9 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
+                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+                convInfo.CreatorId = thisUserId;
+
                 var result = await mConversationService.CreateConversation(convInfo);
 
                 return new ResponseApiModel<ConversationTemplate>()
@@ -63,6 +68,8 @@ namespace VibeChat.Web.Controllers
             public int chatId { get; set; }
 
             public string AuthKeyId { get; set; }
+
+            public string deviceId { get; set; }
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -73,7 +80,7 @@ namespace VibeChat.Web.Controllers
             {
                 var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
-                await mConversationService.UpdateAuthKey(request.chatId, request.AuthKeyId, thisUserId);
+                await mConversationService.UpdateAuthKey(request.chatId, request.AuthKeyId, request.deviceId, thisUserId);
 
                 return new ResponseApiModel<bool>()
                 {
@@ -92,51 +99,103 @@ namespace VibeChat.Web.Controllers
             }
         }
 
+        public class FindUsersInChatRequest
+        {
+            public string UsernameToFind { get; set; }
+
+            public int ChatId { get; set; }
+        }
+
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Conversations/AddUserTo")]
-        public async Task<ResponseApiModel<string>> AddUserTo([FromBody]AddToConversationApiModel UserProvided)
+        [Route("api/Conversations/FindUsersInChat")]
+        public async Task<ResponseApiModel<UsersByNickNameResultApiModel>> FindUsersInChat([FromBody]FindUsersInChatRequest credentials)
         {
             try
             {
-                await mConversationService.AddUserToConversation(UserProvided);
+                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
-                return new ResponseApiModel<string>()
+                var result = await mConversationService.FindUsersInChat(credentials.ChatId, credentials.UsernameToFind, thisUserId);
+
+                foreach (var user in result)
+                {
+                    user.IsBlockedInConversation = await BansService.IsBannedFromConversation(credentials.ChatId, user.Id);
+                    user.ChatRole = await mConversationService.GetChatRole(user.Id, credentials.ChatId);
+                }
+
+                return new ResponseApiModel<UsersByNickNameResultApiModel>()
                 {
                     IsSuccessfull = true,
                     ErrorMessage = null,
-                    Response = null
+                    Response = new UsersByNickNameResultApiModel() { UsersFound = result }
                 };
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<string>()
+                return new ResponseApiModel<UsersByNickNameResultApiModel>()
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
                     Response = null
                 };
             }
+        }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Conversations/GetRoles")]
+        public async Task<ResponseApiModel<List<ChatRoleDto>>> GetRoles()
+        {
+            try 
+            {
+                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+
+                var result = await mConversationService.GetChatRoles(thisUserId);
+
+                return new ResponseApiModel<List<ChatRoleDto>>()
+                {
+                    IsSuccessfull = true,
+                    ErrorMessage = null,
+                    Response = result
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<List<ChatRoleDto>>()
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message,
+                    Response = null
+                };
+            }
+        }
+
+        public class GetChatsRequest
+        {
+            public string deviceId { get; set; }
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/GetAll")]
-        public async Task<ResponseApiModel<List<ConversationTemplate>>> GetAll()
+        public async Task<ResponseApiModel<List<ConversationTemplate>>> GetAll([FromBody] GetChatsRequest request)
         {
             try
             {
                 var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
-                List<ConversationTemplate> result = await mConversationService.GetConversations(thisUserId);
+                List<ConversationTemplate> result = await mConversationService.GetConversations(request.deviceId, thisUserId);
 
                 foreach(ConversationTemplate conversation in result)
                 {
-                    conversation.IsMessagingRestricted = await BansService.IsBannedFromConversation(conversation.ConversationID, thisUserId).ConfigureAwait(false);
-                    conversation.MessagesUnread = await mConversationService.GetUnreadMessagesAmount(conversation.ConversationID, thisUserId).ConfigureAwait(false);
+                    conversation.IsMessagingRestricted = await BansService.IsBannedFromConversation(conversation.ConversationID, thisUserId);
+                    conversation.MessagesUnread = await mConversationService.GetUnreadMessagesAmount(conversation.ConversationID, thisUserId);
+                    conversation.ChatRole = await mConversationService.GetChatRole(thisUserId, conversation.ConversationID);
 
-                    foreach(UserInfo user in conversation.Participants)
+                    if (conversation.IsGroup)
                     {
-                        user.IsBlockedInConversation = await BansService.IsBannedFromConversation(conversation.ConversationID, user.Id).ConfigureAwait(false);
+                        foreach (UserInfo user in conversation.Participants)
+                        {
+                            user.IsBlockedInConversation = await BansService.IsBannedFromConversation(conversation.ConversationID, user.Id);
+                            user.ChatRole = await mConversationService.GetChatRole(user.Id, conversation.ConversationID);
+                        }
                     }
                 }
 
@@ -161,6 +220,8 @@ namespace VibeChat.Web.Controllers
         public class GetByIdRequest
         {
             public int conversationId { get; set; }
+
+            public bool updateRoles { get; set; }
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -171,13 +232,21 @@ namespace VibeChat.Web.Controllers
             {
                 string thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
-                ConversationTemplate result = await mConversationService.GetById(request.conversationId, thisUserId).ConfigureAwait(false);
+                ConversationTemplate result = await mConversationService.GetById(request.conversationId, thisUserId);
 
-                result.IsMessagingRestricted = await BansService.IsBannedFromConversation(request.conversationId, thisUserId).ConfigureAwait(false);
+                result.IsMessagingRestricted = await BansService.IsBannedFromConversation(request.conversationId, thisUserId);
 
-                foreach (UserInfo user in result.Participants)
+                if (result.IsGroup)
                 {
-                    user.IsBlockedInConversation = await BansService.IsBannedFromConversation(request.conversationId, user.Id);
+                    foreach (UserInfo user in result.Participants)
+                    {
+                        user.IsBlockedInConversation = await BansService.IsBannedFromConversation(request.conversationId, user.Id);
+
+                        if (request.updateRoles)
+                        {
+                            user.ChatRole = await mConversationService.GetChatRole(user.Id, request.conversationId);
+                        }
+                    }
                 }
 
                 return new ResponseApiModel<ConversationTemplate>()
@@ -200,7 +269,7 @@ namespace VibeChat.Web.Controllers
 
         public class GetAttachmentsRequest
         {
-            public string kind { get; set; }
+            public AttachmentKind kind { get; set; }
 
             public int conversationId { get; set; }
 
@@ -247,7 +316,7 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                List<UserInfo> result = await mConversationService.GetParticipants(convInfo);
+                List<UserInfo> result = await mConversationService.GetParticipants(convInfo.ConvId);
 
                 return new ResponseApiModel<List<UserInfo>>()
                 {
@@ -270,12 +339,14 @@ namespace VibeChat.Web.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/GetMessages")]
-        public async Task<ResponseApiModel<List<Message>>> GetMessages([FromBody] GetMessagesApiModel convInfo)
+        public async Task<ResponseApiModel<List<Message>>> GetMessages([FromBody] GetMessagesApiModel credentials)
         {
             try
             {
                 List<Message> result = await mConversationService.GetMessages(
-                    convInfo,
+                    credentials.ConversationID,
+                    credentials.MesssagesOffset,
+                    credentials.Count,
                      JwtHelper.GetNamedClaimValue(User.Claims));
 
                 return new ResponseApiModel<List<Message>>()
@@ -332,7 +403,9 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                var result = await mConversationService.UpdateThumbnail(updateThumbnail.conversationId, updateThumbnail.thumbnail);
+                var thisUserID = JwtHelper.GetNamedClaimValue(User.Claims);
+
+                var result = await mConversationService.UpdateThumbnail(updateThumbnail.conversationId, updateThumbnail.thumbnail, thisUserID);
                 return new ResponseApiModel<UpdateThumbnailResponse>()
                 {
                     IsSuccessfull = true,

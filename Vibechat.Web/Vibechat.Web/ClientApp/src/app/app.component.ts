@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { slideInAnimation } from './Animations/Animations';
+import { LoadingScreenService } from './Loading/LoadingScreenService';
 
 @Component({
   selector: 'app-root',
@@ -9,6 +9,9 @@ import { slideInAnimation } from './Animations/Animations';
   animations: []
 })
 export class AppComponent {
+  constructor(public loading: LoadingScreenService) {
+    this.loading.startLoading();
+  }
   prepareRoute(outlet: RouterOutlet) {
     return outlet && outlet.activatedRouteData && outlet.activatedRouteData['animation'];
   }

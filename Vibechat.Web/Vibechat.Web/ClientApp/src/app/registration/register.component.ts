@@ -1,79 +1,71 @@
 import { Component } from '@angular/core';
 import { FormControl, Validators, FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material';
-import { RegisterRequest } from '../ApiModels/RegisterRequest';
+import { ChangeUserInfoRequest } from '../ApiModels/RegisterRequest';
 import { ServerResponse } from '../ApiModels/ServerResponse';
 import { LoginComponent } from '../login/login.component';
 import { Router } from '@angular/router';
 import { ApiRequestsBuilder } from '../Requests/ApiRequestsBuilder';
 import { AuthService } from '../Auth/AuthService';
+import { SnackBarHelper } from '../Snackbar/SnackbarHelper';
 
 @Component({
   selector: 'register-view',
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css']
 })
-export class RegisterComponent extends LoginComponent {
+export class ChangeUserInfoComponent {
 
   public registerGroup: FormGroup
 
   public canRegister: boolean = true;
 
-  public canLogOut: boolean = false;
+  public static maxNameLength: number = 120;
 
-  constructor(requestsBuilder: ApiRequestsBuilder, snackbar: MatSnackBar, router: Router, auth: AuthService) {
-
-    super(requestsBuilder, snackbar, router, auth);
+  constructor(private requestsBuilder: ApiRequestsBuilder, private snackbar: SnackBarHelper, private router: Router) {
 
     this.registerGroup = new FormGroup(
       {
         username: new FormControl('', Validators.required),
-        email: new FormControl(''),
-        password: new FormControl('', Validators.required),
-        confirmPassword: new FormControl('', Validators.required),
         firstName: new FormControl(''),
         lastName: new FormControl('')
       }
     )
   }
 
-  public Register(): void {
-    let password = this.registerGroup.get('password').value;
-    let confirmedPassword = this.registerGroup.get('confirmPassword').value;
+  public async Register() {
 
-    if (password != confirmedPassword) {
-      this.snackbar.openSnackBar("Passwords must match!");
+    let credentials = new ChangeUserInfoRequest(
+      {
+        UserName: this.registerGroup.get('username').value,
+        FirstName: this.registerGroup.get('firstName').value,
+        LastName: this.registerGroup.get('lastName').value
+      });
+
+    if (credentials.FirstName.length > ChangeUserInfoComponent.maxNameLength
+      || credentials.LastName.length > ChangeUserInfoComponent.maxNameLength
+      || credentials.UserName.length > ChangeUserInfoComponent.maxNameLength ) {
+      this.snackbar.openSnackBar("Either username or first name or last name was too long.");
       return;
     }
 
-    let credentials = new RegisterRequest(
-      {
-        UserName: this.registerGroup.get('username').value,
-        Password: password,
-        Email: this.registerGroup.get('email').value,
-        FirstName: this.registerGroup.get('firstName').value,
-        LastName: this.registerGroup.get('lastName').value,
-      });
-
     this.canRegister = false;
 
-    this.requestsBuilder.RegisterRequest(credentials).subscribe(result => this.OnRegisterResultReceived(result));
+    let response = await this.requestsBuilder.ChangeUserInfo(credentials);
+
+    if (response.isSuccessfull) {
+      this.router.navigateByUrl('/chat');
+    } else {
+      this.snackbar.openSnackBar(response.errorMessage, 2);
+    }
+
+    this.canRegister = true;
   }
 
   public GotoLoginScreen() {
     this.router.navigateByUrl('/login');
   }
 
-  private OnRegisterResultReceived(result: ServerResponse<string>) {
-    if (!result.isSuccessfull) {
-      this.snackbar.openSnackBar(result.errorMessage);
-    }
-    else {
-      this.snackbar.openSnackBar("Successfully registered.");
-    }
-
-    this.canRegister = true;
-  }
 
 }
 

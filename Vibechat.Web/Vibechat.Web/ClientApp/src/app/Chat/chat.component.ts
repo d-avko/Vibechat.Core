@@ -1,26 +1,23 @@
 import { Component, ViewChild, OnInit, Type } from "@angular/core";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { AuthService } from "../Auth/AuthService";
-import { ServerResponse } from "../ApiModels/ServerResponse";
-import { MatSnackBar, MatDialog, MatDrawer } from "@angular/material";
-import { ChatMessage } from "../Data/ChatMessage";
+import { MatDialog, MatDrawer } from "@angular/material";
 import { trigger, state, style, transition, animate } from "@angular/animations";
 import { ConversationsFormatter } from "../Formatters/ConversationsFormatter";
 import { MessagesComponent } from "../Conversation/Messages/messages.component";
 import { UserInfo } from "../Data/UserInfo";
-import { FindUsersDialogComponent } from "../Dialogs/FindUsersDialog";
 import { AddGroupDialogComponent } from "../Dialogs/AddGroupDialog";
 import { GroupInfoDialogComponent } from "../Dialogs/GroupInfoDialog";
 import { SearchListComponent } from "../Search/searchlist.component";
 import { UserInfoDialogComponent } from "../Dialogs/UserInfoDialog";
-import { ViewAttachmentsDialogComponent } from "../Dialogs/ViewAttachmentsDialog";
-import { ForwardMessagesDialogComponent } from "../Dialogs/ForwardMessagesDialog";
 import { UsersService } from "../Services/UsersService";
-import { ChatsService } from "../Services/ConversationsService";
+import { ChatsService } from "../Services/ChatsService";
 import { ThemesService } from "../Theming/ThemesService";
 import { ChooseContactDialogComponent } from "../Dialogs/ChooseContactDialog";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
-import { UAParser } from "ua-parser-js";
+import { DeviceService } from "../Services/DeviceService";
+import { userInfo } from "os";
+import { Router } from "@angular/router";
 
 @Component({
   selector: 'chat-root',
@@ -45,9 +42,9 @@ export class ChatComponent implements OnInit {
 
   public SearchString: string;
 
-  @ViewChild(MessagesComponent) messages: MessagesComponent;
-  @ViewChild(MatDrawer) sideDrawer: MatDrawer;
-  @ViewChild(SearchListComponent) searchList: SearchListComponent;
+  @ViewChild(MessagesComponent, { static: false }) messages: MessagesComponent;
+  @ViewChild(MatDrawer, { static: true }) sideDrawer: MatDrawer;
+  @ViewChild(SearchListComponent, { static: false }) searchList: SearchListComponent;
   over: any;
 
   constructor(
@@ -57,55 +54,22 @@ export class ChatComponent implements OnInit {
     private usersService: UsersService,
     private conversationsService: ChatsService,
     private themesService: ThemesService,
-    private snackBar: SnackBarHelper) { }
+    private snackBar: SnackBarHelper,
+    private device: DeviceService,
+    private router: Router) { }
 
-  public isSecureChatsSupported: boolean = false;
+  get IsSecureChatsSupported() {
+    return this.device.isSecureChatsSupported;
+  }
 
   async ngOnInit(): Promise<void> {
-    await this.auth.TryAuthenticate();
+    await this.auth.RefreshLocalData();
 
     await this.UpdateConversations();
 
     await this.usersService.UpdateUserInfo(this.auth.User.id);
 
     await this.usersService.UpdateContacts();
-
-    let browserInfo = new UAParser().getBrowser();
-    let name = browserInfo.name;
-    let versionNumber = Number.parseInt(browserInfo.version.substr(0, browserInfo.version.indexOf(".")));
-
-    switch (name) {
-      case "Chrome": {
-
-        if (versionNumber >= 67) {
-          this.isSecureChatsSupported = true;
-        }
-      }
-      case "Mozilla": {
-        if (versionNumber >= 68) {
-          this.isSecureChatsSupported = true;
-        }
-      }
-      case "Firefox": {
-        if (versionNumber >= 68) {
-          this.isSecureChatsSupported = true;
-        }
-      }
-      case "Opera": {
-        if (versionNumber >= 54) {
-          this.isSecureChatsSupported = true;
-        }
-      }
-      case "Android Browser": {
-        if (versionNumber >= 67) {
-          this.isSecureChatsSupported = true;
-        }
-      }
-      default: {
-        
-      }
-    }
-
   }
 
   public IsDarkTheme() {
@@ -123,15 +87,24 @@ export class ChatComponent implements OnInit {
       return;
     }
 
-    await this.conversationsService.UpdateExisting(group);
-
     const groupInfoRef = this.dialog.open(GroupInfoDialogComponent, {
       width: '450px',
+      autoFocus: false,
       data: {
         Conversation: group,
         user: this.auth.User,
         ExistsInThisGroup: this.conversationsService.ExistsIn(group.conversationID)
       }
+    });
+
+    groupInfoRef.afterOpened().subscribe(async () => {
+      await this.conversationsService.UpdateExisting(group);
+
+      if (!groupInfoRef.componentInstance) {
+        return;
+      }
+
+      groupInfoRef.componentInstance.data.Conversation = group;
     });
 
     groupInfoRef.componentInstance
@@ -146,8 +119,13 @@ export class ChatComponent implements OnInit {
       });
   }
 
+  public ChangeChat(chat: ConversationTemplate) {
+    this.conversationsService.ChangeConversation(chat);
+  }
+
   public OnLogOut(): void {
     this.auth.LogOut();
+    this.conversationsService.OnLogOut();
   }
 
   public CreateSecureChat() {
@@ -174,14 +152,31 @@ export class ChatComponent implements OnInit {
   }
 
   public async OnViewUserInfo(user: UserInfo, chat: ConversationTemplate) {
-    await this.usersService.UpdateUserInfo(user.id);
-
     const userInfoRef = this.dialog.open(UserInfoDialogComponent, {
       width: '450px',
+      autoFocus: false,
       data: {
         user: user,
         currentUser: this.auth.User,
         conversation: chat
+      }
+    });
+
+    userInfoRef.afterOpened().subscribe(async () => {
+      let updatedUser = await this.usersService.UpdateUserInfo(user.id);
+
+      if (!updatedUser) {
+        return;
+      }
+
+      if (!userInfoRef.componentInstance) {
+        return;
+      }
+
+      if (this.auth.User.id == updatedUser.id) {
+        userInfoRef.componentInstance.data.currentUser = updatedUser;
+      } else {
+        userInfoRef.componentInstance.data.user = updatedUser;
       }
     });
   }
@@ -198,14 +193,6 @@ export class ChatComponent implements OnInit {
     await this.searchList.Search();
   }
 
-  public async OnChangeGroupThumbnail(file: File): Promise<void>{
-    await this.conversationsService.ChangeThumbnail(file, this.conversationsService.CurrentConversation);
-  }
-
-  public async OnChangeConversationName(name: string) : Promise<void> {
-    await this.conversationsService.ChangeConversationName(name, this.conversationsService.CurrentConversation);
-  }
-
   public CreateGroup() {
 
     this.sideDrawer.close();
@@ -213,7 +200,6 @@ export class ChatComponent implements OnInit {
     const dialogRef = this.dialog.open(AddGroupDialogComponent, {
       width: '250px'
     });
-
 
     dialogRef.beforeClosed().subscribe(async result => {
 
@@ -247,13 +233,14 @@ export class ChatComponent implements OnInit {
     await this.conversationsService.ChangeConversation(conversation);
   }
 
+  public IsMobileDevice() {
+    return window.innerWidth < ConversationsFormatter.MinPixelsDesktop;
+  }
+
   //input events
 
   public async OnSendMessage(message: string) {
     await this.conversationsService.SendMessage(message, this.conversationsService.CurrentConversation);
-  }
-
-  public async OnUploadImages(files: FileList) {
-    await this.conversationsService.UploadImages(files, this.conversationsService.CurrentConversation);
+    this.messages.ScrollToLastMessage();
   }
 }

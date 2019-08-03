@@ -1,13 +1,13 @@
 <mat-card class="chat_wrapper">
 
-  <mat-drawer-container [hasBackdrop]="true">
+  <mat-drawer-container [hasBackdrop]="true" style="height: 100vh;">
 
     <!--Actions-->
 
     <mat-drawer #actionsdrawer [mode]="over">
       <div class="chatactions_flex">
 
-        <button mat-button (click)="OnViewUserInfo(this.auth.User)">
+        <button mat-button (click)="OnViewUserInfo(this.auth.User, null)">
           <div class="padding10px flexaligned">
             <mat-icon>sentiment_satisfied</mat-icon>
             <span class="padding5px">My profile</span>
@@ -21,7 +21,7 @@
           </div>
         </button>
 
-        <button mat-button *ngIf="isSecureChatsSupported" (click)="CreateSecureChat()">
+        <button mat-button (click)="CreateSecureChat()">
           <div class="padding10px flexaligned">
             <mat-icon>security</mat-icon>
             <span class="padding5px">New secure chat</span>
@@ -51,22 +51,28 @@
       </div>
     </mat-drawer>
 
-    <mat-drawer-content>
+    <mat-drawer-content style="overflow:hidden;">
 
       <mat-card-content class="chat_wrapper_content">
 
-        <div class="conversations_wrapper">
+        <div class="conversations_wrapper"
+             [ngClass]="{
+             'conversations_wrapper_dark': IsDarkTheme(),
+             'conversations_wrapper_light': !IsDarkTheme(),
+             'hidden': IsMobileDevice() && IsConversationSelected()
+             }">
           <div class="conversations_wrapper_searchbar">
 
             <button mat-button (click)="actionsdrawer.toggle()">
               <mat-icon>more_vert</mat-icon>
             </button>
 
-            <mat-form-field style="margin-left: 20%;" appearance="fill">
+            <mat-form-field style="margin-left: 5%; width: 60%;" appearance="standard">
               <mat-label>Search</mat-label>
-              <input matInput placeholder="Search..." type="search" [(ngModel)]="SearchString" (keydown.enter)="Search()" >
+              <input matInput placeholder="Type in something..." type="search" [(ngModel)]="SearchString" (keydown.enter)="Search()">
               <mat-icon matSuffix>search</mat-icon>
             </mat-form-field>
+
           </div>
 
           <searchlist-view *ngIf="SearchString != null && SearchString !== ''"
@@ -92,6 +98,7 @@
 
           <conversationHeader-view class="messages_wrapper_header"
                                    (OnViewGroupInfo)="OnViewGroupInfo(conversationsService.CurrentConversation)"
+                                   (OnGoback)="ChangeChat(null)"
                                    [Conversation]="conversationsService.CurrentConversation"></conversationHeader-view>
 
           <messages-view class="messages_wrapper_messages"
@@ -103,12 +110,21 @@
                       [User]="auth.User"
                       [Conversation]="conversationsService.CurrentConversation"
                       (OnSendMessage)="OnSendMessage($event)"
-                      (OnUploadImages)="OnUploadImages($event)"></input-view>
+                      (OnViewUserInfo)="OnViewUserInfo($event)"></input-view>
 
         </div>
+
+        <h4  [ngClass]="{
+             'hidden': IsMobileDevice() && !IsConversationSelected()
+             }"
+            *ngIf="! IsConversationSelected()"
+            class="no-chat-selected">Choose chat from the left to start chatting...</h4>
 
       </mat-card-content>
 
     </mat-drawer-content>
+
   </mat-drawer-container>
 </mat-card>
+
+

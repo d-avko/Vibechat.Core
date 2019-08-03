@@ -1,17 +1,25 @@
+<mat-progress-bar *ngIf="uploading" mode="determinate" [value]="uploadProgress"></mat-progress-bar>
+
 <div *ngIf="!Conversation.isMessagingRestricted
      && ((Conversation.isSecure && Conversation.authKeyId)
      || (!Conversation.isSecure && !Conversation.authKeyId))" class="messages_wrapper_chat-input">
 
-  <img class="rounded-image" src="{{User.imageUrl}}" />
+  <img class="input-currentuser rounded-image" src="{{User.imageUrl}}" />
 
   <div class="padding20px">
     <!--name must be the same as in UploadFiles method parameter-->
-    <input class="button_send-images" type="file" (change)="UploadImages($event)" multiple="multiple" title="Send file" accept="image/*" name="images">
-    <mat-icon style="color: cadetblue">add_a_photo</mat-icon>
+    <input class="button_send-images" type="file" (change)="UploadImages($event)" multiple="multiple" title="Send images" accept="image/*" name="images">
+    <mat-icon class="sendimage-icon">add_a_photo</mat-icon>
+  </div>
+
+  <div class="padding5px">
+    <!--name must be the same as in UploadFiles method parameter-->
+    <input class="button_send-images" type="file" (change)="UploadFile($event)" title="Send file" name="file">
+    <mat-icon class="sendimage-icon">attach_file</mat-icon>
   </div>
 
   <mat-form-field class="input_field">
-    <textarea (keydown.control.enter)="SendMessage()" matInput placeholder="Type in your message..."></textarea>
+    <textarea class="input-textarea" cdkTextareaAutosize (input)="SetTyping()" (keydown.control.enter)="SendMessage()" matInput placeholder="Type in your message..."></textarea>
   </mat-form-field>
 
   <button mat-button style="color:cadetblue" (click)="SendMessage()">
@@ -31,3 +39,14 @@
   <p>Secure chat will be activated after {{Conversation.dialogueUser.userName}} is online.</p>
 </div>
 
+<style>
+  .sendimage-icon {
+    transition: ease 0.3s;
+    color: cadetblue;
+  }
+
+  .button_send-images:hover + .sendimage-icon {
+    transition: ease 0.3s;
+    color: #b6d2d3;
+  }
+</style>

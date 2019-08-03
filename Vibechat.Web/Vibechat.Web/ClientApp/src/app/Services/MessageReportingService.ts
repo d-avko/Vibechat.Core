@@ -12,11 +12,15 @@ export class MessageReportingService {
   }
 
   public OnDisconnected(): void {
-    this.snackbar.openSnackBar("Disconnected...", 1.5);
+    this.snackbar.openSnackBar("Disconnected, retrying in 1s...", 1.5);
   }
 
   public OnConnecting() {
     this.snackbar.openSnackBar("Connecting...", 1.5);
+  }
+
+  public OnSendWhileDisconnected() {
+    this.snackbar.openSnackBar("Couldn't perform actions while not connected...", 2.5);
   }
 
   public OnError(error: string): void {
@@ -29,5 +33,9 @@ export class MessageReportingService {
 
   public OnFailedToSubsribeToUserStatusChanges() {
     this.snackbar.openSnackBar("Last operation failed, please re-enter this chat.", 3);
+  }
+
+  public DisplayMessage(msg: string) {
+    this.snackbar.openSnackBar(msg, 2);
   }
 }

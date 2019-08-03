@@ -44,26 +44,5 @@ namespace VibeChat.Web.Controllers
             }
         }
 
-        [Route("api/Register")]
-        public async Task<ResponseApiModel<string>> RegisterNewUserAsync([FromBody]RegisterInformationApiModel userToRegister)
-        {
-            try
-            {
-                await loginService.RegisterNewUserAsync(userToRegister);
-
-                return new ResponseApiModel<string>()
-                {
-                    IsSuccessfull = true
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ResponseApiModel<string>()
-                {
-                    IsSuccessfull = false,
-                    ErrorMessage = ex.Message,
-                };
-            }
-        }
     }
 }
