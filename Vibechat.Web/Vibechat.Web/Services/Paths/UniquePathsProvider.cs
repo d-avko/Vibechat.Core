@@ -18,7 +18,7 @@ namespace Vibechat.Web.Services.Paths
         
         public string GetUniquePath(string randomizeValue)
         {
-            return hasher.Hash(Encoding.UTF8.GetBytes(DateTime.UtcNow.ToString() + randomizeValue)) + Path.DirectorySeparatorChar;
+            return hasher.Hash(Encoding.UTF8.GetBytes(DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fffffffK") + randomizeValue)) + Path.DirectorySeparatorChar;
         }
 
     }

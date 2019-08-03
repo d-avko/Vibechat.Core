@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {
-  HttpClient, HttpEvent, HttpEventType, HttpRequest, HttpErrorResponse, HttpHeaders
+  HttpClient, HttpEvent, HttpEventType, HttpRequest, HttpErrorResponse, HttpHeaders, HttpResponse
 } from '@angular/common/http';
 
 import { of, Observable } from 'rxjs';
@@ -12,16 +12,17 @@ export class UploaderService {
 
   public static maxUploadImageSizeMb: number = 5;
 
+  public static maxFileUploadSizeMb: number = 25;
+
   constructor(
     private http: HttpClient,
     private logger: SnackBarHelper) { }
 
-  public uploadImages(files: FileList) : Observable<HttpEvent<any>> {
+  public uploadImagesToChat(files: FileList, progress: (value: number) => void, chatId: string) : Observable<any> {
     if (!files || files.length == 0) { return; }
 
     for (let i = 0; i < files.length; ++i) {
-      if (((files[i].size / 1024) / 1024) > UploaderService.maxUploadImageSizeMb) {
-        this.logger.openSnackBar("Some of the files were larger than " + UploaderService.maxUploadImageSizeMb + "MB");
+      if (!this.CheckIfRightSize(files[i], true)) {
         return;
       }
     }
@@ -30,36 +31,143 @@ export class UploaderService {
 
     for (let i = 0; i < files.length; ++i) {
       data.append('images', files[i]);
+      data.append('ChatId', chatId);
     }
 
-    // Create the request object that POSTs the file to an upload endpoint.
-    // The `reportProgress` option tells HttpClient to listen and return
-    // XHR progress events.
+    let headers = new HttpHeaders();
+    headers = headers.append("ngsw-bypass", "");
+
     const req = new HttpRequest('POST', '/Files/UploadImages', data, {
-      reportProgress: true
+      reportProgress: true,
+      headers: headers
     });
 
-
-    return <Observable<HttpEvent<any>>>this.http.request(req).pipe(
-      tap(event => this.showProgress(event, files)),
+    return <Observable<any>>this.http.request(req).pipe(
+      tap(event => this.showProgress(event, progress)),
       last(),
+      map(x => (<HttpResponse<any>>x).body),
       catchError(this.handleError(files))
     );
   }
 
+  public uploadChatPicture(file: File, progress: (value: number) => void, chatId: number) {
+    if (!file) {
+      return;
+    }
+
+    if (!this.CheckIfRightSize(file, true)) {
+      return;
+    }
+
+    let data = new FormData();
+    data.append('thumbnail', file);
+    data.append('conversationId', chatId.toString());
+
+    let headers = new HttpHeaders();
+    headers = headers.append("ngsw-bypass", "");
+
+    const req = new HttpRequest('POST', 'api/Conversations/UpdateThumbnail', data, {
+      reportProgress: true,
+      headers: headers
+    });
+
+    return <Observable<any>>this.http.request(req).pipe(
+      tap(event => this.showProgress(event, progress)),
+      last(),
+      map(x => (<HttpResponse<any>>x).body),
+      catchError(this.handleError(null, file, true))
+    );
+  }
+
+  public uploadUserPicture(file: File, progress: (value: number) => void) {
+    if (!file) {
+      return;
+    }
+
+    if (!this.CheckIfRightSize(file, true)) {
+      return;
+    }
+
+    let data = new FormData();
+    data.append('picture', file);
+
+    let headers = new HttpHeaders();
+    headers = headers.append("ngsw-bypass", "");
+
+    const req = new HttpRequest('POST', 'api/Users/UpdateProfilePicture', data, {
+      reportProgress: true,
+      headers: headers
+    });
+
+    return <Observable<any>>this.http.request(req).pipe(
+      tap(event => this.showProgress(event, progress)),
+      last(),
+      map(x => (<HttpResponse<any>>x).body),
+      catchError(this.handleError(null, file, true))
+    );
+  }
+
+  public uploadFile(file: File, progress: (value: number) => void, chatId: string) {
+    if (!file) {
+      return;
+    }
+
+    if (!this.CheckIfRightSize(file, false)) {
+      return;
+    }
+
+    let data = new FormData();
+    data.append('file', file);
+    data.append('ChatId', chatId);
+
+    let headers = new HttpHeaders();
+    headers = headers.append("ngsw-bypass", "");
+
+    const req = new HttpRequest('POST', 'Files/UploadFile', data, {
+      reportProgress: true,
+      headers: headers
+    });
+
+    return <Observable<any>>this.http.request(req).pipe(
+      tap(event => this.showProgress(event, progress)),
+      last(),
+      map(x => (<HttpResponse<any>>x).body),
+      catchError(this.handleError(null, file, true))
+    );
+  }
+
+  public CheckIfRightSize(file: File, isImage: boolean) {
+
+    if (isImage) {
+      if (((file.size / 1024) / 1024) > UploaderService.maxUploadImageSizeMb) {
+        this.logger.openSnackBar("Some of the files were larger than " + UploaderService.maxUploadImageSizeMb + "MB");
+        return false;
+      }
+    }
+    else {
+      if (((file.size / 1024) / 1024) > UploaderService.maxFileUploadSizeMb) {
+        this.logger.openSnackBar("Some of the files were larger than " + UploaderService.maxFileUploadSizeMb + "MB");
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   /** Return distinct message for sent, upload progress, & response events */
-  private getEventMessage(event: HttpEvent<any>, files: FileList) {
+  private getEventProgress(event: HttpEvent<any>): number {
+
     switch (event.type) {
       case HttpEventType.Sent:
-        return `Uploading "${files.length}" files.`;
+        return 1;
 
       case HttpEventType.UploadProgress:
         // Compute and show the % done:
         const percentDone = Math.round(100 * event.loaded / event.total);
-        return `Upload progress is ${percentDone}% .`;
+        return percentDone;
 
       case HttpEventType.Response:
-        return `Files were completely uploaded!`;
+        return 100;
     }
   }
 
@@ -70,8 +178,8 @@ export class UploaderService {
    * When no `UploadInterceptor` and no server,
    * you'll end up here in the error handler.
    */
-  private handleError(files: FileList) {
-    const userMessage = `Failed to upload ${files.length} files.`;
+  private handleError(files: FileList, file: File = null, isOneFile: boolean = false) {
+    const userMessage = isOneFile ? `Failed to upload ${file.name} .` : `Failed to upload ${files.length} files.`;
 
     return (error: HttpErrorResponse) => {
 
@@ -79,7 +187,7 @@ export class UploaderService {
 
       const message = (error.error instanceof Error) ?
         error.error.message :
-        `server returned code ${error.status} with body "${error.error}"`;
+        `server returned code ${error.status} with error "${error.error}"`;
 
       this.logger.openSnackBar(message);
 
@@ -88,14 +196,7 @@ export class UploaderService {
     };
   }
 
-  private showProgress(event: HttpEvent<any>, files: FileList) {
-    this.logger.openSnackBar(this.getEventMessage(event, files), 0.5);
+  private showProgress(event: HttpEvent<any>, progress: (value: number) => void) {
+    progress(this.getEventProgress(event));
   }
 }
-
-
-/*
-Copyright Google LLC. All Rights Reserved.
-Use of this source code is governed by an MIT-style license that
-can be found in the LICENSE file at http://angular.io/license
-*/

@@ -1,9 +1,4 @@
-﻿using SkiaSharp;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.IO;
 
 namespace Vibechat.Web.Services.Images
 {
@@ -14,6 +9,6 @@ namespace Vibechat.Web.Services.Images
         /// </summary>
         /// <param name="imageBytes"></param>
         /// <returns>Image, its width and height</returns>
-        Stream Resize(MemoryStream imageBytes, int scaleWidth, int scaleHeight);
+        MemoryStream Resize(MemoryStream imageBytes, int scaleWidth, int scaleHeight);
     }
 }

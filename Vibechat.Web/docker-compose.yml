@@ -1,0 +1,28 @@
+version: '3.4'
+
+services:
+  vibechat.web:
+    build:
+      context: .
+      dockerfile: Vibechat.Web/Dockerfile
+    ports:
+     - "443:443"
+    depends_on:
+     - "vibechat.db"
+    networks:
+      - vibechat-network
+
+  vibechat.db:
+    container_name: 'vibechat.db'
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=Sikorskiy77
+    networks:
+      - vibechat-network
+    volumes:
+      - ./databaseData:/var/lib/postgresql/data
+
+networks:
+  vibechat-network:
+    driver: bridge

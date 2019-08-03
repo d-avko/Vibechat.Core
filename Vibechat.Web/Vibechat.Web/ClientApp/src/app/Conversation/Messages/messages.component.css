@@ -1,3 +1,8 @@
+a{
+  text-decoration: none;
+  color: inherit;
+}
+
 .messages_main {
   display: flex;
   flex-direction: column;
@@ -5,6 +10,62 @@
   height: 85%;
   overflow-y: auto;
   overflow-anchor: none;
+}
+
+.chat_misc_backtonow {
+  display: flex;
+  flex-direction: row;
+  margin-left: 35vw;
+  margin-top: 62vh;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,.1);
+  border-radius: 10px;
+  border: solid 1px #cfd9e1;
+  padding: 4px 4px 4px 4px;
+  color: #335657;
+  height: 20px;
+  transition: all 0.3s ease 0s;
+  cursor: pointer;
+  background-color: #f0f6f6;
+}
+
+@media screen and (max-width: 880px) {
+  .chat_misc_backtonow{
+    margin-left: 41vw !important;
+  }
+}
+
+.no-messages {
+  font: 500 18px/24px Roboto,"Helvetica Neue",sans-serif;
+  width: 100%;
+  height: 85%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chat_misc_backtonow:hover {
+  transition: all 0.3s ease 0s;
+  background-color: #99c1c2 !important;
+}
+
+.time-and-states-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-left: 3%;
+}
+
+.messagestate {
+  color: cadetblue;
+  width: 15px;
+  height: 15px;
+}
+
+.forwarded_message_break {
+  border-left: 2px solid cadetblue;
+  width: 10px
 }
 
 .padding10px {
@@ -36,6 +97,7 @@
   display: flex;
   flex-direction: row;
   justify-content: center;
+  padding: 10px;
 }
 
 .messages_message_content .content_messageAndName {
@@ -58,8 +120,11 @@
 }
 
 .message_text {
-  overflow-wrap: break-word;
   font-size: 13px;
+  word-wrap: break-word;
+  line-height: 150%;
+  white-space: pre-wrap;
+  max-width: 50vw;
 }
 
 .image_attachment {
@@ -71,30 +136,33 @@
 
 .message_attachment--image {
   border-radius: 10px;
+  cursor: pointer;
+}
+
+.message_timereceived {
+  font-size: 13px;
 }
 
 .message_timereceived-dark {
   color: white;
-  font-size: 12px;
 }
 .message_timereceived-light {
   color: dimgray;
-  font-size: 12px;
 }
 
 .chat_misc {
   display: flex;
   flex-direction: row;
-  height: 10%;
+  height: 12%;
 }
 
 .marginleft10px {
   margin-left: 10px;
 }
 
-.messages_component{
+.messages_component {
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100%;
+  height: calc(100vh - 12vh - 65px);
 }

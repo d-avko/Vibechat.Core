@@ -1,4 +1,4 @@
-import { Component, Inject, EventEmitter } from "@angular/core";
+import { Component, Inject, EventEmitter, ViewContainerRef } from "@angular/core";
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from "@angular/material";
 import { ChatComponent } from "../Chat/chat.component";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
@@ -6,8 +6,14 @@ import { UserInfo } from "../Data/UserInfo";
 import { ConversationsFormatter } from "../Formatters/ConversationsFormatter";
 import { ChangeNameDialogComponent } from "./ChangeNameDialog";
 import { FindUsersDialogComponent } from "./FindUsersDialog";
-import { ChatsService } from "../Services/ConversationsService";
+import { ChatsService } from "../Services/ChatsService";
 import { ViewAttachmentsDialogComponent } from "./ViewAttachmentsDialog";
+import { ViewPhotoService } from "./ViewPhotoService";
+import { ChatRole } from "../Roles/ChatRole";
+import { ChatUsersDialogComponent } from "./ChatUsersDialog";
+import { AdminPanelDialog } from "./AdminPanelDialog";
+import { UsersService } from "../Services/UsersService";
+import { AuthService } from "../Auth/AuthService";
 
 export interface  GroupInfoData {
   Conversation: ConversationTemplate;
@@ -29,11 +35,56 @@ export class GroupInfoDialogComponent {
 
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
-    public dialog: MatDialog ,
+    public dialog: MatDialog,
+    public anotherDialog: MatDialog,
     @Inject(MAT_DIALOG_DATA) public data: GroupInfoData,
     public formatter: ConversationsFormatter,
-    public conversationsService: ChatsService,
-    public ChangeNameDialog: MatDialog) { }
+    public chats: ChatsService,
+    public users: UsersService,
+    public ChangeNameDialog: MatDialog,
+    public photos: ViewPhotoService,
+    public auth: AuthService,
+    public viewContainerRef: ViewContainerRef) { this.photos.viewContainerRef = this.viewContainerRef }
+
+  public uploadProgress: number = 0;
+
+  public uploading: boolean = false;
+
+  public ChooseUser() {
+    const chatUsersDialogRef = this.dialog.open(ChatUsersDialogComponent, {
+      width: '450px',
+      data: {
+        conversationId: this.data.Conversation.conversationID
+      }
+    }).beforeClosed().subscribe((user) => {
+
+      if (!user) {
+        return;
+      }
+
+      //show admin panel, pass user
+      const adminPanelRef = this.anotherDialog.open(AdminPanelDialog, {
+        width: '450px',
+        data: {
+          user: user,
+          chat: this.data.Conversation,
+          banFunc: this.BanUser.bind(this),
+          kickFunc: this.KickUser.bind(this),
+          unBanFunc: this.UnbanUser.bind(this),
+          makeModerFunc: this.MakeModerator.bind(this),
+          removeModerFunc: this.RemoveModerator.bind(this)
+        }
+      });
+    });
+  }
+
+  public async MakeModerator(userId: string, chatId: number) {
+    return await this.chats.MakeUserModerator(chatId, userId);
+  }
+
+  public async RemoveModerator(userId: string, chatId: number) {
+    return await this.chats.RemoveModerator(chatId, userId);
+  }
 
   public ViewUserInfo(user: UserInfo) {
     this.OnViewUserInfo.emit(user);
@@ -44,12 +95,12 @@ export class GroupInfoDialogComponent {
   }
 
   public async ClearMessages() {
-    await this.conversationsService.RemoveAllMessages(this.data.Conversation);
+    await this.chats.RemoveAllMessages(this.data.Conversation);
     this.dialogRef.close();
   }
 
   public RemoveGroup() {
-    this.conversationsService.RemoveGroup(this.data.Conversation);
+    this.chats.RemoveGroup(this.data.Conversation);
     this.dialogRef.close();
   }
 
@@ -58,20 +109,51 @@ export class GroupInfoDialogComponent {
   }
 
   public LeaveGroup() {
-    this.conversationsService.Leave(this.data.Conversation);
+    this.chats.Leave(this.data.Conversation);
     this.dialogRef.close();
   }
 
+  public IsModeratorOrCreator() {
+    return this.data.Conversation.chatRole.role == ChatRole.Moderator
+      || this.data.Conversation.chatRole.role == ChatRole.Creator;
+  }
+
   public KickUser(user: UserInfo) {
-    this.conversationsService.KickUser(user, this.data.Conversation);
+    this.chats.KickUser(user, this.data.Conversation);
+
+    if (this.auth.User.id == user.id) {
+      this.dialog.closeAll();
+      this.anotherDialog.closeAll();
+    }
   }
 
   public async BanUser(user: UserInfo) {
-    await this.conversationsService.BanFromConversation(user, this.data.Conversation);
+    let result = await this.chats.BanFromConversation(user, this.data.Conversation);
+
+    if (!result) {
+      return;
+    }
+
+    user.isBlockedInConversation = true;
   }
 
   public async UnbanUser(user: UserInfo) {
-    await this.conversationsService.UnbanFromConversation(user, this.data.Conversation);
+    let result = await this.chats.UnbanFromConversation(user, this.data.Conversation);
+
+    if (!result) {
+      return;
+    }
+
+    user.isBlockedInConversation = false;
+  }
+
+  public ResetInput(input: HTMLInputElement) {
+    input.value = '';
+
+    if (!/safari/i.test(navigator.userAgent)) {
+      input.type = '';
+      input.type = 'file';
+    }
   }
 
   public ViewAttachments() {
@@ -83,12 +165,27 @@ export class GroupInfoDialogComponent {
     });
   }
 
-  public IsCurrentUserCreatorOfConversation() {
-    return this.data.user.id == this.data.Conversation.creator.id;
+  public ViewPicture(image: Event) {
+    this.photos.viewContainerRef = this.viewContainerRef;
+    this.photos.ViewProfilePicture(this.data.Conversation.fullImageUrl);
   }
 
-  public async UpdateThumbnail(event: any) {
-    await this.conversationsService.ChangeThumbnail(event.target.files[0], this.data.Conversation);
+  public IsCurrentUserCreatorOfConversation() {
+    return this.data.Conversation.chatRole.role == ChatRole.Creator;
+  }
+
+  public ProgressCallback(value: number) {
+    this.uploadProgress = value;
+  }
+
+  public async UpdateThumbnail(event: Event) {
+    try {
+      this.uploading = true;
+      await this.chats.ChangeThumbnail((<HTMLInputElement>event.target).files[0], this.data.Conversation, this.ProgressCallback.bind(this));
+    } finally {
+      this.uploading = false;
+      this.ResetInput(<HTMLInputElement>event.target);
+    }
   }
 
   public ChangeName() {
@@ -103,7 +200,7 @@ export class GroupInfoDialogComponent {
           return;
         }
 
-        await this.conversationsService.ChangeConversationName(name, this.data.Conversation);
+        await this.chats.ChangeConversationName(name, this.data.Conversation);
       }
     )
   }
@@ -112,13 +209,14 @@ export class GroupInfoDialogComponent {
     const dialogRef = this.dialog.open(FindUsersDialogComponent, {
       width: '350px',
       data: {
-        conversationId: this.data.Conversation.conversationID
-      }
+        conversationId: this.data.Conversation.conversationID,
+        isMultiSelect: true
+      } 
     });
 
     dialogRef.beforeClosed().subscribe(users => {
 
-      this.conversationsService.InviteUsersToGroup(users, this.data.Conversation);
+      this.chats.InviteUsersToGroup(users, this.data.Conversation);
     });
   }
 

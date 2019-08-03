@@ -26,7 +26,13 @@ export class ConversationHeaderComponent {
 
   @Output() public OnViewGroupInfo = new EventEmitter<void>();
 
+  @Output() public OnGoback = new EventEmitter<void>();
+
   public ViewGroupInfo() : void{
     this.OnViewGroupInfo.emit(null);
+  }
+
+  public GoBack() {
+    this.OnGoback.emit();
   }
 }

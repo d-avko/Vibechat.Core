@@ -9,7 +9,7 @@ import {
 } from '@angular/common/http';
 
 import { Observable, throwError, from } from 'rxjs';
-import { map, catchError, retry, switchMap, mergeMap } from 'rxjs/operators';
+import { map, catchError, switchMap } from 'rxjs/operators';
 import { SnackBarHelper } from '../Snackbar/SnackbarHelper';
 import { Router } from '@angular/router';
 import { ApiRequestsBuilder } from '../Requests/ApiRequestsBuilder';
@@ -31,7 +31,7 @@ export class HttpResponseInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     let token: string = localStorage.getItem('token');
     
-    if (!token) {
+    if (!token || request.headers.has('unauthorized')) {
       return this.handleRequest(request, next);
     }
 
@@ -89,18 +89,26 @@ export class HttpResponseInterceptor implements HttpInterceptor {
       }),
       catchError((error: HttpErrorResponse) => {
 
-        if (error.status == 401) {
+        switch (error.status) {
+          case 401: {
+            from(this.authService.RefreshToken())
+              .subscribe((result) => {
+                this.handleRefreshTokenResponse(result);
+              });
 
-          from(this.authService.RefreshToken())
-            .subscribe((result) => {
-              this.handleRefreshTokenResponse(result);
-            });
-
-          window.location.reload();
-          return;
+            break;
+          }
+          //Gateway timeout
+          case 504:
+          case 0: {
+            this.errorsLogger.openSnackBar('Server is down or there is no internet connection at the moment.');
+            break;
+          }
+          default: {
+            this.errorsLogger.openSnackBar('Server sent an error with code: ' + error.status);
+          }
         }
 
-        this.errorsLogger.openSnackBar('HttpError: ' + error.message);
         return throwError(error);
       }));
   }

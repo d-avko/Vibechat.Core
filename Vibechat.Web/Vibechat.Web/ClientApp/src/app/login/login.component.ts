@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit, AfterViewInit } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { SnackBarHelper } from '../Snackbar/SnackbarHelper';
 import { MatSnackBar } from '@angular/material';
@@ -7,7 +7,8 @@ import { LoginResponse } from '../ApiModels/LoginResponse';
 import { LoginRequest } from '../ApiModels/LoginRequest';
 import { Router } from '@angular/router';
 import { ApiRequestsBuilder } from '../Requests/ApiRequestsBuilder';
-import { AuthService } from '../Auth/AuthService';
+import { AuthService } from "../Auth/AuthService";
+import * as firebase from "firebase/app";
 
 @Component({
   selector: 'login-view',
@@ -16,49 +17,72 @@ import { AuthService } from '../Auth/AuthService';
 })
 export class LoginComponent {
 
-  public usernameOrEmail: FormControl;
-  public password: FormControl;
+  constructor(private requestsBuilder: ApiRequestsBuilder, private snackbar: SnackBarHelper,private router: Router, private auth: AuthService) {
+    this.phoneNumber = new FormControl('',
+      Validators.compose(
+        [
+          Validators.maxLength(AuthService.PHONENUMBER_LENGTH),
+          Validators.minLength(AuthService.PHONENUMBER_LENGTH - 1)]
+      ));
+    this.smsCode = new FormControl('', Validators.maxLength(AuthService.SMSCODE_LENGTH));
+    this.phoneNumber.valueChanges.subscribe(() => this.OnNumberChanged());
+  }
 
-  protected snackbar: SnackBarHelper;
-  protected router: Router;
-  protected requestsBuilder: ApiRequestsBuilder;
+  public phoneNumber: FormControl;
+  public smsCode: FormControl;
 
   public canLogIn: boolean = true;
 
-  constructor(requestsBuilder: ApiRequestsBuilder, snackbar: MatSnackBar, router: Router, private auth: AuthService ) {
-    this.usernameOrEmail = new FormControl('', Validators.required);
-    this.password = new FormControl('', Validators.required);
-    this.snackbar = new SnackBarHelper(snackbar);
-    this.router = router;
-    this.requestsBuilder = requestsBuilder;
+  public isCodeSent: boolean = false;
+
+  private recaptchaVerifier: firebase.auth.RecaptchaVerifier;
+
+  get Recaptcha(): firebase.auth.RecaptchaVerifier {
+
+    if (!this.recaptchaVerifier) {
+      this.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('sign-in-button', { 'size': 'invisible' });
+    }
+
+    return this.recaptchaVerifier;
+  }
+  set Recaptcha(value: firebase.auth.RecaptchaVerifier) {
+    this.recaptchaVerifier = value;
   }
 
-  public Login(): void {
+ 
+  public async SignIn() {
     this.canLogIn = false;
 
-    let credentials = new LoginRequest({ UserNameOrEmail: this.usernameOrEmail.value, Password: this.password.value })
+    if (!await this.auth.SignIn(this.smsCode.value)) {
+      this.snackbar.openSnackBar("Wrong code, try again.");
+    }
 
-    this.requestsBuilder.LoginRequest(credentials).subscribe(result => this.OnLoginResultReceived(result));
+    this.canLogIn = true;
+  }
+
+  public async SendCode() {
+
+    this.canLogIn = false;
+
+    let result = await this.auth.SendSmsCode(this.phoneNumber.value, this.Recaptcha);
+
+    if (result) {
+      this.isCodeSent = true;
+    } else {
+      this.snackbar.openSnackBar("Couldn't send the message.");
+    }
+
+    this.canLogIn = true;
+  }
+
+  public OnNumberChanged() {
+    this.isCodeSent = false;
   }
 
   public GotoRegisterPage() : void {
     this.router.navigateByUrl('/register');
   }
 
-  private OnLoginResultReceived(result: ServerResponse<LoginResponse>): void {
-
-    if (!result.isSuccessfull) {
-      this.snackbar.openSnackBar(result.errorMessage);
-      this.canLogIn = true;
-      return;
-    }
-
-    this.canLogIn = true;
-
-    this.auth.OnUserLoggedIn(result.response);
-
-    this.router.navigateByUrl('/chat');
-  }
 
 }
 

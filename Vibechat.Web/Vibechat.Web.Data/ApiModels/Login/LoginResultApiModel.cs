@@ -18,5 +18,11 @@ namespace Vibechat.Web.ApiModels
 
         public UserInfo Info { get; set; }
 
+        /// <summary>
+        /// Flag indicating if this user
+        /// was auto-registered and his username needs to be changed.
+        /// </summary>
+        public bool IsNewUser { get; set; }
+
     }
 }

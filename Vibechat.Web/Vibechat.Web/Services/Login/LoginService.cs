@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using FirebaseAdmin;
+using FirebaseAdmin.Auth;
+using System;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Vibechat.Web.ApiModels;
+using Vibechat.Web.Data.Repositories;
 using Vibechat.Web.Extensions;
 using Vibechat.Web.Services.ChatDataProviders;
-using Vibechat.Web.Services.Repositories;
 using VibeChat.Web;
 using VibeChat.Web.ApiModels;
-using VibeChat.Web.ChatData;
 
 namespace Vibechat.Web.Services.Login
 {
@@ -17,107 +16,118 @@ namespace Vibechat.Web.Services.Login
     {
         public LoginService(
             IUsersRepository usersRepository,
-            IChatDataProvider chatDataProvider)
+            IChatDataProvider chatDataProvider,
+            UnitOfWork unitOfWork)
         {
             this.usersRepository = usersRepository;
             this.chatDataProvider = chatDataProvider;
+            this.unitOfWork = unitOfWork;
         }
 
         private IUsersRepository usersRepository;
 
         private IChatDataProvider chatDataProvider;
+        private readonly UnitOfWork unitOfWork;
 
         public async Task<LoginResultApiModel> LogInAsync(LoginCredentialsApiModel loginCredentials)
         {
-            var defaultError = new FormatException("Wrong username or password");
+            FirebaseAuth auth = FirebaseAuth.GetAuth(FirebaseApp.DefaultInstance);
 
-            if ((loginCredentials?.UserNameOrEmail == null) || (string.IsNullOrWhiteSpace(loginCredentials.UserNameOrEmail)))
+            //this can throw detailed error message.
+            FirebaseToken verified = await auth.VerifyIdTokenAsync(loginCredentials.UidToken);
+
+            AppUser identityUser = await usersRepository.GetById(verified.Uid);
+
+            //user confirmed his phone number, but has not registered yet; 
+            //Register him now in that case 
+
+            bool IsNewUser = false;
+
+            if(identityUser == null)
             {
-                throw defaultError;
-            }
+                try
+                {
+                    string username = "Generated_" + Guid.NewGuid().ToString();
 
-            UserInApplication user;
+                    var token = await RegisterNewUserAsync(new RegisterInformationApiModel()
+                    {
+                        PhoneNumber = loginCredentials.PhoneNumber,
+                        UserName = username,
+                        Id = verified.Uid
+                    });
 
-            if (Regex.Match(loginCredentials.UserNameOrEmail, "[^@]*@[^\\.]\\.(\\w+)").Success)
-            {
-                user = await usersRepository.GetByEmail(loginCredentials.UserNameOrEmail);
-            }
-            else
-            {
-                user = await usersRepository.GetByUsername(loginCredentials.UserNameOrEmail);
-            }
+                    identityUser = await usersRepository.GetByUsername(username);
 
-            if (user == null)
-            {
-                throw defaultError;
+                    //prevent reading null
+                    identityUser.RefreshToken = token;
+                    IsNewUser = true;
+                }
+                catch (Exception ex)
+                {
+                    throw new FormatException("Couldn't register this user.", ex);
+                }
             }
-
-            if (!await usersRepository.CheckPassword(loginCredentials.Password, user))
-            {
-                throw defaultError;
-            }
-
-            //if we are here then have valid password and login of a user
 
             return new LoginResultApiModel()
             {
-                Info = user.ToUserInfo(),
-                Token = user.GenerateToken(),
-                RefreshToken = user.RefreshToken
+                Info = identityUser.ToUserInfo(),
+                Token = identityUser.GenerateToken(),
+                RefreshToken = identityUser.RefreshToken,
+                IsNewUser = IsNewUser
             };
         }
 
-        public async Task RegisterNewUserAsync(RegisterInformationApiModel userToRegister)
+        /// <summary>
+        /// Registers user and issues a refresh token.
+        /// </summary>
+        /// <param name="userToRegister"></param>
+        /// <returns></returns>
+        private async Task<string> RegisterNewUserAsync(RegisterInformationApiModel userToRegister)
         {
             var defaultError = new FormatException("Check the fields and try again.");
 
-            var EmailFormatError = new FormatException("Email is in wrong format!");
-
             if (userToRegister == null)
-                throw defaultError;
-
-            if (string.IsNullOrWhiteSpace(userToRegister.Email)
-                || string.IsNullOrWhiteSpace(userToRegister.Password)
-                || string.IsNullOrWhiteSpace(userToRegister.UserName))
             {
                 throw defaultError;
             }
 
-            if (userToRegister.UserName.Contains("@") || userToRegister.UserName.Contains("@"))
+            if (string.IsNullOrWhiteSpace(userToRegister.UserName))
             {
-                throw new FormatException("Nickname or Username cannot contain '@'");
+                throw defaultError;
             }
 
-            if (!Regex.Match(userToRegister.Email, "[^@]*@[^\\.]\\.(\\w+)").Success)
+            // if UserName and email is not unique
+
+            if ((await usersRepository.GetByUsername(userToRegister.UserName)) != null)
             {
-                throw EmailFormatError;
+                throw new FormatException("The username is not unique.");
             }
 
-            // if UserName and email are not unique
+            var imageUrl = chatDataProvider.GetProfilePictureUrl();
 
-            if (((await usersRepository.GetByUsername(userToRegister.UserName)) != null) || ((await usersRepository.GetByEmail(userToRegister.Email)) != null))
+            var userToCreate = new AppUser()
             {
-                throw new FormatException("The username or e-mail is not unique.");
-            }
-
-            var userToCreate = new UserInApplication()
-            {
+                Id = userToRegister.Id,
                 UserName = userToRegister.UserName,
-                Email = userToRegister.Email,
                 FirstName = userToRegister.FirstName,
                 LastName = userToRegister.LastName,
-                ProfilePicImageURL = chatDataProvider.GetProfilePictureUrl(),
+                ProfilePicImageURL = imageUrl,
+                FullImageUrl = imageUrl,
                 IsPublic = true
             };
 
-            var result = await usersRepository.CreateUser(userToCreate, userToRegister.Password);
+            var result = await usersRepository.CreateUser(userToCreate);
 
             if (!result.Succeeded)
             {
-                throw new FormatException(result.Errors?.ToList()[0].Description);
+                throw new FormatException(result.Errors?.ToList()[0].Description ?? "Couldn't create user because of unexpected error.");
             }
 
-            await usersRepository.UpdateRefreshToken(userToCreate.Id, userToCreate.GenerateRefreshToken());
+            string token = userToCreate.GenerateRefreshToken();
+
+            await usersRepository.UpdateRefreshToken(userToCreate.Id, token);
+            await unitOfWork.Commit();
+            return token;
         }
     }
 }

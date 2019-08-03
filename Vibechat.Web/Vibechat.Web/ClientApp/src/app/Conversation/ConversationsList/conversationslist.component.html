@@ -15,24 +15,11 @@
       <h3 class="chat_name"
           *ngIf="conversation.isGroup; else dialogueHeader"
           [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
-        {{conversation.name}}
+        {{ (conversation.name.length > 30)? (conversation.name | slice:0:30)+'..':(conversation.name) }}  
       </h3>
 
       <mat-icon *ngIf="conversation.isSecure" class="secured_icon">lock</mat-icon>
-    </div>
 
-
-    <ng-template #dialogueHeader>
-      <h3 class="chat_name"
-          [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
-        {{conversation.dialogueUser.userName}}
-      </h3>
-    </ng-template>
-
-    <div matLine class="lastmessage_content">
-      <span class="lastmessage_content_lastmessage" [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
-        {{formatter.GetLastMessageFormatted(conversation)}}
-      </span>
       <span class="lastmessage_content_lastmessageDate" [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
         {{formatter.GetLastMessageDateFormatted(conversation)}}
       </span>
@@ -40,6 +27,21 @@
       <div *ngIf="conversation.messagesUnread" class="unread_bubble">
         <span class="unread_bubble_text">{{formatter.GetMessagesUnreadFormatted(conversation.messagesUnread)}}</span>
       </div>
+    </div>
+
+
+    <ng-template #dialogueHeader>
+      <h3 class="chat_name"
+          [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
+        {{ (conversation.dialogueUser.userName.length > 30)? (conversation.dialogueUser.userName | slice:0:30)+'..':(conversation.dialogueUser.userName) }}
+      </h3>
+    </ng-template>
+
+    <div matLine class="lastmessage_content">
+      <span class="lastmessage_content_lastmessage" [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
+        {{formatter.GetLastMessageFormatted(conversation)}}
+      </span>
+
     </div>
   </mat-list-item>
 
@@ -51,8 +53,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
+    margin-left: 10px;
+    width: 25px;
+    height: 25px;
     border-radius: 15px;
     background-color: #436f70;
   }
@@ -71,7 +74,7 @@
 
   .chat_name{
     margin: 0;
-    font-size: 18px;
+    font: 600 15px/20px Roboto,"Helvetica Neue",sans-serif;
     padding-right: 10px;
   }
 

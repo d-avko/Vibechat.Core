@@ -2,20 +2,44 @@ import { Injectable } from "@angular/core"
 import { ChatMessage } from "../Data/ChatMessage";
 import { ConversationTemplate } from "../Data/ConversationTemplate";
 import { AuthService } from "../Auth/AuthService";
+import { AttachmentKind } from "../Data/AttachmentKinds";
+import { TypingService } from "../Services/TypingService";
+import { UserInfo } from "../Data/UserInfo";
+import { ChatRole } from "../Roles/ChatRole";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ConversationsFormatter{
 
-  constructor(private auth: AuthService) {}
+  constructor(private auth: AuthService, private typing: TypingService) {}
 
-  public static messageMaxLength = 22;
+  public static MaxSymbols = 38;
+
+  public static MaxPixelsDesktop = 1458;
+
+  public static MinPixelsDesktop = 880;
+
+  public static MaxSymbolsMobile = 20;
+
+  public static MaxSymbolsForNameInTypingStripe = 20;
+
+  public IsMobileDevice() {
+    return window.innerWidth < ConversationsFormatter.MinPixelsDesktop;
+  }
 
   public GetLastMessageFormatted(conversation: ConversationTemplate): string {
 
     if (conversation.messages == null || conversation.messages.length == 0) {
-      return "No messages for this conversation...";
+      return "No messages...";
+    }
+
+    let MaxSymbols = 0;
+
+    if (this.IsMobileDevice()) {
+      MaxSymbols = ConversationsFormatter.MaxSymbolsMobile;
+    } else {
+      MaxSymbols = Math.floor((window.innerWidth * ConversationsFormatter.MaxSymbols * 0.75) / ConversationsFormatter.MaxPixelsDesktop);
     }
 
     let message = conversation.messages[conversation.messages.length - 1];
@@ -27,25 +51,84 @@ export class ConversationsFormatter{
     }
 
     if (message.isAttachment) {
-      return user + ": " + this.GetFormattedAttachmentName(message.attachmentInfo.attachmentKind);
+      let msg = user + ": " + this.GetFormattedAttachmentName(message.attachmentInfo.attachmentKind);
+
+      if (msg.length > MaxSymbols) {
+        msg = msg.slice(0, MaxSymbols) + "...";
+      }
+
+      return msg;
     }
 
-    let messageContent = '';
 
-    if (message.messageContent.length <= ConversationsFormatter.messageMaxLength) {
-      messageContent = message.messageContent;
-    }
-    else {
-      messageContent = message.messageContent.slice(0, ConversationsFormatter.messageMaxLength) + "...";
+    let msg = user + ": " + message.messageContent;
+
+    if (msg.length > MaxSymbols) {
+      msg = msg.slice(0, MaxSymbols) + "...";
     }
 
-    return user + ": " + messageContent;
+    return msg;
   }
 
-  public GetFormattedAttachmentName(name: string) : string {
-    switch (name) {
-      case "img": {
+  public GetUserRoleFormatted(user: UserInfo) {
+    switch (user.chatRole.role) {
+      case ChatRole.Creator: {
+        return "Creator";
+      }
+      case ChatRole.Moderator: {
+        return "Moderator";
+      }
+      default: {
+        return "";
+      }
+    }
+  }
+
+  public GetUsersTypingFormatted(chatId: number) {
+    let users = this.typing.GetUsersTyping(chatId);
+
+    if (!users || !users.length) {
+      return "";
+    }
+
+    let firstUserName = users[0].firstName.substr(0, ConversationsFormatter.MaxSymbolsForNameInTypingStripe);
+
+    if (users.length === 1) {
+      return firstUserName + " is typing";
+    } else {
+      return `${firstUserName} and ${users.length - 1} more people are typing`;
+    }
+  }
+
+  public IsAnyUserTyping(chatId: number): boolean {
+    let users = this.typing.GetUsersTyping(chatId);
+    return users != null && users.length != 0;
+  }
+
+  public GetBytesAmountFormatted(amount: number) {
+    switch (true) {
+      case amount < 1024: {
+        return ` ${amount} Bytes.`
+      }
+      case (amount >= 1024) && (amount < 1024 * 1024): {
+        return `${Math.floor(amount / 1024)} kB.`
+      }
+      case (amount >= 1024 * 1024) && (amount < 1024 * 1024 * 1024):{
+        return `${Math.floor(amount / (1024 * 1024))} MB.`
+      }
+      case (amount >= 1024 * 1024 * 1024): {
+        return `${Math.floor(amount / (1024 * 1024 * 1024))} GB.` 
+      }
+    }
+  }
+
+  public GetFormattedAttachmentName(kind: AttachmentKind) : string {
+    switch (kind) {
+      case AttachmentKind.Image: {
         return "Image"
+      }
+      case AttachmentKind.File: {
+        return "File"
       }
       default: {
         return "Unknown attachment"
@@ -61,10 +144,18 @@ export class ConversationsFormatter{
 
     let message = conversation.messages[conversation.messages.length - 1];
 
+    if (typeof message.timeReceived !== 'object') {
+      message.timeReceived = new Date(<string>message.timeReceived);
+    }
+
     return this.DaysSinceEventFormatted((<Date>message.timeReceived));
   }
 
-  public GetMessagesDateStripFormatted(message: ChatMessage) : string {
+  public GetMessagesDateStripFormatted(message: ChatMessage): string {
+    if (typeof message.timeReceived !== 'object') {
+      message.timeReceived = new Date(<string>message.timeReceived);
+    }
+
     return this.DaysSinceEventFormatted((<Date>message.timeReceived));
   }
 
@@ -83,21 +174,42 @@ export class ConversationsFormatter{
     }
   }
 
+  public static DAYS_IN_A_WEEK = 7;
+
+  public static MAX_FORMATTABLE_DAYS = 5;
+
   private DaysSinceEventFormatted(eventDate: Date): string {
     let currentTime = new Date();
-    let hoursSinceReceived = (currentTime.getTime() - eventDate.getTime()) / (1000 * 60 * 60);
-    let daysSinceReceived = hoursSinceReceived / 24;
+    let hoursSinceReceived = Math.floor((currentTime.getTime() - eventDate.getTime()) / (1000 * 60 * 60));
+    let daysSinceReceived = Math.floor(hoursSinceReceived / 24);
     let hoursSinceMidnight = currentTime.getHours();
 
-    switch (true) {                 // this is for the case when user've sent message right in 00:00:00
+    switch (true) {    // this is for the case when user've sent message right in 00:00:00
       case hoursSinceReceived <= hoursSinceMidnight + 0.001: {
         return "Today"
       }
-      case daysSinceReceived <= 2: {
-        return "Yesterday";
+      case daysSinceReceived <= ConversationsFormatter.MAX_FORMATTABLE_DAYS: {
+        let currentDay = currentTime.getDay();
+        let eventDay = eventDate.getDay();
+        let realDaysBetween : number;
+
+        if (currentDay < eventDay) {
+          realDaysBetween = currentDay + Math.abs(eventDay - ConversationsFormatter.DAYS_IN_A_WEEK);
+        } else {
+          realDaysBetween = currentDay - eventDay;
+        }
+
+        switch (realDaysBetween) {
+          case 1: {
+            return "Yesterday";
+          }
+          default: {
+            return realDaysBetween.toString() + " days ago";
+          }
+        }
       }
-      case daysSinceReceived > 2: {
-        return Math.floor(daysSinceReceived).toString() + " days ago";
+      default: {
+        return eventDate.toLocaleDateString();
       }
     }
   }
@@ -153,7 +265,12 @@ export class ConversationsFormatter{
 
   public GetFormattedDateForAttachments(attachments: Array<ChatMessage>) {
     let date = new Date();
-    let attachmentDate = (<Date>attachments[0].timeReceived);
+
+    if (!<Date>attachments[0].timeReceived) {
+      attachments[0].timeReceived = new Date(<string>attachments[0].timeReceived);
+    }
+
+    let attachmentDate = <Date>attachments[0].timeReceived;
                                       //take zero element, as it's the most recent attachment
     let daysSinceReceived = (date.getTime() - attachmentDate.getTime()) / (1000 * 60 * 60 * 24);
 
@@ -180,9 +297,5 @@ export class ConversationsFormatter{
     }
 
     return conversation.name;
-  }
-
-  public GetMessageTimeFormatted(message: ChatMessage) {
-    return (<Date>message.timeReceived).toLocaleTimeString();
   }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
-using SkiaSharp;
 
 namespace Vibechat.Web.Services.Images
 {
@@ -11,54 +13,62 @@ namespace Vibechat.Web.Services.Images
         /// </summary>
         /// <param name="imageBytes"></param>
         /// <returns>Image, its width and height</returns>
-        public Stream Resize(MemoryStream imageBytes, int scaleWidth, int scaleHeight)
+        public MemoryStream Resize(MemoryStream imageBytes, int width, int height)
         {
-            SKCodec codec = SKCodec.Create(imageBytes);
-
-            SKImageInfo info = codec.Info;
-
-            SKImageInfo desired = new SKImageInfo(scaleWidth, scaleHeight);
-
-            SKBitmap bmp = SKBitmap.Decode(codec, info);
-
-            bmp = bmp.Resize(desired, SKFilterQuality.Medium);
-
-            using (var image = SKImage.FromBitmap(bmp))
-            using (var data = image.Encode(SKEncodedImageFormat.Png, 80))
+            using (var image = new Bitmap(imageBytes))
             {
-                var result = new MemoryStream();
-                data.SaveTo(result);
-                result.Seek(0, SeekOrigin.Begin);
-                return result;
+                var destRect = new Rectangle(0, 0, width, height);
+                using (var destImage = new Bitmap(width, height))
+                {
+                    using (var graphics = Graphics.FromImage(destImage))
+                    {
+                        graphics.CompositingMode = CompositingMode.SourceCopy;
+                        graphics.CompositingQuality = CompositingQuality.HighQuality;
+                        graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        graphics.SmoothingMode = SmoothingMode.HighQuality;
+                        graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                        using (var wrapMode = new ImageAttributes())
+                        {
+                            wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                            graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+                        }
+                    }
+
+                    var resultStream = new MemoryStream();
+                    destImage.Save(resultStream, ImageFormat.Jpeg);
+                    resultStream.Seek(0, SeekOrigin.Begin);
+
+                    return resultStream;
+                }
             }
         }
 
         public ValueTuple<int, int> GetScaledDimensions(MemoryStream image, int maxWidth, int maxHeight)
         {
-            SKCodec codec = SKCodec.Create(image);
-
-            SKImageInfo info = codec.Info;
-
-            int resultingWidth, resultingHeight;
-
-            if (info.Width > info.Height)
+            using (var bitmap = new Bitmap(image))
             {
-                resultingWidth = maxWidth;
+                int resultingWidth, resultingHeight;
 
-                resultingHeight = (int)(maxWidth * (info.Height / (float)info.Width));
-            }
-            else if (info.Width < info.Height)
-            {
-                resultingHeight = maxHeight;
+                if (bitmap.Width > bitmap.Height)
+                {
+                    resultingWidth = maxWidth;
 
-                resultingWidth = (int)(maxHeight * (info.Width / (float)info.Height));
-            }
-            else
-            {
-                resultingWidth = resultingHeight = maxHeight;
-            }
+                    resultingHeight = (int)(maxWidth * (bitmap.Height / (float)bitmap.Width));
+                }
+                else if (bitmap.Width < bitmap.Height)
+                {
+                    resultingHeight = maxHeight;
 
-            return new ValueTuple<int, int>(resultingWidth, resultingHeight);
+                    resultingWidth = (int)(maxHeight * (bitmap.Width / (float)bitmap.Height));
+                }
+                else
+                {
+                    resultingWidth = resultingHeight = maxHeight;
+                }
+
+                return new ValueTuple<int, int>(resultingWidth, resultingHeight);
+            }
         }
     }
 }

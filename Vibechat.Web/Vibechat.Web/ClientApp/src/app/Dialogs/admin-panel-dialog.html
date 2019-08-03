@@ -1,0 +1,50 @@
+<h1 mat-dialog-title>
+  Actions with {{ (data.user.userName.length > 10 )? (data.user.userName | slice:0:10)+'..':(data.user.userName) }}
+</h1>
+<div mat-dialog-content class="adminpanel-content">
+
+  <button mat-button class="adminpanel-button" (click)="Kick()" *ngIf="IsBanAvailable()">
+    <mat-icon class="icon">voice_over_off</mat-icon>
+    <span>Kick this user</span>
+  </button>
+
+  <button mat-button class="adminpanel-button" (click)="Ban()" *ngIf="IsBanAvailable() && !data.user.isBlockedInConversation">
+    <mat-icon class="icon">gavel</mat-icon>
+    <span>Ban this user</span>
+  </button>
+
+  <button mat-button class="adminpanel-button" (click)="UnBan()" *ngIf="IsBanAvailable() && data.user.isBlockedInConversation">
+    <mat-icon class="icon">loop</mat-icon>
+    <span>Unban this user</span>
+  </button>
+
+  <button mat-button class="adminpanel-button" (click)="MakeModerator()" *ngIf="IsCurrentUserCreator() && !IsModerator()">
+    <mat-icon class="icon">person_add</mat-icon>
+    <span>Make a moderator</span>
+  </button>
+
+  <button mat-button class="adminpanel-button" (click)="RemoveModerator()" *ngIf="IsCurrentUserCreator() && IsModerator()">
+    <mat-icon class="icon">loop</mat-icon>
+    <span>Remove moderator privileges</span>
+  </button>
+
+  <h3 *ngIf="!IsCurrentUserCreator() && !IsBanAvailable()">No actions are available for this user.</h3>
+</div>
+
+<style>
+  .adminpanel-content{
+    display: flex;
+    flex-direction: row;
+    justify-content:center;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .icon{
+    color:cadetblue;
+  }
+  .adminpanel-button{
+    display: flex;
+    flex-direction: column;
+    margin-right: 5%;
+  } 
+</style>
