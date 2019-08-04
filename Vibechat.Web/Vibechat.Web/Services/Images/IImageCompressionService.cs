@@ -5,7 +5,7 @@ namespace Vibechat.Web.Services.Images
     public interface IImageCompressionService
     {
         /// <summary>
-        /// Resize an image
+        ///     Resize an image
         /// </summary>
         /// <param name="imageBytes"></param>
         /// <returns>Image, its width and height</returns>

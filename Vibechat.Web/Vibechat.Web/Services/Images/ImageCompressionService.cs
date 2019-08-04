@@ -9,7 +9,7 @@ namespace Vibechat.Web.Services.Images
     public class ImageCompressionService : IImageCompressionService, IImageScalingService
     {
         /// <summary>
-        /// Resize an image
+        ///     Resize an image
         /// </summary>
         /// <param name="imageBytes"></param>
         /// <returns>Image, its width and height</returns>
@@ -31,7 +31,8 @@ namespace Vibechat.Web.Services.Images
                         using (var wrapMode = new ImageAttributes())
                         {
                             wrapMode.SetWrapMode(WrapMode.TileFlipXY);
-                            graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+                            graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel,
+                                wrapMode);
                         }
                     }
 
@@ -54,13 +55,13 @@ namespace Vibechat.Web.Services.Images
                 {
                     resultingWidth = maxWidth;
 
-                    resultingHeight = (int)(maxWidth * (bitmap.Height / (float)bitmap.Width));
+                    resultingHeight = (int) (maxWidth * (bitmap.Height / (float) bitmap.Width));
                 }
                 else if (bitmap.Width < bitmap.Height)
                 {
                     resultingHeight = maxHeight;
 
-                    resultingWidth = (int)(maxHeight * (bitmap.Width / (float)bitmap.Height));
+                    resultingWidth = (int) (maxHeight * (bitmap.Width / (float) bitmap.Height));
                 }
                 else
                 {

@@ -1,11 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using VibeChat.Web;
 using Vibechat.Web.Data.Conversations;
 using Vibechat.Web.Data.DataModels;
-using VibeChat.Web;
 
 namespace Vibechat.Web.Data.Repositories
 {
@@ -20,7 +19,7 @@ namespace Vibechat.Web.Data.Repositories
 
         public void Add(int chatId, string userId, ChatRole role)
         {
-            var newRecord = new ChatRoleDataModel()
+            var newRecord = new ChatRoleDataModel
             {
                 ChatId = chatId,
                 UserId = userId,

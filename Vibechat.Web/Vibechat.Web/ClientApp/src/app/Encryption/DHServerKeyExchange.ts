@@ -1,4 +1,4 @@
-import {ConnectionManager} from "../Connections/ConnectionManager";
+import {SignalrConnection} from "../Connections/signalr-connection.service";
 import {Injectable} from "@angular/core";
 import {Chat} from "../Data/Chat";
 import {ChatsService} from "../Services/ChatsService";
@@ -35,7 +35,7 @@ export class DHServerKeyExchangeService {
   constructor(
     private secureChatsService: SecureChatsService,
     private enc: E2EencryptionService,
-    private connectionManager: ConnectionManager,
+    private connectionManager: SignalrConnection,
     private api: ApiRequestsBuilder,
     private device: DeviceService) {
     this.connectionManager.setDHServerKeyExchangeService(this);

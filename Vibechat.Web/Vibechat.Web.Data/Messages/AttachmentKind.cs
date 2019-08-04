@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Vibechat.Web.Data.Messages
+﻿namespace Vibechat.Web.Data.Messages
 {
     public enum AttachmentKind
     {

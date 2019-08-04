@@ -1,4 +1,4 @@
-import { UserInfo } from "../Data/UserInfo";
+import { AppUser } from "../Data/AppUser";
 
 export class AddedToGroupModel {
   public constructor(init?: Partial<AddedToGroupModel>) {
@@ -6,5 +6,5 @@ export class AddedToGroupModel {
   }
 
   public chatId: number;
-  public user: UserInfo;
+  public user: AppUser;
 }

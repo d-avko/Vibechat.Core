@@ -1,18 +1,19 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.IdentityModel.Tokens;
 
 namespace VibeChat.Web
 {
     public static class JwtHelper
     {
         public const string JwtUserIdClaimName = "UserId";
+
         /// <summary>
-        /// Generates jwt token and returns it as string
+        ///     Generates jwt token and returns it as string
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
@@ -29,15 +30,15 @@ namespace VibeChat.Web
             var credentials = new SigningCredentials(
                 new SymmetricSecurityKey(Encoding.UTF8.GetBytes(DI.Configuration["Jwt:SecretKey"])),
                 SecurityAlgorithms.HmacSha256
-                );
+            );
 
             var token = new JwtSecurityToken(
-                issuer: DI.Configuration["Jwt:Issuer"],
-                audience: DI.Configuration["Jwt:Audience"],
-                claims: claims,
+                DI.Configuration["Jwt:Issuer"],
+                DI.Configuration["Jwt:Audience"],
+                claims,
                 signingCredentials: credentials,
                 expires: DateTime.UtcNow.AddYears(1)
-                );
+            );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
@@ -45,7 +46,7 @@ namespace VibeChat.Web
         public static string GenerateToken(this AppUser user)
         {
             var claims = new[]
-           {
+            {
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
                 new Claim(ClaimsIdentity.DefaultNameClaimType, user.UserName),
                 //add custom claim to identify the user by his id
@@ -55,14 +56,14 @@ namespace VibeChat.Web
             var credentials = new SigningCredentials(
                 new SymmetricSecurityKey(Encoding.UTF8.GetBytes(DI.Configuration["Jwt:SecretKey"])),
                 SecurityAlgorithms.HmacSha256
-                );
+            );
 
             var token = new JwtSecurityToken(
-               issuer: DI.Configuration["Jwt:Issuer"],
-               audience: DI.Configuration["Jwt:Audience"],
-               claims: claims,
-               signingCredentials: credentials,
-               expires: DateTime.UtcNow.AddMinutes(10)
+                DI.Configuration["Jwt:Issuer"],
+                DI.Configuration["Jwt:Audience"],
+                claims,
+                signingCredentials: credentials,
+                expires: DateTime.UtcNow.AddMinutes(10)
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);

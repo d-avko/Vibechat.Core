@@ -8,12 +8,12 @@ namespace Vibechat.Web.Data.Repositories
 {
     public class UsersConversationsRepository : IUsersConversationsRepository
     {
-        private ApplicationDbContext mContext { get; set; }
-
         public UsersConversationsRepository(ApplicationDbContext dbContext)
         {
-            this.mContext = dbContext;
+            mContext = dbContext;
         }
+
+        private ApplicationDbContext mContext { get; }
 
         public AppUser GetUserInDialog(int convId, string FirstUserInDialogueId)
         {
@@ -26,25 +26,25 @@ namespace Vibechat.Web.Data.Repositories
 
         public IQueryable<ConversationDataModel> GetUserConversations(string deviceId, string userId)
         {
-
-            return (from userConversation in mContext.UsersConversations //deviceId could be null because key exchange didn't finish
-                    where userConversation.UserID == userId && (userConversation.DeviceId == deviceId || userConversation.DeviceId == null)
+            return (from userConversation in
+                        mContext.UsersConversations //deviceId could be null because key exchange didn't finish
+                    where userConversation.UserID == userId &&
+                          (userConversation.DeviceId == deviceId || userConversation.DeviceId == null)
                     select userConversation.Conversation
-                   )
-                   .Include(x => x.PublicKey);
+                )
+                .Include(x => x.PublicKey);
         }
 
         public IQueryable<AppUser> GetConversationParticipants(int conversationId)
         {
             return from userConversation in mContext.UsersConversations
-                   where userConversation.ChatID == conversationId
-                   select userConversation.User;
+                where userConversation.ChatID == conversationId
+                select userConversation.User;
         }
 
         public Task<List<AppUser>> FindUsersInChat(string username, int chatId)
         {
-            return mContext.
-                UsersConversations
+            return mContext.UsersConversations
                 .Where(x => x.ChatID == chatId && EF.Functions.Like(x.User.UserName, username + "%"))
                 .Select(x => x.User).ToListAsync();
         }
@@ -60,7 +60,8 @@ namespace Vibechat.Web.Data.Repositories
         public async Task<bool> Exists(string userId, int conversationId)
         {
             return await mContext.UsersConversations
-                .SingleOrDefaultAsync(x => x.ChatID == conversationId && x.UserID == userId) != default(UsersConversationDataModel);
+                       .SingleOrDefaultAsync(x => x.ChatID == conversationId && x.UserID == userId) !=
+                   default(UsersConversationDataModel);
         }
 
         public void Remove(UsersConversationDataModel entity)
@@ -70,7 +71,7 @@ namespace Vibechat.Web.Data.Repositories
 
         public UsersConversationDataModel Add(string userId, int chatId, string deviceId = null)
         {
-            return mContext.UsersConversations.Add(new UsersConversationDataModel()
+            return mContext.UsersConversations.Add(new UsersConversationDataModel
             {
                 ChatID = chatId,
                 UserID = userId,
@@ -86,33 +87,30 @@ namespace Vibechat.Web.Data.Repositories
             chat.DeviceId = deviceId;
         }
 
-        public async Task<bool> Exists(AppUser user, ConversationDataModel conversation)
-        {
-            return await mContext
-                .UsersConversations
-                .FirstOrDefaultAsync(x => x.ChatID == conversation.Id && x.UserID == user.Id) != default(UsersConversationDataModel);
-        }
-
 
         public async Task<UsersConversationDataModel> GetDialog(string firstUserId, string secondUserId)
         {
             IQueryable<UsersConversationDataModel> firstUserConversations = mContext
-              .UsersConversations
-              .Where(x => x.UserID == firstUserId && !x.Conversation.IsGroup)
-              .Include(x => x.Conversation)
-              .Include(x => x.User);
+                .UsersConversations
+                .Where(x => x.UserID == firstUserId && !x.Conversation.IsGroup)
+                .Include(x => x.Conversation)
+                .Include(x => x.User);
 
-            foreach (UsersConversationDataModel conversation in firstUserConversations)
-            {
+            foreach (var conversation in firstUserConversations)
                 if (await mContext
                     .UsersConversations
                     .AnyAsync(x => x.ChatID == conversation.ChatID && x.UserID == secondUserId))
-                {
                     return conversation;
-                }
-            }
 
             return null;
+        }
+
+        public async Task<bool> Exists(AppUser user, ConversationDataModel conversation)
+        {
+            return await mContext
+                       .UsersConversations
+                       .FirstOrDefaultAsync(x => x.ChatID == conversation.Id && x.UserID == user.Id) !=
+                   default(UsersConversationDataModel);
         }
     }
 }

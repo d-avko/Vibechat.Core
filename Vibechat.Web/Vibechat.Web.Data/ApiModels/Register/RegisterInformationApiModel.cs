@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace VibeChat.Web.ApiModels
+﻿namespace VibeChat.Web.ApiModels
 {
-     public class RegisterInformationApiModel
-     {
+    public class RegisterInformationApiModel
+    {
         public string PhoneNumber { get; set; }
         public string UserName { get; set; }
 
@@ -16,5 +10,5 @@ namespace VibeChat.Web.ApiModels
         public string LastName { get; set; }
 
         public string Id { get; set; }
-     }
+    }
 }

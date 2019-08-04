@@ -4,10 +4,10 @@ import {AuthService} from "../Auth/AuthService";
 import {AddedToGroupModel} from "../Shared/AddedToGroupModel";
 import {Message} from "../Data/Message";
 import {ApiRequestsBuilder} from "../Requests/ApiRequestsBuilder";
-import {BanEvent, ConnectionManager} from "../Connections/ConnectionManager";
+import {BanEvent, SignalrConnection} from "../Connections/signalr-connection.service";
 import {RemovedFromGroupModel} from "../Shared/RemovedFromGroupModel";
 import {MessageState} from "../Shared/MessageState";
-import {UserInfo} from "../Data/UserInfo";
+import {AppUser} from "../Data/AppUser";
 import {Attachment} from "../Data/Attachment";
 import {Injectable} from "@angular/core";
 import {SecureChatsService} from "../Encryption/SecureChatsService";
@@ -27,7 +27,7 @@ export class ChatsService {
   constructor(
     private authService: AuthService,
     private requestsBuilder: ApiRequestsBuilder,
-    private connectionManager: ConnectionManager,
+    private connectionManager: SignalrConnection,
     private secureChatsService: SecureChatsService,
     private encryptionService: E2EencryptionService,
     private messagesService: MessageReportingService,
@@ -35,7 +35,7 @@ export class ChatsService {
     private images: ImageScalingService,
     private device: DeviceService)
   {
-    this.connectionManager.setConversationsService(this);
+    this.connectionManager.setChatsService(this);
     this.PendingReadMessages = new Array<number>();
     this.dh.setChatService(this);
   }
@@ -103,7 +103,7 @@ export class ChatsService {
 
       if (!conversation.dialogueUser.isOnline) {
 
-        if (!this.connectionManager.SubsribeToUserOnlineStatusChanges(conversation.dialogueUser.id)) {
+        if (!this.connectionManager.SubscribeToUserOnlineStatusChanges(conversation.dialogueUser.id)) {
           this.messagesService.OnFailedToSubsribeToUserStatusChanges();
         } else {
           this.messagesService.OnWaitingForUserToComeOnline()
@@ -222,7 +222,7 @@ export class ChatsService {
     }
 
     this.dh.InitiateKeyExchange(dialog);
-    this.connectionManager.UnsubsribeFromUserOnlineStatusChanges(user);
+    this.connectionManager.UnsubscribeFromUserOnlineStatusChanges(user);
   }
 
   public async FindGroupsByName(name: string) {
@@ -249,7 +249,7 @@ export class ChatsService {
     }
   }
 
-  public CreateSecureChat(user: UserInfo) : boolean {
+  public CreateSecureChat(user: AppUser) : boolean {
     let dialog = this.FindDialogWithSecurityCheck(user, true);
 
     if (dialog) {
@@ -404,7 +404,7 @@ export class ChatsService {
   }
 
   public async DeleteMessages(messages: Array<Message>, from: Chat) {
-    let notLocalMessages = messages.filter(x => x.state != MessageState.Pending)
+    let notLocalMessages = messages.filter(x => x.state != MessageState.Pending);
 
     //delete local unsent messages
     from.messages = from.messages
@@ -451,7 +451,7 @@ export class ChatsService {
           conversation.messages = new Array<Message>();
         }
 
-      })
+      });
 
     let toDeleteIndexes = [];
 
@@ -586,11 +586,11 @@ export class ChatsService {
       });
   }
 
-  public async BanFromConversation(userToBan: UserInfo, from: Chat) : Promise<boolean> {
+  public async BanFromConversation(userToBan: AppUser, from: Chat) : Promise<boolean> {
     return await this.connectionManager.BlockUserInChat(userToBan.id, from.id, BanEvent.Banned);
   }
 
-  public async UnbanFromConversation(userToUnban: UserInfo, from: Chat): Promise<boolean> {
+  public async UnbanFromConversation(userToUnban: AppUser, from: Chat): Promise<boolean> {
     return await this.connectionManager.BlockUserInChat(userToUnban.id, from.id, BanEvent.Unbanned);
   }
 
@@ -633,7 +633,7 @@ export class ChatsService {
     await this.SendChatMessage(messageToSend, to);
   }
 
-  public async FindUsersInChat(username: string, chatId: number) : Promise<Array<UserInfo>> {
+  public async FindUsersInChat(username: string, chatId: number) : Promise<Array<AppUser>> {
     let result = await this.requestsBuilder.FindUsersInChat(username, chatId);
 
     if (!result.isSuccessfull) {
@@ -685,11 +685,11 @@ export class ChatsService {
     this.Conversations = [...this.Conversations, result.response];
   }
 
-  public CreateDialogWith(user: UserInfo, secure: boolean) {
+  public CreateDialogWith(user: AppUser, secure: boolean) {
     this.connectionManager.CreateDialog(user, secure);
   }
 
-  public RemoveDialogWith(user: UserInfo) {
+  public RemoveDialogWith(user: AppUser) {
     this.connectionManager.RemoveConversation(this.FindDialogWith(user));
   }
 
@@ -709,7 +709,7 @@ export class ChatsService {
     this.Conversations = [...this.Conversations, chat.response];
   }
 
-  public KickUser(user: UserInfo, from: Chat) {
+  public KickUser(user: AppUser, from: Chat) {
     this.connectionManager.RemoveUserFromConversation(user.id, from.id, false);
   }
 
@@ -717,7 +717,7 @@ export class ChatsService {
     return this.Conversations.find(x => x.id == id) != null;
   }
 
-  public FindDialogWith(user: UserInfo) {
+  public FindDialogWith(user: AppUser) {
     return this.Conversations.find(x => !x.isGroup && x.dialogueUser.id == user.id);
   }
 
@@ -725,7 +725,7 @@ export class ChatsService {
     return this.Conversations.find(x => !x.isGroup && x.dialogueUser.id == userId);
   }
 
-  public FindDialogWithSecurityCheck(user: UserInfo, secure: boolean) {
+  public FindDialogWithSecurityCheck(user: AppUser, secure: boolean) {
     return this.Conversations.find(x =>
         !x.isGroup
         && x.dialogueUser.id == user.id
@@ -765,7 +765,7 @@ export class ChatsService {
   }
 
   public async RemoveAllMessages(group: Chat) : Promise<void> {
-    let response = await this.requestsBuilder.DeleteMessages(group.messages, group.id)
+    let response = await this.requestsBuilder.DeleteMessages(group.messages, group.id);
 
     if (!response.isSuccessfull) {
       return;
@@ -806,7 +806,7 @@ export class ChatsService {
     where.name = name;
   }
 
-  public InviteUsersToGroup(users: Array<UserInfo>, group: Chat) {
+  public InviteUsersToGroup(users: Array<AppUser>, group: Chat) {
     if (users == null || users.length == 0) {
       return;
     }
@@ -955,7 +955,7 @@ export class ChatsService {
 
   public async UploadFile(file: File, progress: (value: number) => void, to: Chat) {
 
-    let response = await this.requestsBuilder.UploadFile(file, progress, to.id)
+    let response = await this.requestsBuilder.UploadFile(file, progress, to.id);
 
     if (!response.isSuccessfull) {
       return;
@@ -977,7 +977,7 @@ export class ChatsService {
 
     let conversationToSend = to.id;
 
-    let response = await this.requestsBuilder.UploadImages(files, progress, to.id)
+    let response = await this.requestsBuilder.UploadImages(files, progress, to.id);
 
     if (!response.isSuccessfull) {
       this.messagesService.DisplayMessage("Some files were not uploaded.");

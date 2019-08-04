@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
-using VibeChat.Web;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Vibechat.Web.Data.DataModels
 {
     public class DhPublicKeyDataModel
     {
-        [Key]
-        public int Id { get; set; }
+        [Key] public int Id { get; set; }
 
         public string Modulus { get; set; }
 

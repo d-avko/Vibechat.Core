@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Vibechat.Web.ChatData.Messages;
+﻿using Vibechat.Web.ChatData.Messages;
 
 namespace VibeChat.Web.ChatData
 {
@@ -10,8 +8,8 @@ namespace VibeChat.Web.ChatData
         public UserInfo User { get; set; }
         public string MessageContent { get; set; }
         public int ConversationID { get; set; }
-        public string TimeReceived{ get; set; }
-        
+        public string TimeReceived { get; set; }
+
         public Message ForwardedMessage { get; set; }
 
         public bool IsAttachment { get; set; }
@@ -21,7 +19,7 @@ namespace VibeChat.Web.ChatData
         public MessageState State { get; set; }
 
         /// <summary>
-        /// if this message is from private chat, store payload there.
+        ///     if this message is from private chat, store payload there.
         /// </summary>
         public string EncryptedPayload { get; set; }
     }

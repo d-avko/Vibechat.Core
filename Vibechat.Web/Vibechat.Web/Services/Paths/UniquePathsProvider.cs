@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Vibechat.Web.Services.Hashing;
 
 namespace Vibechat.Web.Services.Paths
@@ -14,12 +11,14 @@ namespace Vibechat.Web.Services.Paths
         {
             this.hasher = hasher;
         }
-        private IHexHashingService hasher { get; set; }
-        
+
+        private IHexHashingService hasher { get; }
+
         public string GetUniquePath(string randomizeValue)
         {
-            return hasher.Hash(Encoding.UTF8.GetBytes(DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fffffffK") + randomizeValue)) + Path.DirectorySeparatorChar;
+            return hasher.Hash(
+                       Encoding.UTF8.GetBytes(DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fffffffK") +
+                                              randomizeValue)) + Path.DirectorySeparatorChar;
         }
-
     }
 }

@@ -12,16 +12,16 @@ namespace Vibechat.Web.Data.Repositories
 {
     public class MessagesRepository : IMessagesRepository
     {
-        private ApplicationDbContext mContext { get; set; }
-
         public MessagesRepository(ApplicationDbContext dbContext)
         {
-            this.mContext = dbContext;
+            mContext = dbContext;
         }
+
+        private ApplicationDbContext mContext { get; }
 
         public MessageDataModel Add(AppUser whoSent, Message message, int groupId, MessageDataModel forwardedMessage)
         {
-            return mContext.Messages.Add(new MessageDataModel()
+            return mContext.Messages.Add(new MessageDataModel
             {
                 ConversationID = groupId,
                 MessageContent = message.MessageContent,
@@ -35,7 +35,7 @@ namespace Vibechat.Web.Data.Repositories
 
         public MessageDataModel AddSecureMessage(AppUser whoSent, string message, int groupId)
         {
-            return mContext.Messages.Add(new MessageDataModel()
+            return mContext.Messages.Add(new MessageDataModel
             {
                 ConversationID = groupId,
                 TimeReceived = DateTime.UtcNow,
@@ -52,7 +52,7 @@ namespace Vibechat.Web.Data.Repositories
             Message message,
             int groupId)
         {
-            return mContext.Messages.Add(new MessageDataModel()
+            return mContext.Messages.Add(new MessageDataModel
             {
                 ConversationID = groupId,
                 MessageContent = message.MessageContent,
@@ -68,11 +68,11 @@ namespace Vibechat.Web.Data.Repositories
         {
             mContext.DeletedMessages.AddRange(
                 messagesIds
-                .Select(msgId => new DeletedMessagesDataModel()
-                {
-                    UserId = whoRemovedId,
-                    Message = mContext.Messages.First(msg => msg.MessageID == msgId)
-                }));
+                    .Select(msgId => new DeletedMessagesDataModel
+                    {
+                        UserId = whoRemovedId,
+                        Message = mContext.Messages.First(msg => msg.MessageID == msgId)
+                    }));
         }
 
         public void RemovePermanent(List<MessageDataModel> messages)
@@ -102,16 +102,16 @@ namespace Vibechat.Web.Data.Repositories
             string userId,
             int conversationId,
             int maxMessageId = -1,
-            bool allMessages = false, 
-            int offset = 0, 
+            bool allMessages = false,
+            int offset = 0,
             int count = 0)
         {
             var deletedMessages = mContext
-            .DeletedMessages
-            .Where(msg => msg.Message.ConversationID == conversationId && msg.UserId == userId);
+                .DeletedMessages
+                .Where(msg => msg.Message.ConversationID == conversationId && msg.UserId == userId);
 
             IQueryable<MessageDataModel> query;
-            
+
             if (allMessages)
             {
                 query = mContext
@@ -122,7 +122,6 @@ namespace Vibechat.Web.Data.Repositories
             else
             {
                 if (maxMessageId != -1)
-                {
                     query = mContext
                         .Messages
                         .Where(msg => msg.ConversationID == conversationId
@@ -131,9 +130,7 @@ namespace Vibechat.Web.Data.Repositories
                         .OrderBy(msg => msg.TimeReceived)
                         .Skip(offset)
                         .Take(count);
-                }
                 else
-                {
                     query = mContext
                         .Messages
                         .Where(msg =>
@@ -142,10 +139,9 @@ namespace Vibechat.Web.Data.Repositories
                         .OrderByDescending(x => x.TimeReceived)
                         .Skip(offset)
                         .Take(count);
-                }   
             }
 
-            return  query
+            return query
                 .Include(msg => msg.User)
                 .Include(msg => msg.AttachmentInfo)
                 .Include(x => x.AttachmentInfo)
@@ -159,23 +155,23 @@ namespace Vibechat.Web.Data.Repositories
         }
 
         public IIncludableQueryable<MessageDataModel, AppUser> GetAttachments(
-            string userId, 
-            int conversationId, 
+            string userId,
+            int conversationId,
             AttachmentKind attachmentKind,
             int offset,
             int count)
         {
             var deletedMessages = mContext
-              .DeletedMessages
-              .Where(msg => msg.Message.ConversationID == conversationId && msg.UserId == userId);
+                .DeletedMessages
+                .Where(msg => msg.Message.ConversationID == conversationId && msg.UserId == userId);
 
             return mContext
                 .Messages
-                .Where(msg => 
-                msg.ConversationID == conversationId 
-                && msg.IsAttachment 
-                && msg.AttachmentInfo.AttachmentKind.Kind == attachmentKind 
-                && !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID))
+                .Where(msg =>
+                    msg.ConversationID == conversationId
+                    && msg.IsAttachment
+                    && msg.AttachmentInfo.AttachmentKind.Kind == attachmentKind
+                    && !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID))
                 .OrderByDescending(x => x.TimeReceived)
                 .Skip(offset)
                 .Take(count)
@@ -188,15 +184,15 @@ namespace Vibechat.Web.Data.Repositories
                 .Include(x => x.ForwardedMessage)
                 .ThenInclude(x => x.User);
         }
-        
+
         public int GetUnreadAmount(int conversationId, string userId, int lastMessageId)
         {
             var deletedMessages = mContext
-             .DeletedMessages
-             .Where(msg => msg.Message.ConversationID == conversationId && msg.UserId == userId);
-            
-            return  mContext
-                .Messages.Count(msg => msg.ConversationID == conversationId 
+                .DeletedMessages
+                .Where(msg => msg.Message.ConversationID == conversationId && msg.UserId == userId);
+
+            return mContext
+                .Messages.Count(msg => msg.ConversationID == conversationId
                                        && !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID)
                                        && msg.MessageID > lastMessageId);
         }
@@ -205,6 +201,5 @@ namespace Vibechat.Web.Data.Repositories
         {
             return mContext.Messages == null;
         }
-
     }
 }

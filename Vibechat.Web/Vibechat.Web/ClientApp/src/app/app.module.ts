@@ -8,7 +8,6 @@ import { LoginModule } from './Modules/LoginModule';
 import { AuthService } from './Auth/AuthService';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
-import { LoadingScreenService } from './Loading/LoadingScreenService';
 import { MaterialModule } from './material.module';
 import { BrowserModule } from '@angular/platform-browser';
 
@@ -24,7 +23,7 @@ import { BrowserModule } from '@angular/platform-browser';
     MaterialModule,
     ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
   ],
-  providers: [ApiRequestsBuilder, AuthService, LoadingScreenService],
+  providers: [ApiRequestsBuilder, AuthService],
   bootstrap: [AppComponent]
 })
 export class AppModule {}

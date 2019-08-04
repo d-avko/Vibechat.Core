@@ -2,7 +2,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Threading.Tasks;
 using Vibechat.Web.Data.Repositories;
-using VibeChat.Web;
 
 namespace Vibechat.Web.AuthHelpers
 {
@@ -19,26 +18,17 @@ namespace Vibechat.Web.AuthHelpers
 
         public async Task<bool> Validate(string userId, string refreshToken)
         {
-            AppUser user = await UsersRepository.GetById(userId);
+            var user = await UsersRepository.GetById(userId);
 
-            if(user == null)
-            {
-                return false;
-            }
+            if (user == null) return false;
 
-            string token = await UsersRepository.GetRefreshToken(userId);
-            
-            if(token != refreshToken)
-            {
-                return false;
-            }
+            var token = await UsersRepository.GetRefreshToken(userId);
 
-            JwtSecurityToken parsedToken = tokensHandler.ReadJwtToken(refreshToken);
+            if (token != refreshToken) return false;
 
-            if(parsedToken.ValidTo < DateTime.Now)
-            {
-                return false;
-            }
+            var parsedToken = tokensHandler.ReadJwtToken(refreshToken);
+
+            if (parsedToken.ValidTo < DateTime.Now) return false;
 
             return true;
         }

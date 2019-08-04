@@ -16,7 +16,7 @@ import {animate, state, style, transition, trigger} from "@angular/animations";
 import {Message} from '../../Data/Message';
 import {ConversationsFormatter} from '../../Formatters/ConversationsFormatter';
 import {AttachmentKind} from '../../Data/AttachmentKinds';
-import {UserInfo} from '../../Data/UserInfo';
+import {AppUser} from '../../Data/AppUser';
 import {MatDialog} from '@angular/material';
 import {MessageState} from '../../Shared/MessageState';
 import {ChatsService} from '../../Services/ChatsService';
@@ -64,7 +64,7 @@ export class MessagesComponent implements AfterViewChecked, AfterContentInit, Af
 
   @Input() public CurrentConversation: Chat;
 
-  @Output() public OnViewUserInfo = new EventEmitter<UserInfo>();
+  @Output() public OnViewUserInfo = new EventEmitter<AppUser>();
 
   public HistoryLoading: boolean;
 
@@ -111,8 +111,9 @@ export class MessagesComponent implements AfterViewChecked, AfterContentInit, Af
     if (!this.CurrentConversation.messages || this.CurrentConversation.messages.length == 0) {
       return;
     }
-
-    this.ReadMessagesInViewport();
+    if(!this.CurrentConversation.isGroup){
+      this.ReadMessagesInViewport();
+    }
   }
 
   ScrollToLastMessage() {
@@ -259,7 +260,7 @@ export class MessagesComponent implements AfterViewChecked, AfterContentInit, Af
     }
   }
 
-  public ViewUserInfo(event: any, user: UserInfo) {
+  public ViewUserInfo(event: any, user: AppUser) {
   // do not highlight the message, just show user profile.
     event.stopPropagation();
     this.OnViewUserInfo.emit(user);

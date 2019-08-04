@@ -13,7 +13,7 @@ namespace Vibechat.Web.Extensions
     {
         public static UserInfo ToUserInfo(this AppUser user)
         {
-            return new UserInfo()
+            return new UserInfo
             {
                 Id = user.Id,
                 Name = user.FirstName,
@@ -30,7 +30,7 @@ namespace Vibechat.Web.Extensions
 
         public static MessageAttachment ToMessageAttachment(this MessageAttachmentDataModel value)
         {
-            return new MessageAttachment()
+            return new MessageAttachment
             {
                 AttachmentKind = value.AttachmentKind.Kind,
                 ContentUrl = value.ContentUrl,
@@ -43,7 +43,7 @@ namespace Vibechat.Web.Extensions
 
         public static DhPublicKey ToDhPublicKey(this DhPublicKeyDataModel value)
         {
-            return new DhPublicKey()
+            return new DhPublicKey
             {
                 Generator = value.Generator,
                 Modulus = value.Modulus
@@ -51,7 +51,7 @@ namespace Vibechat.Web.Extensions
         }
 
         public static Chat ToChatDto(
-            this ConversationDataModel value, 
+            this ConversationDataModel value,
             List<UserInfo> participants,
             AppUser dialogUser,
             DhPublicKeyDataModel key,
@@ -60,7 +60,7 @@ namespace Vibechat.Web.Extensions
             int lastMessageId,
             Message lastMessage)
         {
-            return new Chat()
+            return new Chat
             {
                 Name = value.Name,
                 Id = value.Id,
@@ -81,7 +81,7 @@ namespace Vibechat.Web.Extensions
 
         public static Message ToMessage(this MessageDataModel value)
         {
-            return new Message()
+            return new Message
             {
                 Id = value.MessageID,
                 ConversationID = value.ConversationID,
@@ -98,7 +98,7 @@ namespace Vibechat.Web.Extensions
 
         public static ChatRoleDto ToChatRole(this ChatRoleDataModel value)
         {
-            return new ChatRoleDto()
+            return new ChatRoleDto
             {
                 ChatId = value.ChatId,
                 Role = value.RoleId

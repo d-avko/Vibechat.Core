@@ -1,4 +1,4 @@
-import {UserInfo} from "./UserInfo";
+import {AppUser} from "./AppUser";
 import {Attachment} from "./Attachment";
 
 export class Message {
@@ -8,7 +8,7 @@ export class Message {
 
   public id: number;
 
-  public user: UserInfo;
+  public user: AppUser;
 
   public messageContent: string;
 

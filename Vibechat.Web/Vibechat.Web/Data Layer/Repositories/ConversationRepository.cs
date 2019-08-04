@@ -1,20 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Vibechat.Web.Data.DataModels;
+﻿using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using VibeChat.Web;
 
 namespace Vibechat.Web.Data.Repositories
 {
     public class ConversationsRepository : IConversationRepository
     {
-        private ApplicationDbContext mContext { get; set; }
         public ConversationsRepository(ApplicationDbContext dbContext)
         {
-            this.mContext = dbContext;
+            mContext = dbContext;
         }
+
+        private ApplicationDbContext mContext { get; }
 
         public ConversationDataModel GetById(int id)
         {

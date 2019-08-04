@@ -1,8 +1,8 @@
 import {Component, EventEmitter, Inject, ViewContainerRef} from "@angular/core";
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from "@angular/material";
-import {ChatComponent} from "../Chat/chat.component";
+import {ChatComponent} from "../UiComponents/Chat/chat.component";
 import {Chat} from "../Data/Chat";
-import {UserInfo} from "../Data/UserInfo";
+import {AppUser} from "../Data/AppUser";
 import {ConversationsFormatter} from "../Formatters/ConversationsFormatter";
 import {ChangeNameDialogComponent} from "./ChangeNameDialog";
 import {FindUsersDialogComponent} from "./FindUsersDialog";
@@ -17,7 +17,7 @@ import {AuthService} from "../Auth/AuthService";
 
 export interface  GroupInfoData {
   Conversation: Chat;
-  user: UserInfo;
+  user: AppUser;
   ExistsInThisGroup: boolean;
 }
 
@@ -27,7 +27,7 @@ export interface  GroupInfoData {
 })
 export class GroupInfoDialogComponent {
 
-  public OnViewUserInfo = new EventEmitter<UserInfo>();
+  public OnViewUserInfo = new EventEmitter<AppUser>();
 
   public OnJoinGroup = new EventEmitter<Chat>();
 
@@ -84,7 +84,7 @@ export class GroupInfoDialogComponent {
     return await this.chats.RemoveModerator(chatId, userId);
   }
 
-  public ViewUserInfo(user: UserInfo) {
+  public ViewUserInfo(user: AppUser) {
     this.OnViewUserInfo.emit(user);
   }
 
@@ -116,7 +116,7 @@ export class GroupInfoDialogComponent {
       || this.data.Conversation.chatRole.role == ChatRole.Creator;
   }
 
-  public KickUser(user: UserInfo) {
+  public KickUser(user: AppUser) {
     this.chats.KickUser(user, this.data.Conversation);
 
     if (this.auth.User.id == user.id) {
@@ -125,7 +125,7 @@ export class GroupInfoDialogComponent {
     }
   }
 
-  public async BanUser(user: UserInfo) {
+  public async BanUser(user: AppUser) {
     let result = await this.chats.BanFromConversation(user, this.data.Conversation);
 
     if (!result) {
@@ -135,7 +135,7 @@ export class GroupInfoDialogComponent {
     user.isBlockedInConversation = true;
   }
 
-  public async UnbanUser(user: UserInfo) {
+  public async UnbanUser(user: AppUser) {
     let result = await this.chats.UnbanFromConversation(user, this.data.Conversation);
 
     if (!result) {

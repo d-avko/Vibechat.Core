@@ -1,18 +1,17 @@
 ﻿using System.Linq;
-using System.Threading.Tasks;
-using Vibechat.Web.Data.DataModels;
 using VibeChat.Web;
+using Vibechat.Web.Data.DataModels;
 
 namespace Vibechat.Web.Data.Repositories
 {
     public class ContactsRepository : IContactsRepository
     {
-        private ApplicationDbContext mContext { get; set; }
-
         public ContactsRepository(ApplicationDbContext dbContext)
         {
-            this.mContext = dbContext;
+            mContext = dbContext;
         }
+
+        private ApplicationDbContext mContext { get; }
 
         public IQueryable<ContactsDataModel> GetContactsOf(string id)
         {
@@ -21,13 +20,14 @@ namespace Vibechat.Web.Data.Repositories
 
         public void RemoveContact(string whoRemovesId, string contactId)
         {
-            var contact = mContext.Contacts.FirstOrDefault(x => x.FirstUserID == whoRemovesId && x.SecondUserID == contactId);
+            var contact =
+                mContext.Contacts.FirstOrDefault(x => x.FirstUserID == whoRemovesId && x.SecondUserID == contactId);
             mContext.Contacts.Remove(contact);
         }
 
         public void AddContact(string whoAdds, string contact)
         {
-            mContext.Contacts.Add(new ContactsDataModel() { FirstUserID = whoAdds, SecondUserID = contact });
+            mContext.Contacts.Add(new ContactsDataModel {FirstUserID = whoAdds, SecondUserID = contact});
         }
     }
 }

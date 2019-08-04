@@ -1,17 +1,17 @@
-import {UserInfo} from "../Data/UserInfo";
+import {AppUser} from "../Data/AppUser";
 import {Component, Inject} from "@angular/core";
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material";
-import {ChatComponent} from "../Chat/chat.component";
+import {ChatComponent} from "../UiComponents/Chat/chat.component";
 import {Chat} from "../Data/Chat";
 import {ChatRole} from "../Roles/ChatRole";
 import {AuthService} from "../Auth/AuthService";
 
 export interface AdminPanelDialogData {
-  user: UserInfo;
+  user: AppUser;
   chat: Chat;
-  kickFunc: (user: UserInfo) => void;
-  banFunc: (user: UserInfo) => Promise<boolean>;
-  unBanFunc: (user: UserInfo) => Promise<boolean>;
+  kickFunc: (user: AppUser) => void;
+  banFunc: (user: AppUser) => Promise<boolean>;
+  unBanFunc: (user: AppUser) => Promise<boolean>;
   makeModerFunc: (userId: string, chatId: number) => Promise<boolean>;
   removeModerFunc: (userId: string, chatId: number) => Promise<boolean>;
 }

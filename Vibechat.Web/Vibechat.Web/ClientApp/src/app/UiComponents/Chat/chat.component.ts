@@ -1,21 +1,21 @@
 import {Component, OnInit, ViewChild} from "@angular/core";
-import {Chat} from "../Data/Chat";
-import {AuthService} from "../Auth/AuthService";
+import {Chat} from "../../Data/Chat";
+import {AuthService} from "../../Auth/AuthService";
 import {MatDialog, MatDrawer} from "@angular/material";
 import {animate, state, style, transition, trigger} from "@angular/animations";
-import {ConversationsFormatter} from "../Formatters/ConversationsFormatter";
-import {MessagesComponent} from "../Conversation/Messages/messages.component";
-import {UserInfo} from "../Data/UserInfo";
-import {AddGroupDialogComponent} from "../Dialogs/AddGroupDialog";
-import {GroupInfoDialogComponent} from "../Dialogs/GroupInfoDialog";
-import {SearchListComponent} from "../Search/searchlist.component";
-import {UserInfoDialogComponent} from "../Dialogs/UserInfoDialog";
-import {UsersService} from "../Services/UsersService";
-import {ChatsService} from "../Services/ChatsService";
-import {ThemesService} from "../Theming/ThemesService";
-import {ChooseContactDialogComponent} from "../Dialogs/ChooseContactDialog";
-import {SnackBarHelper} from "../Snackbar/SnackbarHelper";
-import {DeviceService} from "../Services/DeviceService";
+import {ConversationsFormatter} from "../../Formatters/ConversationsFormatter";
+import {MessagesComponent} from "../Messages/messages.component";
+import {AppUser} from "../../Data/AppUser";
+import {AddGroupDialogComponent} from "../../Dialogs/AddGroupDialog";
+import {GroupInfoDialogComponent} from "../../Dialogs/GroupInfoDialog";
+import {SearchListComponent} from "../../Search/searchlist.component";
+import {UserInfoDialogComponent} from "../../Dialogs/UserInfoDialog";
+import {UsersService} from "../../Services/UsersService";
+import {ChatsService} from "../../Services/ChatsService";
+import {ThemesService} from "../../Theming/ThemesService";
+import {ChooseContactDialogComponent} from "../../Dialogs/ChooseContactDialog";
+import {SnackBarHelper} from "../../Snackbar/SnackbarHelper";
+import {DeviceService} from "../../Services/DeviceService";
 import {Router} from "@angular/router";
 
 @Component({
@@ -109,7 +109,7 @@ export class ChatComponent implements OnInit {
 
     groupInfoRef.componentInstance
       .OnViewUserInfo
-      .subscribe((user: UserInfo) => this.OnViewUserInfo(user, null));
+      .subscribe((user: AppUser) => this.OnViewUserInfo(user, null));
 
     groupInfoRef.componentInstance
       .OnJoinGroup
@@ -151,7 +151,7 @@ export class ChatComponent implements OnInit {
     this.conversationsService.JoinGroup(conversation);
   }
 
-  public async OnViewUserInfo(user: UserInfo, chat: Chat) {
+  public async OnViewUserInfo(user: AppUser, chat: Chat) {
     const userInfoRef = this.dialog.open(UserInfoDialogComponent, {
       width: '450px',
       autoFocus: false,
@@ -182,7 +182,7 @@ export class ChatComponent implements OnInit {
     });
   }
 
-  public CreateDialogWith(user: UserInfo) {
+  public CreateDialogWith(user: AppUser) {
     this.conversationsService.CreateDialogWith(user, false);
   }
 

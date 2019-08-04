@@ -1,18 +1,18 @@
 import { AuthService } from "../Auth/AuthService";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
-import { UserInfo } from "../Data/UserInfo";
+import { AppUser } from "../Data/AppUser";
 import { Injectable } from "@angular/core";
-import { ConnectionManager, BanEvent } from "../Connections/ConnectionManager";
+import { SignalrConnection, BanEvent } from "../Connections/signalr-connection.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class UsersService {
-  constructor(private requestsBuilder: ApiRequestsBuilder, private connectionManager: ConnectionManager, private auth: AuthService) { }
+  constructor(private requestsBuilder: ApiRequestsBuilder, private connectionManager: SignalrConnection, private auth: AuthService) { }
 
   //Fetches user info of specified user. If current user id specified,
   //updates user entry in AuthService.
-  public async UpdateUserInfo(userId: string) : Promise<UserInfo> {
+  public async UpdateUserInfo(userId: string) : Promise<AppUser> {
     let result = await this.requestsBuilder.GetUserById(userId);
 
     if (!result.isSuccessfull) {
@@ -22,11 +22,11 @@ export class UsersService {
     if (result.response.id == this.auth.User.id) {
       this.auth.User = result.response;
     }
-    
+
     return result.response;
   }
 
-  public async FindUsersByUsername(name: string): Promise<Array<UserInfo>>{
+  public async FindUsersByUsername(name: string): Promise<Array<AppUser>>{
     let result = await this.requestsBuilder.FindUsersByUsername(name);
 
     if (!result.isSuccessfull) {
@@ -34,7 +34,7 @@ export class UsersService {
     }
 
     if (result.response.usersFound == null) {
-      return new Array<UserInfo>();
+      return new Array<AppUser>();
 
     } else {
       return [...result.response.usersFound];
@@ -49,17 +49,17 @@ export class UsersService {
     }
 
     if (!contacts.response) {
-      this.auth.Contacts = new Array<UserInfo>();
+      this.auth.Contacts = new Array<AppUser>();
     } else {
       this.auth.Contacts = contacts.response;
     }
   }
 
-  public HasContactWith(user: UserInfo) {
+  public HasContactWith(user: AppUser) {
     return this.auth.Contacts.findIndex(x => x.id == user.id) != -1;
   }
 
-  public async AddToContacts(user: UserInfo) {
+  public async AddToContacts(user: AppUser) {
     let result = await this.requestsBuilder.AddToContacts(user.id);
 
     if (!result.isSuccessfull) {
@@ -69,7 +69,7 @@ export class UsersService {
     this.auth.Contacts.push(user);
   }
 
-  public async RemoveFromContacts(user: UserInfo) {
+  public async RemoveFromContacts(user: AppUser) {
     let result = await this.requestsBuilder.RemoveFromContacts(user.id);
 
     if (!result.isSuccessfull) {
@@ -85,7 +85,7 @@ export class UsersService {
     this.auth.Contacts.splice(contactIndex, 1);
   }
 
-  public async BlockUser(user: UserInfo) {
+  public async BlockUser(user: AppUser) {
     let result = await this.connectionManager.BlockUser(user.id, BanEvent.Banned);
 
     if (!result) {
@@ -95,7 +95,7 @@ export class UsersService {
     user.isBlocked = true;
   }
 
-  public async UnblockUser(user: UserInfo) {
+  public async UnblockUser(user: AppUser) {
     let result = await this.connectionManager.BlockUser(user.id, BanEvent.Unbanned);
 
     if (!result) {

@@ -73,7 +73,7 @@ var UsersService = /** @class */ (function () {
                             return [2 /*return*/, null];
                         }
                         if (result.response.usersFound == null) {
-                            return [2 /*return*/, new Array()];
+                            return [2 /*return*/, []];
                         }
                         else {
                             return [2 /*return*/, result.response.usersFound.slice()];
@@ -169,8 +169,7 @@ var UsersService = /** @class */ (function () {
             });
         });
     };
-    ;
-    return UsersService;
+  return UsersService;
 }());
 exports.UsersService = UsersService;
 //# sourceMappingURL=UsersService.js.map

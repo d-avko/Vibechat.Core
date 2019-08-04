@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using VibeChat.Web;
 using VibeChat.Web.ChatData;
 using VibeChat.Web.Data.DataModels;
@@ -10,16 +7,16 @@ namespace Vibechat.Web.Data.Repositories
 {
     public class AttachmentRepository : IAttachmentRepository
     {
-        private ApplicationDbContext mContext { get; set; }
-
         public AttachmentRepository(ApplicationDbContext dbContext)
         {
-            this.mContext = dbContext;
+            mContext = dbContext;
         }
+
+        private ApplicationDbContext mContext { get; }
 
         public MessageAttachmentDataModel Add(AttachmentKindDataModel attachmentKind, Message message)
         {
-            var attachment = new MessageAttachmentDataModel()
+            var attachment = new MessageAttachmentDataModel
             {
                 AttachmentKind = attachmentKind,
                 ContentUrl = message.AttachmentInfo.ContentUrl,
@@ -34,10 +31,7 @@ namespace Vibechat.Web.Data.Repositories
 
         public void Remove(List<MessageAttachmentDataModel> attachments)
         {
-            foreach (var attachment in attachments)
-            {
-                mContext.Attachments.Remove(attachment);
-            }
+            foreach (var attachment in attachments) mContext.Attachments.Remove(attachment);
         }
     }
 }

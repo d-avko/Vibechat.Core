@@ -11,7 +11,6 @@ using Vibechat.Web.Data.ApiModels.Conversation;
 using Vibechat.Web.Data.ApiModels.Messages;
 using Vibechat.Web.Data.Conversations;
 using Vibechat.Web.Data.DataModels;
-using VibeChat.Web.Data.DataModels;
 using Vibechat.Web.Data.Messages;
 using Vibechat.Web.Data.Repositories;
 using Vibechat.Web.Data_Layer.Repositories;
@@ -24,6 +23,38 @@ namespace Vibechat.Web.Services
 {
     public class ChatService
     {
+        private const int MaxThumbnailLengthMb = 5;
+
+        private const int MaxNameLength = 200;
+
+        private const int MaxParticipantsToReturn = 200;
+
+        private readonly IAttachmentKindsRepository attachmentKindsRepository;
+
+        private readonly IAttachmentRepository attachmentRepository;
+
+        private readonly BansService bansService;
+
+        private readonly IChatDataProvider chatDataProvider;
+
+        private readonly IConversationRepository conversationRepository;
+
+        private readonly FilesService imagesService;
+
+        private readonly ILastMessagesRepository lastMessagesRepository;
+
+        private readonly IMessagesRepository messagesRepository;
+
+        private readonly IDhPublicKeysRepository publicKeys;
+
+        private readonly IChatRolesRepository rolesRepository;
+
+        private readonly UnitOfWork unitOfWork;
+
+        private readonly IUsersConversationsRepository usersConversationsRepository;
+
+        private readonly IUsersRepository usersRepository;
+
         public ChatService(
             IChatDataProvider chatDataProvider,
             IUsersRepository usersRepository,
@@ -47,60 +78,23 @@ namespace Vibechat.Web.Services
             this.usersConversationsRepository = usersConversationsRepository;
             this.conversationRepository = conversationRepository;
             this.lastMessagesRepository = lastMessagesRepository;
-            this.publicKeys = dh;
+            publicKeys = dh;
             this.rolesRepository = rolesRepository;
             this.imagesService = imagesService;
             this.unitOfWork = unitOfWork;
             this.bansService = bansService;
         }
 
-        private readonly IChatDataProvider chatDataProvider;
-
-        private readonly IUsersRepository usersRepository;
-
-        private readonly IMessagesRepository messagesRepository;
-
-        private readonly IAttachmentRepository attachmentRepository;
-
-        private readonly IAttachmentKindsRepository attachmentKindsRepository;
-
-        private readonly IUsersConversationsRepository usersConversationsRepository;
-
-        private readonly IConversationRepository conversationRepository;
-        
-        private readonly ILastMessagesRepository lastMessagesRepository;
-
-        private readonly IDhPublicKeysRepository publicKeys;
-        
-        private readonly IChatRolesRepository rolesRepository;
-        
-        private const int MaxThumbnailLengthMb = 5;
-
-        private const int MaxNameLength = 200;
-
-        private const int MaxParticipantsToReturn = 200;
-
-        private readonly FilesService imagesService;
-        
-        private readonly UnitOfWork unitOfWork;
-        
-        private readonly BansService bansService;
-
         #region Conversations
 
         public async Task UpdateAuthKey(int chatId, string authKeyId, string deviceId, string thisUserId)
         {
-            if(!await ExistsInConversation(chatId, thisUserId))
-            {
-                throw new InvalidDataException($"Wrong conversation id was provided.");
-            }
+            if (!await ExistsInConversation(chatId, thisUserId))
+                throw new InvalidDataException("Wrong conversation id was provided.");
 
-            ConversationDataModel chat = conversationRepository.GetById(chatId);
+            var chat = conversationRepository.GetById(chatId);
 
-            if (chat == null)
-            {
-                throw new InvalidDataException($"Wrong conversation id was provided.");
-            }
+            if (chat == null) throw new InvalidDataException("Wrong conversation id was provided.");
 
             conversationRepository.UpdateAuthKey(chat, authKeyId);
 
@@ -111,59 +105,42 @@ namespace Vibechat.Web.Services
 
         public async Task<Chat> CreateConversation(CreateConversationCredentialsApiModel credentials)
         {
-
             var defaultError = new FormatException("Error while creating the conversation..");
 
             //if there was no group info or creator info
 
-            if (string.IsNullOrWhiteSpace(credentials.CreatorId))
-            {
-                throw defaultError;
-            }
+            if (string.IsNullOrWhiteSpace(credentials.CreatorId)) throw defaultError;
 
             var user = await usersRepository.GetById(credentials.CreatorId);
 
-            if (user == null)
-            {
-                throw defaultError;
-            }
+            if (user == null) throw defaultError;
 
-            if ((!credentials.IsGroup) && (credentials.DialogUserId == null))
-            {
+            if (!credentials.IsGroup && credentials.DialogUserId == null)
                 throw new FormatException("No dialogue user was provided...");
-            }
-            
-            if(credentials.IsGroup && credentials.ConversationName.Length > MaxNameLength)
-            {
+
+            if (credentials.IsGroup && credentials.ConversationName.Length > MaxNameLength)
                 throw new FormatException("Chat name was too long...");
-            }
 
             AppUser SecondDialogueUser = null;
             DhPublicKeyDataModel dhPublicKey = null;
 
-            string imageUrl = string.Empty;
+            var imageUrl = string.Empty;
 
             if (!credentials.IsGroup)
             {
                 //if this is a dialogue , find a user with whom to create conversation
                 SecondDialogueUser = await usersRepository.GetById(credentials.DialogUserId);
 
-                if (SecondDialogueUser == null)
-                {
-                    throw defaultError;
-                }
+                if (SecondDialogueUser == null) throw defaultError;
 
-                if (credentials.IsSecure)
-                {
-                    dhPublicKey = await publicKeys.GetRandomKey();
-                }
+                if (credentials.IsSecure) dhPublicKey = await publicKeys.GetRandomKey();
             }
             else
             {
                 imageUrl = credentials.ImageUrl ?? chatDataProvider.GetGroupPictureUrl();
             }
 
-            var createdChat = new ConversationDataModel()
+            var createdChat = new ConversationDataModel
             {
                 IsGroup = credentials.IsGroup,
                 Name = credentials.IsGroup ? credentials.ConversationName : null,
@@ -197,29 +174,27 @@ namespace Vibechat.Web.Services
             }
 
             var creator = user.ToUserInfo();
-            creator.ChatRole = new ChatRoleDto()
+            creator.ChatRole = new ChatRoleDto
             {
                 ChatId = createdChat.Id,
                 Role = ChatRole.Creator
             };
 
             return createdChat.ToChatDto(
-                credentials.IsGroup ? new List<UserInfo>() { creator } : null,
+                credentials.IsGroup ? new List<UserInfo> {creator} : null,
                 SecondDialogueUser,
                 dhPublicKey,
                 await rolesRepository.GetAsync(createdChat.Id, credentials.CreatorId),
                 credentials.DeviceId,
                 0,
                 null
-                );
+            );
         }
 
         public async Task<List<UserInfo>> FindUsersInChat(int chatId, string username, string caller)
         {
-            if(!await usersConversationsRepository.Exists(caller, chatId))
-            {
+            if (!await usersConversationsRepository.Exists(caller, chatId))
                 throw new UnauthorizedAccessException("Caller of this method must be the part of conversation.");
-            }
 
             return (await usersConversationsRepository.FindUsersInChat(username, chatId))
                 .Select(x => x.ToUserInfo())
@@ -228,12 +203,9 @@ namespace Vibechat.Web.Services
 
         public async Task<int> GetUnreadMessagesAmount(Chat chat, string userId)
         {
-            if (messagesRepository.Empty())
-            {
-                return 0;
-            }
+            if (messagesRepository.Empty()) return 0;
             var lastMessage = lastMessagesRepository.Get(userId, chat.Id);
-            
+
             return messagesRepository.GetUnreadAmount(chat.Id, userId, lastMessage?.MessageID ?? 0);
         }
 
@@ -253,20 +225,15 @@ namespace Vibechat.Web.Services
 
             await unitOfWork.Commit();
         }
-        
+
         public async Task<UpdateThumbnailResponse> UpdateThumbnail(int conversationId, IFormFile image, string userId)
         {
-            if ((image.Length / (1024 * 1024)) > MaxThumbnailLengthMb)
-            {
+            if (image.Length / (1024 * 1024) > MaxThumbnailLengthMb)
                 throw new InvalidDataException($"Thumbnail was larger than {MaxThumbnailLengthMb}");
-            }
 
-            ConversationDataModel conversation = conversationRepository.GetById(conversationId);
+            var conversation = conversationRepository.GetById(conversationId);
 
-            if(conversation == null)
-            {
-                throw new InvalidDataException($"Wrong conversation id was provided.");
-            }
+            if (conversation == null) throw new InvalidDataException("Wrong conversation id was provided.");
 
             try
             {
@@ -274,13 +241,14 @@ namespace Vibechat.Web.Services
                 {
                     image.CopyTo(buffer);
                     buffer.Seek(0, SeekOrigin.Begin);
-                    var thumbnailFull = await imagesService.SaveProfileOrChatPicture(image, buffer, image.FileName, conversationId.ToString(), userId);
+                    var thumbnailFull = await imagesService.SaveProfileOrChatPicture(image, buffer, image.FileName,
+                        conversationId.ToString(), userId);
 
                     conversationRepository.UpdateThumbnail(thumbnailFull.Item1, thumbnailFull.Item2, conversation);
                     await unitOfWork.Commit();
                 }
 
-                return new UpdateThumbnailResponse()
+                return new UpdateThumbnailResponse
                 {
                     ThumbnailUrl = conversation.ThumbnailUrl,
                     FullImageUrl = conversation.FullImageUrl
@@ -288,35 +256,27 @@ namespace Vibechat.Web.Services
             }
             catch (Exception ex)
             {
-
-                throw new Exception("Failed to update chat image. Try different one." , ex);
+                throw new Exception("Failed to update chat image. Try different one.", ex);
             }
         }
 
-        public async Task<List<Message>> GetAttachments(AttachmentKind kind, int conversationId, string whoAccessedId, int offset, int count)
+        public async Task<List<Message>> GetAttachments(AttachmentKind kind, int conversationId, string whoAccessedId,
+            int offset, int count)
         {
             var unAuthorizedError = new UnauthorizedAccessException("You are unauthorized to do such an action.");
 
-            if (messagesRepository.Empty())
-            {
-                return null;
-            }
+            if (messagesRepository.Empty()) return null;
 
             var conversation = conversationRepository.GetById(conversationId);
 
-            if (conversation == null)
-            {
-                throw new FormatException("Wrong conversation to get attachments from.");
-            }
+            if (conversation == null) throw new FormatException("Wrong conversation to get attachments from.");
 
             var members = usersConversationsRepository.GetConversationParticipants(conversationId);
 
             //only member of conversation could request messages of non-public conversation.
 
             if (members.FirstOrDefault(x => x.Id == whoAccessedId) == null && !conversation.IsPublic)
-            {
                 throw new UnauthorizedAccessException("You are unauthorized to do such an action.");
-            }
 
             var messages = messagesRepository.GetAttachments(
                 whoAccessedId,
@@ -327,23 +287,17 @@ namespace Vibechat.Web.Services
 
 
             return (from msg in messages
-                    select msg.ToMessage()).ToList();
-
+                select msg.ToMessage()).ToList();
         }
 
-        public async Task ChangeName (int conversationId, string name)
+        public async Task ChangeName(int conversationId, string name)
         {
-            if(name.Length > MaxNameLength)
-            {
+            if (name.Length > MaxNameLength)
                 throw new InvalidDataException($"Name length couldn't be more than {MaxNameLength}.");
-            }
 
             var conversation = conversationRepository.GetById(conversationId);
 
-            if (conversation == null)
-            {
-                throw new InvalidDataException($"Wrong conversation id was provided.");
-            }
+            if (conversation == null) throw new InvalidDataException("Wrong conversation id was provided.");
 
             conversationRepository.ChangeName(conversation, name);
             await unitOfWork.Commit();
@@ -351,22 +305,15 @@ namespace Vibechat.Web.Services
 
         public async Task<List<Chat>> SearchForGroups(string name, string whoAccessedId)
         {
-            if (string.IsNullOrEmpty(name))
-            {
-                throw new InvalidDataException($"Search string coudn't be null.");
-            }
+            if (string.IsNullOrEmpty(name)) throw new InvalidDataException("Search string coudn't be null.");
 
             var groups = conversationRepository.SearchByName(name);
 
-            if(groups == null)
-            {
-                return null;
-            }
+            if (groups == null) return null;
 
             var result = new List<Chat>();
 
-            foreach (ConversationDataModel conversation in groups)
-            {
+            foreach (var conversation in groups)
                 result.Add(
                     conversation.ToChatDto(
                         await GetParticipants(conversation.Id, MaxParticipantsToReturn),
@@ -375,9 +322,8 @@ namespace Vibechat.Web.Services
                         await rolesRepository.GetAsync(conversation.Id, whoAccessedId),
                         null,
                         0,
-                         null
+                        null
                     ));
-            }
 
             return result;
         }
@@ -387,10 +333,8 @@ namespace Vibechat.Web.Services
             var conversation = conversationRepository.GetById(conversationId);
             var userRole = await rolesRepository.GetAsync(conversationId, whoAccessedId);
 
-            if (userRole.RoleId!= ChatRole.Moderator && userRole.RoleId != ChatRole.Creator)
-            {
+            if (userRole.RoleId != ChatRole.Moderator && userRole.RoleId != ChatRole.Creator)
                 throw new FormatException("This method is only allowed to group creator / moderator.");
-            }
 
             conversationRepository.ChangePublicState(conversation);
             await unitOfWork.Commit();
@@ -398,7 +342,7 @@ namespace Vibechat.Web.Services
 
 
         /// <summary>
-        /// Should not be used frequently as it's quiet expensive.
+        ///     Should not be used frequently as it's quiet expensive.
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="whoRemovedId"></param>
@@ -409,35 +353,23 @@ namespace Vibechat.Web.Services
         {
             var conversation = conversationRepository.GetById(chatId);
 
-            if (conversation == null)
-            {
-                throw new FormatException("Wrong conversation.");
-            }
+            if (conversation == null) throw new FormatException("Wrong conversation.");
 
             var userConversation = await usersConversationsRepository.Get(userId, chatId);
 
-            if (userConversation == null)
-            {
-                throw new FormatException("User is not a part of this conversation.");
-            }
+            if (userConversation == null) throw new FormatException("User is not a part of this conversation.");
 
             var userRole = await rolesRepository.GetAsync(chatId, whoRemovedId);
 
             if (!IsSelf)
-            {
-                if(userRole.RoleId != ChatRole.Moderator && userRole.RoleId != ChatRole.Creator)
-                {
+                if (userRole.RoleId != ChatRole.Moderator && userRole.RoleId != ChatRole.Creator)
                     throw new FormatException("Only creator / moderator can remove users in group.");
-                }
-            }
 
             usersConversationsRepository.Remove(userConversation);
 
             //dumbest thing to do, will fix later. TODO
             if (usersConversationsRepository.GetConversationParticipants(conversation.Id).Count().Equals(0))
-            {
                 conversationRepository.Remove(conversation);
-            }
 
             rolesRepository.Remove(await rolesRepository.GetAsync(chatId, userId));
 
@@ -446,27 +378,18 @@ namespace Vibechat.Web.Services
 
         public async Task RemoveConversation(Chat Conversation, string whoRemoves)
         {
-            ConversationDataModel conversation = conversationRepository.GetById(Conversation.Id);
+            var conversation = conversationRepository.GetById(Conversation.Id);
 
-            if(conversation == null)
-            {
-                throw new FormatException("Wrong conversation to remove.");
-            }
+            if (conversation == null) throw new FormatException("Wrong conversation to remove.");
 
             //secure chats may be removed by any of participants.
 
             var userRole = await rolesRepository.GetAsync(conversation.Id, whoRemoves);
 
             if (!conversation.IsSecure)
-            {
                 if (conversation.IsGroup)
-                {
                     if (userRole.RoleId != ChatRole.Creator)
-                    {
                         throw new FormatException("Only creator can remove group.");
-                    }
-                }
-            }
 
             //this removes all messages and users-chats links
             conversationRepository.Remove(conversation);
@@ -478,20 +401,12 @@ namespace Vibechat.Web.Services
         {
             var callerRole = await rolesRepository.GetAsync(chatId, caller);
 
-            if(callerRole == null)
-            {
-                throw new UnauthorizedAccessException("Only creator can change user's roles.");
-            }
+            if (callerRole == null) throw new UnauthorizedAccessException("Only creator can change user's roles.");
 
-            if(callerRole.RoleId != ChatRole.Creator)
-            {
+            if (callerRole.RoleId != ChatRole.Creator)
                 throw new UnauthorizedAccessException("Only creator can change user's roles.");
-            }
 
-            if (userId == caller)
-            {
-                throw new UnauthorizedAccessException("Can't change role of creator.");
-            }
+            if (userId == caller) throw new UnauthorizedAccessException("Can't change role of creator.");
 
             var targetUserRole = await rolesRepository.GetAsync(chatId, userId);
 
@@ -506,22 +421,14 @@ namespace Vibechat.Web.Services
 
             var FoundConversation = conversationRepository.GetById(chatId);
 
-            if (FoundConversation == null)
-            {
-                throw defaultError;
-            }
+            if (FoundConversation == null) throw defaultError;
 
             var FoundUser = await usersRepository.GetById(userId);
 
-            if (FoundUser == null)
-            {
-                throw defaultError;
-            }
+            if (FoundUser == null) throw defaultError;
 
-            if(await usersConversationsRepository.Exists(FoundUser.Id, FoundConversation.Id))
-            {
+            if (await usersConversationsRepository.Exists(FoundUser.Id, FoundConversation.Id))
                 throw new FormatException("User already exists in converation.");
-            }
 
             var addedUser = usersConversationsRepository.Add(userId, chatId).User;
             rolesRepository.Add(chatId, userId, ChatRole.NoRole);
@@ -534,10 +441,7 @@ namespace Vibechat.Web.Services
         {
             var dialog = await usersConversationsRepository.GetDialog(firstUserId, secondUserId);
 
-            if(dialog == null)
-            {
-                throw new InvalidDataException("Wrong id of a user in dialog.");
-            }
+            if (dialog == null) throw new InvalidDataException("Wrong id of a user in dialog.");
         }
 
         public async Task<List<ChatRoleDto>> GetChatRoles(string userId)
@@ -545,7 +449,7 @@ namespace Vibechat.Web.Services
             var roles = await rolesRepository.GetAsync(userId);
 
             return (from role in roles
-                   select role.ToChatRole()).ToList();
+                select role.ToChatRole()).ToList();
         }
 
         public async Task<ChatRoleDto> GetChatRole(string userid, int chatId)
@@ -557,28 +461,22 @@ namespace Vibechat.Web.Services
         {
             var defaultError = new FormatException("User info provided was not correct.");
 
-            if (whoAccessedId == null)
-            {
-                throw defaultError;
-            }
+            if (whoAccessedId == null) throw defaultError;
 
             var user = await usersRepository.GetById(whoAccessedId).ConfigureAwait(false);
 
-            if (user == null)
-            {
-                throw defaultError;
-            }
+            if (user == null) throw defaultError;
 
-            IQueryable<ConversationDataModel> conversations = usersConversationsRepository.GetUserConversations(deviceId, whoAccessedId);
+            var conversations = usersConversationsRepository.GetUserConversations(deviceId, whoAccessedId);
 
             var returnData = new List<Chat>();
 
-            foreach (ConversationDataModel conversation in conversations)
+            foreach (var conversation in conversations)
             {
-                var lastMessage = (await GetMessages(conversation.Id, offset: 0, count: 1, -1, whoAccessedId))
+                var lastMessage = (await GetMessages(conversation.Id, 0, 1, -1, whoAccessedId))
                     .FirstOrDefault();
-                
-                Chat dtoChat = conversation.ToChatDto(
+
+                var dtoChat = conversation.ToChatDto(
                     conversation.IsGroup ? await GetParticipants(conversation.Id, MaxParticipantsToReturn) : null,
                     conversation.IsGroup
                         ? null
@@ -589,25 +487,24 @@ namespace Vibechat.Web.Services
                     lastMessagesRepository.Get(whoAccessedId, conversation.Id)?.MessageID ?? 0,
                     lastMessage
                 );
-                
-                dtoChat.IsMessagingRestricted = await bansService.IsBannedFromConversation(conversation.Id, whoAccessedId);
+
+                dtoChat.IsMessagingRestricted =
+                    await bansService.IsBannedFromConversation(conversation.Id, whoAccessedId);
                 dtoChat.MessagesUnread = await GetUnreadMessagesAmount(dtoChat, whoAccessedId);
                 dtoChat.ChatRole = await GetChatRole(whoAccessedId, conversation.Id);
 
                 if (conversation.IsGroup)
-                {
-                    foreach (UserInfo User in dtoChat.Participants)
+                    foreach (var User in dtoChat.Participants)
                     {
-                        User.IsBlockedInConversation = await bansService.IsBannedFromConversation(conversation.Id, User.Id);
+                        User.IsBlockedInConversation =
+                            await bansService.IsBannedFromConversation(conversation.Id, User.Id);
                         User.ChatRole = await GetChatRole(User.Id, conversation.Id);
                     }
-                }
-                
+
                 returnData.Add(dtoChat);
             }
 
             return returnData;
-
         }
 
         private async Task<string> GetDeviceId(int chatId, string userId)
@@ -622,71 +519,51 @@ namespace Vibechat.Web.Services
 
             var conversation = conversationRepository.GetById(chatId);
 
-            if (conversation == null)
-            {
-                throw defaultErrorMessage;
-            }
+            if (conversation == null) throw defaultErrorMessage;
 
             var participants = usersConversationsRepository.GetConversationParticipants(chatId);
 
             var users = (from participant in participants
                     select participant.ToUserInfo()
-                               ).ToList();
+                ).ToList();
 
             if (maximum.Equals(0))
-            {
                 return users;
-            }
-            else
-            {
-                return users.Take(maximum).ToList();
-            }
+            return users.Take(maximum).ToList();
         }
-        
-        public async Task<List<Message>> GetMessages(int chatId, int offset, int count, int maxMessageId, string whoAccessedId)
+
+        public async Task<List<Message>> GetMessages(int chatId, int offset, int count, int maxMessageId,
+            string whoAccessedId)
         {
             var defaultErrorMessage = new FormatException("Wrong conversation was provided.");
 
             var unAuthorizedError = new UnauthorizedAccessException("You are unauthorized to do such an action.");
 
-            if (messagesRepository.Empty())
-            {
-                return null;
-            }
+            if (messagesRepository.Empty()) return null;
 
             var conversation = conversationRepository.GetById(chatId);
 
-            if (conversation == null)
-            {
-                throw defaultErrorMessage;
-            }
+            if (conversation == null) throw defaultErrorMessage;
 
             var members = usersConversationsRepository.GetConversationParticipants(chatId);
 
             //only member of conversation could request messages of non-public conversation.
 
             if (members.FirstOrDefault(x => x.Id == whoAccessedId) == null && !conversation.IsPublic)
-            {
                 throw unAuthorizedError;
-            }
 
             var messages = messagesRepository.Get(
                 whoAccessedId,
                 chatId, maxMessageId, false, offset, count);
 
             //automatically set last message in group.
-            
+
             if (maxMessageId != -1 && conversation.IsGroup)
-            {
                 if (!messages.Count().Equals(0))
-                {
                     await SetLastMessage(whoAccessedId, chatId, messages.Max(msg => msg.MessageID));
-                }
-            }
 
             return (from msg in messages
-                    select msg.ToMessage()).ToList();
-
+                select msg.ToMessage()).ToList();
         }
 
         public async Task<bool> ExistsInConversation(int conversationsId, string userId)
@@ -695,71 +572,60 @@ namespace Vibechat.Web.Services
         }
 
         /// <summary>
-        /// Gets specified chat info by id. Doesn't support secure chats.
+        ///     Gets specified chat info by id. Doesn't support secure chats.
         /// </summary>
         /// <param name="conversationId"></param>
         /// <param name="whoAccessedId"></param>
         /// <returns></returns>
         public async Task<Chat> GetById(int conversationId, string whoAccessedId)
         {
-             
-            ConversationDataModel conversation = conversationRepository.GetById(conversationId);
+            var conversation = conversationRepository.GetById(conversationId);
 
-            if (conversation == null)
-            {
-                throw new FormatException("No such conversation was found.");
-            }
+            if (conversation == null) throw new FormatException("No such conversation was found.");
 
             var dialogUser = new AppUser();
             var members = new List<UserInfo>();
-            
+
             if (conversation.IsGroup)
             {
                 members = usersConversationsRepository.GetConversationParticipants(conversationId)
-                .Select(x => x.ToUserInfo())
-                .ToList();
+                    .Select(x => x.ToUserInfo())
+                    .ToList();
             }
             else
             {
-                dialogUser = usersConversationsRepository.GetUserInDialog(conversationId,whoAccessedId);
+                dialogUser = usersConversationsRepository.GetUserInDialog(conversationId, whoAccessedId);
 
                 if (dialogUser == null)
-                {
                     throw new FormatException("Unexpected error: no corresponding user in dialogue.");
-                }
             }
 
             var dtoChat = conversation.ToChatDto(
                 members,
-                dialogUser, 
+                dialogUser,
                 conversation.PublicKey,
                 await rolesRepository.GetAsync(conversation.Id, whoAccessedId),
                 null,
                 0,
                 null);
-            
+
             dtoChat.IsMessagingRestricted = await bansService.IsBannedFromConversation(dtoChat.Id, whoAccessedId);
 
             if (conversation.IsGroup)
-            {
-                foreach (UserInfo User in dtoChat.Participants)
+                foreach (var User in dtoChat.Participants)
                 {
                     User.IsBlockedInConversation = await bansService.IsBannedFromConversation(conversation.Id, User.Id);
                     User.ChatRole = await GetChatRole(User.Id, conversation.Id);
                 }
-            }
 
             return dtoChat;
         }
 
         public async Task<Chat> GetByIdSimplified(int conversationId, string whoAccessedId)
         {
-            ConversationDataModel conversation = conversationRepository.GetById(conversationId);
+            var conversation = conversationRepository.GetById(conversationId);
 
-            if (conversation == null)
-            {
-                throw new FormatException("No such conversation was found.");
-            }
+            if (conversation == null) throw new FormatException("No such conversation was found.");
 
             var dialogUser = new AppUser();
 
@@ -768,20 +634,18 @@ namespace Vibechat.Web.Services
                 dialogUser = usersConversationsRepository.GetUserInDialog(conversationId, whoAccessedId);
 
                 if (dialogUser == null)
-                {
                     throw new FormatException("Unexpected error: no corresponding user in dialogue.");
-                }
             }
 
-            return new Chat()
+            return new Chat
             {
                 DialogueUser = dialogUser?.ToUserInfo(),
                 IsGroup = conversation.IsGroup
-            }; 
+            };
         }
 
         /// <summary>
-        /// Marks message as read and updates lastMessageId of a client.
+        ///     Marks message as read and updates lastMessageId of a client.
         /// </summary>
         /// <param name="msgId"></param>
         /// <param name="conversationId"></param>
@@ -790,17 +654,14 @@ namespace Vibechat.Web.Services
         /// <exception cref="UnauthorizedAccessException"></exception>
         public async Task MarkMessageAsRead(int msgId, int conversationId, string whoAccessedId)
         {
-            MessageDataModel message = messagesRepository.GetById(msgId);
+            var message = messagesRepository.GetById(msgId);
 
             if (message.User.Id == whoAccessedId)
-            {
                 throw new UnauthorizedAccessException("Couldn't mark this message as read because it was sent by you.");
-            }
 
-            if(!await ExistsInConversation(conversationId, whoAccessedId))
-            {
-                throw new UnauthorizedAccessException("User was not present in conversation. Couldn't mark the message as read.");
-            }
+            if (!await ExistsInConversation(conversationId, whoAccessedId))
+                throw new UnauthorizedAccessException(
+                    "User was not present in conversation. Couldn't mark the message as read.");
 
             messagesRepository.MarkAsRead(message);
             await SetLastMessage(whoAccessedId, conversationId, msgId);
@@ -808,7 +669,7 @@ namespace Vibechat.Web.Services
         }
 
         /// <summary>
-        /// Adds a messages and updates client lastMessageId
+        ///     Adds a messages and updates client lastMessageId
         /// </summary>
         /// <param name="message"></param>
         /// <param name="groupId"></param>
@@ -817,23 +678,19 @@ namespace Vibechat.Web.Services
         /// <exception cref="FormatException"></exception>
         public async Task<MessageDataModel> AddMessage(Message message, int groupId, string senderId)
         {
-            AppUser whoSent = await usersRepository.GetById(senderId);
+            var whoSent = await usersRepository.GetById(senderId);
 
             if (whoSent == null)
-            {
-                throw new FormatException($"Failed to retrieve user with id {senderId} from database: no such user exists");
-            }
+                throw new FormatException(
+                    $"Failed to retrieve user with id {senderId} from database: no such user exists");
 
             MessageDataModel forwardedMessage = null;
 
-            if(message.ForwardedMessage != null)
+            if (message.ForwardedMessage != null)
             {
-                var foundMessage = messagesRepository.GetByIds(new List<int>() { message.ForwardedMessage.Id }).ToList();
+                var foundMessage = messagesRepository.GetByIds(new List<int> {message.ForwardedMessage.Id}).ToList();
 
-                if (!foundMessage.Count().Equals(1))
-                {
-                    throw new FormatException($"Forwarded message was not found.");
-                }
+                if (!foundMessage.Count().Equals(1)) throw new FormatException("Forwarded message was not found.");
 
                 forwardedMessage = foundMessage[0];
             }
@@ -846,12 +703,11 @@ namespace Vibechat.Web.Services
 
         public async Task<MessageDataModel> AddEncryptedMessage(string message, int groupId, string senderId)
         {
-            AppUser whoSent = await usersRepository.GetById(senderId);
+            var whoSent = await usersRepository.GetById(senderId);
 
             if (whoSent == null)
-            {
-                throw new FormatException($"Failed to retrieve user with id {senderId} from database: no such user exists");
-            }
+                throw new FormatException(
+                    $"Failed to retrieve user with id {senderId} from database: no such user exists");
 
             var result = messagesRepository.AddSecureMessage(whoSent, message, groupId);
             await SetLastMessage(senderId, groupId, result.MessageID);
@@ -861,14 +717,13 @@ namespace Vibechat.Web.Services
 
         public async Task<MessageDataModel> AddAttachmentMessage(Message message, int groupId, string senderId)
         {
-            AppUser whoSent = await usersRepository.GetById(senderId);
+            var whoSent = await usersRepository.GetById(senderId);
 
             if (whoSent == null)
-            {
-                throw new FormatException($"Failed to retrieve user with id {senderId} from database: no such user exists");
-            }
+                throw new FormatException(
+                    $"Failed to retrieve user with id {senderId} from database: no such user exists");
 
-            AttachmentKindDataModel attachmentKind = await attachmentKindsRepository.GetById(message.AttachmentInfo.AttachmentKind);
+            var attachmentKind = await attachmentKindsRepository.GetById(message.AttachmentInfo.AttachmentKind);
 
             var attachment = attachmentRepository.Add(attachmentKind, message);
 
@@ -882,30 +737,26 @@ namespace Vibechat.Web.Services
         {
             var unAuthorizedError = new UnauthorizedAccessException("You are unauthorized to do such an action.");
 
-            IQueryable<MessageDataModel> messagesToDelete = messagesRepository.GetByIds(messagesInfo.MessagesId);
+            var messagesToDelete = messagesRepository.GetByIds(messagesInfo.MessagesId);
 
-            if(!messagesToDelete.All(x => x.ConversationID == messagesInfo.ConversationId))
-            {
-                throw new ArgumentException("All messages must be from same conversation passed as ConversationId parameter.");
-            }
+            if (!messagesToDelete.All(x => x.ConversationID == messagesInfo.ConversationId))
+                throw new ArgumentException(
+                    "All messages must be from same conversation passed as ConversationId parameter.");
 
             var conversation = await usersConversationsRepository.Get(whoAccessedId, messagesInfo.ConversationId);
 
-            if(conversation == null)
-            {
-                throw unAuthorizedError;
-            }
+            if (conversation == null) throw unAuthorizedError;
 
             try
             {
                 messagesRepository.Remove(messagesInfo.MessagesId, whoAccessedId);
                 await unitOfWork.Commit();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new MemberAccessException("Failed to delete this message. Probably it was already deleted.", ex);
             }
-        } 
+        }
 
         #endregion
     }

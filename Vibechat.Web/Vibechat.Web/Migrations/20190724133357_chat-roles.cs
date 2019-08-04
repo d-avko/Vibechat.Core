@@ -7,63 +7,60 @@ namespace Vibechat.Web.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Conversations_AspNetUsers_CreatorId",
-                table: "Conversations");
+                "FK_Conversations_AspNetUsers_CreatorId",
+                "Conversations");
 
             migrationBuilder.DropIndex(
-                name: "IX_Conversations_CreatorId",
-                table: "Conversations");
+                "IX_Conversations_CreatorId",
+                "Conversations");
 
             migrationBuilder.DropColumn(
-                name: "CreatorId",
-                table: "Conversations");
+                "CreatorId",
+                "Conversations");
 
             migrationBuilder.CreateTable(
-                name: "Roles",
-                columns: table => new
+                "Roles",
+                table => new
                 {
-                    Id = table.Column<int>(nullable: false)
+                    Id = table.Column<int>()
+                },
+                constraints: table => { table.PrimaryKey("PK_Roles", x => x.Id); });
+
+            migrationBuilder.CreateTable(
+                "ChatRoles",
+                table => new
+                {
+                    ChatId = table.Column<int>(),
+                    UserId = table.Column<string>(),
+                    RoleId = table.Column<int>()
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Roles", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ChatRoles",
-                columns: table => new
-                {
-                    ChatId = table.Column<int>(nullable: false),
-                    UserId = table.Column<string>(nullable: false),
-                    RoleId = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ChatRoles", x => new { x.ChatId, x.UserId });
+                    table.PrimaryKey("PK_ChatRoles", x => new {x.ChatId, x.UserId});
                     table.ForeignKey(
-                        name: "FK_ChatRoles_Conversations_ChatId",
-                        column: x => x.ChatId,
-                        principalTable: "Conversations",
-                        principalColumn: "Id",
+                        "FK_ChatRoles_Conversations_ChatId",
+                        x => x.ChatId,
+                        "Conversations",
+                        "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ChatRoles_Roles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "Roles",
-                        principalColumn: "Id",
+                        "FK_ChatRoles_Roles_RoleId",
+                        x => x.RoleId,
+                        "Roles",
+                        "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_ChatRoles_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
+                        "FK_ChatRoles_AspNetUsers_UserId",
+                        x => x.UserId,
+                        "AspNetUsers",
+                        "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
-                table: "Roles",
-                column: "Id",
-                values: new object[]
+                "Roles",
+                "Id",
+                new object[]
                 {
                     0,
                     1,
@@ -71,39 +68,39 @@ namespace Vibechat.Web.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ChatRoles_RoleId",
-                table: "ChatRoles",
-                column: "RoleId");
+                "IX_ChatRoles_RoleId",
+                "ChatRoles",
+                "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ChatRoles_UserId",
-                table: "ChatRoles",
-                column: "UserId");
+                "IX_ChatRoles_UserId",
+                "ChatRoles",
+                "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ChatRoles");
+                "ChatRoles");
 
             migrationBuilder.DropTable(
-                name: "Roles");
+                "Roles");
 
             migrationBuilder.AddColumn<string>(
-                name: "CreatorId",
-                table: "Conversations",
+                "CreatorId",
+                "Conversations",
                 nullable: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Conversations_CreatorId",
-                table: "Conversations",
-                column: "CreatorId");
+                "IX_Conversations_CreatorId",
+                "Conversations",
+                "CreatorId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Conversations_AspNetUsers_CreatorId",
-                table: "Conversations",
-                column: "CreatorId",
-                principalTable: "AspNetUsers",
+                "FK_Conversations_AspNetUsers_CreatorId",
+                "Conversations",
+                "CreatorId",
+                "AspNetUsers",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
         }

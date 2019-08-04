@@ -7,70 +7,70 @@ namespace Vibechat.Web.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Attachments_AttachmentKinds_AttachmentKindName",
-                table: "Attachments");
+                "FK_Attachments_AttachmentKinds_AttachmentKindName",
+                "Attachments");
 
             migrationBuilder.DropIndex(
-                name: "IX_Attachments_AttachmentKindName",
-                table: "Attachments");
+                "IX_Attachments_AttachmentKindName",
+                "Attachments");
 
             migrationBuilder.DropPrimaryKey(
-                name: "PK_AttachmentKinds",
-                table: "AttachmentKinds");
+                "PK_AttachmentKinds",
+                "AttachmentKinds");
 
             migrationBuilder.DeleteData(
-                table: "AttachmentKinds",
-                keyColumn: "Name",
-                keyValue: "file");
+                "AttachmentKinds",
+                "Name",
+                "file");
 
             migrationBuilder.DeleteData(
-                table: "AttachmentKinds",
-                keyColumn: "Name",
-                keyValue: "img");
+                "AttachmentKinds",
+                "Name",
+                "img");
 
             migrationBuilder.DropColumn(
-                name: "AttachmentKindName",
-                table: "Attachments");
+                "AttachmentKindName",
+                "Attachments");
 
             migrationBuilder.DropColumn(
-                name: "Name",
-                table: "AttachmentKinds");
+                "Name",
+                "AttachmentKinds");
 
             migrationBuilder.AddColumn<int>(
-                name: "AttachmentKindKind",
-                table: "Attachments",
+                "AttachmentKindKind",
+                "Attachments",
                 nullable: true);
 
             migrationBuilder.AddColumn<int>(
-                name: "Kind",
-                table: "AttachmentKinds",
+                "Kind",
+                "AttachmentKinds",
                 nullable: false,
                 defaultValue: 0);
 
             migrationBuilder.AddPrimaryKey(
-                name: "PK_AttachmentKinds",
-                table: "AttachmentKinds",
-                column: "Kind");
+                "PK_AttachmentKinds",
+                "AttachmentKinds",
+                "Kind");
 
             migrationBuilder.InsertData(
-                table: "AttachmentKinds",
-                column: "Kind",
-                values: new object[]
+                "AttachmentKinds",
+                "Kind",
+                new object[]
                 {
                     0,
                     1
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Attachments_AttachmentKindKind",
-                table: "Attachments",
-                column: "AttachmentKindKind");
+                "IX_Attachments_AttachmentKindKind",
+                "Attachments",
+                "AttachmentKindKind");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Attachments_AttachmentKinds_AttachmentKindKind",
-                table: "Attachments",
-                column: "AttachmentKindKind",
-                principalTable: "AttachmentKinds",
+                "FK_Attachments_AttachmentKinds_AttachmentKindKind",
+                "Attachments",
+                "AttachmentKindKind",
+                "AttachmentKinds",
                 principalColumn: "Kind",
                 onDelete: ReferentialAction.Restrict);
         }
@@ -78,70 +78,70 @@ namespace Vibechat.Web.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Attachments_AttachmentKinds_AttachmentKindKind",
-                table: "Attachments");
+                "FK_Attachments_AttachmentKinds_AttachmentKindKind",
+                "Attachments");
 
             migrationBuilder.DropIndex(
-                name: "IX_Attachments_AttachmentKindKind",
-                table: "Attachments");
+                "IX_Attachments_AttachmentKindKind",
+                "Attachments");
 
             migrationBuilder.DropPrimaryKey(
-                name: "PK_AttachmentKinds",
-                table: "AttachmentKinds");
+                "PK_AttachmentKinds",
+                "AttachmentKinds");
 
             migrationBuilder.DeleteData(
-                table: "AttachmentKinds",
-                keyColumn: "Kind",
-                keyValue: 0);
+                "AttachmentKinds",
+                "Kind",
+                0);
 
             migrationBuilder.DeleteData(
-                table: "AttachmentKinds",
-                keyColumn: "Kind",
-                keyValue: 1);
+                "AttachmentKinds",
+                "Kind",
+                1);
 
             migrationBuilder.DropColumn(
-                name: "AttachmentKindKind",
-                table: "Attachments");
+                "AttachmentKindKind",
+                "Attachments");
 
             migrationBuilder.DropColumn(
-                name: "Kind",
-                table: "AttachmentKinds");
+                "Kind",
+                "AttachmentKinds");
 
             migrationBuilder.AddColumn<string>(
-                name: "AttachmentKindName",
-                table: "Attachments",
+                "AttachmentKindName",
+                "Attachments",
                 nullable: true);
 
             migrationBuilder.AddColumn<string>(
-                name: "Name",
-                table: "AttachmentKinds",
+                "Name",
+                "AttachmentKinds",
                 nullable: false,
                 defaultValue: "");
 
             migrationBuilder.AddPrimaryKey(
-                name: "PK_AttachmentKinds",
-                table: "AttachmentKinds",
-                column: "Name");
+                "PK_AttachmentKinds",
+                "AttachmentKinds",
+                "Name");
 
             migrationBuilder.InsertData(
-                table: "AttachmentKinds",
-                column: "Name",
-                values: new object[]
+                "AttachmentKinds",
+                "Name",
+                new object[]
                 {
                     "img",
                     "file"
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Attachments_AttachmentKindName",
-                table: "Attachments",
-                column: "AttachmentKindName");
+                "IX_Attachments_AttachmentKindName",
+                "Attachments",
+                "AttachmentKindName");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Attachments_AttachmentKinds_AttachmentKindName",
-                table: "Attachments",
-                column: "AttachmentKindName",
-                principalTable: "AttachmentKinds",
+                "FK_Attachments_AttachmentKinds_AttachmentKindName",
+                "Attachments",
+                "AttachmentKindName",
+                "AttachmentKinds",
                 principalColumn: "Name",
                 onDelete: ReferentialAction.Restrict);
         }

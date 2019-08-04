@@ -1,5 +1,4 @@
-﻿
-using VibeChat.Web.ChatData;
+﻿using VibeChat.Web.ChatData;
 
 namespace VibeChat.Web.ApiModels
 {

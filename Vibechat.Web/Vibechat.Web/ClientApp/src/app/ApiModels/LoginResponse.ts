@@ -1,8 +1,8 @@
-import { UserInfo } from "../Data/UserInfo";
+import { AppUser } from "../Data/AppUser";
 
 export class LoginResponse {
   token: string;
   refreshToken: string;
-  info: UserInfo;
+  info: AppUser;
   isNewUser: boolean;
 }

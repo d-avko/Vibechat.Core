@@ -1,9 +1,9 @@
 import { Component, Inject } from "@angular/core";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material";
-import { ChatComponent } from "../Chat/chat.component";
+import { ChatComponent } from "../UiComponents/Chat/chat.component";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
-import { UserInfo } from "../Data/UserInfo";
+import { AppUser } from "../Data/AppUser";
 import { UsersService } from "../Services/UsersService";
 import { AuthService } from "../Auth/AuthService";
 
@@ -27,7 +27,7 @@ export class ChooseContactDialogComponent {
       this.dialogRef.close(null);
     }
 
-  public SelectUser(user: UserInfo) {
+  public SelectUser(user: AppUser) {
     if (!this.SelectedUser) {
       this.SelectedUser = user;
       return;

@@ -5,7 +5,7 @@ import {Injectable} from "@angular/core";
 import {MessageReceivedModel} from "../Shared/MessageReceivedModel";
 import {AddedToGroupModel} from "../Shared/AddedToGroupModel";
 import {RemovedFromGroupModel} from "../Shared/RemovedFromGroupModel";
-import {UserInfo} from "../Data/UserInfo";
+import {AppUser} from "../Data/AppUser";
 import {ChatsService} from "../Services/ChatsService";
 import {MessageReportingService} from "../Services/MessageReportingService";
 import {AuthService} from "../Auth/AuthService";
@@ -23,14 +23,14 @@ export enum BanEvent {
   providedIn: 'root'
 })
 
-export class ConnectionManager {
+export class SignalrConnection {
   private connection: signalR.HubConnection;
 
   private chats: ChatsService;
 
   private DHServerKeyExchangeService: DHServerKeyExchangeService;
 
-  public setConversationsService(service: ChatsService) {
+  public setChatsService(service: ChatsService) {
     this.chats = service;
   }
 
@@ -73,7 +73,7 @@ export class ConnectionManager {
         }));
     });
 
-    this.connection.on("AddedToGroup", async (chatId: number, user: UserInfo) => {
+    this.connection.on("AddedToGroup", async (chatId: number, user: AppUser) => {
       await this.chats.OnAddedToGroup(new AddedToGroupModel({ chatId: chatId, user: user}));
     });
 
@@ -162,22 +162,22 @@ export class ConnectionManager {
     return this.connection.invoke<number>("SendSecureMessage", encryptedMessage, userId, chatId);
   }
 
-  public SubsribeToUserOnlineStatusChanges(user: string) {
+  public SubscribeToUserOnlineStatusChanges(user: string) {
     if (this.connection.state != signalR.HubConnectionState.Connected) {
       this.messagesService.OnSendWhileDisconnected();
       return Promise.resolve(false);
     }
 
-    return this.connection.invoke<boolean>("SubsribeToUserOnlineStatusChanges", user);
+    return this.connection.invoke<boolean>("SubscribeToUserOnlineStatusChanges", user);
   }
 
-  public UnsubsribeFromUserOnlineStatusChanges(user: string) {
+  public UnsubscribeFromUserOnlineStatusChanges(user: string) {
     if (this.connection.state != signalR.HubConnectionState.Connected) {
       this.messagesService.OnSendWhileDisconnected();
       return Promise.resolve(false);
     }
 
-    return this.connection.invoke<boolean>("SubsribeToUserOnlineStatusChanges", user);
+    return this.connection.invoke<boolean>("SubscribeToUserOnlineStatusChanges", user);
   }
 
   public async AddUserToConversation(userId: string, conversation: Chat) {
@@ -208,7 +208,7 @@ export class ConnectionManager {
     this.connection.send("RemoveFromGroup", userId, conversationId, IsSelf);
   }
 
-  public CreateDialog(user: UserInfo, secure: boolean) {
+  public CreateDialog(user: AppUser, secure: boolean) {
     if (this.connection.state != signalR.HubConnectionState.Connected) {
       this.messagesService.OnSendWhileDisconnected();
       return;

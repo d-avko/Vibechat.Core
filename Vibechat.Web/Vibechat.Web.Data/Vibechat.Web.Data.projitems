@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Bans\BanUserRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\ChatApiModels.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\AddToConversationApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\AddToConversationResultApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\ChangeConversationNameRequest.cs" />
@@ -38,6 +39,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Users Info\UserByIdApiResponseModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Users Info\UsersByNickNameApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Users Info\UsersByNickNameResultApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\UsersApiModels.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Conversations\Chat.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Conversations\ChatRole.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Conversations\ChatRoleDto.cs" />

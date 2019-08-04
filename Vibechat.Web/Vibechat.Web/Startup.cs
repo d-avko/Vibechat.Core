@@ -1,3 +1,6 @@
+using System;
+using System.Text;
+using System.Threading.Tasks;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -10,12 +13,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Text;
-using System.Threading.Tasks;
+using VibeChat.Web;
 using Vibechat.Web.Middleware;
 using Vibechat.Web.Services.Extension_methods;
-using VibeChat.Web;
 
 namespace Vibechat.Web
 {
@@ -36,15 +36,11 @@ namespace Vibechat.Web
         public void ConfigureServices(IServiceCollection services)
         {
             if (environment.IsDevelopment())
-            {
                 services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseNpgsql(Configuration["ConnectionStrings:Development"]));
-            }
             else
-            {
                 services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseNpgsql(Configuration["ConnectionStrings:DefaultConnection"]));
-            }
 
             services.AddIdentity<AppUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -58,12 +54,12 @@ namespace Vibechat.Web
 
 
             services.AddAuthentication(options =>
-            {
-                // Identity made Cookie authentication the default.
-                // However, we want JWT Bearer Auth to be the default.
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
+                {
+                    // Identity made Cookie authentication the default.
+                    // However, we want JWT Bearer Auth to be the default.
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
                 .AddJwtBearer(options =>
                 {
                     // Configure JWT Bearer Auth to expect our security key
@@ -71,15 +67,14 @@ namespace Vibechat.Web
                     options.TokenValidationParameters =
                         new TokenValidationParameters
                         {
-                            LifetimeValidator = (before, expires, token, param) =>
-                            {
-                                return expires > DateTime.UtcNow;
-                            },
+                            LifetimeValidator =
+                                (before, expires, token, param) => { return expires > DateTime.UtcNow; },
                             ValidateAudience = false,
                             ValidateIssuer = false,
                             ValidateActor = false,
                             ValidateLifetime = true,
-                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:SecretKey"]))
+                            IssuerSigningKey =
+                                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:SecretKey"]))
                         };
 
 
@@ -96,11 +91,9 @@ namespace Vibechat.Web
                             // If the request is for our hub...
                             var path = context.HttpContext.Request.Path;
                             if (!string.IsNullOrEmpty(accessToken) &&
-                                (path.StartsWithSegments("/hubs/chat")))
-                            {
+                                path.StartsWithSegments("/hubs/chat"))
                                 // Read the token out of the query string
                                 context.Token = accessToken;
-                            }
                             return Task.CompletedTask;
                         }
                     };
@@ -119,23 +112,16 @@ namespace Vibechat.Web
             services.AddDefaultMiddleware();
 
             // In production, the Angular files will be served from this directory
-            services.AddSpaStaticFiles(configuration =>
-            {
-                configuration.RootPath = "ClientApp/dist";
-            });
+            services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/dist"; });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
         {
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
             else
-            {
                 app.UseHsts();
-            }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles(new StaticFileOptions
@@ -147,16 +133,13 @@ namespace Vibechat.Web
 
             app.UseMiddleware<UserStatusMiddleware>();
 
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<ChatsHub>("/hubs/chat");
-            });
+            app.UseSignalR(routes => { routes.MapHub<ChatsHub>("/hubs/chat"); });
 
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
-                    name: "default",
-                    template: "{controller}/{action=Index}/{id?}");
+                    "default",
+                    "{controller}/{action=Index}/{id?}");
             });
 
             app.UseSpa(spa =>
@@ -166,15 +149,12 @@ namespace Vibechat.Web
 
                 spa.Options.SourcePath = "ClientApp";
                 spa.Options.StartupTimeout = TimeSpan.FromMinutes(5);
-                if (env.IsDevelopment())
-                {
-                    spa.UseAngularCliServer(npmScript: "start");
-                }
+                if (env.IsDevelopment()) spa.UseAngularCliServer("start");
             });
 
-            FirebaseApp.Create(new AppOptions()
+            FirebaseApp.Create(new AppOptions
             {
-                Credential = GoogleCredential.GetApplicationDefault(),
+                Credential = GoogleCredential.GetApplicationDefault()
             });
 
             serviceProvider.GetService<ApplicationDbContext>().Database.Migrate();

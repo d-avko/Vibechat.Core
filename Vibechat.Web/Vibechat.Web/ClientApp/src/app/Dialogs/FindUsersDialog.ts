@@ -1,8 +1,8 @@
 import { Component, Inject } from "@angular/core";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material";
-import { ChatComponent } from "../Chat/chat.component";
+import { ChatComponent } from "../UiComponents/Chat/chat.component";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
-import { UserInfo } from "../Data/UserInfo";
+import { AppUser } from "../Data/AppUser";
 import { UsersService } from "../Services/UsersService";
 
 export interface InviteUsersData {
@@ -18,14 +18,14 @@ export class FindUsersDialogComponent {
 
   public usernameToFind: string;
 
-  public FoundUsers = new Array<UserInfo>();
+  public FoundUsers = new Array<AppUser>();
 
-  public SelectedUsers = new Array<UserInfo>();
+  public SelectedUsers = new Array<AppUser>();
 
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
     @Inject(MAT_DIALOG_DATA) public data: InviteUsersData, public usersService: UsersService, public snackBar: SnackBarHelper) {
-    this.SelectedUsers = new Array<UserInfo>();
+    this.SelectedUsers = new Array<AppUser>();
   }
 
   public async OnFindUsers(): Promise<void> {
@@ -40,10 +40,10 @@ export class FindUsersDialogComponent {
     if (users == null) {
       this.snackBar.openSnackBar('Noone was found.', 2);
 
-      this.FoundUsers = new Array<UserInfo>();
+      this.FoundUsers = new Array<AppUser>();
 
     } else {
-      this.FoundUsers = [...users]; 
+      this.FoundUsers = [...users];
     }
 
     if (this.SelectedUsers.length != 0) {
@@ -57,11 +57,11 @@ export class FindUsersDialogComponent {
     this.dialogRef.close();
   }
 
-  public IsUserSelected(user: UserInfo) : boolean {
+  public IsUserSelected(user: AppUser) : boolean {
     return this.SelectedUsers.findIndex((x) => x.id == user.id) != -1;
   }
 
-  public SelectUser(user: UserInfo) {
+  public SelectUser(user: AppUser) {
     if (this.IsUserSelected(user)) {
 
       this.SelectedUsers.splice(this.SelectedUsers.findIndex((x) => x.id == user.id), 1);

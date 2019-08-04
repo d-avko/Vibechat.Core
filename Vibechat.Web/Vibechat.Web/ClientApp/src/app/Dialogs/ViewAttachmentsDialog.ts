@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Inject, ViewChild, ViewContainerRef} from "@angular/core";
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef, MatTabChangeEvent} from "@angular/material";
-import {ChatComponent} from "../Chat/chat.component";
+import {ChatComponent} from "../UiComponents/Chat/chat.component";
 import {Chat} from "../Data/Chat";
 import {Attachment} from "../Data/Attachment";
 import {AttachmentKind} from "../Data/AttachmentKinds";

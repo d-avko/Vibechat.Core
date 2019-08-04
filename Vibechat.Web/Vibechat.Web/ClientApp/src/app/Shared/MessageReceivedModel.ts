@@ -5,11 +5,11 @@ export class MessageReceivedModel {
     (<any>Object).assign(this, init);
   }
 
-  public senderId: string
+  public senderId: string;
 
-  public message: Message
+  public message: Message;
 
-  public conversationId: number
+  public conversationId: number;
 
   public secure: boolean;
 }

@@ -1,25 +1,23 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using VibeChat.Web;
 
 namespace Vibechat.Web.Data.Repositories
-{ 
+{
     public class UsersRepository : IUsersRepository
     {
-        private UserManager<AppUser> mUserManager { get; set; }
-
         public UsersRepository(UserManager<AppUser> mUserManager)
         {
             this.mUserManager = mUserManager;
         }
 
+        private UserManager<AppUser> mUserManager { get; }
+
         public async Task MakeUserOnline(string userId, string signalRConnectionId)
         {
-            AppUser user = await GetById(userId);
+            var user = await GetById(userId);
 
             user.IsOnline = true;
 
@@ -30,7 +28,7 @@ namespace Vibechat.Web.Data.Repositories
 
         public async Task MakeUserOnline(string userId)
         {
-            AppUser user = await GetById(userId);
+            var user = await GetById(userId);
 
             user.IsOnline = true;
 
@@ -63,7 +61,7 @@ namespace Vibechat.Web.Data.Repositories
 
         public Task<bool> CheckPassword(string password, AppUser user)
         {
-           return mUserManager.CheckPasswordAsync(user, password);
+            return mUserManager.CheckPasswordAsync(user, password);
         }
 
         public Task<IdentityResult> CreateUser(AppUser user, string password)

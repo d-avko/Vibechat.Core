@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { LoadingScreenService } from './Loading/LoadingScreenService';
 
 @Component({
   selector: 'app-root',
@@ -9,8 +8,8 @@ import { LoadingScreenService } from './Loading/LoadingScreenService';
   animations: []
 })
 export class AppComponent {
-  constructor(public loading: LoadingScreenService) {
-    this.loading.startLoading();
+  constructor() {
+
   }
   prepareRoute(outlet: RouterOutlet) {
     return outlet && outlet.activatedRouteData && outlet.activatedRouteData['animation'];

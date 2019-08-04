@@ -1,4 +1,4 @@
-import {UserInfo} from "./UserInfo";
+import {AppUser} from "./AppUser";
 import {Message} from "./Message";
 import {ChatRoleDto} from "../Roles/ChatRoleDto";
 
@@ -11,7 +11,7 @@ export class Chat {
 
   public id: number;
 
-  public dialogueUser: UserInfo;
+  public dialogueUser: AppUser;
 
   public name: string;
 
@@ -23,7 +23,7 @@ export class Chat {
 
   public messages: Array<Message>;
 
-  public participants: Array<UserInfo>;
+  public participants: Array<AppUser>;
 
   public isMessagingRestricted: boolean;
 
