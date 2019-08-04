@@ -12,7 +12,7 @@ import {
   ViewChild,
   ViewContainerRef
 } from "@angular/core";
-import {ChatMessage} from "../Data/ChatMessage";
+import {Message} from "../Data/Message";
 import {ComponentPortal} from "@angular/cdk/portal";
 import {ImageScalingService} from "../Services/ImageScalingService";
 import {ChatsService} from "../Services/ChatsService";
@@ -38,7 +38,7 @@ export class ViewPhotoInjector extends Injector {
 }
 
 export class ViewPhotoData {
-  photo: ChatMessage;
+  photo: Message;
   fullsizedUrl: string;
   imageName: string;
   isForwardSupported: boolean;
@@ -55,7 +55,7 @@ export class ViewPhotoService {
 
   private config: OverlayConfig;
 
-  public ViewPhoto(photo: ChatMessage) {
+  public ViewPhoto(photo: Message) {
     let overlayRef = this.overlay.create(this.config);
 
     let data = new ViewPhotoData();
@@ -137,7 +137,7 @@ export class ViewPhotoComponent implements AfterContentInit  {
       .beforeClosed()
       .subscribe((result: Array<Chat>) => {
 
-        let forwardArray = new Array<ChatMessage>();
+        let forwardArray = new Array<Message>();
         forwardArray.push(this.data.photo);
 
         this.chats.ForwardMessagesTo(result, forwardArray);

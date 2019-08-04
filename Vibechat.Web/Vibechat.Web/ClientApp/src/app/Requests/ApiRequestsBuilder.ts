@@ -5,14 +5,14 @@ import {LoginRequest} from "../ApiModels/LoginRequest";
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {ChangeUserInfoRequest} from "../ApiModels/RegisterRequest";
 import {Inject, Injectable} from "@angular/core";
-import {ChatMessage} from "../Data/ChatMessage";
+import {Message} from "../Data/Message";
 import {Chat} from "../Data/Chat";
 import {FoundUsersResponse} from "../Data/FoundUsersResponse";
 import {UpdateThumbnailResponse} from "../ApiModels/UpdateThumbnailResponse";
 import {UserInfo} from "../Data/UserInfo";
 import {UploaderService} from "../uploads/upload.service";
 import {SnackBarHelper} from "../Snackbar/SnackbarHelper";
-import {MessageAttachment} from "../Data/MessageAttachment";
+import {Attachment} from "../Data/Attachment";
 import {AttachmentKind} from "../Data/AttachmentKinds";
 import {ChatState} from "./ChatState";
 
@@ -65,9 +65,9 @@ export class ApiRequestsBuilder {
     return result;
   }
 
-  public GetConversationMessages(offset: number, count: number, conversationId: number, maxMessageId: number): Promise<ServerResponse<Array<ChatMessage>>> {
+  public GetConversationMessages(offset: number, count: number, conversationId: number, maxMessageId: number): Promise<ServerResponse<Array<Message>>> {
 
-    return this.MakeCall<Array<ChatMessage>>(
+    return this.MakeCall<Array<Message>>(
         {
           Count: count,
           ConversationID: conversationId,
@@ -78,7 +78,14 @@ export class ApiRequestsBuilder {
     ).toPromise();
   }
 
-  public DeleteMessages(messages: Array<ChatMessage>, conversationId: number) : Promise<ServerResponse<string>> {
+  public SetLastMessageId(msgId: number, chatId: number){
+    return this.MakeCall<boolean>(
+      { chatId: chatId, messageId: msgId },
+      'api/Conversations/SetLastMessage'
+    ).toPromise();
+  }
+
+  public DeleteMessages(messages: Array<Message>, conversationId: number) : Promise<ServerResponse<string>> {
 
     return this.MakeCall<string>(
         {
@@ -102,7 +109,7 @@ export class ApiRequestsBuilder {
     return this.uploader.uploadUserPicture(picture, progress).toPromise();
   }
 
-  public UploadFile(file: File, progress: (value: number) => void, chatId: number) : Promise<ServerResponse<MessageAttachment>> {
+  public UploadFile(file: File, progress: (value: number) => void, chatId: number) : Promise<ServerResponse<Attachment>> {
     return this.uploader.uploadFile(file, progress, chatId.toString()).toPromise();
   }
 
@@ -156,7 +163,7 @@ export class ApiRequestsBuilder {
   }
 
   public GetAttachmentsForConversation(conversationId: number, kind: AttachmentKind, offset: number, count: number) {
-    return this.MakeCall<Array<ChatMessage>>(
+    return this.MakeCall<Array<Message>>(
       {
         conversationId: conversationId,
         kind: kind,

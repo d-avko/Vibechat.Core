@@ -1,4 +1,5 @@
 import {
+  AfterContentInit,
   AfterViewChecked,
   AfterViewInit,
   Component,
@@ -12,7 +13,7 @@ import {
 } from '@angular/core';
 import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {animate, state, style, transition, trigger} from "@angular/animations";
-import {ChatMessage} from '../../Data/ChatMessage';
+import {Message} from '../../Data/Message';
 import {ConversationsFormatter} from '../../Formatters/ConversationsFormatter';
 import {AttachmentKind} from '../../Data/AttachmentKinds';
 import {UserInfo} from '../../Data/UserInfo';
@@ -26,7 +27,7 @@ import {ViewPhotoService} from '../../Dialogs/ViewPhotoService';
 
 export class ForwardMessagesModel {
   public forwardTo: Array<number>;
-  public Messages: Array<ChatMessage>;
+  public Messages: Array<Message>;
 }
 
 @Component({
@@ -48,7 +49,7 @@ export class ForwardMessagesModel {
     ])
   ]
 })
-export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnChanges {
+export class MessagesComponent implements AfterViewChecked, AfterContentInit, AfterViewInit, OnChanges {
 
   constructor(
     public formatter: ConversationsFormatter,
@@ -58,40 +59,49 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     private vc: ViewContainerRef,
     private photos: ViewPhotoService) {
 
-    this.SelectedMessages = new Array<ChatMessage>();
+    this.SelectedMessages = new Array<Message>();
   }
 
   @Input() public CurrentConversation: Chat;
 
   @Output() public OnViewUserInfo = new EventEmitter<UserInfo>();
 
-  public MessagesLoading: boolean;
+  public HistoryLoading: boolean;
+
+  public RecentMessagesLoading: boolean;
 
   public IsConversationHistoryEnd: boolean = false;
+
+  public IsRecentMessagesEnd: boolean = false;
 
   public IsScrollingAssistNeeded: boolean = false;
 
   public static MessagesToScrollForGoBackButtonToShowUp: number = 20;
 
-  public static MessageMinSize: number = 50;
-
   public static MessagesBufferLength: number = 50;
+
+  public MaxErrorInPixels: number = 25;
 
   @ViewChild(CdkVirtualScrollViewport, { static: false }) viewport: CdkVirtualScrollViewport;
 
-  public SelectedMessages: Array<ChatMessage>;
+  public SelectedMessages: Array<Message>;
 
   ngAfterViewInit() {
     this.ScrollToLastMessage();
   }
 
-  ngOnChanges(changes: SimpleChanges) {
+  ngAfterContentInit(): void {
+
+  }
+
+  async ngOnChanges(changes: SimpleChanges) {
 
     if (changes.CurrentConversation != undefined) {
       this.IsScrollingAssistNeeded = false;
       this.IsConversationHistoryEnd = false;
-      this.SelectedMessages = new Array<ChatMessage>();
-      this.UpdateMessagesIfNotUpdated();
+      this.SelectedMessages = new Array<Message>();
+      await this.UpdateMessagesIfNotUpdated();
+      await this.ReadMessagesInGroup();
       this.ScrollToLastMessage();
     }
   }
@@ -110,6 +120,10 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
       return;
     }
 
+    if(!this.viewport){
+      return;
+    }
+
     requestAnimationFrame(() => {
       this.viewport.elementRef.nativeElement.scrollTop = this.viewport.elementRef.nativeElement.scrollHeight;
     });
@@ -119,7 +133,11 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     return this.themes.currentThemeName == 'dark';
   }
 
-  public ViewImage(event: Event, image: ChatMessage) {
+  public ReadMessagesInGroup(){
+    return this.chatsService.ReadExistingMessagesInGroup(MessagesComponent.MessagesBufferLength);
+  }
+
+  public ViewImage(event: Event, image: Message) {
     event.stopPropagation();
     this.photos.viewContainerRef = this.vc;
     this.photos.ViewPhoto(image);
@@ -139,27 +157,28 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     this.chatsService.ResendMessages(this.SelectedMessages, this.CurrentConversation);
   }
 
-  public async UpdateMessages() {
+  public async UpdateHistory() {
 
     let currentChat = this.CurrentConversation;
 
-    if (!this.MessagesLoading && !this.IsConversationHistoryEnd) {
-      this.MessagesLoading = true;
+    if (!this.HistoryLoading && !this.IsConversationHistoryEnd) {
+      this.HistoryLoading = true;
 
       if (currentChat.messages == null) {
         return;
       }
 
-      let result = await this.chatsService.UpdateMessagesForConversation(MessagesComponent.MessagesBufferLength, currentChat);
+      let result = await this.chatsService.UpdateMessagesHistory(MessagesComponent.MessagesBufferLength,
+        MessagesComponent.MessagesBufferLength, currentChat);
 
       if (result == null || result.length == 0) {
-        this.MessagesLoading = false;
+        this.HistoryLoading = false;
         this.IsConversationHistoryEnd = true;
         return;
       }
 
       if (!this.CurrentConversation) {
-        this.MessagesLoading = false;
+        this.HistoryLoading = false;
         return;
       }
 
@@ -167,7 +186,40 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
         this.ScrollToMessage(result.length);
       }
 
-      this.MessagesLoading = false;
+      this.HistoryLoading = false;
+    }
+
+  }
+
+  public async UpdateRecentMessages() {
+
+    let currentChat = this.CurrentConversation;
+
+    if (!this.RecentMessagesLoading && !this.IsRecentMessagesEnd) {
+      this.RecentMessagesLoading = true;
+
+      if (!currentChat.messages) {
+        return;
+      }
+
+      let result = await this.chatsService.UpdateRecentMessages(MessagesComponent.MessagesBufferLength, currentChat);
+
+      if (result == null || result.length == 0) {
+        this.RecentMessagesLoading = false;
+        this.IsRecentMessagesEnd = true;
+        return;
+      }
+
+      if (!this.CurrentConversation) {
+        this.RecentMessagesLoading = false;
+        return;
+      }
+
+      if (currentChat.id == this.CurrentConversation.id) {
+        this.ScrollToLastMessage();
+      }
+
+      this.RecentMessagesLoading = false;
     }
 
   }
@@ -195,16 +247,15 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
   }
 
 
-  public UpdateMessagesIfNotUpdated() {
+  public async UpdateMessagesIfNotUpdated() {
 
     if (!this.CurrentConversation.messages) {
-      this.CurrentConversation.messages = new Array<ChatMessage>();
-      this.UpdateMessages();
-      return;
+      this.CurrentConversation.messages = new Array<Message>();
     }
 
     if (this.CurrentConversation.messages.length <= 1) {
-      this.UpdateMessages();
+      await this.UpdateHistory();
+      await this.UpdateRecentMessages();
     }
   }
 
@@ -219,7 +270,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
 
     for (let i = boundaries[0]; i < boundaries[1] + 1; ++i) {
       if (this.CurrentConversation.messages[i].state == MessageState.Delivered) {
-        this.chatsService.ReadMessage(this.CurrentConversation.messages[i]);
+        this.chatsService.ReadMessage(this.CurrentConversation.messages[i], this.chatsService.CurrentConversation);
       }
     }
   }
@@ -286,7 +337,13 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     return new Array<number>(startBoundary, endBoundary);
   }
 
-  public OnMessagesScrolled(messageIndex: number): void {
+
+  /**
+   * Main method for handling scrolling event.
+   * @param messageIndex
+   * @constructor
+   */
+  public async OnMessagesScrolled(messageIndex: number) {
     // user scrolled to last loaded message, load more messages
 
     if (this.CurrentConversation.messages == null) {
@@ -294,7 +351,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     }
 
     if (messageIndex == 0) {
-      this.UpdateMessages();
+      await this.UpdateHistory();
       return;
     }
 
@@ -306,12 +363,19 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
       this.IsScrollingAssistNeeded = false;
     }
 
-    //read the message if it's not read
+    if(this.viewport.elementRef.nativeElement.scrollTop
+      >= this.viewport.elementRef.nativeElement.scrollHeight - this.MaxErrorInPixels){
+      await this.UpdateRecentMessages();
+    }
 
-    this.ReadMessagesInViewport();
+    //reading is supported for dialogs only.
+
+    if(!this.CurrentConversation.isGroup){
+      this.ReadMessagesInViewport();
+    }
   }
 
-  public SelectMessage(message: ChatMessage): void {
+  public SelectMessage(message: Message): void {
 
     let messageIndex = this.SelectedMessages.findIndex(x => x.id == message.id);
 
@@ -325,7 +389,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     }
   }
 
-  public IsPreviousMessageOnAnotherDay(message: ChatMessage): boolean {
+  public IsPreviousMessageOnAnotherDay(message: Message): boolean {
     if (this.CurrentConversation.messages == null) {
       return false;
     }
@@ -351,7 +415,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     return (<Date>message.timeReceived).getDay() != (<Date>this.CurrentConversation.messages[messageIndex - 1].timeReceived).getDay();
   }
 
-  public IsLastMessage(message: ChatMessage): boolean {
+  public IsLastMessage(message: Message): boolean {
 
     if (this.CurrentConversation.messages == null)
       return false;
@@ -359,11 +423,11 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     return this.CurrentConversation.messages.findIndex((x) => x.id == message.id) == 0;
   }
 
-  public IsMessageSelected(message: ChatMessage): boolean {
+  public IsMessageSelected(message: Message): boolean {
     return this.SelectedMessages.find(x => x.id == message.id) != null;
   }
 
-  public IsFirstMessageInSequence(message: ChatMessage): boolean {
+  public IsFirstMessageInSequence(message: Message): boolean {
     if (this.CurrentConversation.messages == null) {
       return false;
     }
@@ -381,7 +445,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     return this.CurrentConversation.messages[messageIndex - 1].user.userName != message.user.userName;
   }
 
-  public IsImage(message: ChatMessage): boolean {
+  public IsImage(message: Message): boolean {
 
     if (!message.isAttachment) {
       return false;
@@ -390,7 +454,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     return message.attachmentInfo.attachmentKind == AttachmentKind.Image;
   }
 
-  public IsFile(message: ChatMessage): boolean {
+  public IsFile(message: Message): boolean {
 
     if (!message.isAttachment) {
       return false;

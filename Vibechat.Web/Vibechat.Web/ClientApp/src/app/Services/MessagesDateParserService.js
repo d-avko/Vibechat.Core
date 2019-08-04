@@ -1,10 +1,10 @@
-//import { ChatMessage } from "../Data/ChatMessage";
+//import { Message } from "../Data/Message";
 //import { Injectable } from "@angular/core";
 //@Injectable({
 //  providedIn: 'root'
 //})
 //export class MessagesDateParserService {
-//  public ParseStringDatesInMessages(messages: Array<ChatMessage>) :  void {
+//  public ParseStringDatesInMessages(messages: Array<Message>) :  void {
 //    messages.forEach((msg) => {
 //      msg.timeReceived = new Date(msg.timeReceived);
 //      if (msg.forwardedMessage != null) {
@@ -12,7 +12,7 @@
 //      }
 //    });
 //  }
-//  public ParseStringDateInMessage(message: ChatMessage) : void {
+//  public ParseStringDateInMessage(message: Message) : void {
 //    message.timeReceived = new Date(message.timeReceived);
 //    if (message.forwardedMessage != null) {
 //      message.forwardedMessage.timeReceived = new Date(message.forwardedMessage.timeReceived)

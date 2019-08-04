@@ -15,7 +15,7 @@
 
         <!--loading progress spinner-->
 
-        <div *ngIf="MessagesLoading && IsLastMessage(message)" class="padding10px">
+        <div *ngIf="HistoryLoading && IsLastMessage(message)" class="padding10px">
           <mat-progress-spinner class="load-spinner"
                                 diameter="60"
                                 color="Primary"
@@ -132,7 +132,8 @@
 
           <div class="time-and-states-wrapper">
 
-            <span [ngClass]="{'message_timereceived-dark': IsDarkTheme(), 'message_timereceived-light': !IsDarkTheme()}">{{message.timeReceived | date: 'shortTime'}}</span>
+            <span [ngClass]="{'message_timereceived-dark': IsDarkTheme(),
+            'message_timereceived-light': !IsDarkTheme()}">{{message.timeReceived | date: 'shortTime'}}</span>
             <!--read, delivered etc.-->
 
             <mat-icon class="messagestate" *ngIf="message.state == 0">
@@ -264,7 +265,7 @@
             [@slideIn]>
       <span *ngIf="!formatter.IsMobileDevice()">Resend messages</span>
 
-      <mat-icon 
+      <mat-icon
                 color="primary"
                 [@slideIn]>
         restore

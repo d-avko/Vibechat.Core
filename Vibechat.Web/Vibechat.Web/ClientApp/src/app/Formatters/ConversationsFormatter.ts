@@ -1,5 +1,5 @@
 import {Injectable} from "@angular/core"
-import {ChatMessage} from "../Data/ChatMessage";
+import {Message} from "../Data/Message";
 import {Chat} from "../Data/Chat";
 import {AuthService} from "../Auth/AuthService";
 import {AttachmentKind} from "../Data/AttachmentKinds";
@@ -30,7 +30,7 @@ export class ConversationsFormatter{
 
   public GetLastMessageFormatted(conversation: Chat): string {
 
-    if (conversation.messages == null || conversation.messages.length == 0) {
+    if (!conversation.lastMessage) {
       return "No messages...";
     }
 
@@ -42,7 +42,7 @@ export class ConversationsFormatter{
       MaxSymbols = Math.floor((window.innerWidth * ConversationsFormatter.MaxSymbols * 0.75) / ConversationsFormatter.MaxPixelsDesktop);
     }
 
-    let message = conversation.messages[conversation.messages.length - 1];
+    let message = conversation.lastMessage;
 
     let user = message.user.id == this.auth.User.id ? 'You' : message.user.userName;
 
@@ -151,7 +151,7 @@ export class ConversationsFormatter{
     return this.DaysSinceEventFormatted((<Date>message.timeReceived));
   }
 
-  public GetMessagesDateStripFormatted(message: ChatMessage): string {
+  public GetMessagesDateStripFormatted(message: Message): string {
     if (typeof message.timeReceived !== 'object') {
       message.timeReceived = new Date(<string>message.timeReceived);
     }
@@ -182,12 +182,8 @@ export class ConversationsFormatter{
     let currentTime = new Date();
     let hoursSinceReceived = Math.floor((currentTime.getTime() - eventDate.getTime()) / (1000 * 60 * 60));
     let daysSinceReceived = Math.floor(hoursSinceReceived / 24);
-    let hoursSinceMidnight = currentTime.getHours();
 
     switch (true) {    // this is for the case when user've sent message right in 00:00:00
-      case hoursSinceReceived <= hoursSinceMidnight + 0.001: {
-        return "Today"
-      }
       case daysSinceReceived <= ConversationsFormatter.MAX_FORMATTABLE_DAYS: {
         let currentDay = currentTime.getDay();
         let eventDay = eventDate.getDay();
@@ -200,6 +196,9 @@ export class ConversationsFormatter{
         }
 
         switch (realDaysBetween) {
+          case 0: {
+            return "Today";
+          }
           case 1: {
             return "Yesterday";
           }
@@ -263,7 +262,7 @@ export class ConversationsFormatter{
     }
   }
 
-  public GetFormattedDateForAttachments(attachments: Array<ChatMessage>) {
+  public GetFormattedDateForAttachments(attachments: Array<Message>) {
     let date = new Date();
 
     if (!<Date>attachments[0].timeReceived) {

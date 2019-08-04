@@ -248,6 +248,7 @@ namespace Vibechat.Web.Services
             else
             {
                 lastMessage.MessageID = msgId;
+                lastMessagesRepository.Update(lastMessage);
             }
 
             await unitOfWork.Commit();
@@ -601,7 +602,8 @@ namespace Vibechat.Web.Services
                         User.ChatRole = await GetChatRole(User.Id, conversation.Id);
                     }
                 }
-
+                
+                returnData.Add(dtoChat);
             }
 
             return returnData;
@@ -738,6 +740,15 @@ namespace Vibechat.Web.Services
             
             dtoChat.IsMessagingRestricted = await bansService.IsBannedFromConversation(dtoChat.Id, whoAccessedId);
 
+            if (conversation.IsGroup)
+            {
+                foreach (UserInfo User in dtoChat.Participants)
+                {
+                    User.IsBlockedInConversation = await bansService.IsBannedFromConversation(conversation.Id, User.Id);
+                    User.ChatRole = await GetChatRole(User.Id, conversation.Id);
+                }
+            }
+
             return dtoChat;
         }
 
@@ -796,13 +807,21 @@ namespace Vibechat.Web.Services
             await unitOfWork.Commit();
         }
 
-        public async Task<MessageDataModel> AddMessage(Message message, int groupId, string SenderId)
+        /// <summary>
+        /// Adds a messages and updates client lastMessageId
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="groupId"></param>
+        /// <param name="senderId"></param>
+        /// <returns></returns>
+        /// <exception cref="FormatException"></exception>
+        public async Task<MessageDataModel> AddMessage(Message message, int groupId, string senderId)
         {
-            AppUser whoSent = await usersRepository.GetById(SenderId);
+            AppUser whoSent = await usersRepository.GetById(senderId);
 
             if (whoSent == null)
             {
-                throw new FormatException($"Failed to retrieve user with id {SenderId} from database: no such user exists");
+                throw new FormatException($"Failed to retrieve user with id {senderId} from database: no such user exists");
             }
 
             MessageDataModel forwardedMessage = null;
@@ -820,31 +839,33 @@ namespace Vibechat.Web.Services
             }
 
             var result = messagesRepository.Add(whoSent, message, groupId, forwardedMessage);
+            await SetLastMessage(senderId, groupId, result.MessageID);
             await unitOfWork.Commit();
             return result;
         }
 
-        public async Task<MessageDataModel> AddEncryptedMessage(string message, int groupId, string SenderId)
+        public async Task<MessageDataModel> AddEncryptedMessage(string message, int groupId, string senderId)
         {
-            AppUser whoSent = await usersRepository.GetById(SenderId);
+            AppUser whoSent = await usersRepository.GetById(senderId);
 
             if (whoSent == null)
             {
-                throw new FormatException($"Failed to retrieve user with id {SenderId} from database: no such user exists");
+                throw new FormatException($"Failed to retrieve user with id {senderId} from database: no such user exists");
             }
 
             var result = messagesRepository.AddSecureMessage(whoSent, message, groupId);
+            await SetLastMessage(senderId, groupId, result.MessageID);
             await unitOfWork.Commit();
             return result;
         }
 
-        public async Task<MessageDataModel> AddAttachmentMessage(Message message, int groupId, string SenderId)
+        public async Task<MessageDataModel> AddAttachmentMessage(Message message, int groupId, string senderId)
         {
-            AppUser whoSent = await usersRepository.GetById(SenderId);
+            AppUser whoSent = await usersRepository.GetById(senderId);
 
             if (whoSent == null)
             {
-                throw new FormatException($"Failed to retrieve user with id {SenderId} from database: no such user exists");
+                throw new FormatException($"Failed to retrieve user with id {senderId} from database: no such user exists");
             }
 
             AttachmentKindDataModel attachmentKind = await attachmentKindsRepository.GetById(message.AttachmentInfo.AttachmentKind);
@@ -852,9 +873,8 @@ namespace Vibechat.Web.Services
             var attachment = attachmentRepository.Add(attachmentKind, message);
 
             var result = messagesRepository.AddAttachment(whoSent, attachment, message, groupId);
-
+            await SetLastMessage(senderId, groupId, result.MessageID);
             await unitOfWork.Commit();
-
             return result;
         }
 

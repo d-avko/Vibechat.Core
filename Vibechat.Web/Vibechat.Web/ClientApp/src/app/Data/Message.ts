@@ -1,26 +1,26 @@
-import { UserInfo } from "./UserInfo";
-import { MessageAttachment } from "./MessageAttachment";
+import {UserInfo} from "./UserInfo";
+import {Attachment} from "./Attachment";
 
-export class ChatMessage {
-  constructor(init?: Partial<ChatMessage>) {
+export class Message {
+  constructor(init?: Partial<Message>) {
     (<any>Object).assign(this, init);
   }
 
   public id: number;
 
   public user: UserInfo;
-    
+
   public messageContent: string;
-    
+
   public conversationID: number;
 
   public state: number;
-    
+
   public timeReceived: Date | string;
 
-  public attachmentInfo: MessageAttachment;
+  public attachmentInfo: Attachment;
 
-  public forwardedMessage: ChatMessage;
+  public forwardedMessage: Message;
 
   public isAttachment: boolean;
 

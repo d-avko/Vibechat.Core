@@ -1,6 +1,6 @@
 import * as signalR from "@aspnet/signalr";
 import {Chat} from "../Data/Chat";
-import {ChatMessage} from "../Data/ChatMessage";
+import {Message} from "../Data/Message";
 import {Injectable} from "@angular/core";
 import {MessageReceivedModel} from "../Shared/MessageReceivedModel";
 import {AddedToGroupModel} from "../Shared/AddedToGroupModel";
@@ -62,7 +62,7 @@ export class ConnectionManager {
       setTimeout(() => this.Start(), 1000);
     });
 
-    this.connection.on("ReceiveMessage", (senderId: string, message: ChatMessage, conversationId: number, secure: boolean) => {
+    this.connection.on("ReceiveMessage", (senderId: string, message: Message, conversationId: number, secure: boolean) => {
       this.chats.OnMessageReceived(new MessageReceivedModel(
         {
           senderId: senderId,
@@ -118,19 +118,19 @@ export class ConnectionManager {
     });
   }
 
-  public SendMessage(message: ChatMessage, conversation: Chat) {
+  public SendMessage(message: Message, conversation: Chat) {
     if (this.connection.state != signalR.HubConnectionState.Connected) {
       this.messagesService.OnSendWhileDisconnected();
-      return;
+      return Promise.resolve(0);
     }
 
     if (conversation.isGroup) {
 
-      return this.connection.invoke<boolean>("SendMessageToGroup", message, conversation.id);
+      return this.connection.invoke<number>("SendMessageToGroup", message, conversation.id);
 
     } else {
 
-      return this.connection.invoke<boolean>("SendMessageToUser", message, conversation.dialogueUser.id, conversation.id);
+      return this.connection.invoke<number>("SendMessageToUser", message, conversation.dialogueUser.id, conversation.id);
 
     }
   }
@@ -156,16 +156,16 @@ export class ConnectionManager {
   public SendMessageToSecureChat(encryptedMessage: string, userId: string, chatId: number) {
     if (this.connection.state != signalR.HubConnectionState.Connected) {
       this.messagesService.OnSendWhileDisconnected();
-      return;
+      return Promise.resolve(0);
     }
 
-    return this.connection.invoke<boolean>("SendSecureMessage", encryptedMessage, userId, chatId);
+    return this.connection.invoke<number>("SendSecureMessage", encryptedMessage, userId, chatId);
   }
 
   public SubsribeToUserOnlineStatusChanges(user: string) {
     if (this.connection.state != signalR.HubConnectionState.Connected) {
       this.messagesService.OnSendWhileDisconnected();
-      return;
+      return Promise.resolve(false);
     }
 
     return this.connection.invoke<boolean>("SubsribeToUserOnlineStatusChanges", user);
@@ -174,7 +174,7 @@ export class ConnectionManager {
   public UnsubsribeFromUserOnlineStatusChanges(user: string) {
     if (this.connection.state != signalR.HubConnectionState.Connected) {
       this.messagesService.OnSendWhileDisconnected();
-      return;
+      return Promise.resolve(false);
     }
 
     return this.connection.invoke<boolean>("SubsribeToUserOnlineStatusChanges", user);
@@ -245,7 +245,7 @@ export class ConnectionManager {
       return;
     }
 
-    return await this.connection.invoke<boolean>("BlockUser", userId, banType);
+    return this.connection.invoke<boolean>("BlockUser", userId, banType);
   }
 
   public async BlockUserInChat(userId: string, chatId: number, banType: BanEvent) {
@@ -254,7 +254,7 @@ export class ConnectionManager {
       return;
     }
 
-    return await this.connection.invoke<boolean>("BlockUserInChat", userId, chatId, banType);
+    return this.connection.invoke<boolean>("BlockUserInChat", userId, chatId, banType);
   }
 
   public InitiateConnections(conversationIds: Array<number>): void {

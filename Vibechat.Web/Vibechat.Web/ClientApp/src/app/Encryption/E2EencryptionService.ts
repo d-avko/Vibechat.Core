@@ -1,7 +1,7 @@
-import { ChatMessage } from "../Data/ChatMessage";
+import {Message} from "../Data/Message";
 import * as crypto from "crypto-js";
-import { Injectable } from "@angular/core";
-import { SecureChatsService } from "./SecureChatsService";
+import {Injectable} from "@angular/core";
+import {SecureChatsService} from "./SecureChatsService";
 import * as biginteger from "big-integer";
 
 class authKeys {
@@ -22,11 +22,9 @@ export class E2EencryptionService {
 
   public static keySize = 256;
 
-  public static ivSize = 128;
-
   public static iterations = 100;
 
-  public Encrypt(userId: string, message: ChatMessage) {
+  public Encrypt(userId: string, message: Message) {
     let authKey = this.secureChatsService.GetAuthKey(userId);
     if (!authKey) {
       return null;
@@ -60,7 +58,7 @@ export class E2EencryptionService {
     }
 
     let salt = crypto.enc.Hex.parse(transitmessage.substr(0, 32));
-    let iv = crypto.enc.Hex.parse(transitmessage.substr(32, 32))
+    let iv = crypto.enc.Hex.parse(transitmessage.substr(32, 32));
     let encrypted = transitmessage.substring(64);
 
     let key = crypto.PBKDF2(authKey, salt, {
@@ -74,10 +72,10 @@ export class E2EencryptionService {
       mode: crypto.mode.CBC
 
     });
-    return <ChatMessage>JSON.parse(decrypted.toString(crypto.enc.Utf8));
+    return <Message>JSON.parse(decrypted.toString(crypto.enc.Utf8));
   }
 
-  public GenerateDhPrivate(): biginteger.BigInteger {
+  public static GenerateDhPrivate(): biginteger.BigInteger {
     let min = biginteger(2).pow(E2EencryptionService.DhMinKeyLength);
     let max = biginteger(2).pow(E2EencryptionService.DhMaxKeyLength);
 

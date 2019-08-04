@@ -31,8 +31,6 @@ export class GroupInfoDialogComponent {
 
   public OnJoinGroup = new EventEmitter<Chat>();
 
-  public OnViewAttachments = new EventEmitter<Chat>();
-
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
     public dialog: MatDialog,

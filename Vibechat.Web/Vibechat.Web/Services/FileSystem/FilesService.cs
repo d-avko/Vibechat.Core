@@ -1,16 +1,15 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using VibeChat.Web;
 using Vibechat.Web.ChatData.Messages;
 using Vibechat.Web.Data.Messages;
 using Vibechat.Web.Services.Images;
 using Vibechat.Web.Services.Paths;
-using VibeChat.Web;
 
 namespace Vibechat.Web.Services.FileSystem
 {
@@ -47,7 +46,7 @@ namespace Vibechat.Web.Services.FileSystem
         public IImageCompressionService ImageCompression { get; }
 
         /// <summary>
-        /// Takes stream containing image and returns <see cref="MessageAttachment"/> object.
+        /// Takes stream containing image and returns <see cref="Attachment"/> object.
         /// This method doesn't compress image, it just calculates scaled dimensions
         /// And saves the image.
         /// </summary>

@@ -78,6 +78,9 @@ namespace VibeChat.Web
 
             modelBuilder.Entity<ChatRoleDataModel>()
                .HasKey(x => new { x.ChatId, x.UserId});
+            
+            modelBuilder.Entity<LastMessageDataModel>()
+                .HasKey(x => new { x.ChatID, x.UserID});
              
             modelBuilder.Entity<AttachmentKindDataModel>().HasData(
                 new[] 

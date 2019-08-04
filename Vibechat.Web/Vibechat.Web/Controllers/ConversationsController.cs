@@ -231,6 +231,41 @@ namespace VibeChat.Web.Controllers
                 };
             }
         }
+        
+        public class SetLastMessageRequest
+        {
+            public int chatId { get; set; }
+            
+            public int messageId { get; set; }
+        }
+        
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("api/Conversations/SetLastMessage")]
+        public async Task<ResponseApiModel<bool>> GetById([FromBody]SetLastMessageRequest request)
+        {
+            try
+            {
+                string thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+
+                await mConversationService.SetLastMessage(thisUserId, request.chatId, request.messageId);
+
+                return new ResponseApiModel<bool>()
+                {
+                    IsSuccessfull = true,
+                    ErrorMessage = null,
+                    Response = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseApiModel<bool>()
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message,
+                    Response = false
+                };
+            }
+        }
 
         public class GetAttachmentsRequest
         {

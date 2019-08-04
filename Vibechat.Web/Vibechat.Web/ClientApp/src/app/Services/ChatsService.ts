@@ -2,13 +2,13 @@ import {Chat} from "../Data/Chat";
 import {MessageReceivedModel} from "../Shared/MessageReceivedModel";
 import {AuthService} from "../Auth/AuthService";
 import {AddedToGroupModel} from "../Shared/AddedToGroupModel";
-import {ChatMessage} from "../Data/ChatMessage";
+import {Message} from "../Data/Message";
 import {ApiRequestsBuilder} from "../Requests/ApiRequestsBuilder";
 import {BanEvent, ConnectionManager} from "../Connections/ConnectionManager";
 import {RemovedFromGroupModel} from "../Shared/RemovedFromGroupModel";
 import {MessageState} from "../Shared/MessageState";
 import {UserInfo} from "../Data/UserInfo";
-import {MessageAttachment} from "../Data/MessageAttachment";
+import {Attachment} from "../Data/Attachment";
 import {Injectable} from "@angular/core";
 import {SecureChatsService} from "../Encryption/SecureChatsService";
 import {E2EencryptionService} from "../Encryption/E2EencryptionService";
@@ -52,6 +52,34 @@ export class ChatsService {
     return this.Conversations.map(x => x.id);
   }
 
+  /**
+   * "reads" messages -
+      decrements unread count and updates lastMessageId if necessary.
+   * @constructor
+   */
+  public async ReadExistingMessagesInGroup(maximumToRead: number){
+    if(!this.CurrentConversation.isGroup){
+      return;
+    }
+
+    this.CurrentConversation.messagesUnread = Math.max(0, this.CurrentConversation.messagesUnread - maximumToRead);
+
+    let index = this.CurrentConversation.messages.length - 1;
+
+    while(!this.CurrentConversation.messages[index].id){
+      --index;
+    }
+    let lastMsgId = this.CurrentConversation.messages[index].id;
+
+    if(this.CurrentConversation.clientLastMessageId != lastMsgId){
+      let response = await this.requestsBuilder.SetLastMessageId(lastMsgId, this.CurrentConversation.id);
+
+      if(response.isSuccessfull){
+        this.CurrentConversation.clientLastMessageId = lastMsgId;
+      }
+    }
+
+  }
 
   public async ChangeConversation(conversation: Chat) {
     if (conversation == this.CurrentConversation) {
@@ -232,18 +260,31 @@ export class ChatsService {
     return true;
   }
 
-  public ResendMessages(messages: Array<ChatMessage>, chat: Chat) {
-    messages.forEach((msg) => {
-      this.SendChatMessage(msg, chat);
+  public ResendMessages(messages: Array<Message>, chat: Chat) {
+    messages.forEach(async (msg) => {
+      await this.SendChatMessage(msg, chat);
     });
 
   }
 
-  public async UpdateMessagesForConversation(count: number, chat: Chat) {
+  /**
+   * To calculate the offset for messages,
+   * considers recentMessagesMaxCount and length of local messages array.
+   */
+  public async UpdateMessagesHistory(count: number, recentMessagesMaxCount: number, chat: Chat) {
+    let offset;
+    //recent messages will be loaded, do not include them in offset.
+    if(chat.messagesUnread <= recentMessagesMaxCount){
+      offset = chat.messages.length;
+    }else{
+      offset = chat.messages.length + chat.messagesUnread;
+    }
+
     let result = await this.requestsBuilder.GetConversationMessages(
-      chat.messages.length,
+      offset,
       count,
-      chat.id)
+      chat.id,
+      -1);
 
     if (!result.isSuccessfull) {
       return;
@@ -288,20 +329,81 @@ export class ChatsService {
     return result.response;
   }
 
-  private DecryptedMessageToLocalMessage(container: ChatMessage, decrypted: ChatMessage) {
+  public async UpdateRecentMessages(count: number, chat: Chat){
+    let offset = chat.messages.filter(msg => msg.id > chat.clientLastMessageId).length;
+
+    let result = await this.requestsBuilder.GetConversationMessages(
+      offset,
+      count,
+      chat.id,
+      chat.clientLastMessageId);
+
+    if (!result.isSuccessfull) {
+      return;
+    }
+
+    //server sent zero messages, we reached end of our history.
+
+    if (!result.response || !result.response.length) {
+      //only allow receiving messages, if client loaded all recent messages.
+      chat.canReceiveMessages = true;
+      return result.response;
+    }
+
+    if (chat.isSecure) {
+      let decryptedMessages = [];
+
+      result.response.forEach(x => {
+
+        let decrypted = this.encryptionService.Decrypt(chat.dialogueUser.id, x.encryptedPayload);
+
+        if (!decrypted) {
+          this.OnAuthKeyLost(chat);
+          return;
+        }
+
+        this.DecryptedMessageToLocalMessage(
+          x,
+          decrypted);
+
+        decryptedMessages.push(decrypted);
+      });
+
+      result.response = decryptedMessages;
+    }
+
+    result.response = result.response.sort(this.MessagesSortFunc);
+
+    //apply scaling to images
+    this.images.ScaleImages(result.response);
+
+    //append old messages to new ones.
+    chat.messages.push(...result.response);
+
+    //for the case of groups, client lastMessageId is updated automatically,
+    //for dialogs, they are updated as we read messages.
+    if(chat.isGroup){
+      chat.messagesUnread = Math.max(0, chat.messagesUnread - result.response.length);
+      chat.clientLastMessageId = Math.max(...result.response.map(msg => msg.id));
+    }
+
+    return result.response;
+  }
+
+  private DecryptedMessageToLocalMessage(container: Message, decrypted: Message) {
     decrypted.id = container.id;
     decrypted.state = container.state;
     decrypted.timeReceived = container.timeReceived;
     decrypted.user = container.user;
   }
 
-  private MessagesSortFunc(left: ChatMessage, right: ChatMessage): number {
+  private MessagesSortFunc(left: Message, right: Message): number {
     if (left.timeReceived < right.timeReceived) return -1;
     if (left.timeReceived > right.timeReceived) return 1;
     return 0;
   }
 
-  public async DeleteMessages(messages: Array<ChatMessage>, from: Chat) {
+  public async DeleteMessages(messages: Array<Message>, from: Chat) {
     let notLocalMessages = messages.filter(x => x.state != MessageState.Pending)
 
     //delete local unsent messages
@@ -346,7 +448,7 @@ export class ChatsService {
         if (conversation.messages != null) {
           this.images.ScaleImages(conversation.messages);
         } else {
-          conversation.messages = new Array<ChatMessage>();
+          conversation.messages = new Array<Message>();
         }
 
       })
@@ -416,11 +518,11 @@ export class ChatsService {
   }
 
 
-  public OnMessageReceived(data: MessageReceivedModel): void {
-    let conversation = this.Conversations
+  public async OnMessageReceived(data: MessageReceivedModel) {
+    let chat = this.Conversations
       .find(x => x.id == data.conversationId);
 
-    if (!conversation) {
+    if (!chat) {
       return;
     }
 
@@ -428,7 +530,7 @@ export class ChatsService {
       let decrypted = this.encryptionService.Decrypt(data.senderId, data.message.encryptedPayload);
 
       if (!decrypted) {
-        this.OnAuthKeyLost(conversation);
+        this.OnAuthKeyLost(chat);
         return;
       }
 
@@ -439,23 +541,28 @@ export class ChatsService {
 
     this.images.ScaleImage(data.message);
 
-    conversation.messages.push(data.message);
+    //we can accept message only if chat.canAcceptMessages is true.
+    if(chat.canReceiveMessages){
+      chat.messages.push(data.message);
+      chat.messages = [...chat.messages];
 
-    conversation.messages = [...conversation.messages];
+      //if user was in different chat, increment unread counter.
+      //if not, UI should automatically update clientLastMessageId.
+      if(!this.CurrentConversation || chat.id != this.CurrentConversation.id){
+        ++chat.messagesUnread;
+      }
 
-    if (data.senderId != this.authService.User.id) {
-      ++conversation.messagesUnread;
+    } else{
+      ++chat.messagesUnread;
     }
+
+    chat.lastMessage = data.message;
   }
 
-  public BuildForwardedMessage(whereTo: number, forwarded: ChatMessage): ChatMessage {
-    var min = 1;
-    var max = 100000;
-    var clientMessageId = Math.floor(Math.random() * (+max - +min) + +min);
-
-    return new ChatMessage(
+  public BuildForwardedMessage(whereTo: number, forwarded: Message): Message {
+    return new Message(
       {
-        id: clientMessageId,
+        id: 0,
         isAttachment: false,
         user: this.authService.User,
         conversationID: whereTo,
@@ -465,14 +572,10 @@ export class ChatsService {
       });
   }
 
-  public BuildMessage(message: string, whereTo: number, isAttachment = false, AttachmentInfo: MessageAttachment = null): ChatMessage {
-    var min = 1;
-    var max = 100000;
-    var clientMessageId = Math.floor(Math.random() * (+max - +min) + +min);
-
-    return new ChatMessage(
+  public BuildMessage(message: string, whereTo: number, isAttachment = false, AttachmentInfo: Attachment = null): Message {
+    return new Message(
       {
-        id: clientMessageId,
+        id: 0,
         messageContent: message,
         isAttachment: isAttachment,
         attachmentInfo: AttachmentInfo,
@@ -520,18 +623,14 @@ export class ChatsService {
     return chat.isSecure && !chat.authKeyId;
   }
 
-  public SendMessage(message: string, to: Chat) {
+  public async SendMessage(message: string, to: Chat) {
     let messageToSend = this.BuildMessage(message, to.id);
 
     if (this.IsSecureChatAndNoAuthKey(to)) {
       return;
     }
 
-    to.messages.push(
-      messageToSend
-    );
-
-    this.SendChatMessage(messageToSend, to);
+    await this.SendChatMessage(messageToSend, to);
   }
 
   public async FindUsersInChat(username: string, chatId: number) : Promise<Array<UserInfo>> {
@@ -544,7 +643,7 @@ export class ChatsService {
     return result.response.usersFound;
   }
 
-  public async ReadMessage(message: ChatMessage) {
+  public async ReadMessage(message: Message, chat: Chat) {
 
     if (message.user.id == this.authService.User.id) {
       return;
@@ -554,19 +653,26 @@ export class ChatsService {
       return;
     }
 
-    this.PendingReadMessages.push(message.id);
+    let pendingIndex = this.PendingReadMessages.push(message.id) - 1;
 
     let result = await this.connectionManager.ReadMessage(message.id, message.conversationID);
 
     if (!result) {
+      this.PendingReadMessages.splice(pendingIndex, 1);
       return;
     }
 
     message.state = MessageState.Read;
+
+    //clientLastMessageId is updated on server automatically, so do it locally.
+    chat.clientLastMessageId = message.id;
+    chat.clientLastMessageId = Math.max(0, chat.clientLastMessageId - 1);
+    this.PendingReadMessages.splice(pendingIndex, 1);
   }
 
   public async CreateGroup(name: string, isPublic: boolean) {
-    let result = await this.requestsBuilder.CreateConversation(name, this.authService.User.id, null, null, true, isPublic);
+    let result = await this.requestsBuilder.CreateConversation(
+      name, this.authService.User.id, null, null, true, isPublic);
 
     if (!result.isSuccessfull) {
       return;
@@ -574,7 +680,7 @@ export class ChatsService {
 
     this.connectionManager.InitiateConnections(new Array<number>(1).fill(result.response.id));
 
-    result.response.messages = new Array<ChatMessage>();
+    result.response.messages = new Array<Message>();
 
     this.Conversations = [...this.Conversations, result.response];
   }
@@ -636,7 +742,7 @@ export class ChatsService {
     this.UpdateConversationFields(target, result.response);
   }
 
-  public ForwardMessagesTo(destination: Array<Chat>, messages: Array<ChatMessage>) {
+  public ForwardMessagesTo(destination: Array<Chat>, messages: Array<Message>) {
     if (destination == null || destination.length == 0) {
       return;
     }
@@ -648,16 +754,12 @@ export class ChatsService {
           return;
         }
 
-        messages.forEach(msg => {
+        messages.forEach(async msg => {
           let messageToSend = this.BuildForwardedMessage(conversation.id, msg.forwardedMessage ? msg.forwardedMessage : msg);
-
-          this.connectionManager.SendMessage(messageToSend, conversation);
-
-          conversation.messages.push(messageToSend);
-
-        })
+          await this.SendChatMessage(messageToSend, conversation);
+        });
       }
-    )
+    );
 
     messages.splice(0, messages.length);
   }
@@ -750,12 +852,6 @@ export class ChatsService {
     }
 
 
-  // // if the client received an answer to an API call to remove secure chats with lost
-  ////keys quickly enough, do not delete chats twice.
-  //  if (this.Conversations[chatIndex].isSecure) {
-  //    return;
-  //  }
-
     //either this client left or creator removed him.
     if (data.userId == this.authService.User.id) {
 
@@ -776,7 +872,7 @@ export class ChatsService {
   public OnMessageRead(msgId: number, conversationId: number) {
     let conversation = this.Conversations.find(x => x.id == conversationId);
 
-    if (conversation == null) {
+    if (conversation == null || conversation.isGroup) {
       return;
     }
 
@@ -792,17 +888,7 @@ export class ChatsService {
 
     message.state = MessageState.Read;
     conversation.messages = [...conversation.messages];
-
-    if (message.user.id != this.authService.User.id) {
-      //this is to prevent values like "-1" (could happen in some rare cases)
-      conversation.messagesUnread = Math.max(0, conversation.messagesUnread - 1);
-    }
-
-    let pendingIndex = this.PendingReadMessages.findIndex(x => x == message.id);
-
-    if (pendingIndex != -1) {
-      this.PendingReadMessages.splice(pendingIndex, 1);
-    }
+    conversation.messagesUnread = Math.max(0, conversation.messagesUnread - 1);
   }
 
   public OnMessageDelivered(msgId: number, clientMessageId: number, conversationId: number) {
@@ -823,24 +909,47 @@ export class ChatsService {
     conversation.messages = [...conversation.messages];
   }
 
-  private SendChatMessage(message: ChatMessage, to: Chat) {
+  /**
+   * Method is used for sending built message to specified chat.
+   * Handles push and pop automatically.
+   * @param message
+   * @param to
+   * @constructor
+   */
+  private async SendChatMessage(message: Message, to: Chat) : Promise<boolean> {
+    let msgIndex = to.messages.push(message) - 1;
+    to.messages = [...to.messages];
+    let messageId = 0;
+
     if (to.isSecure) {
 
       let encrypted = this.encryptionService.Encrypt(to.dialogueUser.id, message);
 
       if (!encrypted) {
         this.OnAuthKeyLost(to);
-        return;
+        return false;
       }
 
-      this.connectionManager.SendMessageToSecureChat(
+      messageId = await this.connectionManager.SendMessageToSecureChat(
         encrypted,
-        message.id,
         to.dialogueUser.id,
         to.id);
 
     } else {
-      this.connectionManager.SendMessage(message, to);
+      messageId = await this.connectionManager.SendMessage(message, to);
+    }
+
+    if(messageId){
+      message.state = MessageState.Delivered;
+      message.id = messageId;
+      to.clientLastMessageId = messageId;
+      to.lastMessage = message;
+
+      return true;
+    } else{
+      to.messages.splice(msgIndex, 1);
+      to.messages = [...to.messages];
+      return false;
     }
   }
 
@@ -854,10 +963,11 @@ export class ChatsService {
 
     let message = this.BuildMessage(null, to.id, true, response.response);
 
-    this.SendChatMessage(message, to);
+    let successfull = await this.SendChatMessage(message, to);
 
-    this.images.ScaleImage(message);
-    to.messages.push(message);
+    if(successfull){
+      this.images.ScaleImage(message);
+    }
   }
 
   public async UploadImages(files: FileList, progress: (value: number) => void, to: Chat) {
@@ -874,13 +984,14 @@ export class ChatsService {
     }
 
     response.response.uploadedFiles.forEach(
-      (file) => {
+      async (file) => {
         let message = this.BuildMessage(null, conversationToSend, true, file);
 
-        this.SendChatMessage(message, to);
+        let successfull = await this.SendChatMessage(message, to);
 
-        this.images.ScaleImage(message);
-        to.messages.push(message);
+        if(successfull){
+          this.images.ScaleImage(message);
+        }
       })
   }
 
@@ -889,5 +1000,6 @@ export class ChatsService {
     old.fullImageUrl = New.fullImageUrl;
     old.thumbnailUrl = New.thumbnailUrl;
     old.participants = New.participants;
+    old.isMessagingRestricted = New.isMessagingRestricted;
   }
 }

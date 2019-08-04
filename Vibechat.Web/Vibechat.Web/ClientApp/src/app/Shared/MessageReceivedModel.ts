@@ -1,4 +1,4 @@
-import { ChatMessage } from "../Data/ChatMessage";
+import {Message} from "../Data/Message";
 
 export class MessageReceivedModel {
   public constructor(init?: Partial<MessageReceivedModel>) {
@@ -7,7 +7,7 @@ export class MessageReceivedModel {
 
   public senderId: string
 
-  public message: ChatMessage
+  public message: Message
 
   public conversationId: number
 
