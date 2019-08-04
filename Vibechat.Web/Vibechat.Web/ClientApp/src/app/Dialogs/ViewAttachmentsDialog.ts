@@ -2,9 +2,9 @@ import {Component, EventEmitter, Inject, ViewChild, ViewContainerRef} from "@ang
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef, MatTabChangeEvent} from "@angular/material";
 import {ChatComponent} from "../Chat/chat.component";
 import {Chat} from "../Data/Chat";
-import {MessageAttachment} from "../Data/MessageAttachment";
+import {Attachment} from "../Data/Attachment";
 import {AttachmentKind} from "../Data/AttachmentKinds";
-import {ChatMessage} from "../Data/ChatMessage";
+import {Message} from "../Data/Message";
 import {ConversationsFormatter} from "../Formatters/ConversationsFormatter";
 import {CdkVirtualScrollViewport} from "@angular/cdk/scrolling";
 import {ChatsService} from "../Services/ChatsService";
@@ -20,11 +20,11 @@ export interface AttachmentsData {
 })
 export class ViewAttachmentsDialogComponent {
 
-  public OnDownloadMedia = new EventEmitter<MessageAttachment>();
+  public OnDownloadMedia = new EventEmitter<Attachment>();
 
-  public PhotosWeeks: Array<Array<ChatMessage>>;
+  public PhotosWeeks: Array<Array<Message>>;
 
-  public FilesWeeks: Array<Array<ChatMessage>>;
+  public FilesWeeks: Array<Array<Message>>;
 
   @ViewChild(CdkVirtualScrollViewport, { static: true }) scroll: CdkVirtualScrollViewport;
 
@@ -50,13 +50,13 @@ export class ViewAttachmentsDialogComponent {
     public photos: ViewPhotoService,
     public viewContainerRef: ViewContainerRef)
   {
-    this.PhotosWeeks = new Array<Array<ChatMessage>>();
-    this.FilesWeeks = new Array<Array<ChatMessage>>();
+    this.PhotosWeeks = new Array<Array<Message>>();
+    this.FilesWeeks = new Array<Array<Message>>();
     this.Init();
     this.photos.viewContainerRef = viewContainerRef;
   }
   //photos should be sorted new to old.
-  private AddPhotos(photos: Array<ChatMessage>) {
+  private AddPhotos(photos: Array<Message>) {
     if (photos.length == 0) {
       return;
     }
@@ -77,12 +77,12 @@ export class ViewAttachmentsDialogComponent {
         let weeksSinceReceived = Math.floor(this.GetDaysSinceReceived(photo) / 7);
 
         if (weeksSinceReceived > currentWeek) {
-          this.PhotosWeeks.push(new Array<ChatMessage>());
+          this.PhotosWeeks.push(new Array<Message>());
           currentWeek = Math.floor(this.GetDaysSinceReceived(photo) / 7);
         }
 
         if (this.PhotosWeeks.length == 0) {
-          this.PhotosWeeks.push(new Array<ChatMessage>());
+          this.PhotosWeeks.push(new Array<Message>());
         }
 
         this.PhotosWeeks[this.PhotosWeeks.length - 1].push(photo);
@@ -92,7 +92,7 @@ export class ViewAttachmentsDialogComponent {
     this.PhotosWeeks = [...this.PhotosWeeks];
   }
 
-  public AddFiles(files: Array<ChatMessage>) {
+  public AddFiles(files: Array<Message>) {
     if (files.length == 0) {
       return;
     }
@@ -113,12 +113,12 @@ export class ViewAttachmentsDialogComponent {
         let weeksSinceReceived = Math.floor(this.GetDaysSinceReceived(file) / 7);
 
         if (weeksSinceReceived > currentWeek) {
-          this.FilesWeeks.push(new Array<ChatMessage>());
+          this.FilesWeeks.push(new Array<Message>());
           currentWeek = Math.floor(this.GetDaysSinceReceived(file) / 7);
         }
 
         if (this.FilesWeeks.length == 0) {
-          this.FilesWeeks.push(new Array<ChatMessage>());
+          this.FilesWeeks.push(new Array<Message>());
         }
 
         this.FilesWeeks[this.FilesWeeks.length - 1].push(file);
@@ -165,7 +165,7 @@ export class ViewAttachmentsDialogComponent {
     }
   }
 
-  private GetDaysSinceReceived(message: ChatMessage): number {
+  private GetDaysSinceReceived(message: Message): number {
     let messageDate = (<Date>message.timeReceived).getTime();
     let nowDate = new Date().getTime();
     let x = (nowDate - messageDate) / 1000;
@@ -175,7 +175,7 @@ export class ViewAttachmentsDialogComponent {
     return Math.floor(x);
   }
 
-  public ViewPhoto(event: Event, photo: ChatMessage) {
+  public ViewPhoto(event: Event, photo: Message) {
     this.photos.ViewPhoto(photo);
   }
 

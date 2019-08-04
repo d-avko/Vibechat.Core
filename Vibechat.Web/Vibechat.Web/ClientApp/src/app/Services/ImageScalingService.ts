@@ -1,7 +1,7 @@
-import { Injectable } from "@angular/core";
-import { ChatMessage } from "../Data/ChatMessage";
-import { AttachmentKind } from "../Data/AttachmentKinds";
-import { ConversationsFormatter } from "../Formatters/ConversationsFormatter";
+import {Injectable} from "@angular/core";
+import {Message} from "../Data/Message";
+import {AttachmentKind} from "../Data/AttachmentKinds";
+import {ConversationsFormatter} from "../Formatters/ConversationsFormatter";
 
 export class Dimensions {
   height: number;
@@ -25,7 +25,7 @@ export class ImageScalingService {
 
   public chatImageWidthRatioDesktop = 0.4;
 
-  public ScaleImages(messages: Array<ChatMessage>) {
+  public ScaleImages(messages: Array<Message>) {
 
     for (let i = 0; i < messages.length; ++i) {
 
@@ -43,15 +43,15 @@ export class ImageScalingService {
     }
   }
 
-  public IsImage(chat: ChatMessage) {
+  public IsImage(chat: Message) {
     if (!chat) {
       return false;
     }
-      
+
     return chat.isAttachment && chat.attachmentInfo.attachmentKind == AttachmentKind.Image;
   }
 
-  public ScaleImage(message: ChatMessage) {
+  public ScaleImage(message: Message) {
 
     if (message.isAttachment && message.attachmentInfo.attachmentKind == AttachmentKind.Image) {
       let d = this.GetChatImageDimensions(message.attachmentInfo.imageWidth, message.attachmentInfo.imageHeight);

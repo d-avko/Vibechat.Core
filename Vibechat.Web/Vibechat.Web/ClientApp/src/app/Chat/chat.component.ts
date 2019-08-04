@@ -89,6 +89,7 @@ export class ChatComponent implements OnInit {
     const groupInfoRef = this.dialog.open(GroupInfoDialogComponent, {
       width: '450px',
       autoFocus: false,
+      panelClass: "profile-dialog",
       data: {
         Conversation: group,
         user: this.auth.User,
@@ -154,6 +155,7 @@ export class ChatComponent implements OnInit {
     const userInfoRef = this.dialog.open(UserInfoDialogComponent, {
       width: '450px',
       autoFocus: false,
+      panelClass: "profile-dialog",
       data: {
         user: user,
         currentUser: this.auth.User,

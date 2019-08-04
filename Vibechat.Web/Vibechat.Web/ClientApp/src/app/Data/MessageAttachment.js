@@ -6,4 +6,4 @@ var MessageAttachment = /** @class */ (function () {
     return MessageAttachment;
 }());
 exports.MessageAttachment = MessageAttachment;
-//# sourceMappingURL=MessageAttachment.js.map
+//# sourceMappingURL=Attachment.js.map

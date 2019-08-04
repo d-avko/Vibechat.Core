@@ -1,5 +1,5 @@
-import { MessageAttachment } from "./MessageAttachment";
+import {Attachment} from "./Attachment";
 
 export class UploadFilesResponse{
-  uploadedFiles: Array<MessageAttachment>;
+  uploadedFiles: Array<Attachment>;
 }

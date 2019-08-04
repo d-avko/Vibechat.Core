@@ -25,6 +25,15 @@ $dark-theme: mat-dark-theme($dark-primary, $dark-accent, $dark-warn);
 .white-theme {
   @include angular-material-theme($candy-app-theme);
 }
+.profile-dialog .mat-dialog-container{
+  padding: 0;
+  overflow-x: hidden;
+}
+.profile-dialog_header-text{
+  color: white;
+  padding: 20px;
+  background: cadetblue;
+}
 
 ::-webkit-scrollbar {
   width: 10px;

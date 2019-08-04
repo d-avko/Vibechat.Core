@@ -1,6 +1,6 @@
-import { AttachmentKind } from "./AttachmentKinds";
+import {AttachmentKind} from "./AttachmentKinds";
 
-export class MessageAttachment{
+export class Attachment{
   public contentUrl: string;
 
   public attachmentName: string;

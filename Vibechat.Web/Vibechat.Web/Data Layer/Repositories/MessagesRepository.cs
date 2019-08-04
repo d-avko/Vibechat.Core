@@ -119,29 +119,32 @@ namespace Vibechat.Web.Data.Repositories
                     .Where(msg => msg.ConversationID == conversationId)
                     .Where(msg => !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID));
             }
-
-            if (maxMessageId != -1)
-            {
-                query = mContext
-                    .Messages
-                    .Where(msg => msg.ConversationID == conversationId
-                                  && !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID)
-                                  && msg.MessageID > maxMessageId)
-                    .Skip(offset)
-                    .Take(count);
-            }
             else
             {
-                query = mContext
-                    .Messages
-                    .Where(msg =>
-                        msg.ConversationID == conversationId &&
-                        !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID))
-                    .OrderByDescending(x => x.TimeReceived)
-                    .Skip(offset)
-                    .Take(count);
+                if (maxMessageId != -1)
+                {
+                    query = mContext
+                        .Messages
+                        .Where(msg => msg.ConversationID == conversationId
+                                      && !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID)
+                                      && msg.MessageID > maxMessageId)
+                        .OrderBy(msg => msg.TimeReceived)
+                        .Skip(offset)
+                        .Take(count);
+                }
+                else
+                {
+                    query = mContext
+                        .Messages
+                        .Where(msg =>
+                            msg.ConversationID == conversationId &&
+                            !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID))
+                        .OrderByDescending(x => x.TimeReceived)
+                        .Skip(offset)
+                        .Take(count);
+                }   
             }
-                    
+
             return  query
                 .Include(msg => msg.User)
                 .Include(msg => msg.AttachmentInfo)

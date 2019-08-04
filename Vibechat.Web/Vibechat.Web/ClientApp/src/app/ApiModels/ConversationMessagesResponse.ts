@@ -1,5 +1,5 @@
-import { ChatMessage } from "../Data/ChatMessage";
+import {Message} from "../Data/Message";
 
 export class ConversationMessagesResponse{
-  public messages: Array<ChatMessage>
+  public messages: Array<Message>
 }

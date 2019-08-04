@@ -35,7 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var ChatMessage_1 = require("../Data/ChatMessage");
+var ChatMessage_1 = require("../Data/Message");
 var MessageState_1 = require("../Shared/MessageState");
 var ConversationsService = /** @class */ (function () {
     function ConversationsService(dateParser, authService, requestsBuilder, connectionManager) {
@@ -205,7 +205,7 @@ var ConversationsService = /** @class */ (function () {
         var min = 1;
         var max = 100000;
         var clientMessageId = Math.floor(Math.random() * (+max - +min) + +min);
-        return new ChatMessage_1.ChatMessage({
+        return new ChatMessage_1.Message({
             id: clientMessageId,
             isAttachment: false,
             user: this.authService.User,
@@ -221,7 +221,7 @@ var ConversationsService = /** @class */ (function () {
         var min = 1;
         var max = 100000;
         var clientMessageId = Math.floor(Math.random() * (+max - +min) + +min);
-        return new ChatMessage_1.ChatMessage({
+        return new ChatMessage_1.Message({
             id: clientMessageId,
             messageContent: message,
             isAttachment: isAttachment,

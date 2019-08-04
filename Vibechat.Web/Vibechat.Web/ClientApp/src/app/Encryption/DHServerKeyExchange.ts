@@ -65,7 +65,7 @@ export class DHServerKeyExchangeService {
       return;
     }
 
-    entry.value.thisUserPrivateKey = this.enc.GenerateDhPrivate();
+    entry.value.thisUserPrivateKey = E2EencryptionService.GenerateDhPrivate();
 
     let toSend = this.enc.GenerateDhS(
       conversation.publicKey.modulus,
@@ -105,7 +105,7 @@ export class DHServerKeyExchangeService {
     //Here non - creator sends generated param to creator.
     if (chat.chatRole.role != ChatRole.Creator) {
 
-      entry.value.thisUserPrivateKey = this.enc.GenerateDhPrivate();
+      entry.value.thisUserPrivateKey = E2EencryptionService.GenerateDhPrivate();
 
       let toSend = this.enc.GenerateDhS(
         chat.publicKey.modulus,

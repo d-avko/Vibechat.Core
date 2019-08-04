@@ -443,7 +443,7 @@ namespace VibeChat.Web
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<bool> SendMessageToGroup(Message message, int groupId)
+        public async Task<int> SendMessageToGroup(Message message, int groupId)
         {
             AppUser whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
             await userService.MakeUserOnline(whoSent.Id, Context.ConnectionId);
@@ -453,13 +453,13 @@ namespace VibeChat.Web
                 if(!await chatsService.ExistsInConversation(groupId, whoSent.Id))
                 {
                     await SendError(Context.ConnectionId, "You must join this group to send messages.");
-                    return false;
+                    return 0;
                 }
 
                 if(await bansService.IsBannedFromConversation(groupId , whoSent.Id))
                 {
                     await SendError(Context.ConnectionId, "You were banned in this group.");
-                    return false;
+                    return 0;
                 }
 
                 //we can't trust user on what's in user field
@@ -482,19 +482,19 @@ namespace VibeChat.Web
                 message.State = MessageState.Delivered;
 
                 await SendMessageToGroupExcept(groupId, Context.ConnectionId, whoSent.Id, message);
-                return true;
+                return created.MessageID;
             }
             catch(Exception ex)
             {
                 await SendError(Context.ConnectionId, ex.Message);
                 logger.LogError(ex.Message);
-                return false;
+                return 0;
             }
         }
 
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<bool> SendMessageToUser(Message message, string UserToSendId, int conversationId)
+        public async Task<int> SendMessageToUser(Message message, string UserToSendId, int conversationId)
         {
             AppUser whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
             await userService.MakeUserOnline(whoSent.Id, Context.ConnectionId);
@@ -504,14 +504,14 @@ namespace VibeChat.Web
                 if (bansService.IsBannedFromMessagingWith(whoSent.Id, UserToSendId))
                 {
                     await SendError(Context.ConnectionId, "You were blocked by this user. Couldn't send message.");
-                    return false;
+                    return 0;
                 }
 
                 //we can't trust user on what's in user field
 
                 message.User = whoSent.ToUserInfo();
 
-                var created = new MessageDataModel();
+                MessageDataModel created;
 
                 if (message.IsAttachment)
                 {
@@ -533,7 +533,7 @@ namespace VibeChat.Web
                     await SendMessageToUser(message, whoSent.Id, userToSend.ConnectionId, conversationId, false);
                 }
 
-                return true;
+                return created.MessageID;
             }
             catch(Exception ex)
             {
@@ -546,12 +546,12 @@ namespace VibeChat.Web
                     await SendError(Context.ConnectionId, ex.Message);
                 }
                 logger.LogError(ex.Message);
-                return false;
+                return 0;
             }
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<bool> SendSecureMessage(string encryptedMessage, string userId, int conversationId)
+        public async Task<int> SendSecureMessage(string encryptedMessage, string userId, int conversationId)
         {
             AppUser whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
             await userService.MakeUserOnline(whoSent.Id, Context.ConnectionId);
@@ -577,7 +577,7 @@ namespace VibeChat.Web
                     await SendMessageToUser(toSend, whoSent.Id, user.ConnectionId, conversationId, true);
                 }
 
-                return true;
+                return toSend.Id;
             }
             catch (Exception ex)
             {
@@ -591,7 +591,7 @@ namespace VibeChat.Web
                 }
 
                 logger.LogError(ex.Message);
-                return false;
+                return 0;
             }
            
         }

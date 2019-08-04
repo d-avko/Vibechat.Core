@@ -1,5 +1,5 @@
 import {UserInfo} from "./UserInfo";
-import {ChatMessage} from "./ChatMessage";
+import {Message} from "./Message";
 import {ChatRoleDto} from "../Roles/ChatRoleDto";
 
 export class DhPublicKey {
@@ -21,7 +21,7 @@ export class Chat {
 
   public isGroup: boolean;
 
-  public messages: Array<ChatMessage>;
+  public messages: Array<Message>;
 
   public participants: Array<UserInfo>;
 
@@ -38,4 +38,10 @@ export class Chat {
   public messagesUnread: number;
 
   public deviceId: string;
+
+  public canReceiveMessages: boolean;
+
+  public clientLastMessageId: number;
+
+  public lastMessage: Message
 }
