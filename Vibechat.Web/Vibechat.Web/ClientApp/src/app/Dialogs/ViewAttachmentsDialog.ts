@@ -1,17 +1,17 @@
-import { Component, Inject, EventEmitter, ViewChild, ViewContainerRef } from "@angular/core";
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialog, MatTabChangeEvent } from "@angular/material";
-import { ChatComponent } from "../Chat/chat.component";
-import { ConversationTemplate } from "../Data/ConversationTemplate";
-import { MessageAttachment } from "../Data/MessageAttachment";
-import { AttachmentKind } from "../Data/AttachmentKinds";
-import { ChatMessage } from "../Data/ChatMessage";
-import { ConversationsFormatter } from "../Formatters/ConversationsFormatter";
-import { CdkVirtualScrollViewport } from "@angular/cdk/scrolling";
-import { ChatsService } from "../Services/ChatsService";
-import { ViewPhotoService } from "./ViewPhotoService";
+import {Component, EventEmitter, Inject, ViewChild, ViewContainerRef} from "@angular/core";
+import {MAT_DIALOG_DATA, MatDialog, MatDialogRef, MatTabChangeEvent} from "@angular/material";
+import {ChatComponent} from "../Chat/chat.component";
+import {Chat} from "../Data/Chat";
+import {MessageAttachment} from "../Data/MessageAttachment";
+import {AttachmentKind} from "../Data/AttachmentKinds";
+import {ChatMessage} from "../Data/ChatMessage";
+import {ConversationsFormatter} from "../Formatters/ConversationsFormatter";
+import {CdkVirtualScrollViewport} from "@angular/cdk/scrolling";
+import {ChatsService} from "../Services/ChatsService";
+import {ViewPhotoService} from "./ViewPhotoService";
 
 export interface AttachmentsData {
-  conversation: ConversationTemplate;
+  conversation: Chat;
 }
 
 @Component({
@@ -190,7 +190,7 @@ export class ViewAttachmentsDialogComponent {
     this.PhotosLoading = true;
 
     let result = await this.conversationsService.GetAttachmentsFor(
-      this.data.conversation.conversationID,
+      this.data.conversation.id,
       AttachmentKind.File,
       offset,
       ViewAttachmentsDialogComponent.attachmentsToLoadAmount);
@@ -216,7 +216,7 @@ export class ViewAttachmentsDialogComponent {
     this.PhotosLoading = true;
 
     let result = await this.conversationsService.GetAttachmentsFor(
-      this.data.conversation.conversationID,
+      this.data.conversation.id,
       AttachmentKind.Image,
       offset,
       ViewAttachmentsDialogComponent.attachmentsToLoadAmount);

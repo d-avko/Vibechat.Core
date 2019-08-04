@@ -1,17 +1,28 @@
-import { Component, Output, EventEmitter, ViewChild, AfterViewInit, OnChanges,  AfterViewChecked, SimpleChanges, Input, ViewContainerRef } from '@angular/core';
-import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
-import { trigger, state, style, transition, animate } from "@angular/animations";
-import { ChatMessage } from '../../Data/ChatMessage';
-import { ConversationsFormatter } from '../../Formatters/ConversationsFormatter';
-import { AttachmentKind } from '../../Data/AttachmentKinds';
-import { UserInfo } from '../../Data/UserInfo';
-import { MatDialog } from '@angular/material';
-import { MessageState } from '../../Shared/MessageState';
-import { ChatsService } from '../../Services/ChatsService';
-import { ForwardMessagesDialogComponent } from '../../Dialogs/ForwardMessagesDialog';
-import { ConversationTemplate } from '../../Data/ConversationTemplate';
-import { ThemesService } from '../../Theming/ThemesService';
-import { ViewPhotoService } from '../../Dialogs/ViewPhotoService';
+import {
+  AfterViewChecked,
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+  ViewChild,
+  ViewContainerRef
+} from '@angular/core';
+import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
+import {animate, state, style, transition, trigger} from "@angular/animations";
+import {ChatMessage} from '../../Data/ChatMessage';
+import {ConversationsFormatter} from '../../Formatters/ConversationsFormatter';
+import {AttachmentKind} from '../../Data/AttachmentKinds';
+import {UserInfo} from '../../Data/UserInfo';
+import {MatDialog} from '@angular/material';
+import {MessageState} from '../../Shared/MessageState';
+import {ChatsService} from '../../Services/ChatsService';
+import {ForwardMessagesDialogComponent} from '../../Dialogs/ForwardMessagesDialog';
+import {Chat} from '../../Data/Chat';
+import {ThemesService} from '../../Theming/ThemesService';
+import {ViewPhotoService} from '../../Dialogs/ViewPhotoService';
 
 export class ForwardMessagesModel {
   public forwardTo: Array<number>;
@@ -50,7 +61,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     this.SelectedMessages = new Array<ChatMessage>();
   }
 
-  @Input() public CurrentConversation: ConversationTemplate;
+  @Input() public CurrentConversation: Chat;
 
   @Output() public OnViewUserInfo = new EventEmitter<UserInfo>();
 
@@ -67,7 +78,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
   public static MessagesBufferLength: number = 50;
 
   @ViewChild(CdkVirtualScrollViewport, { static: false }) viewport: CdkVirtualScrollViewport;
-  
+
   public SelectedMessages: Array<ChatMessage>;
 
   ngAfterViewInit() {
@@ -83,7 +94,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
       this.UpdateMessagesIfNotUpdated();
       this.ScrollToLastMessage();
     }
-  } 
+  }
 
   ngAfterViewChecked() {
 
@@ -152,7 +163,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
         return;
       }
 
-      if (currentChat.conversationID == this.CurrentConversation.conversationID) {
+      if (currentChat.id == this.CurrentConversation.id) {
         this.ScrollToMessage(result.length);
       }
 
@@ -177,13 +188,13 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
 
     forwardMessagesDialog
       .beforeClosed()
-      .subscribe((result: Array<ConversationTemplate>) => {
+      .subscribe((result: Array<Chat>) => {
 
         this.chatsService.ForwardMessagesTo(result, this.SelectedMessages);
       })
   }
 
-  
+
   public UpdateMessagesIfNotUpdated() {
 
     if (!this.CurrentConversation.messages) {
@@ -191,7 +202,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
       this.UpdateMessages();
       return;
     }
-    
+
     if (this.CurrentConversation.messages.length <= 1) {
       this.UpdateMessages();
     }

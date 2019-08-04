@@ -1,22 +1,18 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Vibechat.Web.ApiModels;
+using VibeChat.Web.ApiModels;
+using VibeChat.Web.ChatData;
 using Vibechat.Web.Data.ApiModels.Conversation;
 using Vibechat.Web.Data.ApiModels.Messages;
 using Vibechat.Web.Data.Conversations;
 using Vibechat.Web.Data.Messages;
 using Vibechat.Web.Services;
 using Vibechat.Web.Services.Bans;
-using Vibechat.Web.Services.FileSystem;
-using VibeChat.Web.ApiModels;
-using VibeChat.Web.ChatData;
 
 namespace VibeChat.Web.Controllers
 {
@@ -36,7 +32,7 @@ namespace VibeChat.Web.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/Create")]
-        public async Task<ResponseApiModel<ConversationTemplate>> Create([FromBody] CreateConversationCredentialsApiModel convInfo)
+        public async Task<ResponseApiModel<Chat>> Create([FromBody] CreateConversationCredentialsApiModel convInfo)
         {
             try
             {
@@ -45,7 +41,7 @@ namespace VibeChat.Web.Controllers
 
                 var result = await mConversationService.CreateConversation(convInfo);
 
-                return new ResponseApiModel<ConversationTemplate>()
+                return new ResponseApiModel<Chat>()
                 {
                     IsSuccessfull = true,
                     ErrorMessage = null,
@@ -54,7 +50,7 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<ConversationTemplate>()
+                return new ResponseApiModel<Chat>()
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
@@ -175,31 +171,15 @@ namespace VibeChat.Web.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/GetAll")]
-        public async Task<ResponseApiModel<List<ConversationTemplate>>> GetAll([FromBody] GetChatsRequest request)
+        public async Task<ResponseApiModel<List<Chat>>> GetAll([FromBody] GetChatsRequest request)
         {
             try
             {
                 var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
-                List<ConversationTemplate> result = await mConversationService.GetConversations(request.deviceId, thisUserId);
+                List<Chat> result = await mConversationService.GetConversations(request.deviceId,  thisUserId);
 
-                foreach(ConversationTemplate conversation in result)
-                {
-                    conversation.IsMessagingRestricted = await BansService.IsBannedFromConversation(conversation.ConversationID, thisUserId);
-                    conversation.MessagesUnread = await mConversationService.GetUnreadMessagesAmount(conversation.ConversationID, thisUserId);
-                    conversation.ChatRole = await mConversationService.GetChatRole(thisUserId, conversation.ConversationID);
-
-                    if (conversation.IsGroup)
-                    {
-                        foreach (UserInfo user in conversation.Participants)
-                        {
-                            user.IsBlockedInConversation = await BansService.IsBannedFromConversation(conversation.ConversationID, user.Id);
-                            user.ChatRole = await mConversationService.GetChatRole(user.Id, conversation.ConversationID);
-                        }
-                    }
-                }
-
-                return new ResponseApiModel<List<ConversationTemplate>>()
+                return new ResponseApiModel<List<Chat>>()
                 {
                     IsSuccessfull = true,
                     ErrorMessage = null,
@@ -208,7 +188,7 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<List<ConversationTemplate>>()
+                return new ResponseApiModel<List<Chat>>()
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
@@ -226,30 +206,15 @@ namespace VibeChat.Web.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/GetById")]
-        public async Task<ResponseApiModel<ConversationTemplate>> GetById([FromBody]GetByIdRequest request)
+        public async Task<ResponseApiModel<Chat>> GetById([FromBody]GetByIdRequest request)
         {
             try
             {
                 string thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
-                ConversationTemplate result = await mConversationService.GetById(request.conversationId, thisUserId);
+                Chat result = await mConversationService.GetById(request.conversationId, thisUserId);
 
-                result.IsMessagingRestricted = await BansService.IsBannedFromConversation(request.conversationId, thisUserId);
-
-                if (result.IsGroup)
-                {
-                    foreach (UserInfo user in result.Participants)
-                    {
-                        user.IsBlockedInConversation = await BansService.IsBannedFromConversation(request.conversationId, user.Id);
-
-                        if (request.updateRoles)
-                        {
-                            user.ChatRole = await mConversationService.GetChatRole(user.Id, request.conversationId);
-                        }
-                    }
-                }
-
-                return new ResponseApiModel<ConversationTemplate>()
+                return new ResponseApiModel<Chat>()
                 {
                     IsSuccessfull = true,
                     ErrorMessage = null,
@@ -258,7 +223,7 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<ConversationTemplate>()
+                return new ResponseApiModel<Chat>()
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
@@ -345,8 +310,9 @@ namespace VibeChat.Web.Controllers
             {
                 List<Message> result = await mConversationService.GetMessages(
                     credentials.ConversationID,
-                    credentials.MesssagesOffset,
+                    credentials.MessagesOffset,
                     credentials.Count,
+                    credentials.MaxMessageId,
                      JwtHelper.GetNamedClaimValue(User.Claims));
 
                 return new ResponseApiModel<List<Message>>()
@@ -455,14 +421,14 @@ namespace VibeChat.Web.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/SearchGroups")]
-        public async Task<ResponseApiModel<List<ConversationTemplate>>> SearchGroups([FromBody] SearchRequest request)
+        public async Task<ResponseApiModel<List<Chat>>> SearchGroups([FromBody] SearchRequest request)
         {
             try
             {
                 var result = await mConversationService.SearchForGroups(request.SearchString,
                      JwtHelper.GetNamedClaimValue(User.Claims));
 
-                return new ResponseApiModel<List<ConversationTemplate>>()
+                return new ResponseApiModel<List<Chat>>()
                 {
                     IsSuccessfull = true,
                     Response = result
@@ -470,7 +436,7 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<List<ConversationTemplate>>()
+                return new ResponseApiModel<List<Chat>>()
                 {
                     ErrorMessage = ex.Message,
                     IsSuccessfull = false

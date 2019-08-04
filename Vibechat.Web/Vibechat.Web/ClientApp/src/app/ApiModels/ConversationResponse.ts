@@ -1,5 +1,5 @@
-import { ConversationTemplate } from "../Data/ConversationTemplate";
+import {Chat} from "../Data/Chat";
 
 export class ConversationResponse {
-  public conversations: Array<ConversationTemplate>
+  public conversations: Array<Chat>
 }

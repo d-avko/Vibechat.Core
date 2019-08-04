@@ -4,6 +4,6 @@ namespace VibeChat.Web.ApiModels
 {
     public class GetConversationByIdResultApiModel
     {
-        public ConversationTemplate Conversation { get; set; }
+        public Chat Conversation { get; set; }
     }
 }

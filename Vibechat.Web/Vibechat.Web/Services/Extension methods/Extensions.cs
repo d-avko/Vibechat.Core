@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using VibeChat.Web;
+using VibeChat.Web.ChatData;
 using Vibechat.Web.ChatData.Messages;
 using Vibechat.Web.Data.Conversations;
 using Vibechat.Web.Data.DataModels;
-using Vibechat.Web.Services.Extension_methods;
-using VibeChat.Web;
-using VibeChat.Web.ChatData;
 using VibeChat.Web.Data.DataModels;
+using Vibechat.Web.Services.Extension_methods;
 
 namespace Vibechat.Web.Extensions
 {
@@ -53,30 +50,32 @@ namespace Vibechat.Web.Extensions
             };
         }
 
-        public static ConversationTemplate ToConversationTemplate(
+        public static Chat ToChatDto(
             this ConversationDataModel value, 
             List<UserInfo> participants,
-            List<Message> messages,
             AppUser dialogUser,
             DhPublicKeyDataModel key,
             ChatRoleDataModel chatRole,
-            string deviceId)
+            string deviceId,
+            int lastMessageId,
+            Message lastMessage)
         {
-            return new ConversationTemplate()
+            return new Chat()
             {
                 Name = value.Name,
-                ConversationID = value.Id,
+                Id = value.Id,
                 DialogueUser = dialogUser?.ToUserInfo(),
                 IsGroup = value.IsGroup,
                 ThumbnailUrl = value.ThumbnailUrl,
                 FullImageUrl = value.FullImageUrl,
                 Participants = participants,
-                Messages = messages,
                 AuthKeyId = value.AuthKeyId,
                 IsSecure = value.IsSecure,
                 PublicKey = key?.ToDhPublicKey(),
                 DeviceId = deviceId,
-                ChatRole = chatRole.ToChatRole()
+                ChatRole = chatRole.ToChatRole(),
+                ClientLastMessageId = lastMessageId,
+                LastMessage = lastMessage
             };
         }
 

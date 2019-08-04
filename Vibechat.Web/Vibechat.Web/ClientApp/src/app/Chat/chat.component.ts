@@ -1,23 +1,22 @@
-import { Component, ViewChild, OnInit, Type } from "@angular/core";
-import { ConversationTemplate } from "../Data/ConversationTemplate";
-import { AuthService } from "../Auth/AuthService";
-import { MatDialog, MatDrawer } from "@angular/material";
-import { trigger, state, style, transition, animate } from "@angular/animations";
-import { ConversationsFormatter } from "../Formatters/ConversationsFormatter";
-import { MessagesComponent } from "../Conversation/Messages/messages.component";
-import { UserInfo } from "../Data/UserInfo";
-import { AddGroupDialogComponent } from "../Dialogs/AddGroupDialog";
-import { GroupInfoDialogComponent } from "../Dialogs/GroupInfoDialog";
-import { SearchListComponent } from "../Search/searchlist.component";
-import { UserInfoDialogComponent } from "../Dialogs/UserInfoDialog";
-import { UsersService } from "../Services/UsersService";
-import { ChatsService } from "../Services/ChatsService";
-import { ThemesService } from "../Theming/ThemesService";
-import { ChooseContactDialogComponent } from "../Dialogs/ChooseContactDialog";
-import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
-import { DeviceService } from "../Services/DeviceService";
-import { userInfo } from "os";
-import { Router } from "@angular/router";
+import {Component, OnInit, ViewChild} from "@angular/core";
+import {Chat} from "../Data/Chat";
+import {AuthService} from "../Auth/AuthService";
+import {MatDialog, MatDrawer} from "@angular/material";
+import {animate, state, style, transition, trigger} from "@angular/animations";
+import {ConversationsFormatter} from "../Formatters/ConversationsFormatter";
+import {MessagesComponent} from "../Conversation/Messages/messages.component";
+import {UserInfo} from "../Data/UserInfo";
+import {AddGroupDialogComponent} from "../Dialogs/AddGroupDialog";
+import {GroupInfoDialogComponent} from "../Dialogs/GroupInfoDialog";
+import {SearchListComponent} from "../Search/searchlist.component";
+import {UserInfoDialogComponent} from "../Dialogs/UserInfoDialog";
+import {UsersService} from "../Services/UsersService";
+import {ChatsService} from "../Services/ChatsService";
+import {ThemesService} from "../Theming/ThemesService";
+import {ChooseContactDialogComponent} from "../Dialogs/ChooseContactDialog";
+import {SnackBarHelper} from "../Snackbar/SnackbarHelper";
+import {DeviceService} from "../Services/DeviceService";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'chat-root',
@@ -80,7 +79,7 @@ export class ChatComponent implements OnInit {
     this.themesService.changeTheme(name);
   }
 
-  public async OnViewGroupInfo(group: ConversationTemplate) : Promise<void> {
+  public async OnViewGroupInfo(group: Chat) : Promise<void> {
 
     if (!group.isGroup) {
       this.OnViewUserInfo(group.dialogueUser, group);
@@ -93,7 +92,7 @@ export class ChatComponent implements OnInit {
       data: {
         Conversation: group,
         user: this.auth.User,
-        ExistsInThisGroup: this.conversationsService.ExistsIn(group.conversationID)
+        ExistsInThisGroup: this.conversationsService.ExistsIn(group.id)
       }
     });
 
@@ -113,13 +112,13 @@ export class ChatComponent implements OnInit {
 
     groupInfoRef.componentInstance
       .OnJoinGroup
-      .subscribe((group: ConversationTemplate) => {
+      .subscribe((group: Chat) => {
         groupInfoRef.close();
         this.OnJoinGroup(group);
       });
   }
 
-  public ChangeChat(chat: ConversationTemplate) {
+  public ChangeChat(chat: Chat) {
     this.conversationsService.ChangeConversation(chat);
   }
 
@@ -146,12 +145,12 @@ export class ChatComponent implements OnInit {
     )
   }
 
-  public OnJoinGroup(conversation: ConversationTemplate) {
+  public OnJoinGroup(conversation: Chat) {
     this.SearchString = '';
     this.conversationsService.JoinGroup(conversation);
   }
 
-  public async OnViewUserInfo(user: UserInfo, chat: ConversationTemplate) {
+  public async OnViewUserInfo(user: UserInfo, chat: Chat) {
     const userInfoRef = this.dialog.open(UserInfoDialogComponent, {
       width: '450px',
       autoFocus: false,
@@ -219,13 +218,13 @@ export class ChatComponent implements OnInit {
     await this.conversationsService.UpdateConversations();
   }
 
-  public async ChangeConversationTo(conversation: ConversationTemplate) {
+  public async ChangeConversationTo(conversation: Chat) {
     this.SearchString = '';
     await this.conversationsService.ChangeConversation(null);
     await this.conversationsService.ChangeConversation(conversation);
   }
 
-  public async ChangeConversation(conversation: ConversationTemplate) {
+  public async ChangeConversation(conversation: Chat) {
     //if we were on search screen, we should hide it
 
     this.SearchString = '';

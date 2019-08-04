@@ -1,11 +1,11 @@
-import { Injectable } from "@angular/core"
-import { ChatMessage } from "../Data/ChatMessage";
-import { ConversationTemplate } from "../Data/ConversationTemplate";
-import { AuthService } from "../Auth/AuthService";
-import { AttachmentKind } from "../Data/AttachmentKinds";
-import { TypingService } from "../Services/TypingService";
-import { UserInfo } from "../Data/UserInfo";
-import { ChatRole } from "../Roles/ChatRole";
+import {Injectable} from "@angular/core"
+import {ChatMessage} from "../Data/ChatMessage";
+import {Chat} from "../Data/Chat";
+import {AuthService} from "../Auth/AuthService";
+import {AttachmentKind} from "../Data/AttachmentKinds";
+import {TypingService} from "../Services/TypingService";
+import {UserInfo} from "../Data/UserInfo";
+import {ChatRole} from "../Roles/ChatRole";
 
 @Injectable({
   providedIn: 'root'
@@ -28,7 +28,7 @@ export class ConversationsFormatter{
     return window.innerWidth < ConversationsFormatter.MinPixelsDesktop;
   }
 
-  public GetLastMessageFormatted(conversation: ConversationTemplate): string {
+  public GetLastMessageFormatted(conversation: Chat): string {
 
     if (conversation.messages == null || conversation.messages.length == 0) {
       return "No messages...";
@@ -117,7 +117,7 @@ export class ConversationsFormatter{
         return `${Math.floor(amount / (1024 * 1024))} MB.`
       }
       case (amount >= 1024 * 1024 * 1024): {
-        return `${Math.floor(amount / (1024 * 1024 * 1024))} GB.` 
+        return `${Math.floor(amount / (1024 * 1024 * 1024))} GB.`
       }
     }
   }
@@ -136,7 +136,7 @@ export class ConversationsFormatter{
     }
   }
 
-  public GetLastMessageDateFormatted(conversation: ConversationTemplate) {
+  public GetLastMessageDateFormatted(conversation: Chat) {
 
     if (conversation.messages == null || conversation.messages.length == 0) {
       return '';
@@ -214,7 +214,7 @@ export class ConversationsFormatter{
     }
   }
 
-  public GetConversationMembersFormatted(conversation: ConversationTemplate) {
+  public GetConversationMembersFormatted(conversation: Chat) {
     let membersAmount = conversation.participants == null ? 0 : conversation.participants.length;
 
     return membersAmount.toString() + " Member(s)";
@@ -290,7 +290,7 @@ export class ConversationsFormatter{
     }
   }
 
-  public GetConversationNameFormatted(conversation: ConversationTemplate) {
+  public GetConversationNameFormatted(conversation: Chat) {
 
     if (!conversation.isGroup) {
       return conversation.dialogueUser.userName;

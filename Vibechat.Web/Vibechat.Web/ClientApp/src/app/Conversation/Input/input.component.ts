@@ -1,8 +1,8 @@
-import { Component, Input, Output, EventEmitter, ViewChild } from "@angular/core";
-import { ConversationTemplate } from "../../Data/ConversationTemplate";
-import { MatFormField } from "@angular/material";
-import { UserInfo } from "../../Data/UserInfo";
-import { ChatsService } from "../../Services/ChatsService";
+import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
+import {Chat} from "../../Data/Chat";
+import {MatFormField} from "@angular/material";
+import {UserInfo} from "../../Data/UserInfo";
+import {ChatsService} from "../../Services/ChatsService";
 
 @Component({
   selector: 'input-view',
@@ -23,7 +23,7 @@ export class InputComponent {
 
   }
 
-  @Input() public Conversation: ConversationTemplate;
+  @Input() public Conversation: Chat;
 
   public uploadProgress: number = 0;
 
@@ -63,7 +63,7 @@ export class InputComponent {
       return;
     }
 
-    this.chats.SetTyping(this.Conversation.conversationID);
+    this.chats.SetTyping(this.Conversation.id);
     setTimeout(() => this.isTypingSent = false, this.TypingDelay);
   }
 

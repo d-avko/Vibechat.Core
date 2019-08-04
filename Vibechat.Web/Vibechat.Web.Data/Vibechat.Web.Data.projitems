@@ -47,7 +47,4 @@
     <Compile Include="$(MSBuildThisFileDirectory)Messages\MessageAttachment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Users\UserInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)ApiModels\misc\" />
-  </ItemGroup>
 </Project>

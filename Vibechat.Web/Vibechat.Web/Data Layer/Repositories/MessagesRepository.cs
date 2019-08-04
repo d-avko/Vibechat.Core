@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
-using Vibechat.Web.Data.Messages;
 using VibeChat.Web;
 using VibeChat.Web.ChatData;
 using VibeChat.Web.Data.DataModels;
+using Vibechat.Web.Data.Messages;
 
 namespace Vibechat.Web.Data.Repositories
 {
@@ -102,7 +101,8 @@ namespace Vibechat.Web.Data.Repositories
         public IIncludableQueryable<MessageDataModel, AppUser> Get(
             string userId,
             int conversationId,
-            bool AllMessages = false, 
+            int maxMessageId = -1,
+            bool allMessages = false, 
             int offset = 0, 
             int count = 0)
         {
@@ -110,30 +110,39 @@ namespace Vibechat.Web.Data.Repositories
             .DeletedMessages
             .Where(msg => msg.Message.ConversationID == conversationId && msg.UserId == userId);
 
-            if (AllMessages)
+            IQueryable<MessageDataModel> query;
+            
+            if (allMessages)
             {
-               return mContext
-                       .Messages
-                       .Where(msg => msg.ConversationID == conversationId)
-                       .Where(msg => !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID))
-                       .Include(msg => msg.User)
-                       .Include(msg => msg.AttachmentInfo)
-                       .Include(x => x.AttachmentInfo)
-                        .ThenInclude(x => x.AttachmentKind)
-                        .Include(x => x.User)
-                        .Include(x => x.ForwardedMessage)
-                        .ThenInclude(x => x.AttachmentInfo)
-                        .ThenInclude(x => x.AttachmentKind)
-                        .Include(x => x.ForwardedMessage)
-                        .ThenInclude(x => x.User);
+                query = mContext
+                    .Messages
+                    .Where(msg => msg.ConversationID == conversationId)
+                    .Where(msg => !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID));
+            }
+
+            if (maxMessageId != -1)
+            {
+                query = mContext
+                    .Messages
+                    .Where(msg => msg.ConversationID == conversationId
+                                  && !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID)
+                                  && msg.MessageID > maxMessageId)
+                    .Skip(offset)
+                    .Take(count);
+            }
+            else
+            {
+                query = mContext
+                    .Messages
+                    .Where(msg =>
+                        msg.ConversationID == conversationId &&
+                        !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID))
+                    .OrderByDescending(x => x.TimeReceived)
+                    .Skip(offset)
+                    .Take(count);
             }
                     
-           return  mContext
-                .Messages
-                .Where(msg => msg.ConversationID == conversationId && !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID))
-                .OrderByDescending(x => x.TimeReceived)
-                .Skip(offset)
-                .Take(count)
+            return  query
                 .Include(msg => msg.User)
                 .Include(msg => msg.AttachmentInfo)
                 .Include(x => x.AttachmentInfo)
@@ -177,19 +186,16 @@ namespace Vibechat.Web.Data.Repositories
                 .ThenInclude(x => x.User);
         }
         
-        public int GetUnreadAmount(int conversationId, string userId)
+        public int GetUnreadAmount(int conversationId, string userId, int lastMessageId)
         {
             var deletedMessages = mContext
              .DeletedMessages
              .Where(msg => msg.Message.ConversationID == conversationId && msg.UserId == userId);
-
+            
             return  mContext
-                    .Messages
-                    .Where(
-                    msg => msg.ConversationID == conversationId 
-                    && !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID)
-                    && msg.State == MessageState.Delivered
-                    && msg.User.Id != userId).Count();
+                .Messages.Count(msg => msg.ConversationID == conversationId 
+                                       && !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID)
+                                       && msg.MessageID > lastMessageId);
         }
 
         public bool Empty()

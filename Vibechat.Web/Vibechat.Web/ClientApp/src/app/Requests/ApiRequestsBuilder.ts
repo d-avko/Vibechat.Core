@@ -1,22 +1,20 @@
-import { Observable } from "rxjs";
-import { ServerResponse } from "../ApiModels/ServerResponse";
-import { LoginResponse } from "../ApiModels/LoginResponse";
-import { LoginRequest } from "../ApiModels/LoginRequest";
-import { HttpClient, HttpHeaders, HttpEvent } from "@angular/common/http";
-import { ChangeUserInfoRequest } from "../ApiModels/RegisterRequest";
-import { Injectable, Inject } from "@angular/core";
-import { ConversationMessagesResponse } from "../ApiModels/ConversationMessagesResponse";
-import { ChatMessage } from "../Data/ChatMessage";
-import { ConversationTemplate } from "../Data/ConversationTemplate";
-import { FoundUsersResponse } from "../Data/FoundUsersResponse";
-import { UpdateThumbnailResponse } from "../ApiModels/UpdateThumbnailResponse";
-import { UserInfo } from "../Data/UserInfo";
-import { UploaderService } from "../uploads/upload.service";
-import {
-} from "@angular/material";
-import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
-import { MessageAttachment } from "../Data/MessageAttachment";
-import { AttachmentKind } from "../Data/AttachmentKinds";
+import {Observable} from "rxjs";
+import {ServerResponse} from "../ApiModels/ServerResponse";
+import {LoginResponse} from "../ApiModels/LoginResponse";
+import {LoginRequest} from "../ApiModels/LoginRequest";
+import {HttpClient, HttpHeaders} from "@angular/common/http";
+import {ChangeUserInfoRequest} from "../ApiModels/RegisterRequest";
+import {Inject, Injectable} from "@angular/core";
+import {ChatMessage} from "../Data/ChatMessage";
+import {Chat} from "../Data/Chat";
+import {FoundUsersResponse} from "../Data/FoundUsersResponse";
+import {UpdateThumbnailResponse} from "../ApiModels/UpdateThumbnailResponse";
+import {UserInfo} from "../Data/UserInfo";
+import {UploaderService} from "../uploads/upload.service";
+import {SnackBarHelper} from "../Snackbar/SnackbarHelper";
+import {MessageAttachment} from "../Data/MessageAttachment";
+import {AttachmentKind} from "../Data/AttachmentKinds";
+import {ChatState} from "./ChatState";
 
 @Injectable({
   providedIn: 'root'
@@ -52,10 +50,10 @@ export class ApiRequestsBuilder {
     ).toPromise();
   }
 
-  public GetChats(deviceId: string): Promise<ServerResponse<Array<ConversationTemplate>>> {
+  public GetChats(deviceId: string, localState: Array<ChatState> = null): Promise<ServerResponse<Array<Chat>>> {
 
-    return this.MakeCall<Array<ConversationTemplate>>(
-      { deviceId: deviceId},
+    return this.MakeCall<Array<Chat>>(
+      { deviceId: deviceId, localState: localState},
       'api/Conversations/GetAll'
     ).toPromise();
   }
@@ -67,13 +65,14 @@ export class ApiRequestsBuilder {
     return result;
   }
 
-  public GetConversationMessages(offset: number, count: number, conversationId: number): Promise<ServerResponse<Array<ChatMessage>>> {
+  public GetConversationMessages(offset: number, count: number, conversationId: number, maxMessageId: number): Promise<ServerResponse<Array<ChatMessage>>> {
 
     return this.MakeCall<Array<ChatMessage>>(
         {
           Count: count,
           ConversationID: conversationId,
-          MesssagesOffset: offset
+          MessagesOffset: offset,
+          MaxMessageId: maxMessageId
         },
       'api/Conversations/GetMessages'
     ).toPromise();
@@ -114,8 +113,8 @@ export class ApiRequestsBuilder {
     ).toPromise();
   }
 
-  public GetConversationById(conversationId: number, updateRoles: boolean): Promise<ServerResponse<ConversationTemplate>> {
-    return this.MakeCall<ConversationTemplate>(
+  public GetConversationById(conversationId: number, updateRoles: boolean): Promise<ServerResponse<Chat>> {
+    return this.MakeCall<Chat>(
       { conversationId: conversationId, updateRoles: updateRoles },
       'api/Conversations/GetById'
     ).toPromise();
@@ -175,9 +174,9 @@ export class ApiRequestsBuilder {
     thumbnailUrl: string,
     isGroup: boolean,
     isPublic: boolean)
-  : Promise<ServerResponse<ConversationTemplate>>
+  : Promise<ServerResponse<Chat>>
   {
-    return this.MakeCall<ConversationTemplate>(
+    return this.MakeCall<Chat>(
       {
         ConversationName: name,
         CreatorId: whoCreatedId,
@@ -238,9 +237,9 @@ export class ApiRequestsBuilder {
       { headers: headers}).toPromise();
   }
 
-  public SearchForGroups(searchstring: string): Promise<ServerResponse<Array<ConversationTemplate>>>{
+  public SearchForGroups(searchstring: string): Promise<ServerResponse<Array<Chat>>>{
 
-    return this.MakeCall<Array<ConversationTemplate>>(
+    return this.MakeCall<Array<Chat>>(
       { SearchString: searchstring },
       'api/Conversations/SearchGroups'
     ).toPromise();

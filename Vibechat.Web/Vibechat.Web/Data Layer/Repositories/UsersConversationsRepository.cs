@@ -1,8 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VibeChat.Web;
 
 namespace Vibechat.Web.Data.Repositories
@@ -82,8 +81,7 @@ namespace Vibechat.Web.Data.Repositories
         public void UpdateDeviceId(string deviceId, string userId, int chatId)
         {
             var chat = mContext
-                .UsersConversations
-                .Where(x => x.UserID == userId && x.ChatID == chatId).Single();
+                .UsersConversations.Single(x => x.UserID == userId && x.ChatID == chatId);
 
             chat.DeviceId = deviceId;
         }
