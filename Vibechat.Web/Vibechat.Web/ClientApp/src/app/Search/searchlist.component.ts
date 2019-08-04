@@ -1,5 +1,5 @@
 import {Chat} from "../Data/Chat";
-import {UserInfo} from "../Data/UserInfo";
+import {AppUser} from "../Data/AppUser";
 import {Component, EventEmitter, Input, Output} from "@angular/core";
 import {ChatsService} from "../Services/ChatsService";
 import {UsersService} from "../Services/UsersService";
@@ -13,9 +13,9 @@ export class SearchListComponent {
 
   public FoundLocalConversations: Array<Chat>;
 
-  public Users: Array<UserInfo>;
+  public Users: Array<AppUser>;
 
-  @Output() public OnViewUser = new EventEmitter<UserInfo>();
+  @Output() public OnViewUser = new EventEmitter<AppUser>();
   @Output() public OnViewConversation = new EventEmitter<Chat>();
   @Output() public OnViewLocalConversation = new EventEmitter<Chat>();
   @Output() public OnApiError = new EventEmitter<any>();
@@ -98,7 +98,7 @@ export class SearchListComponent {
     this.OnViewConversation.emit(conversation);
   }
 
-  public ViewUser(user: UserInfo) {
+  public ViewUser(user: AppUser) {
     this.OnViewUser.emit(user);
   }
 }

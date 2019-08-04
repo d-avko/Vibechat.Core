@@ -16,7 +16,7 @@ import { SnackBarHelper } from '../Snackbar/SnackbarHelper';
 })
 export class ChangeUserInfoComponent {
 
-  public registerGroup: FormGroup
+  public registerGroup: FormGroup;
 
   public canRegister: boolean = true;
 

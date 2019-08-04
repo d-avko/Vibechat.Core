@@ -98,7 +98,7 @@ export class ImageScalingService {
   public AdjustFullSizedImageDimensions(imageW: number, imageH: number) {
     let appropriateHeight = this.formatter.IsMobileDevice()
       ? Math.floor(document.documentElement.clientHeight * this.fullScreenImageToScreenMobileRatio)
-      : Math.floor(document.documentElement.clientHeight * this.fullScreenImageToScreenDesktopRatio)
+      : Math.floor(document.documentElement.clientHeight * this.fullScreenImageToScreenDesktopRatio);
 
     let d = new Dimensions();
     d.height = appropriateHeight;

@@ -7,8 +7,8 @@ namespace Vibechat.Web.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<long>(
-                name: "FileSize",
-                table: "Attachments",
+                "FileSize",
+                "Attachments",
                 nullable: false,
                 defaultValue: 0L);
         }
@@ -16,8 +16,8 @@ namespace Vibechat.Web.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "FileSize",
-                table: "Attachments");
+                "FileSize",
+                "Attachments");
         }
     }
 }

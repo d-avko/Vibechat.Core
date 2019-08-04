@@ -7,17 +7,17 @@ namespace Vibechat.Web.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.InsertData(
-                table: "AttachmentKinds",
-                column: "Name",
-                value: "file");
+                "AttachmentKinds",
+                "Name",
+                "file");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DeleteData(
-                table: "AttachmentKinds",
-                keyColumn: "Name",
-                keyValue: "file");
+                "AttachmentKinds",
+                "Name",
+                "file");
         }
     }
 }

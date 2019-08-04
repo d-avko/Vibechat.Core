@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Vibechat.Web.Data.Repositories;
+using Microsoft.AspNetCore.Http;
 using VibeChat.Web;
+using Vibechat.Web.Data.Repositories;
 
 namespace Vibechat.Web.Middleware
 {

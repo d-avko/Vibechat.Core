@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace VibeChat.Web
 {
     /// <summary>
-    /// Data model for deleted messages
+    ///     Data model for deleted messages
     /// </summary>
     public class DeletedMessagesDataModel
     {
@@ -12,10 +12,9 @@ namespace VibeChat.Web
         //deleted message
         public int MessageID { get; set; }
 
-        [ForeignKey("MessageID")]
-        public virtual MessageDataModel Message { get; set; }
-      
+        [ForeignKey("MessageID")] public virtual MessageDataModel Message { get; set; }
+
         //user that deleted that message
-        public string UserId { get; set; } 
+        public string UserId { get; set; }
     }
 }

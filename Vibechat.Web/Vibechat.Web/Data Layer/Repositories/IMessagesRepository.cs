@@ -11,7 +11,10 @@ namespace Vibechat.Web.Data.Repositories
     public interface IMessagesRepository
     {
         MessageDataModel Add(AppUser whoSent, Message message, int groupId, MessageDataModel forwardedMessage);
-        MessageDataModel AddAttachment(AppUser whoSent, MessageAttachmentDataModel attachment, Message message, int groupId);
+
+        MessageDataModel AddAttachment(AppUser whoSent, MessageAttachmentDataModel attachment, Message message,
+            int groupId);
+
         bool Empty();
         IQueryable<MessageDataModel> GetByIds(List<int> ids);
 
@@ -24,6 +27,7 @@ namespace Vibechat.Web.Data.Repositories
         IIncludableQueryable<MessageDataModel, AppUser> Get(string userId, int conversationId, int maxMessageId,
             bool AllMessages = false,
             int offset = 0, int count = 0);
+
         IIncludableQueryable<MessageDataModel, AppUser> GetAttachments(string userId, int conversationId,
             AttachmentKind attachmentKind, int offset, int count);
 

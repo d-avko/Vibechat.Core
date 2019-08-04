@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.FileProviders.Physical;
-using Microsoft.Extensions.Logging;
 
 namespace Vibechat.FileServer
 {
     public class Startup
     {
+        public string OriginsPolicyName = "DefaultOriginsPolicy";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -23,19 +18,17 @@ namespace Vibechat.FileServer
 
         public IConfiguration Configuration { get; }
 
-        public string OriginsPolicyName = "DefaultOriginsPolicy";
-
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCors(options =>
             {
                 options.AddPolicy(OriginsPolicyName,
-                builder =>
-                {
-                    builder.AllowAnyOrigin();
-                    builder.AllowAnyMethod();
-                    builder.AllowAnyHeader();
-                });
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin();
+                        builder.AllowAnyMethod();
+                        builder.AllowAnyHeader();
+                    });
             });
             services.AddScoped<AdminSafeListMiddleware, AdminSafeListMiddleware>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
@@ -45,8 +38,9 @@ namespace Vibechat.FileServer
         {
             app.UseCors(OriginsPolicyName);
 
-            app.UseStaticFiles(new StaticFileOptions() {
-                FileProvider = new PhysicalFileProvider(Configuration["ContentPath"], ExclusionFilters.None),                
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(Configuration["ContentPath"], ExclusionFilters.None)
             });
 
             app.UseMiddleware<AdminSafeListMiddleware>();
@@ -56,8 +50,8 @@ namespace Vibechat.FileServer
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
-                    name: "default",
-                    template: "{controller}/{action=Index}/{id?}");
+                    "default",
+                    "{controller}/{action=Index}/{id?}");
             });
         }
     }

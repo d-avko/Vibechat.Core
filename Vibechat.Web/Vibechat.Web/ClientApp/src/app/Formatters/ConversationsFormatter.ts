@@ -4,7 +4,7 @@ import {Chat} from "../Data/Chat";
 import {AuthService} from "../Auth/AuthService";
 import {AttachmentKind} from "../Data/AttachmentKinds";
 import {TypingService} from "../Services/TypingService";
-import {UserInfo} from "../Data/UserInfo";
+import {AppUser} from "../Data/AppUser";
 import {ChatRole} from "../Roles/ChatRole";
 
 @Injectable({
@@ -70,7 +70,7 @@ export class ConversationsFormatter{
     return msg;
   }
 
-  public GetUserRoleFormatted(user: UserInfo) {
+  public GetUserRoleFormatted(user: AppUser) {
     switch (user.chatRole.role) {
       case ChatRole.Creator: {
         return "Creator";

@@ -12,12 +12,11 @@ namespace VibeChat.Web
     }
 
     /// <summary>
-    /// Data model for messages
+    ///     Data model for messages
     /// </summary>
     public class MessageDataModel
     {
-        [Key]
-        public int MessageID { get; set; }
+        [Key] public int MessageID { get; set; }
 
         public MessageState State { get; set; }
 
@@ -34,17 +33,16 @@ namespace VibeChat.Web
         public MessageDataModel ForwardedMessage { get; set; }
 
         //Id of a conversation where this message was sent 
-        
+
         public int ConversationID { get; set; }
 
-        [ForeignKey("ConversationID")]
-        public virtual ConversationDataModel Chat { get; set; }
+        [ForeignKey("ConversationID")] public virtual ConversationDataModel Chat { get; set; }
 
         //time when this message was received
         public DateTime TimeReceived { get; set; }
 
         /// <summary>
-        /// if this message is from private chat, store payload there.
+        ///     if this message is from private chat, store payload there.
         /// </summary>
         public string EncryptedPayload { get; set; }
     }

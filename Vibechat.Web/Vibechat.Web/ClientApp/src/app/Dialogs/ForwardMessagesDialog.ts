@@ -1,6 +1,6 @@
 import {Component, Inject} from "@angular/core";
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material";
-import {ChatComponent} from "../Chat/chat.component";
+import {ChatComponent} from "../UiComponents/Chat/chat.component";
 import {Chat} from "../Data/Chat";
 
 export interface ForwardMessagesData {

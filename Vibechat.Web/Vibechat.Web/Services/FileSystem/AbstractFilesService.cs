@@ -1,10 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Vibechat.Web.Services.Paths;
 
 namespace Vibechat.Web.Services.FileSystem
@@ -21,7 +18,7 @@ namespace Vibechat.Web.Services.FileSystem
         public UniquePathsProvider PathsProvider { get; }
 
         /// <summary>
-        /// Saves file to specified / generated location
+        ///     Saves file to specified / generated location
         /// </summary>
         /// <param name="file"></param>
         /// <param name="filename"></param>
@@ -30,7 +27,8 @@ namespace Vibechat.Web.Services.FileSystem
         /// <param name="additionalPathString">string to insert between filename and extension</param>
         /// <param name="folder">folder to save to. Assumes it's created</param>
         /// <returns></returns>
-        public async Task<string> SaveFile(IFormFile formFile, MemoryStream file, string filename, string chatOrUserId, string sender, string additionalPathString = null, string folder = null)
+        public async Task<string> SaveFile(IFormFile formFile, MemoryStream file, string filename, string chatOrUserId,
+            string sender, string additionalPathString = null, string folder = null)
         {
             var builder = new StringBuilder();
 
@@ -50,7 +48,7 @@ namespace Vibechat.Web.Services.FileSystem
             else
             {
                 //folder specified explicitly
-                if(folder != null)
+                if (folder != null)
                 {
                     builder.Clear();
                     builder.Append(folder);
@@ -68,13 +66,13 @@ namespace Vibechat.Web.Services.FileSystem
                 resultPath = builder.ToString();
             }
 
-            
+
             await SaveToStorage(formFile, file, resultPath);
 
             return resultPath;
         }
 
-        public async virtual Task SaveToStorage(IFormFile formFile, MemoryStream file, string path)
+        public virtual async Task SaveToStorage(IFormFile formFile, MemoryStream file, string path)
         {
             using (var fStream = new FileStream(path, FileMode.Create))
             {

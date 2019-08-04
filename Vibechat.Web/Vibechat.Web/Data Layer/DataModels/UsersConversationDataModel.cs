@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace VibeChat.Web
 {
@@ -9,16 +8,13 @@ namespace VibeChat.Web
 
         public int ChatID { get; set; }
 
-        [ForeignKey("UserID")]
-        public virtual AppUser User { get; set; }
+        [ForeignKey("UserID")] public virtual AppUser User { get; set; }
 
-        [ForeignKey("ChatID")]
-        public virtual ConversationDataModel Conversation { get; set; }
+        [ForeignKey("ChatID")] public virtual ConversationDataModel Conversation { get; set; }
 
         /// <summary>
-        /// Secure chat deviceId
+        ///     Secure chat deviceId
         /// </summary>
         public string DeviceId { get; set; }
-
     }
 }

@@ -7,51 +7,51 @@ namespace Vibechat.Web.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "LastViewedMessages",
-                columns: table => new
+                "LastViewedMessages",
+                table => new
                 {
-                    UserID = table.Column<string>(nullable: false),
-                    ChatID = table.Column<int>(nullable: false),
-                    MessageID = table.Column<int>(nullable: false)
+                    UserID = table.Column<string>(),
+                    ChatID = table.Column<int>(),
+                    MessageID = table.Column<int>()
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LastViewedMessages", x => new { x.ChatID, x.UserID });
+                    table.PrimaryKey("PK_LastViewedMessages", x => new {x.ChatID, x.UserID});
                     table.ForeignKey(
-                        name: "FK_LastViewedMessages_Conversations_ChatID",
-                        column: x => x.ChatID,
-                        principalTable: "Conversations",
-                        principalColumn: "Id",
+                        "FK_LastViewedMessages_Conversations_ChatID",
+                        x => x.ChatID,
+                        "Conversations",
+                        "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_LastViewedMessages_Messages_MessageID",
-                        column: x => x.MessageID,
-                        principalTable: "Messages",
-                        principalColumn: "MessageID",
+                        "FK_LastViewedMessages_Messages_MessageID",
+                        x => x.MessageID,
+                        "Messages",
+                        "MessageID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_LastViewedMessages_AspNetUsers_UserID",
-                        column: x => x.UserID,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
+                        "FK_LastViewedMessages_AspNetUsers_UserID",
+                        x => x.UserID,
+                        "AspNetUsers",
+                        "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_LastViewedMessages_MessageID",
-                table: "LastViewedMessages",
-                column: "MessageID");
+                "IX_LastViewedMessages_MessageID",
+                "LastViewedMessages",
+                "MessageID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LastViewedMessages_UserID",
-                table: "LastViewedMessages",
-                column: "UserID");
+                "IX_LastViewedMessages_UserID",
+                "LastViewedMessages",
+                "UserID");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "LastViewedMessages");
+                "LastViewedMessages");
         }
     }
 }

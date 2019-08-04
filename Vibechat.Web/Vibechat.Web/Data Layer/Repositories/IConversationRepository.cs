@@ -1,6 +1,4 @@
 ﻿using System.Linq;
-using System.Threading.Tasks;
-using Vibechat.Web.Data.DataModels;
 using VibeChat.Web;
 
 namespace Vibechat.Web.Data.Repositories

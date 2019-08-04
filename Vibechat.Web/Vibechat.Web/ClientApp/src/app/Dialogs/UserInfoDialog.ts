@@ -1,7 +1,7 @@
 import {Component, Inject, ViewContainerRef} from "@angular/core";
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from "@angular/material";
-import {ChatComponent} from "../Chat/chat.component";
-import {UserInfo} from "../Data/UserInfo";
+import {ChatComponent} from "../UiComponents/Chat/chat.component";
+import {AppUser} from "../Data/AppUser";
 import {Chat} from "../Data/Chat";
 import {ConversationsFormatter} from "../Formatters/ConversationsFormatter";
 import {ChangeNameDialogComponent} from "./ChangeNameDialog";
@@ -12,8 +12,8 @@ import {AuthService} from "../Auth/AuthService";
 import {ViewPhotoService} from "./ViewPhotoService";
 
 export interface UserInfoData {
-  user: UserInfo;
-  currentUser: UserInfo;
+  user: AppUser;
+  currentUser: AppUser;
   conversation: Chat;
 }
 

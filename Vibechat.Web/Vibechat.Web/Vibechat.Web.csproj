@@ -107,7 +107,6 @@
     <TypeScriptCompile Include="ClientApp\src\app\ApiModels\UpdateThumbnailResponse.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Auth\AuthService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Chat\chat.component.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\Connections\ConnectionManager.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\AttachmentKinds.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationIdsFactory.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\FoundUsersResponse.ts" />
@@ -128,13 +127,8 @@
     <TypeScriptCompile Include="ClientApp\src\app\Encryption\E2EencryptionService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Encryption\SecureChatsService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Formatters\ConversationsFormatter.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationTemplate.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\Data\ChatMessage.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\DeleteMessagesRequest.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\Data\MessageAttachment.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\Data\UserInfo.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Interceptors\HttpResponseInterceptor.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\Loading\LoadingScreenService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Modules\ChatModule.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Modules\LoginModule.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
@@ -170,6 +164,7 @@
   </ItemGroup>-->
 
   <ItemGroup>
+    <Folder Include="ClientApp\src\app\UiComponents" />
     <Folder Include="wwwroot\Uploads\" />
   </ItemGroup>
 

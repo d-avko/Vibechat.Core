@@ -9,7 +9,7 @@ import {Message} from "../Data/Message";
 import {Chat} from "../Data/Chat";
 import {FoundUsersResponse} from "../Data/FoundUsersResponse";
 import {UpdateThumbnailResponse} from "../ApiModels/UpdateThumbnailResponse";
-import {UserInfo} from "../Data/UserInfo";
+import {AppUser} from "../Data/AppUser";
 import {UploaderService} from "../uploads/upload.service";
 import {SnackBarHelper} from "../Snackbar/SnackbarHelper";
 import {Attachment} from "../Data/Attachment";
@@ -27,7 +27,7 @@ export class ApiRequestsBuilder {
 
   private uploader: UploaderService;
 
-  private logger: SnackBarHelper
+  private logger: SnackBarHelper;
 
   constructor(httpClient: HttpClient, @Inject('BASE_URL') baseUrl: string, uploader: UploaderService, logger: SnackBarHelper) {
     this.baseUrl = baseUrl;
@@ -113,8 +113,8 @@ export class ApiRequestsBuilder {
     return this.uploader.uploadFile(file, progress, chatId.toString()).toPromise();
   }
 
-  public GetUserById(userId: string): Promise<ServerResponse<UserInfo>> {
-    return this.MakeCall<UserInfo>(
+  public GetUserById(userId: string): Promise<ServerResponse<AppUser>> {
+    return this.MakeCall<AppUser>(
       { Id: userId },
       'api/Users/GetById'
     ).toPromise();
@@ -211,8 +211,8 @@ export class ApiRequestsBuilder {
     ).toPromise();
   }
 
-  public GetContacts(): Promise<ServerResponse<Array<UserInfo>>> {
-    return this.MakeCall<Array<UserInfo>>(
+  public GetContacts(): Promise<ServerResponse<Array<AppUser>>> {
+    return this.MakeCall<Array<AppUser>>(
       null,
       'api/Users/GetContacts'
     ).toPromise();

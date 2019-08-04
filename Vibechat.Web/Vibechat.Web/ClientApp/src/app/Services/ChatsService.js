@@ -43,7 +43,7 @@ var ConversationsService = /** @class */ (function () {
         this.authService = authService;
         this.requestsBuilder = requestsBuilder;
         this.connectionManager = connectionManager;
-        this.connectionManager.setConversationsService(this);
+        this.connectionManager.setChatsService(this);
     }
     ConversationsService.prototype.IsConversationSelected = function () {
         return this.CurrentConversation != null;
@@ -81,7 +81,7 @@ var ConversationsService = /** @class */ (function () {
                             return [2 /*return*/, null];
                         }
                         if (result.response == null) {
-                            return [2 /*return*/, new Array()];
+                            return [2 /*return*/, []];
                         }
                         else {
                             return [2 /*return*/, result.response.slice()];
@@ -172,7 +172,7 @@ var ConversationsService = /** @class */ (function () {
                                     _this.dateParser.ParseStringDatesInMessages(conversation.messages);
                                 }
                                 else {
-                                    conversation.messages = new Array();
+                                    conversation.messages = [];
                                 }
                             });
                             this.Conversations = response.response;
@@ -183,7 +183,7 @@ var ConversationsService = /** @class */ (function () {
                             });
                         }
                         else {
-                            this.Conversations = new Array();
+                            this.Conversations = [];
                         }
                         //Initiate signalR group connections
                         this.connectionManager.Start();
@@ -316,7 +316,7 @@ var ConversationsService = /** @class */ (function () {
                             return [2 /*return*/];
                         }
                         this.connectionManager.InitiateConnections(new Array(1).fill(result.response.id));
-                        result.response.messages = new Array();
+                        result.response.messages = [];
                         this.Conversations = this.Conversations.concat([result.response]);
                         return [2 /*return*/];
                 }
@@ -469,7 +469,7 @@ var ConversationsService = /** @class */ (function () {
                             //we created new group.
                             if (data.user.id == this.authService.User.id) {
                                 if (data.conversation.messages == null) {
-                                    data.conversation.messages = new Array();
+                                    data.conversation.messages = [];
                                 }
                                 this.Conversations = this.Conversations.concat([data.conversation]);
                             }
@@ -483,7 +483,7 @@ var ConversationsService = /** @class */ (function () {
                             //we created dialog with someone;
                             if (data.user.id == this.authService.User.id) {
                                 if (data.conversation.messages == null) {
-                                    data.conversation.messages = new Array();
+                                    data.conversation.messages = [];
                                 }
                                 this.Conversations = this.Conversations.concat([data.conversation]);
                             }

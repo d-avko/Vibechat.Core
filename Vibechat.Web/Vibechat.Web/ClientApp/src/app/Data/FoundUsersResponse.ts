@@ -1,5 +1,5 @@
-import { UserInfo } from "./UserInfo";
+import { AppUser } from "./AppUser";
 
 export class FoundUsersResponse {
-  usersFound: Array<UserInfo>;
+  usersFound: Array<AppUser>;
 }

@@ -17,7 +17,7 @@ export class ImageWithLoadProgress {
       this.internalImg.width = d.width;
       this.internalImg.height = d.height;
       setTimeout(() => this.isDownloading = false, 500);
-    }
+    };
     this.internalImg.src = url;
   }
 }

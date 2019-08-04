@@ -1,20 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Vibechat.Web.Data.DataModels;
 using VibeChat.Web;
+using Vibechat.Web.Data.DataModels;
 
 namespace Vibechat.Web.Data.Repositories
 {
     public class DhPublicKeysRepository : IDhPublicKeysRepository
     {
-        private ApplicationDbContext mContext { get; set; }
-
         public DhPublicKeysRepository(ApplicationDbContext dbContext)
         {
-            this.mContext = dbContext;
+            mContext = dbContext;
         }
+
+        private ApplicationDbContext mContext { get; }
 
         [Obsolete("Keys are now seeded via DbContext")]
         public async Task Add(DhPublicKeyDataModel value)

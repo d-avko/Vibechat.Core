@@ -20,15 +20,15 @@ namespace VibeChat.Web.Controllers
     {
         protected ChatService mConversationService;
 
-        public BansService BansService { get; }
-
         public ConversationsController(
             ChatService mDbService,
             BansService bansService)
         {
-            this.mConversationService = mDbService;
+            mConversationService = mDbService;
             BansService = bansService;
         }
+
+        public BansService BansService { get; }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/Create")]
@@ -41,7 +41,7 @@ namespace VibeChat.Web.Controllers
 
                 var result = await mConversationService.CreateConversation(convInfo);
 
-                return new ResponseApiModel<Chat>()
+                return new ResponseApiModel<Chat>
                 {
                     IsSuccessfull = true,
                     ErrorMessage = null,
@@ -50,22 +50,13 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<Chat>()
+                return new ResponseApiModel<Chat>
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
                     Response = null
                 };
             }
-        }
-
-        public class UpdateAuthKeyRequest
-        {
-            public int chatId { get; set; }
-
-            public string AuthKeyId { get; set; }
-
-            public string deviceId { get; set; }
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -76,9 +67,10 @@ namespace VibeChat.Web.Controllers
             {
                 var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
-                await mConversationService.UpdateAuthKey(request.chatId, request.AuthKeyId, request.deviceId, thisUserId);
+                await mConversationService.UpdateAuthKey(request.chatId, request.AuthKeyId, request.deviceId,
+                    thisUserId);
 
-                return new ResponseApiModel<bool>()
+                return new ResponseApiModel<bool>
                 {
                     IsSuccessfull = true,
                     Response = true
@@ -86,7 +78,7 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<bool>()
+                return new ResponseApiModel<bool>
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
@@ -95,39 +87,36 @@ namespace VibeChat.Web.Controllers
             }
         }
 
-        public class FindUsersInChatRequest
-        {
-            public string UsernameToFind { get; set; }
-
-            public int ChatId { get; set; }
-        }
-
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/FindUsersInChat")]
-        public async Task<ResponseApiModel<UsersByNickNameResultApiModel>> FindUsersInChat([FromBody]FindUsersInChatRequest credentials)
+        public async Task<ResponseApiModel<UsersByNickNameResultApiModel>> FindUsersInChat(
+            [FromBody] FindUsersInChatRequest credentials)
         {
             try
             {
                 var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
-                var result = await mConversationService.FindUsersInChat(credentials.ChatId, credentials.UsernameToFind, thisUserId);
+                var result =
+                    await mConversationService.FindUsersInChat(credentials.ChatId, credentials.UsernameToFind,
+                        thisUserId);
 
                 foreach (var user in result)
                 {
-                    user.IsBlockedInConversation = await BansService.IsBannedFromConversation(credentials.ChatId, user.Id);
+                    user.IsBlockedInConversation =
+                        await BansService.IsBannedFromConversation(credentials.ChatId, user.Id);
                     user.ChatRole = await mConversationService.GetChatRole(user.Id, credentials.ChatId);
                 }
 
-                return new ResponseApiModel<UsersByNickNameResultApiModel>()
+                return new ResponseApiModel<UsersByNickNameResultApiModel>
                 {
                     IsSuccessfull = true,
                     ErrorMessage = null,
-                    Response = new UsersByNickNameResultApiModel() { UsersFound = result }
+                    Response = new UsersByNickNameResultApiModel {UsersFound = result}
                 };
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<UsersByNickNameResultApiModel>()
+                return new ResponseApiModel<UsersByNickNameResultApiModel>
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
@@ -140,13 +129,13 @@ namespace VibeChat.Web.Controllers
         [Route("api/Conversations/GetRoles")]
         public async Task<ResponseApiModel<List<ChatRoleDto>>> GetRoles()
         {
-            try 
+            try
             {
                 var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
                 var result = await mConversationService.GetChatRoles(thisUserId);
 
-                return new ResponseApiModel<List<ChatRoleDto>>()
+                return new ResponseApiModel<List<ChatRoleDto>>
                 {
                     IsSuccessfull = true,
                     ErrorMessage = null,
@@ -155,18 +144,13 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<List<ChatRoleDto>>()
+                return new ResponseApiModel<List<ChatRoleDto>>
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
                     Response = null
                 };
             }
-        }
-
-        public class GetChatsRequest
-        {
-            public string deviceId { get; set; }
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -177,9 +161,9 @@ namespace VibeChat.Web.Controllers
             {
                 var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
-                List<Chat> result = await mConversationService.GetConversations(request.deviceId,  thisUserId);
+                var result = await mConversationService.GetConversations(request.deviceId, thisUserId);
 
-                return new ResponseApiModel<List<Chat>>()
+                return new ResponseApiModel<List<Chat>>
                 {
                     IsSuccessfull = true,
                     ErrorMessage = null,
@@ -188,33 +172,26 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<List<Chat>>()
+                return new ResponseApiModel<List<Chat>>
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
                     Response = null
                 };
             }
-        }
-
-        public class GetByIdRequest
-        {
-            public int conversationId { get; set; }
-
-            public bool updateRoles { get; set; }
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/GetById")]
-        public async Task<ResponseApiModel<Chat>> GetById([FromBody]GetByIdRequest request)
+        public async Task<ResponseApiModel<Chat>> GetById([FromBody] GetByIdRequest request)
         {
             try
             {
-                string thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
-                Chat result = await mConversationService.GetById(request.conversationId, thisUserId);
+                var result = await mConversationService.GetById(request.conversationId, thisUserId);
 
-                return new ResponseApiModel<Chat>()
+                return new ResponseApiModel<Chat>
                 {
                     IsSuccessfull = true,
                     ErrorMessage = null,
@@ -223,7 +200,7 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<Chat>()
+                return new ResponseApiModel<Chat>
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
@@ -231,25 +208,18 @@ namespace VibeChat.Web.Controllers
                 };
             }
         }
-        
-        public class SetLastMessageRequest
-        {
-            public int chatId { get; set; }
-            
-            public int messageId { get; set; }
-        }
-        
+
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/SetLastMessage")]
-        public async Task<ResponseApiModel<bool>> GetById([FromBody]SetLastMessageRequest request)
+        public async Task<ResponseApiModel<bool>> GetById([FromBody] SetLastMessageRequest request)
         {
             try
             {
-                string thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
                 await mConversationService.SetLastMessage(thisUserId, request.chatId, request.messageId);
 
-                return new ResponseApiModel<bool>()
+                return new ResponseApiModel<bool>
                 {
                     IsSuccessfull = true,
                     ErrorMessage = null,
@@ -258,24 +228,13 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<bool>()
+                return new ResponseApiModel<bool>
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
                     Response = false
                 };
             }
-        }
-
-        public class GetAttachmentsRequest
-        {
-            public AttachmentKind kind { get; set; }
-
-            public int conversationId { get; set; }
-
-            public int offset { get; set; }
-
-            public int count { get; set; }
         }
 
 
@@ -286,13 +245,13 @@ namespace VibeChat.Web.Controllers
             try
             {
                 var result = await mConversationService.GetAttachments(
-                    request.kind, 
-                    request.conversationId, 
+                    request.kind,
+                    request.conversationId,
                     JwtHelper.GetNamedClaimValue(User.Claims),
                     request.offset,
                     request.count);
 
-                return new ResponseApiModel<List<Message>>()
+                return new ResponseApiModel<List<Message>>
                 {
                     IsSuccessfull = true,
                     ErrorMessage = null,
@@ -301,7 +260,7 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<List<Message>>()
+                return new ResponseApiModel<List<Message>>
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
@@ -316,9 +275,9 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                List<UserInfo> result = await mConversationService.GetParticipants(convInfo.ConvId);
+                var result = await mConversationService.GetParticipants(convInfo.ConvId);
 
-                return new ResponseApiModel<List<UserInfo>>()
+                return new ResponseApiModel<List<UserInfo>>
                 {
                     IsSuccessfull = true,
                     ErrorMessage = null,
@@ -327,7 +286,7 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<List<UserInfo>>()
+                return new ResponseApiModel<List<UserInfo>>
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
@@ -343,14 +302,14 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                List<Message> result = await mConversationService.GetMessages(
+                var result = await mConversationService.GetMessages(
                     credentials.ConversationID,
                     credentials.MessagesOffset,
                     credentials.Count,
                     credentials.MaxMessageId,
-                     JwtHelper.GetNamedClaimValue(User.Claims));
+                    JwtHelper.GetNamedClaimValue(User.Claims));
 
-                return new ResponseApiModel<List<Message>>()
+                return new ResponseApiModel<List<Message>>
                 {
                     IsSuccessfull = true,
                     ErrorMessage = null,
@@ -359,27 +318,27 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<List<Message>>()
+                return new ResponseApiModel<List<Message>>
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
                     Response = null
                 };
             }
-
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/DeleteMessages")]
-        public async Task<ResponseApiModel<string>> DeleteConversationMessages([FromBody] DeleteMessagesRequest messagesInfo)
+        public async Task<ResponseApiModel<string>> DeleteConversationMessages(
+            [FromBody] DeleteMessagesRequest messagesInfo)
         {
             try
             {
                 await mConversationService.DeleteConversationMessages(
                     messagesInfo,
-                     JwtHelper.GetNamedClaimValue(User.Claims));
+                    JwtHelper.GetNamedClaimValue(User.Claims));
 
-                return new ResponseApiModel<string>()
+                return new ResponseApiModel<string>
                 {
                     IsSuccessfull = true,
                     ErrorMessage = null,
@@ -388,7 +347,7 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<string>()
+                return new ResponseApiModel<string>
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
@@ -400,14 +359,16 @@ namespace VibeChat.Web.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/UpdateThumbnail")]
-        public async Task<ResponseApiModel<UpdateThumbnailResponse>> UpdateThumbnail([FromForm]UpdateThumbnailRequest updateThumbnail)
+        public async Task<ResponseApiModel<UpdateThumbnailResponse>> UpdateThumbnail(
+            [FromForm] UpdateThumbnailRequest updateThumbnail)
         {
             try
             {
                 var thisUserID = JwtHelper.GetNamedClaimValue(User.Claims);
 
-                var result = await mConversationService.UpdateThumbnail(updateThumbnail.conversationId, updateThumbnail.thumbnail, thisUserID);
-                return new ResponseApiModel<UpdateThumbnailResponse>()
+                var result = await mConversationService.UpdateThumbnail(updateThumbnail.conversationId,
+                    updateThumbnail.thumbnail, thisUserID);
+                return new ResponseApiModel<UpdateThumbnailResponse>
                 {
                     IsSuccessfull = true,
                     Response = result
@@ -415,7 +376,7 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<UpdateThumbnailResponse>()
+                return new ResponseApiModel<UpdateThumbnailResponse>
                 {
                     ErrorMessage = ex.Message,
                     IsSuccessfull = false
@@ -431,26 +392,19 @@ namespace VibeChat.Web.Controllers
             {
                 await mConversationService.ChangeName(request.ConversationId, request.Name);
 
-                return new ResponseApiModel<bool>()
+                return new ResponseApiModel<bool>
                 {
                     IsSuccessfull = true
                 };
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<bool>()
+                return new ResponseApiModel<bool>
                 {
                     ErrorMessage = ex.Message,
                     IsSuccessfull = false
                 };
             }
-        }
-
-        public class BanRequest
-        {
-            public string userId { get; set; }
-
-            public int conversationId { get; set; }
         }
 
 
@@ -461,9 +415,9 @@ namespace VibeChat.Web.Controllers
             try
             {
                 var result = await mConversationService.SearchForGroups(request.SearchString,
-                     JwtHelper.GetNamedClaimValue(User.Claims));
+                    JwtHelper.GetNamedClaimValue(User.Claims));
 
-                return new ResponseApiModel<List<Chat>>()
+                return new ResponseApiModel<List<Chat>>
                 {
                     IsSuccessfull = true,
                     Response = result
@@ -471,7 +425,7 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<List<Chat>>()
+                return new ResponseApiModel<List<Chat>>
                 {
                     ErrorMessage = ex.Message,
                     IsSuccessfull = false
@@ -479,21 +433,17 @@ namespace VibeChat.Web.Controllers
             }
         }
 
-        public class ChangeConversationPublicStateRequest
-        {
-            public int conversationId{ get; set; }
-        }
-
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("api/Conversations/ChangePublicState")]
-        public async Task<ResponseApiModel<bool>> ChangeConversationPublicState([FromBody]ChangeConversationPublicStateRequest request)
-        { 
+        public async Task<ResponseApiModel<bool>> ChangeConversationPublicState(
+            [FromBody] ChangeConversationPublicStateRequest request)
+        {
             try
             {
-               await mConversationService.ChangePublicState(request.conversationId,
-                     JwtHelper.GetNamedClaimValue(User.Claims));
+                await mConversationService.ChangePublicState(request.conversationId,
+                    JwtHelper.GetNamedClaimValue(User.Claims));
 
-                return new ResponseApiModel<bool>()
+                return new ResponseApiModel<bool>
                 {
                     IsSuccessfull = true,
                     Response = true
@@ -501,7 +451,7 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<bool>()
+                return new ResponseApiModel<bool>
                 {
                     ErrorMessage = ex.Message,
                     IsSuccessfull = false
@@ -520,7 +470,7 @@ namespace VibeChat.Web.Controllers
                     request.userId,
                     JwtHelper.GetNamedClaimValue(User.Claims));
 
-                return new ResponseApiModel<bool>()
+                return new ResponseApiModel<bool>
                 {
                     IsSuccessfull = true,
                     Response = true
@@ -528,7 +478,7 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<bool>()
+                return new ResponseApiModel<bool>
                 {
                     ErrorMessage = ex.Message,
                     IsSuccessfull = false
@@ -547,7 +497,7 @@ namespace VibeChat.Web.Controllers
                     request.userId,
                     JwtHelper.GetNamedClaimValue(User.Claims));
 
-                return new ResponseApiModel<bool>()
+                return new ResponseApiModel<bool>
                 {
                     IsSuccessfull = true,
                     Response = true
@@ -555,12 +505,13 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<bool>()
+                return new ResponseApiModel<bool>
                 {
                     ErrorMessage = ex.Message,
                     IsSuccessfull = false
                 };
             }
         }
+        
     }
 }

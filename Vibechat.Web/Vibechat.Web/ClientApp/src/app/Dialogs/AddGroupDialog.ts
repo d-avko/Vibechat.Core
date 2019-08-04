@@ -1,6 +1,6 @@
 import { Component, ViewChild } from "@angular/core";
 import { MatDialogRef, MatCheckbox } from "@angular/material";
-import { ChatComponent } from "../Chat/chat.component";
+import { ChatComponent } from "../UiComponents/Chat/chat.component";
 
 @Component({
   selector: 'add-group-dialog',

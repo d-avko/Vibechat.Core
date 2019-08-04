@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
-using Vibechat.Web.Data.Messages;
 using VibeChat.Web.Data.DataModels;
+using Vibechat.Web.Data.Messages;
 
 namespace Vibechat.Web.Data.Repositories
 {

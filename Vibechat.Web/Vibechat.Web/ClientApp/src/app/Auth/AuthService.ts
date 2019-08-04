@@ -1,5 +1,5 @@
 import { LoginResponse } from "../ApiModels/LoginResponse";
-import { UserInfo } from "../Data/UserInfo";
+import { AppUser } from "../Data/AppUser";
 import { Router } from "@angular/router";
 import { ServerResponse } from "../ApiModels/ServerResponse";
 import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
@@ -26,9 +26,9 @@ export class AuthService  {
     firebase.initializeApp(firebaseConfig);
   }
 
-  public User: UserInfo;
+  public User: AppUser;
 
-  public Contacts: Array<UserInfo>;
+  public Contacts: Array<AppUser>;
 
   public token: string;
 
@@ -94,7 +94,7 @@ export class AuthService  {
 
   public async RefreshLocalData(): Promise<void> {
     let refreshToken = localStorage.getItem('refreshtoken');
-    let user = <UserInfo>JSON.parse(localStorage.getItem('user'));
+    let user = <AppUser>JSON.parse(localStorage.getItem('user'));
     if (user == null || refreshToken == null) {
       this.router.navigateByUrl('/login');
       return;

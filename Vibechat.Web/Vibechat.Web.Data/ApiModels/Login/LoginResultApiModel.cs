@@ -1,16 +1,15 @@
-﻿using System;
-using VibeChat.Web.ChatData;
+﻿using VibeChat.Web.ChatData;
 
 namespace Vibechat.Web.ApiModels
 {
     /// <summary>
-    /// Class used to pass info to a user in a result of a request
-    /// to log in
+    ///     Class used to pass info to a user in a result of a request
+    ///     to log in
     /// </summary>
     public class LoginResultApiModel
     {
         /// <summary>
-        /// As a result of a successfull login we'll get bearer token.
+        ///     As a result of a successfull login we'll get bearer token.
         /// </summary>
         public string Token { get; set; }
 
@@ -19,10 +18,9 @@ namespace Vibechat.Web.ApiModels
         public UserInfo Info { get; set; }
 
         /// <summary>
-        /// Flag indicating if this user
-        /// was auto-registered and his username needs to be changed.
+        ///     Flag indicating if this user
+        ///     was auto-registered and his username needs to be changed.
         /// </summary>
         public bool IsNewUser { get; set; }
-
     }
 }

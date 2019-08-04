@@ -1,21 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Vibechat.Web.Data.Messages;
+﻿using System.Threading.Tasks;
 using VibeChat.Web;
 using VibeChat.Web.Data.DataModels;
+using Vibechat.Web.Data.Messages;
 
 namespace Vibechat.Web.Data.Repositories
 {
     public class AttachmentKindsRepository : IAttachmentKindsRepository
     {
-        private ApplicationDbContext mContext { get; set; }
-
         public AttachmentKindsRepository(ApplicationDbContext dbContext)
         {
-            this.mContext = dbContext;
+            mContext = dbContext;
         }
+
+        private ApplicationDbContext mContext { get; }
 
         public Task<AttachmentKindDataModel> GetById(AttachmentKind kind)
         {

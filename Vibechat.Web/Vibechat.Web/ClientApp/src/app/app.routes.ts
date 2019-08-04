@@ -2,7 +2,7 @@ import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import { LoginComponent } from './login/login.component';
 import { ChangeUserInfoComponent } from './registration/register.component';
-import { ChatComponent } from './Chat/chat.component';
+import { ChatComponent } from './UiComponents/Chat/chat.component';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: '/chat'},

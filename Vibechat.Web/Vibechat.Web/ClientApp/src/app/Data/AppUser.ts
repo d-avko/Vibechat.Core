@@ -1,6 +1,6 @@
 import { ChatRoleDto } from "../Roles/ChatRoleDto";
 
-export class UserInfo {
+export class AppUser {
 
   public id: string;
 

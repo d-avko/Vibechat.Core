@@ -1,8 +1,8 @@
 import { Component, Inject } from "@angular/core";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material";
-import { ChatComponent } from "../Chat/chat.component";
+import { ChatComponent } from "../UiComponents/Chat/chat.component";
 import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
-import { UserInfo } from "../Data/UserInfo";
+import { AppUser } from "../Data/AppUser";
 import { ChatsService } from "../Services/ChatsService";
 import { AuthService } from "../Auth/AuthService";
 
@@ -18,9 +18,9 @@ export class ChatUsersDialogComponent {
 
   public usernameToFind: string;
 
-  public FoundUsers = new Array<UserInfo>();
+  public FoundUsers = new Array<AppUser>();
 
-  public SelectedUser: UserInfo;
+  public SelectedUser: AppUser;
 
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
@@ -38,7 +38,7 @@ export class ChatUsersDialogComponent {
     if (!users) {
       this.snackBar.openSnackBar('Noone was found.', 2);
 
-      this.FoundUsers = new Array<UserInfo>();
+      this.FoundUsers = new Array<AppUser>();
 
     } else {
       users = users.filter(x => x.id != this.auth.User.id);
@@ -56,7 +56,7 @@ export class ChatUsersDialogComponent {
     this.dialogRef.close();
   }
 
-  public IsUserSelected(user: UserInfo): boolean {
+  public IsUserSelected(user: AppUser): boolean {
     if (!this.SelectedUser) {
       return false;
     }
@@ -64,7 +64,7 @@ export class ChatUsersDialogComponent {
     return this.SelectedUser.id == user.id;
   }
 
-  public SelectUser(user: UserInfo) {
+  public SelectUser(user: AppUser) {
     if (this.IsUserSelected(user)) {
       this.SelectedUser = null;
       return;

@@ -7,24 +7,24 @@ namespace Vibechat.Web.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "DeviceId",
-                table: "Conversations");
+                "DeviceId",
+                "Conversations");
 
             migrationBuilder.AddColumn<string>(
-                name: "DeviceId",
-                table: "UsersConversations",
+                "DeviceId",
+                "UsersConversations",
                 nullable: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "DeviceId",
-                table: "UsersConversations");
+                "DeviceId",
+                "UsersConversations");
 
             migrationBuilder.AddColumn<string>(
-                name: "DeviceId",
-                table: "Conversations",
+                "DeviceId",
+                "Conversations",
                 nullable: true);
         }
     }

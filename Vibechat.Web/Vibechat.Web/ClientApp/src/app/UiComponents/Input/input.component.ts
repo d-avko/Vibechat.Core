@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
 import {Chat} from "../../Data/Chat";
 import {MatFormField} from "@angular/material";
-import {UserInfo} from "../../Data/UserInfo";
+import {AppUser} from "../../Data/AppUser";
 import {ChatsService} from "../../Services/ChatsService";
 
 @Component({
@@ -13,9 +13,9 @@ export class InputComponent {
 
   @Output() public OnSendMessage = new EventEmitter<string>();
 
-  @Output() public OnViewUserInfo = new EventEmitter<UserInfo>();
+  @Output() public OnViewUserInfo = new EventEmitter<AppUser>();
 
-  @Input() public User: UserInfo;
+  @Input() public User: AppUser;
 
   @ViewChild(MatFormField, { static: false }) inputfield: MatFormField;
 

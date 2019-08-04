@@ -1,19 +1,25 @@
-﻿using FirebaseAdmin;
-using FirebaseAdmin.Auth;
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using FirebaseAdmin;
+using FirebaseAdmin.Auth;
+using VibeChat.Web;
 using Vibechat.Web.ApiModels;
+using VibeChat.Web.ApiModels;
 using Vibechat.Web.Data.Repositories;
 using Vibechat.Web.Extensions;
 using Vibechat.Web.Services.ChatDataProviders;
-using VibeChat.Web;
-using VibeChat.Web.ApiModels;
 
 namespace Vibechat.Web.Services.Login
 {
     public class LoginService
     {
+        private readonly UnitOfWork unitOfWork;
+
+        private readonly IChatDataProvider chatDataProvider;
+
+        private readonly IUsersRepository usersRepository;
+
         public LoginService(
             IUsersRepository usersRepository,
             IChatDataProvider chatDataProvider,
@@ -24,32 +30,26 @@ namespace Vibechat.Web.Services.Login
             this.unitOfWork = unitOfWork;
         }
 
-        private IUsersRepository usersRepository;
-
-        private IChatDataProvider chatDataProvider;
-        private readonly UnitOfWork unitOfWork;
-
         public async Task<LoginResultApiModel> LogInAsync(LoginCredentialsApiModel loginCredentials)
         {
-            FirebaseAuth auth = FirebaseAuth.GetAuth(FirebaseApp.DefaultInstance);
+            var auth = FirebaseAuth.GetAuth(FirebaseApp.DefaultInstance);
 
             //this can throw detailed error message.
-            FirebaseToken verified = await auth.VerifyIdTokenAsync(loginCredentials.UidToken);
+            var verified = await auth.VerifyIdTokenAsync(loginCredentials.UidToken);
 
-            AppUser identityUser = await usersRepository.GetById(verified.Uid);
+            var identityUser = await usersRepository.GetById(verified.Uid);
 
             //user confirmed his phone number, but has not registered yet; 
             //Register him now in that case 
 
-            bool IsNewUser = false;
+            var IsNewUser = false;
 
-            if(identityUser == null)
-            {
+            if (identityUser == null)
                 try
                 {
-                    string username = "Generated_" + Guid.NewGuid().ToString();
+                    var username = "Generated_" + Guid.NewGuid();
 
-                    var token = await RegisterNewUserAsync(new RegisterInformationApiModel()
+                    var token = await RegisterNewUserAsync(new RegisterInformationApiModel
                     {
                         PhoneNumber = loginCredentials.PhoneNumber,
                         UserName = username,
@@ -66,9 +66,8 @@ namespace Vibechat.Web.Services.Login
                 {
                     throw new FormatException("Couldn't register this user.", ex);
                 }
-            }
 
-            return new LoginResultApiModel()
+            return new LoginResultApiModel
             {
                 Info = identityUser.ToUserInfo(),
                 Token = identityUser.GenerateToken(),
@@ -78,7 +77,7 @@ namespace Vibechat.Web.Services.Login
         }
 
         /// <summary>
-        /// Registers user and issues a refresh token.
+        ///     Registers user and issues a refresh token.
         /// </summary>
         /// <param name="userToRegister"></param>
         /// <returns></returns>
@@ -86,26 +85,18 @@ namespace Vibechat.Web.Services.Login
         {
             var defaultError = new FormatException("Check the fields and try again.");
 
-            if (userToRegister == null)
-            {
-                throw defaultError;
-            }
+            if (userToRegister == null) throw defaultError;
 
-            if (string.IsNullOrWhiteSpace(userToRegister.UserName))
-            {
-                throw defaultError;
-            }
+            if (string.IsNullOrWhiteSpace(userToRegister.UserName)) throw defaultError;
 
             // if UserName and email is not unique
 
-            if ((await usersRepository.GetByUsername(userToRegister.UserName)) != null)
-            {
+            if (await usersRepository.GetByUsername(userToRegister.UserName) != null)
                 throw new FormatException("The username is not unique.");
-            }
 
             var imageUrl = chatDataProvider.GetProfilePictureUrl();
 
-            var userToCreate = new AppUser()
+            var userToCreate = new AppUser
             {
                 Id = userToRegister.Id,
                 UserName = userToRegister.UserName,
@@ -119,11 +110,10 @@ namespace Vibechat.Web.Services.Login
             var result = await usersRepository.CreateUser(userToCreate);
 
             if (!result.Succeeded)
-            {
-                throw new FormatException(result.Errors?.ToList()[0].Description ?? "Couldn't create user because of unexpected error.");
-            }
+                throw new FormatException(result.Errors?.ToList()[0].Description ??
+                                          "Couldn't create user because of unexpected error.");
 
-            string token = userToCreate.GenerateRefreshToken();
+            var token = userToCreate.GenerateRefreshToken();
 
             await usersRepository.UpdateRefreshToken(userToCreate.Id, token);
             await unitOfWork.Commit();

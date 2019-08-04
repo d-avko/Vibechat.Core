@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using VibeChat.Web;
 
 namespace Vibechat.Web.Data.DataModels
@@ -13,10 +9,8 @@ namespace Vibechat.Web.Data.DataModels
 
         public int ChatID { get; set; }
 
-        [ForeignKey("UserID")]
-        public virtual AppUser BannedUser { get; set; }
+        [ForeignKey("UserID")] public virtual AppUser BannedUser { get; set; }
 
-        [ForeignKey("ChatID")]
-        public virtual ConversationDataModel Conversation { get; set; }
+        [ForeignKey("ChatID")] public virtual ConversationDataModel Conversation { get; set; }
     }
 }

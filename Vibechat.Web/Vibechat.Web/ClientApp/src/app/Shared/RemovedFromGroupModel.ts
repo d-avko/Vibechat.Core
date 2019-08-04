@@ -3,6 +3,6 @@ export class RemovedFromGroupModel {
     (<any>Object).assign(this, init);
   }
 
-  public conversationId: number
+  public conversationId: number;
   public userId: string;
 }
