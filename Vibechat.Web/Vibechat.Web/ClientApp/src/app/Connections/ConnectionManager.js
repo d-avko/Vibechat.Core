@@ -34,10 +34,10 @@ var ConnectionManager = /** @class */ (function () {
     };
     ConnectionManager.prototype.SendMessage = function (message, conversation, whoSentId) {
         if (conversation.isGroup) {
-            this.connection.send("SendMessageToGroup", message, whoSentId, conversation.conversationID);
+            this.connection.send("SendMessageToGroup", message, whoSentId, conversation.id);
         }
         else {
-            this.connection.send("SendMessageToUser", message, whoSentId, conversation.dialogueUser.id, conversation.conversationID);
+            this.connection.send("SendMessageToUser", message, whoSentId, conversation.dialogueUser.id, conversation.id);
         }
     };
     return ConnectionManager;

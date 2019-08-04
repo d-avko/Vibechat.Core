@@ -1,13 +1,13 @@
-import { ConnectionManager } from "../Connections/ConnectionManager";
-import { Injectable } from "@angular/core";
-import { ConversationTemplate } from "../Data/ConversationTemplate";
-import { ChatsService } from "../Services/ChatsService";
-import { SecureChatsService } from "./SecureChatsService";
-import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
-import { E2EencryptionService } from "./E2EencryptionService";
+import {ConnectionManager} from "../Connections/ConnectionManager";
+import {Injectable} from "@angular/core";
+import {Chat} from "../Data/Chat";
+import {ChatsService} from "../Services/ChatsService";
+import {SecureChatsService} from "./SecureChatsService";
+import {ApiRequestsBuilder} from "../Requests/ApiRequestsBuilder";
+import {E2EencryptionService} from "./E2EencryptionService";
 import * as biginteger from "big-integer";
-import { DeviceService } from "../Services/DeviceService";
-import { ChatRole } from "../Roles/ChatRole";
+import {DeviceService} from "../Services/DeviceService";
+import {ChatRole} from "../Roles/ChatRole";
 
 export class DictionaryEntry<K, V> {
   public constructor(init?: Partial<DictionaryEntry<K, V>>) {
@@ -48,7 +48,7 @@ export class DHServerKeyExchangeService {
     this.chatService = c;
   }
 
-  public InitiateKeyExchange(conversation: ConversationTemplate) {
+  public InitiateKeyExchange(conversation: Chat) {
     let entry = this.PendingParams.find(x => x.key == conversation.dialogueUser.id);
 
     if (!entry) {
@@ -73,7 +73,7 @@ export class DHServerKeyExchangeService {
       entry.value.thisUserPrivateKey);
 
     entry.value.busy = true;
-    this.connectionManager.SendDhParam(toSend, conversation.dialogueUser.id, conversation.conversationID);
+    this.connectionManager.SendDhParam(toSend, conversation.dialogueUser.id, conversation.id);
 
     //if user is not really online or cannot accept incoming requests, allow resending the params.
     setTimeout(() => {
@@ -99,7 +99,7 @@ export class DHServerKeyExchangeService {
 
     entry.value.secondUserS = s;
 
-    let chat = this.chatService.Conversations.find(x => x.conversationID == chatId);
+    let chat = this.chatService.Conversations.find(x => x.id == chatId);
 
     //only creator could initiate key exchange.
     //Here non - creator sends generated param to creator.
@@ -112,7 +112,7 @@ export class DHServerKeyExchangeService {
         chat.publicKey.generator,
         entry.value.thisUserPrivateKey);
 
-      this.connectionManager.SendDhParam(toSend, chat.dialogueUser.id, chat.conversationID);
+      this.connectionManager.SendDhParam(toSend, chat.dialogueUser.id, chat.id);
     }
 
     let authKey = this.enc.CalculatePrivateKey(s, chat.publicKey.modulus, entry.value.thisUserPrivateKey);
@@ -120,7 +120,7 @@ export class DHServerKeyExchangeService {
 
     //got response, update authkeyId (creator)
     if (chat.chatRole.role == ChatRole.Creator) {
-      await this.api.UpdateAuthKeyId(authKeyId, chat.conversationID, this.device.GetDeviceId());
+      await this.api.UpdateAuthKeyId(authKeyId, chat.id, this.device.GetDeviceId());
     }
 
     chat.authKeyId = authKeyId;

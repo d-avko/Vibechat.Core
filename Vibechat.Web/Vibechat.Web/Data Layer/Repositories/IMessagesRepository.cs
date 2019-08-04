@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Query;
-using Vibechat.Web.Data.Messages;
 using VibeChat.Web;
 using VibeChat.Web.ChatData;
 using VibeChat.Web.Data.DataModels;
+using Vibechat.Web.Data.Messages;
 
 namespace Vibechat.Web.Data.Repositories
 {
@@ -18,14 +17,15 @@ namespace Vibechat.Web.Data.Repositories
 
         MessageDataModel GetById(int id);
 
-        int GetUnreadAmount(int conversationId, string userId);
+        int GetUnreadAmount(int conversationId, string userId, int lastMessageId);
 
         void MarkAsRead(MessageDataModel message);
 
-        IIncludableQueryable<MessageDataModel, AppUser> Get(
-            string userId, int conversationId, bool AllMessages = false, int offset = 0, int count = 0);
-        IIncludableQueryable<MessageDataModel, AppUser> GetAttachments(
-            string userId, int conversationId, AttachmentKind attachmentKind, int offset, int count);
+        IIncludableQueryable<MessageDataModel, AppUser> Get(string userId, int conversationId, int maxMessageId,
+            bool AllMessages = false,
+            int offset = 0, int count = 0);
+        IIncludableQueryable<MessageDataModel, AppUser> GetAttachments(string userId, int conversationId,
+            AttachmentKind attachmentKind, int offset, int count);
 
         MessageDataModel AddSecureMessage(AppUser whoSent, string message, int groupId);
 

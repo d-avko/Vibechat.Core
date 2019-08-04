@@ -1,24 +1,24 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using VibeChat.Web;
+using VibeChat.Web.ApiModels;
+using VibeChat.Web.ChatData;
 using Vibechat.Web.Data.ApiModels.Conversation;
 using Vibechat.Web.Data.ApiModels.Messages;
 using Vibechat.Web.Data.Conversations;
 using Vibechat.Web.Data.DataModels;
+using VibeChat.Web.Data.DataModels;
 using Vibechat.Web.Data.Messages;
 using Vibechat.Web.Data.Repositories;
+using Vibechat.Web.Data_Layer.Repositories;
 using Vibechat.Web.Extensions;
+using Vibechat.Web.Services.Bans;
 using Vibechat.Web.Services.ChatDataProviders;
-using Vibechat.Web.Services.Crypto;
 using Vibechat.Web.Services.FileSystem;
-using VibeChat.Web;
-using VibeChat.Web.ApiModels;
-using VibeChat.Web.ChatData;
-using VibeChat.Web.Data.DataModels;
 
 namespace Vibechat.Web.Services
 {
@@ -32,11 +32,12 @@ namespace Vibechat.Web.Services
             IAttachmentKindsRepository attachmentKindsRepository,
             IUsersConversationsRepository usersConversationsRepository,
             IConversationRepository conversationRepository,
+            ILastMessagesRepository lastMessagesRepository,
             IDhPublicKeysRepository dh,
             IChatRolesRepository rolesRepository,
             FilesService imagesService,
-            CryptoService cryptoService,
-            UnitOfWork unitOfWork)
+            UnitOfWork unitOfWork,
+            BansService bansService)
         {
             this.chatDataProvider = chatDataProvider;
             this.usersRepository = usersRepository;
@@ -45,39 +46,45 @@ namespace Vibechat.Web.Services
             this.attachmentKindsRepository = attachmentKindsRepository;
             this.usersConversationsRepository = usersConversationsRepository;
             this.conversationRepository = conversationRepository;
+            this.lastMessagesRepository = lastMessagesRepository;
             this.publicKeys = dh;
             this.rolesRepository = rolesRepository;
-            ImagesService = imagesService;
-            this.cryptoService = cryptoService;
+            this.imagesService = imagesService;
             this.unitOfWork = unitOfWork;
+            this.bansService = bansService;
         }
 
-        protected readonly IChatDataProvider chatDataProvider;
+        private readonly IChatDataProvider chatDataProvider;
 
-        protected readonly IUsersRepository usersRepository;
+        private readonly IUsersRepository usersRepository;
 
-        protected readonly IMessagesRepository messagesRepository;
+        private readonly IMessagesRepository messagesRepository;
 
-        protected readonly IAttachmentRepository attachmentRepository;
+        private readonly IAttachmentRepository attachmentRepository;
 
-        protected readonly IAttachmentKindsRepository attachmentKindsRepository;
+        private readonly IAttachmentKindsRepository attachmentKindsRepository;
 
-        protected readonly IUsersConversationsRepository usersConversationsRepository;
+        private readonly IUsersConversationsRepository usersConversationsRepository;
 
-        protected readonly IConversationRepository conversationRepository;
+        private readonly IConversationRepository conversationRepository;
+        
+        private readonly ILastMessagesRepository lastMessagesRepository;
 
         private readonly IDhPublicKeysRepository publicKeys;
+        
         private readonly IChatRolesRepository rolesRepository;
-        private const int MaxThumbnailLengthMB = 5;
+        
+        private const int MaxThumbnailLengthMb = 5;
 
         private const int MaxNameLength = 200;
 
         private const int MaxParticipantsToReturn = 200;
 
-        protected readonly FilesService ImagesService;
-
-        private readonly CryptoService cryptoService;
+        private readonly FilesService imagesService;
+        
         private readonly UnitOfWork unitOfWork;
+        
+        private readonly BansService bansService;
 
         #region Conversations
 
@@ -102,7 +109,7 @@ namespace Vibechat.Web.Services
             await unitOfWork.Commit();
         }
 
-        public async Task<ConversationTemplate> CreateConversation(CreateConversationCredentialsApiModel credentials)
+        public async Task<Chat> CreateConversation(CreateConversationCredentialsApiModel credentials)
         {
 
             var defaultError = new FormatException("Error while creating the conversation..");
@@ -196,13 +203,14 @@ namespace Vibechat.Web.Services
                 Role = ChatRole.Creator
             };
 
-            return createdChat.ToConversationTemplate(
+            return createdChat.ToChatDto(
                 credentials.IsGroup ? new List<UserInfo>() { creator } : null,
-                null,
                 SecondDialogueUser,
                 dhPublicKey,
                 await rolesRepository.GetAsync(createdChat.Id, credentials.CreatorId),
-                credentials.DeviceId
+                credentials.DeviceId,
+                0,
+                null
                 );
         }
 
@@ -218,27 +226,38 @@ namespace Vibechat.Web.Services
                 .ToList();
         }
 
-        public async Task<int> GetUnreadMessagesAmount(int conversationId, string userId)
+        public async Task<int> GetUnreadMessagesAmount(Chat chat, string userId)
         {
-            ConversationDataModel conversation = conversationRepository.GetById(conversationId);
-
-            if (conversation == null)
-            {
-                throw new InvalidDataException($"Wrong conversation id was provided.");
-            }
-
             if (messagesRepository.Empty())
             {
                 return 0;
             }
-
-            return messagesRepository.GetUnreadAmount(conversationId, userId);
+            var lastMessage = lastMessagesRepository.Get(userId, chat.Id);
+            
+            return messagesRepository.GetUnreadAmount(chat.Id, userId, lastMessage?.MessageID ?? 0);
         }
+
+        public async Task SetLastMessage(string userId, int chatId, int msgId)
+        {
+            var lastMessage = lastMessagesRepository.Get(userId, chatId);
+
+            if (lastMessage == null)
+            {
+                lastMessagesRepository.Add(userId, chatId, msgId);
+            }
+            else
+            {
+                lastMessage.MessageID = msgId;
+            }
+
+            await unitOfWork.Commit();
+        }
+        
         public async Task<UpdateThumbnailResponse> UpdateThumbnail(int conversationId, IFormFile image, string userId)
         {
-            if ((image.Length / (1024 * 1024)) > MaxThumbnailLengthMB)
+            if ((image.Length / (1024 * 1024)) > MaxThumbnailLengthMb)
             {
-                throw new InvalidDataException($"Thumbnail was larger than {MaxThumbnailLengthMB}");
+                throw new InvalidDataException($"Thumbnail was larger than {MaxThumbnailLengthMb}");
             }
 
             ConversationDataModel conversation = conversationRepository.GetById(conversationId);
@@ -254,7 +273,7 @@ namespace Vibechat.Web.Services
                 {
                     image.CopyTo(buffer);
                     buffer.Seek(0, SeekOrigin.Begin);
-                    var thumbnailFull = await ImagesService.SaveProfileOrChatPicture(image, buffer, image.FileName, conversationId.ToString(), userId);
+                    var thumbnailFull = await imagesService.SaveProfileOrChatPicture(image, buffer, image.FileName, conversationId.ToString(), userId);
 
                     conversationRepository.UpdateThumbnail(thumbnailFull.Item1, thumbnailFull.Item2, conversation);
                     await unitOfWork.Commit();
@@ -329,7 +348,7 @@ namespace Vibechat.Web.Services
             await unitOfWork.Commit();
         }
 
-        public async Task<List<ConversationTemplate>> SearchForGroups(string name, string whoAccessedId)
+        public async Task<List<Chat>> SearchForGroups(string name, string whoAccessedId)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -343,18 +362,19 @@ namespace Vibechat.Web.Services
                 return null;
             }
 
-            var result = new List<ConversationTemplate>();
+            var result = new List<Chat>();
 
             foreach (ConversationDataModel conversation in groups)
             {
                 result.Add(
-                    conversation.ToConversationTemplate(
+                    conversation.ToChatDto(
                         await GetParticipants(conversation.Id, MaxParticipantsToReturn),
-                        await GetMessages(conversation.Id, offset: 0, count: 1, whoAccessedId),
                         null,
                         conversation.PublicKey,
                         await rolesRepository.GetAsync(conversation.Id, whoAccessedId),
-                        null
+                        null,
+                        0,
+                         null
                     ));
             }
 
@@ -423,9 +443,9 @@ namespace Vibechat.Web.Services
             await unitOfWork.Commit();
         }
 
-        public async Task RemoveConversation(ConversationTemplate Conversation, string whoRemoves)
+        public async Task RemoveConversation(Chat Conversation, string whoRemoves)
         {
-            ConversationDataModel conversation = conversationRepository.GetById(Conversation.ConversationID);
+            ConversationDataModel conversation = conversationRepository.GetById(Conversation.Id);
 
             if(conversation == null)
             {
@@ -532,7 +552,7 @@ namespace Vibechat.Web.Services
             return (await rolesRepository.GetAsync(chatId, userid)).ToChatRole();
         }
 
-        public async Task<List<ConversationTemplate>> GetConversations(string deviceId, string whoAccessedId)
+        public async Task<List<Chat>> GetConversations(string deviceId, string whoAccessedId)
         {
             var defaultError = new FormatException("User info provided was not correct.");
 
@@ -550,24 +570,38 @@ namespace Vibechat.Web.Services
 
             IQueryable<ConversationDataModel> conversations = usersConversationsRepository.GetUserConversations(deviceId, whoAccessedId);
 
-            var returnData = new List<ConversationTemplate>();
+            var returnData = new List<Chat>();
 
             foreach (ConversationDataModel conversation in conversations)
             {
-                AppUser DialogUser = conversation.IsGroup ? null : usersConversationsRepository.GetUserInDialog(conversation.Id, whoAccessedId);
+                var lastMessage = (await GetMessages(conversation.Id, offset: 0, count: 1, -1, whoAccessedId))
+                    .FirstOrDefault();
+                
+                Chat dtoChat = conversation.ToChatDto(
+                    conversation.IsGroup ? await GetParticipants(conversation.Id, MaxParticipantsToReturn) : null,
+                    conversation.IsGroup
+                        ? null
+                        : usersConversationsRepository.GetUserInDialog(conversation.Id, whoAccessedId),
+                    conversation.PublicKey,
+                    await rolesRepository.GetAsync(conversation.Id, whoAccessedId),
+                    conversation.IsSecure ? await GetDeviceId(conversation.Id, whoAccessedId) : null,
+                    lastMessagesRepository.Get(whoAccessedId, conversation.Id)?.MessageID ?? 0,
+                    lastMessage
+                );
+                
+                dtoChat.IsMessagingRestricted = await bansService.IsBannedFromConversation(conversation.Id, whoAccessedId);
+                dtoChat.MessagesUnread = await GetUnreadMessagesAmount(dtoChat, whoAccessedId);
+                dtoChat.ChatRole = await GetChatRole(whoAccessedId, conversation.Id);
 
-                returnData.Add
-                    (
-                    conversation.ToConversationTemplate(
-                         conversation.IsGroup ? await GetParticipants(conversation.Id, MaxParticipantsToReturn) : null,
-                         //only get last message here, client should fetch messages after he opened the conversation.
-                         await GetMessages(conversation.Id, offset: 0, count: 1, whoAccessedId),
-                         DialogUser,
-                         conversation.PublicKey,
-                         await rolesRepository.GetAsync(conversation.Id, whoAccessedId),
-                         conversation.IsSecure ? await GetDeviceId(conversation.Id, whoAccessedId) : null
-                         )
-                    );
+                if (conversation.IsGroup)
+                {
+                    foreach (UserInfo User in dtoChat.Participants)
+                    {
+                        User.IsBlockedInConversation = await bansService.IsBannedFromConversation(conversation.Id, User.Id);
+                        User.ChatRole = await GetChatRole(User.Id, conversation.Id);
+                    }
+                }
+
             }
 
             return returnData;
@@ -606,8 +640,8 @@ namespace Vibechat.Web.Services
                 return users.Take(maximum).ToList();
             }
         }
-
-        public async Task<List<Message>> GetMessages(int chatId, int offset, int count, string whoAccessedId)
+        
+        public async Task<List<Message>> GetMessages(int chatId, int offset, int count, int maxMessageId, string whoAccessedId)
         {
             var defaultErrorMessage = new FormatException("Wrong conversation was provided.");
 
@@ -636,10 +670,17 @@ namespace Vibechat.Web.Services
 
             var messages = messagesRepository.Get(
                 whoAccessedId,
-                chatId,
-                false,
-                offset,
-                count);
+                chatId, maxMessageId, false, offset, count);
+
+            //automatically set last message in group.
+            
+            if (maxMessageId != -1 && conversation.IsGroup)
+            {
+                if (!messages.Count().Equals(0))
+                {
+                    await SetLastMessage(whoAccessedId, chatId, messages.Max(msg => msg.MessageID));
+                }
+            }
 
             return (from msg in messages
                     select msg.ToMessage()).ToList();
@@ -657,7 +698,7 @@ namespace Vibechat.Web.Services
         /// <param name="conversationId"></param>
         /// <param name="whoAccessedId"></param>
         /// <returns></returns>
-        public async Task<ConversationTemplate> GetById(int conversationId, string whoAccessedId)
+        public async Task<Chat> GetById(int conversationId, string whoAccessedId)
         {
              
             ConversationDataModel conversation = conversationRepository.GetById(conversationId);
@@ -669,8 +710,7 @@ namespace Vibechat.Web.Services
 
             var dialogUser = new AppUser();
             var members = new List<UserInfo>();
-            var messages = new List<Message>();
-
+            
             if (conversation.IsGroup)
             {
                 members = usersConversationsRepository.GetConversationParticipants(conversationId)
@@ -687,16 +727,21 @@ namespace Vibechat.Web.Services
                 }
             }
 
-            return conversation.ToConversationTemplate(
-                members, 
-                null, 
+            var dtoChat = conversation.ToChatDto(
+                members,
                 dialogUser, 
                 conversation.PublicKey,
                 await rolesRepository.GetAsync(conversation.Id, whoAccessedId),
+                null,
+                0,
                 null);
+            
+            dtoChat.IsMessagingRestricted = await bansService.IsBannedFromConversation(dtoChat.Id, whoAccessedId);
+
+            return dtoChat;
         }
 
-        public async Task<ConversationTemplate> GetByIdSimplified(int conversationId, string whoAccessedId)
+        public async Task<Chat> GetByIdSimplified(int conversationId, string whoAccessedId)
         {
             ConversationDataModel conversation = conversationRepository.GetById(conversationId);
 
@@ -717,13 +762,21 @@ namespace Vibechat.Web.Services
                 }
             }
 
-            return new ConversationTemplate()
+            return new Chat()
             {
                 DialogueUser = dialogUser?.ToUserInfo(),
                 IsGroup = conversation.IsGroup
             }; 
         }
 
+        /// <summary>
+        /// Marks message as read and updates lastMessageId of a client.
+        /// </summary>
+        /// <param name="msgId"></param>
+        /// <param name="conversationId"></param>
+        /// <param name="whoAccessedId"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         public async Task MarkMessageAsRead(int msgId, int conversationId, string whoAccessedId)
         {
             MessageDataModel message = messagesRepository.GetById(msgId);
@@ -739,6 +792,7 @@ namespace Vibechat.Web.Services
             }
 
             messagesRepository.MarkAsRead(message);
+            await SetLastMessage(whoAccessedId, conversationId, msgId);
             await unitOfWork.Commit();
         }
 

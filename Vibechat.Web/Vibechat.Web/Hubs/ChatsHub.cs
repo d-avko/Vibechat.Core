@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using VibeChat.Web.ApiModels;
+using VibeChat.Web.ChatData;
 using Vibechat.Web.Data.Conversations;
 using Vibechat.Web.Data.Repositories;
 using Vibechat.Web.Extensions;
@@ -12,8 +14,6 @@ using Vibechat.Web.Services;
 using Vibechat.Web.Services.Bans;
 using Vibechat.Web.Services.Extension_methods;
 using Vibechat.Web.Services.Users;
-using VibeChat.Web.ApiModels;
-using VibeChat.Web.ChatData;
 using VibeChat.Web.UserProviders;
 
 namespace VibeChat.Web
@@ -313,7 +313,7 @@ namespace VibeChat.Web
                 if (chat.IsGroup)
                 {
                     List<UserInfo> participants = await chatsService
-                        .GetParticipants(chat.ConversationID);
+                        .GetParticipants(chat.Id);
 
                     foreach (UserInfo user in participants)
                     {
@@ -321,7 +321,7 @@ namespace VibeChat.Web
 
                         if (userToSend.IsOnline)
                         {
-                            await RemovedFromGroup(user.Id, chat.ConversationID);
+                            await RemovedFromGroup(user.Id, chat.Id);
                         }
                     }
                 }
@@ -331,10 +331,10 @@ namespace VibeChat.Web
 
                     if (userToSend.IsOnline)
                     {
-                        await RemovedFromDialog(userToSend.Id, userToSend.ConnectionId, chat.ConversationID);
+                        await RemovedFromDialog(userToSend.Id, userToSend.ConnectionId, chat.Id);
                     }
 
-                    await RemovedFromDialog(whoSent.Id, Context.ConnectionId, chat.ConversationID);
+                    await RemovedFromDialog(whoSent.Id, Context.ConnectionId, chat.Id);
                 }
 
                 await chatsService.RemoveConversation(chat, whoSent.Id);
@@ -360,7 +360,7 @@ namespace VibeChat.Web
                     return;
                 }
 
-                ConversationTemplate created = await chatsService
+                Chat created = await chatsService
                     .CreateConversation(new CreateConversationCredentialsApiModel()
                     {
                         IsGroup = false,
@@ -375,12 +375,12 @@ namespace VibeChat.Web
                 if (whoSent.IsOnline)
                 {
                     //send to self 
-                    await AddedToDialog(new UserInfo() { Id = whoSent.Id }, Context.ConnectionId, created.ConversationID);
+                    await AddedToDialog(new UserInfo() { Id = whoSent.Id }, Context.ConnectionId, created.Id);
                 }
 
                 if (userToSend.IsOnline)
                 {
-                    await AddedToDialog(new UserInfo() { Id = userToSend.Id }, userToSend.ConnectionId, created.ConversationID);
+                    await AddedToDialog(new UserInfo() { Id = userToSend.Id }, userToSend.ConnectionId, created.Id);
                 }
             }
             catch (Exception ex)
@@ -407,6 +407,12 @@ namespace VibeChat.Web
             }
         }
 
+        /// <summary>
+        /// Marks message as read, updates client last message id.
+        /// </summary>
+        /// <param name="msgId"></param>
+        /// <param name="conversationId"></param>
+        /// <returns>true in case of success, false otherwise</returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<bool> MessageRead(int msgId, int conversationId)
         {
@@ -416,7 +422,7 @@ namespace VibeChat.Web
             {
                 await chatsService.MarkMessageAsRead(msgId, conversationId, whoSent.Id);
 
-                ConversationTemplate conversation = await chatsService.GetByIdSimplified(conversationId, whoSent.Id);
+                Chat conversation = await chatsService.GetByIdSimplified(conversationId, whoSent.Id);
 
                 if (conversation.IsGroup)
                 {
@@ -437,7 +443,7 @@ namespace VibeChat.Web
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task SendMessageToGroup(Message message, int groupId)
+        public async Task<bool> SendMessageToGroup(Message message, int groupId)
         {
             AppUser whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
             await userService.MakeUserOnline(whoSent.Id, Context.ConnectionId);
@@ -447,20 +453,20 @@ namespace VibeChat.Web
                 if(!await chatsService.ExistsInConversation(groupId, whoSent.Id))
                 {
                     await SendError(Context.ConnectionId, "You must join this group to send messages.");
-                    return;
+                    return false;
                 }
 
                 if(await bansService.IsBannedFromConversation(groupId , whoSent.Id))
                 {
                     await SendError(Context.ConnectionId, "You were banned in this group.");
-                    return;
+                    return false;
                 }
 
                 //we can't trust user on what's in user field
 
                 message.User = whoSent.ToUserInfo();
                 
-                var created = new MessageDataModel();
+                MessageDataModel created;
 
                 if (message.IsAttachment)
                 {
@@ -472,23 +478,23 @@ namespace VibeChat.Web
                 }
 
                 message.TimeReceived = created.TimeReceived.ToUTCString();
-                int clientMessageId = message.Id;
                 message.Id = created.MessageID;
                 message.State = MessageState.Delivered;
 
                 await SendMessageToGroupExcept(groupId, Context.ConnectionId, whoSent.Id, message);
-                await MessageDelivered(Context.ConnectionId, message.Id, clientMessageId, groupId);
+                return true;
             }
             catch(Exception ex)
             {
                 await SendError(Context.ConnectionId, ex.Message);
                 logger.LogError(ex.Message);
+                return false;
             }
         }
 
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task SendMessageToUser(Message message, string UserToSendId, int conversationId)
+        public async Task<bool> SendMessageToUser(Message message, string UserToSendId, int conversationId)
         {
             AppUser whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
             await userService.MakeUserOnline(whoSent.Id, Context.ConnectionId);
@@ -498,7 +504,7 @@ namespace VibeChat.Web
                 if (bansService.IsBannedFromMessagingWith(whoSent.Id, UserToSendId))
                 {
                     await SendError(Context.ConnectionId, "You were blocked by this user. Couldn't send message.");
-                    return;
+                    return false;
                 }
 
                 //we can't trust user on what's in user field
@@ -517,7 +523,6 @@ namespace VibeChat.Web
                 }
 
                 message.TimeReceived = created.TimeReceived.ToUTCString();
-                int clientMessageId = message.Id;
                 message.Id = created.MessageID;
                 message.State = MessageState.Delivered;
 
@@ -528,7 +533,7 @@ namespace VibeChat.Web
                     await SendMessageToUser(message, whoSent.Id, userToSend.ConnectionId, conversationId, false);
                 }
 
-                await MessageDelivered(Context.ConnectionId, message.Id, clientMessageId, conversationId);
+                return true;
             }
             catch(Exception ex)
             {
@@ -541,11 +546,12 @@ namespace VibeChat.Web
                     await SendError(Context.ConnectionId, ex.Message);
                 }
                 logger.LogError(ex.Message);
+                return false;
             }
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task SendSecureMessage(string encryptedMessage, int generatedMessageId, string userId, int conversationId)
+        public async Task<bool> SendSecureMessage(string encryptedMessage, string userId, int conversationId)
         {
             AppUser whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
             await userService.MakeUserOnline(whoSent.Id, Context.ConnectionId);
@@ -571,7 +577,7 @@ namespace VibeChat.Web
                     await SendMessageToUser(toSend, whoSent.Id, user.ConnectionId, conversationId, true);
                 }
 
-                await MessageDelivered(Context.ConnectionId, toSend.Id, generatedMessageId, conversationId);
+                return true;
             }
             catch (Exception ex)
             {
@@ -585,6 +591,7 @@ namespace VibeChat.Web
                 }
 
                 logger.LogError(ex.Message);
+                return false;
             }
            
         }
@@ -682,11 +689,6 @@ namespace VibeChat.Web
             return Clients.Client(UserToSendConnectionId).SendAsync("ReceiveMessage", SenderId, message, conversationId, secure);
         }
 
-        private Task MessageDelivered(string connectionId, int messageId, int clientMessageId, int conversationId)
-        {
-            return Clients.Client(connectionId).SendAsync("MessageDelivered", messageId, clientMessageId, conversationId);
-        }
-
         private Task MessageReadInGroup(int messageId, int conversationId)
         {
             return Clients.Group(conversationId.ToString()).SendAsync("MessageRead", messageId, conversationId);
@@ -699,7 +701,7 @@ namespace VibeChat.Web
                 return Clients.Client(dialogUserConnectionId).SendAsync("MessageRead", messageId, conversationId);
             }
 
-            return Clients.Client(SenderConnectionId).SendAsync("MessageRead", messageId, conversationId);
+            return Task.CompletedTask;
         }
 
         private Task SendError(string connectionId, string error)

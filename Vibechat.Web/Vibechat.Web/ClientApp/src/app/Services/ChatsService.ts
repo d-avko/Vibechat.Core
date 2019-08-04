@@ -1,24 +1,24 @@
-import { ConversationTemplate } from "../Data/ConversationTemplate";
-import { MessageReceivedModel } from "../Shared/MessageReceivedModel";
-import { AuthService } from "../Auth/AuthService";
-import { AddedToGroupModel } from "../Shared/AddedToGroupModel";
-import { ChatMessage } from "../Data/ChatMessage";
-import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
-import { ConnectionManager, BanEvent } from "../Connections/ConnectionManager";
-import { RemovedFromGroupModel } from "../Shared/RemovedFromGroupModel";
-import { MessageState } from "../Shared/MessageState";
-import { UserInfo } from "../Data/UserInfo";
-import { MessageAttachment } from "../Data/MessageAttachment";
-import { Injectable } from "@angular/core";
-import { SecureChatsService } from "../Encryption/SecureChatsService";
-import { E2EencryptionService } from "../Encryption/E2EencryptionService";
-import { DHServerKeyExchangeService } from "../Encryption/DHServerKeyExchange";
-import { MessageReportingService } from "./MessageReportingService";
-import { ImageScalingService } from "./ImageScalingService";
-import { DeviceService } from "./DeviceService";
-import { ChatRole } from "../Roles/ChatRole";
-import { AttachmentKind } from "../Data/AttachmentKinds";
-import { ChatRoleDto } from "../Roles/ChatRoleDto";
+import {Chat} from "../Data/Chat";
+import {MessageReceivedModel} from "../Shared/MessageReceivedModel";
+import {AuthService} from "../Auth/AuthService";
+import {AddedToGroupModel} from "../Shared/AddedToGroupModel";
+import {ChatMessage} from "../Data/ChatMessage";
+import {ApiRequestsBuilder} from "../Requests/ApiRequestsBuilder";
+import {BanEvent, ConnectionManager} from "../Connections/ConnectionManager";
+import {RemovedFromGroupModel} from "../Shared/RemovedFromGroupModel";
+import {MessageState} from "../Shared/MessageState";
+import {UserInfo} from "../Data/UserInfo";
+import {MessageAttachment} from "../Data/MessageAttachment";
+import {Injectable} from "@angular/core";
+import {SecureChatsService} from "../Encryption/SecureChatsService";
+import {E2EencryptionService} from "../Encryption/E2EencryptionService";
+import {DHServerKeyExchangeService} from "../Encryption/DHServerKeyExchange";
+import {MessageReportingService} from "./MessageReportingService";
+import {ImageScalingService} from "./ImageScalingService";
+import {DeviceService} from "./DeviceService";
+import {ChatRole} from "../Roles/ChatRole";
+import {AttachmentKind} from "../Data/AttachmentKinds";
+import {ChatRoleDto} from "../Roles/ChatRoleDto";
 
 @Injectable({
   providedIn: 'root'
@@ -40,8 +40,8 @@ export class ChatsService {
     this.dh.setChatService(this);
   }
 
-  public Conversations: Array<ConversationTemplate>;
-  public CurrentConversation: ConversationTemplate;
+  public Conversations: Array<Chat>;
+  public CurrentConversation: Chat;
   private PendingReadMessages: Array<number>;
 
   public IsConversationSelected(): boolean {
@@ -49,11 +49,11 @@ export class ChatsService {
   }
 
   public GetConversationsIds() {
-    return this.Conversations.map(x => x.conversationID);
+    return this.Conversations.map(x => x.id);
   }
 
 
-  public async ChangeConversation(conversation: ConversationTemplate) {
+  public async ChangeConversation(conversation: Chat) {
     if (conversation == this.CurrentConversation) {
       this.CurrentConversation = null;
       return;
@@ -64,11 +64,11 @@ export class ChatsService {
     if (!this.CurrentConversation) {
       return;
     }
-    
+
     //secure dialog might not even exist on second user side, so update will fail
     if (!(conversation.isSecure && !conversation.authKeyId)) {
       await this.UpdateExisting(conversation);
-    } 
+    }
 
     //creator should wait until other user is online, and initiate key exchange.
     if (conversation.isSecure && !conversation.authKeyId && conversation.chatRole.role == ChatRole.Creator) {
@@ -112,7 +112,7 @@ export class ChatsService {
   }
 
   public OnUserRoleChanged(chatId: number, userId: string, newRole: ChatRole) {
-    let chat = this.Conversations.find(x => x.conversationID == chatId);
+    let chat = this.Conversations.find(x => x.id == chatId);
 
     if (!chat) {
       return;
@@ -145,7 +145,7 @@ export class ChatsService {
   }
 
   public OnBannedInChat(chatId: number, userId: string, banType: BanEvent) {
-    let chat = this.Conversations.find(x => x.conversationID == chatId);
+    let chat = this.Conversations.find(x => x.id == chatId);
 
     if (!chat) {
       return;
@@ -181,7 +181,7 @@ export class ChatsService {
   }
 
   public OnLogOut() {
-    this.Conversations = new Array<ConversationTemplate>();
+    this.Conversations = new Array<Chat>();
     this.CurrentConversation = null;
     this.PendingReadMessages = new Array<number>();
   }
@@ -205,15 +205,15 @@ export class ChatsService {
     }
 
     if (result.response == null) {
-      return new Array<ConversationTemplate>();
+      return new Array<Chat>();
 
     } else {
-      let resultArr = new Array<ConversationTemplate>();
+      let resultArr = new Array<Chat>();
 
       for (let i = 0; i < result.response.length; ++i) {
         //we'll send only global(non-local groups as a result.)
 
-        if (!this.Conversations.find(x => x.conversationID == result.response[i].conversationID)) {
+        if (!this.Conversations.find(x => x.id == result.response[i].id)) {
           resultArr.push(result.response[i]);
         }
       }
@@ -232,18 +232,18 @@ export class ChatsService {
     return true;
   }
 
-  public ResendMessages(messages: Array<ChatMessage>, chat: ConversationTemplate) {
+  public ResendMessages(messages: Array<ChatMessage>, chat: Chat) {
     messages.forEach((msg) => {
       this.SendChatMessage(msg, chat);
     });
 
   }
 
-  public async UpdateMessagesForConversation(count: number, chat: ConversationTemplate) {
+  public async UpdateMessagesForConversation(count: number, chat: Chat) {
     let result = await this.requestsBuilder.GetConversationMessages(
       chat.messages.length,
       count,
-      chat.conversationID)
+      chat.id)
 
     if (!result.isSuccessfull) {
       return;
@@ -301,7 +301,7 @@ export class ChatsService {
     return 0;
   }
 
-  public async DeleteMessages(messages: Array<ChatMessage>, from: ConversationTemplate) {
+  public async DeleteMessages(messages: Array<ChatMessage>, from: Chat) {
     let notLocalMessages = messages.filter(x => x.state != MessageState.Pending)
 
     //delete local unsent messages
@@ -312,7 +312,7 @@ export class ChatsService {
       return;
     }
 
-    let response = await this.requestsBuilder.DeleteMessages(notLocalMessages, from.conversationID);
+    let response = await this.requestsBuilder.DeleteMessages(notLocalMessages, from.id);
 
     if (!response.isSuccessfull) {
       return;
@@ -335,7 +335,7 @@ export class ChatsService {
     }
 
     if (!response.response) {
-      this.Conversations = new Array<ConversationTemplate>();
+      this.Conversations = new Array<Chat>();
       await this.connectionManager.Start();
       return;
     }
@@ -359,7 +359,7 @@ export class ChatsService {
         //deviceId is not set, fix it.
 
         if (chat.authKeyId && this.secureChatsService.AuthKeyExists(chat.authKeyId) && !chat.deviceId) {
-          await this.requestsBuilder.UpdateAuthKeyId(chat.authKeyId, chat.conversationID, this.device.GetDeviceId());
+          await this.requestsBuilder.UpdateAuthKeyId(chat.authKeyId, chat.id, this.device.GetDeviceId());
           chat.deviceId = this.device.GetDeviceId();
         }
 
@@ -398,7 +398,7 @@ export class ChatsService {
       }
     });
 
-    let chatsToDelete = Array<ConversationTemplate>();
+    let chatsToDelete = Array<Chat>();
 
     toDeleteIndexes.forEach(x => {
       chatsToDelete.push(response.response.splice(x, 1)[0]);
@@ -418,7 +418,7 @@ export class ChatsService {
 
   public OnMessageReceived(data: MessageReceivedModel): void {
     let conversation = this.Conversations
-      .find(x => x.conversationID == data.conversationId);
+      .find(x => x.id == data.conversationId);
 
     if (!conversation) {
       return;
@@ -483,15 +483,15 @@ export class ChatsService {
       });
   }
 
-  public async BanFromConversation(userToBan: UserInfo, from: ConversationTemplate) : Promise<boolean> {
-    return await this.connectionManager.BlockUserInChat(userToBan.id, from.conversationID, BanEvent.Banned);
+  public async BanFromConversation(userToBan: UserInfo, from: Chat) : Promise<boolean> {
+    return await this.connectionManager.BlockUserInChat(userToBan.id, from.id, BanEvent.Banned);
   }
 
-  public async UnbanFromConversation(userToUnban: UserInfo, from: ConversationTemplate): Promise<boolean> {
-    return await this.connectionManager.BlockUserInChat(userToUnban.id, from.conversationID, BanEvent.Unbanned);
+  public async UnbanFromConversation(userToUnban: UserInfo, from: Chat): Promise<boolean> {
+    return await this.connectionManager.BlockUserInChat(userToUnban.id, from.id, BanEvent.Unbanned);
   }
 
-  public RemoveGroup(group: ConversationTemplate) {
+  public RemoveGroup(group: Chat) {
     this.connectionManager.RemoveConversation(group);
   }
 
@@ -512,16 +512,16 @@ export class ChatsService {
 
   }
 
-  public OnAuthKeyLost(chat: ConversationTemplate) {
+  public OnAuthKeyLost(chat: Chat) {
     this.RemoveGroup(chat);
   }
 
-  public IsSecureChatAndNoAuthKey(chat: ConversationTemplate) {
+  public IsSecureChatAndNoAuthKey(chat: Chat) {
     return chat.isSecure && !chat.authKeyId;
   }
 
-  public SendMessage(message: string, to: ConversationTemplate) {
-    let messageToSend = this.BuildMessage(message, to.conversationID);
+  public SendMessage(message: string, to: Chat) {
+    let messageToSend = this.BuildMessage(message, to.id);
 
     if (this.IsSecureChatAndNoAuthKey(to)) {
       return;
@@ -572,7 +572,7 @@ export class ChatsService {
       return;
     }
 
-    this.connectionManager.InitiateConnections(new Array<number>(1).fill(result.response.conversationID));
+    this.connectionManager.InitiateConnections(new Array<number>(1).fill(result.response.id));
 
     result.response.messages = new Array<ChatMessage>();
 
@@ -587,14 +587,14 @@ export class ChatsService {
     this.connectionManager.RemoveConversation(this.FindDialogWith(user));
   }
 
-  public async JoinGroup(group: ConversationTemplate) {
+  public async JoinGroup(group: Chat) {
     let result = await this.connectionManager.AddUserToConversation(this.authService.User.id, group);
 
     if (!result) {
       return;
     }
 
-    let chat = await this.requestsBuilder.GetConversationById(group.conversationID, true);
+    let chat = await this.requestsBuilder.GetConversationById(group.id, true);
 
     if (!chat.isSuccessfull) {
       return;
@@ -603,12 +603,12 @@ export class ChatsService {
     this.Conversations = [...this.Conversations, chat.response];
   }
 
-  public KickUser(user: UserInfo, from: ConversationTemplate) {
-    this.connectionManager.RemoveUserFromConversation(user.id, from.conversationID, false);
+  public KickUser(user: UserInfo, from: Chat) {
+    this.connectionManager.RemoveUserFromConversation(user.id, from.id, false);
   }
 
   public ExistsIn(id: number) {
-    return this.Conversations.find(x => x.conversationID == id) != null;
+    return this.Conversations.find(x => x.id == id) != null;
   }
 
   public FindDialogWith(user: UserInfo) {
@@ -626,8 +626,8 @@ export class ChatsService {
         && x.isSecure == secure);
   }
 
-  public async UpdateExisting(target: ConversationTemplate) : Promise<void> {
-    let result = await this.requestsBuilder.GetConversationById(target.conversationID, true);
+  public async UpdateExisting(target: Chat) : Promise<void> {
+    let result = await this.requestsBuilder.GetConversationById(target.id, true);
 
     if (!result.isSuccessfull) {
       return;
@@ -636,7 +636,7 @@ export class ChatsService {
     this.UpdateConversationFields(target, result.response);
   }
 
-  public ForwardMessagesTo(destination: Array<ConversationTemplate>, messages: Array<ChatMessage>) {
+  public ForwardMessagesTo(destination: Array<Chat>, messages: Array<ChatMessage>) {
     if (destination == null || destination.length == 0) {
       return;
     }
@@ -649,7 +649,7 @@ export class ChatsService {
         }
 
         messages.forEach(msg => {
-          let messageToSend = this.BuildForwardedMessage(conversation.conversationID, msg.forwardedMessage ? msg.forwardedMessage : msg);
+          let messageToSend = this.BuildForwardedMessage(conversation.id, msg.forwardedMessage ? msg.forwardedMessage : msg);
 
           this.connectionManager.SendMessage(messageToSend, conversation);
 
@@ -662,8 +662,8 @@ export class ChatsService {
     messages.splice(0, messages.length);
   }
 
-  public async RemoveAllMessages(group: ConversationTemplate) : Promise<void> {
-    let response = await this.requestsBuilder.DeleteMessages(group.messages, group.conversationID)
+  public async RemoveAllMessages(group: Chat) : Promise<void> {
+    let response = await this.requestsBuilder.DeleteMessages(group.messages, group.id)
 
     if (!response.isSuccessfull) {
       return;
@@ -675,16 +675,16 @@ export class ChatsService {
       group.messages.splice(0, group.messages.length);
     }
 
-    this.CurrentConversation = null;     
-  }
-
-  public Leave(from: ConversationTemplate) {
-    this.connectionManager.RemoveUserFromConversation(this.authService.User.id, from.conversationID, true);
     this.CurrentConversation = null;
   }
 
-  public async ChangeThumbnail(file: File, where: ConversationTemplate, progress: (value: number) => void): Promise<void> {
-    let result = await this.requestsBuilder.UploadConversationThumbnail(file, progress, where.conversationID);
+  public Leave(from: Chat) {
+    this.connectionManager.RemoveUserFromConversation(this.authService.User.id, from.id, true);
+    this.CurrentConversation = null;
+  }
+
+  public async ChangeThumbnail(file: File, where: Chat, progress: (value: number) => void): Promise<void> {
+    let result = await this.requestsBuilder.UploadConversationThumbnail(file, progress, where.id);
 
     if (!result.isSuccessfull) {
       return;
@@ -694,17 +694,17 @@ export class ChatsService {
     where.fullImageUrl = result.response.fullImageUrl;
   }
 
-  public async ChangeConversationName(name: string, where: ConversationTemplate): Promise<void> {
-    let result = await this.requestsBuilder.ChangeConversationName(name, where.conversationID);
+  public async ChangeConversationName(name: string, where: Chat): Promise<void> {
+    let result = await this.requestsBuilder.ChangeConversationName(name, where.id);
 
     if (!result.isSuccessfull) {
       return;
     }
 
-    where.name = name;     
+    where.name = name;
   }
 
-  public InviteUsersToGroup(users: Array<UserInfo>, group: ConversationTemplate) {
+  public InviteUsersToGroup(users: Array<UserInfo>, group: Chat) {
     if (users == null || users.length == 0) {
       return;
     }
@@ -723,7 +723,7 @@ export class ChatsService {
   }
 
   public async OnAddedToGroup(data: AddedToGroupModel): Promise<void> {
-      
+
     let chat = await this.requestsBuilder.GetConversationById(data.chatId, true);
 
     if (!chat.isSuccessfull) {
@@ -743,8 +743,8 @@ export class ChatsService {
   }
 
   public OnRemovedFromGroup(data: RemovedFromGroupModel) {
-    let chatIndex = this.Conversations.findIndex(x => x.conversationID == data.conversationId);
-    
+    let chatIndex = this.Conversations.findIndex(x => x.id == data.conversationId);
+
     if (chatIndex == -1) {
       return;
     }
@@ -759,7 +759,7 @@ export class ChatsService {
     //either this client left or creator removed him.
     if (data.userId == this.authService.User.id) {
 
-      if (this.CurrentConversation && this.CurrentConversation.conversationID == data.conversationId) {
+      if (this.CurrentConversation && this.CurrentConversation.id == data.conversationId) {
           this.CurrentConversation = null;
       }
 
@@ -774,7 +774,7 @@ export class ChatsService {
   }
 
   public OnMessageRead(msgId: number, conversationId: number) {
-    let conversation = this.Conversations.find(x => x.conversationID == conversationId);
+    let conversation = this.Conversations.find(x => x.id == conversationId);
 
     if (conversation == null) {
       return;
@@ -806,7 +806,7 @@ export class ChatsService {
   }
 
   public OnMessageDelivered(msgId: number, clientMessageId: number, conversationId: number) {
-    let conversation = this.Conversations.find(x => x.conversationID == conversationId);
+    let conversation = this.Conversations.find(x => x.id == conversationId);
 
     if (conversation == null) {
       return;
@@ -823,7 +823,7 @@ export class ChatsService {
     conversation.messages = [...conversation.messages];
   }
 
-  private SendChatMessage(message: ChatMessage, to: ConversationTemplate) {
+  private SendChatMessage(message: ChatMessage, to: Chat) {
     if (to.isSecure) {
 
       let encrypted = this.encryptionService.Encrypt(to.dialogueUser.id, message);
@@ -837,22 +837,22 @@ export class ChatsService {
         encrypted,
         message.id,
         to.dialogueUser.id,
-        to.conversationID);
+        to.id);
 
     } else {
       this.connectionManager.SendMessage(message, to);
     }
   }
 
-  public async UploadFile(file: File, progress: (value: number) => void, to: ConversationTemplate) {
+  public async UploadFile(file: File, progress: (value: number) => void, to: Chat) {
 
-    let response = await this.requestsBuilder.UploadFile(file, progress, to.conversationID)
+    let response = await this.requestsBuilder.UploadFile(file, progress, to.id)
 
     if (!response.isSuccessfull) {
       return;
     }
 
-    let message = this.BuildMessage(null, to.conversationID, true, response.response);
+    let message = this.BuildMessage(null, to.id, true, response.response);
 
     this.SendChatMessage(message, to);
 
@@ -860,14 +860,14 @@ export class ChatsService {
     to.messages.push(message);
   }
 
-  public async UploadImages(files: FileList, progress: (value: number) => void, to: ConversationTemplate) {
+  public async UploadImages(files: FileList, progress: (value: number) => void, to: Chat) {
     if (files.length == 0) {
       return;
     }
 
-    let conversationToSend = to.conversationID;
+    let conversationToSend = to.id;
 
-    let response = await this.requestsBuilder.UploadImages(files, progress, to.conversationID)
+    let response = await this.requestsBuilder.UploadImages(files, progress, to.id)
 
     if (!response.isSuccessfull) {
       this.messagesService.DisplayMessage("Some files were not uploaded.");
@@ -884,7 +884,7 @@ export class ChatsService {
       })
   }
 
-  public UpdateConversationFields(old: ConversationTemplate, New: ConversationTemplate): void {
+  public UpdateConversationFields(old: Chat, New: Chat): void {
     old.name = New.name;
     old.fullImageUrl = New.fullImageUrl;
     old.thumbnailUrl = New.thumbnailUrl;

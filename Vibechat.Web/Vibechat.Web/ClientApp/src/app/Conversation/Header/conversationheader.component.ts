@@ -1,9 +1,9 @@
-import { Component, Input, Output, EventEmitter } from "@angular/core";
-import { ConversationTemplate } from "../../Data/ConversationTemplate";
-import { ConversationsFormatter } from "../../Formatters/ConversationsFormatter";
-import { MatDialog, MatSnackBar } from "@angular/material";
-import { ApiRequestsBuilder } from "../../Requests/ApiRequestsBuilder";
-import { SnackBarHelper } from "../../Snackbar/SnackbarHelper";
+import {Component, EventEmitter, Input, Output} from "@angular/core";
+import {Chat} from "../../Data/Chat";
+import {ConversationsFormatter} from "../../Formatters/ConversationsFormatter";
+import {MatDialog, MatSnackBar} from "@angular/material";
+import {ApiRequestsBuilder} from "../../Requests/ApiRequestsBuilder";
+import {SnackBarHelper} from "../../Snackbar/SnackbarHelper";
 
 @Component({
   selector: 'conversationHeader-view',
@@ -22,7 +22,7 @@ export class ConversationHeaderComponent {
     this.snackbar = new SnackBarHelper(snackbar);
   }
 
-  @Input() public Conversation: ConversationTemplate;
+  @Input() public Conversation: Chat;
 
   @Output() public OnViewGroupInfo = new EventEmitter<void>();
 

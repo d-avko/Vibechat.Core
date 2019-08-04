@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Vibechat.Web.Data.Conversations;
+﻿using System.Collections.Generic;
 using VibeChat.Web.Controllers;
+using Vibechat.Web.Data.Conversations;
 
 namespace VibeChat.Web.ChatData
 {
-    public class ConversationTemplate
+    public class Chat
     {
-        public int ConversationID { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// If this conversation is dialog, then this field points to dialog user
@@ -71,5 +67,12 @@ namespace VibeChat.Web.ChatData
         /// This field is filled only once in <see cref="ConversationsController.GetAll()"/> method
         /// </summary>
         public int MessagesUnread { get; set; }
+        
+        //Client field, to simplify data retrieval.
+        public bool CanReceiveMessages { get; set; }
+        
+        public int ClientLastMessageId { get; set; }
+        
+        public Message LastMessage { get; set; }
     }
 }

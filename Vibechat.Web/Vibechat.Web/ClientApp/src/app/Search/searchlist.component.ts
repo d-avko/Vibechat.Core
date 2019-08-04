@@ -1,34 +1,33 @@
-import { ConversationTemplate } from "../Data/ConversationTemplate";
-import { UserInfo } from "../Data/UserInfo";
-import { Output, EventEmitter, Component, Input } from "@angular/core";
-import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
-import { ChatsService } from "../Services/ChatsService";
-import { UsersService } from "../Services/UsersService";
+import {Chat} from "../Data/Chat";
+import {UserInfo} from "../Data/UserInfo";
+import {Component, EventEmitter, Input, Output} from "@angular/core";
+import {ChatsService} from "../Services/ChatsService";
+import {UsersService} from "../Services/UsersService";
 
 @Component({
   selector: 'searchlist-view',
   templateUrl: './searchlist.component.html'
 })
 export class SearchListComponent {
-  public GlobalConversations: Array<ConversationTemplate>;
+  public GlobalConversations: Array<Chat>;
 
-  public FoundLocalConversations: Array<ConversationTemplate>;
+  public FoundLocalConversations: Array<Chat>;
 
   public Users: Array<UserInfo>;
 
   @Output() public OnViewUser = new EventEmitter<UserInfo>();
-  @Output() public OnViewConversation = new EventEmitter<ConversationTemplate>();
-  @Output() public OnViewLocalConversation = new EventEmitter<ConversationTemplate>();
+  @Output() public OnViewConversation = new EventEmitter<Chat>();
+  @Output() public OnViewLocalConversation = new EventEmitter<Chat>();
   @Output() public OnApiError = new EventEmitter<any>();
   @Output() public OnError = new EventEmitter<string>();
   @Input() public SearchString: string;
-  @Input() public LocalConversations: Array<ConversationTemplate>;
+  @Input() public LocalConversations: Array<Chat>;
 
   public IsSearchingForGroups: boolean;
   public IsSearchingForUsers: boolean;
 
   constructor(private conversationsService: ChatsService, private usersService: UsersService) {
-    this.FoundLocalConversations = new Array<ConversationTemplate>();
+    this.FoundLocalConversations = new Array<Chat>();
   }
 
   public async Search() {
@@ -91,11 +90,11 @@ export class SearchListComponent {
     this.GlobalConversations = [...response];
   }
 
-  public ViewLocalConversation(conversation: ConversationTemplate): void {
+  public ViewLocalConversation(conversation: Chat): void {
     this.OnViewLocalConversation.emit(conversation);
   }
 
-  public ViewConversation(conversation: ConversationTemplate): void {
+  public ViewConversation(conversation: Chat): void {
     this.OnViewConversation.emit(conversation);
   }
 

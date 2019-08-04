@@ -1,18 +1,25 @@
-import { Overlay, OverlayConfig } from "@angular/cdk/overlay";
+import {Overlay, OverlayConfig} from "@angular/cdk/overlay";
 import {
-  ViewContainerRef,
+  AfterContentInit,
   Component,
-  Injector, Type, InjectionToken, InjectFlags, Inject, ViewChild, ElementRef, Injectable,
-  AfterContentInit
+  ElementRef,
+  Inject,
+  Injectable,
+  InjectFlags,
+  InjectionToken,
+  Injector,
+  Type,
+  ViewChild,
+  ViewContainerRef
 } from "@angular/core";
-import { ChatMessage } from "../Data/ChatMessage";
-import { ComponentPortal } from "@angular/cdk/portal";
-import { ImageScalingService } from "../Services/ImageScalingService";
-import { ChatsService } from "../Services/ChatsService";
-import { ForwardMessagesDialogComponent } from "./ForwardMessagesDialog";
-import { ConversationTemplate } from "../Data/ConversationTemplate";
-import { MatDialog } from "@angular/material";
-import { ImageWithLoadProgress } from "../Shared/ImageWithLoadProgress";
+import {ChatMessage} from "../Data/ChatMessage";
+import {ComponentPortal} from "@angular/cdk/portal";
+import {ImageScalingService} from "../Services/ImageScalingService";
+import {ChatsService} from "../Services/ChatsService";
+import {ForwardMessagesDialogComponent} from "./ForwardMessagesDialog";
+import {Chat} from "../Data/Chat";
+import {MatDialog} from "@angular/material";
+import {ImageWithLoadProgress} from "../Shared/ImageWithLoadProgress";
 
 export class ViewPhotoInjector extends Injector {
 
@@ -128,7 +135,7 @@ export class ViewPhotoComponent implements AfterContentInit  {
 
     forwardMessagesDialog
       .beforeClosed()
-      .subscribe((result: Array<ConversationTemplate>) => {
+      .subscribe((result: Array<Chat>) => {
 
         let forwardArray = new Array<ChatMessage>();
         forwardArray.push(this.data.photo);

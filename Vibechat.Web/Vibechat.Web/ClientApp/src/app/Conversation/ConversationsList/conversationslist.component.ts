@@ -1,6 +1,6 @@
-import { Component, Input, EventEmitter, Output } from "@angular/core";
-import { ConversationTemplate } from "../../Data/ConversationTemplate";
-import { ConversationsFormatter } from "../../Formatters/ConversationsFormatter";
+import {Component, EventEmitter, Input, Output} from "@angular/core";
+import {Chat} from "../../Data/Chat";
+import {ConversationsFormatter} from "../../Formatters/ConversationsFormatter";
 
 @Component({
   selector: 'conversationslist-view',
@@ -11,24 +11,24 @@ export class ConversationsListComponent {
 
   public formatter: ConversationsFormatter;
 
-  @Input() public Conversations: Array<ConversationTemplate>;
+  @Input() public Conversations: Array<Chat>;
 
-  @Output() public OnSelectedConversationChanged = new EventEmitter<ConversationTemplate>();
+  @Output() public OnSelectedConversationChanged = new EventEmitter<Chat>();
 
-  @Input() public CurrentConversation: ConversationTemplate;
+  @Input() public CurrentConversation: Chat;
 
   constructor(formatter: ConversationsFormatter) {
     this.formatter = formatter;
   }
 
-  public ChangeConversation(conversation: ConversationTemplate) {
+  public ChangeConversation(conversation: Chat) {
     this.OnSelectedConversationChanged.emit(conversation);
   }
 
-  public IsCurrentConversation(conversation: ConversationTemplate): boolean {
+  public IsCurrentConversation(conversation: Chat): boolean {
     if (this.CurrentConversation == null)
       return false;
 
-    return this.CurrentConversation.conversationID == conversation.conversationID;
+    return this.CurrentConversation.id == conversation.id;
   }
 }

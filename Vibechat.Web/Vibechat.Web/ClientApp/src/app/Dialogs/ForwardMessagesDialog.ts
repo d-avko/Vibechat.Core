@@ -1,10 +1,10 @@
-import { Component, Inject } from "@angular/core";
-import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material";
-import { ChatComponent } from "../Chat/chat.component";
-import { ConversationTemplate } from "../Data/ConversationTemplate";
+import {Component, Inject} from "@angular/core";
+import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material";
+import {ChatComponent} from "../Chat/chat.component";
+import {Chat} from "../Data/Chat";
 
 export interface ForwardMessagesData {
-  conversations: Array<ConversationTemplate>;
+  conversations: Array<Chat>;
 }
 
 @Component({
@@ -13,7 +13,7 @@ export interface ForwardMessagesData {
 })
 export class ForwardMessagesDialogComponent {
 
-  public SelectedConversations = new Array<ConversationTemplate>();
+  public SelectedConversations = new Array<Chat>();
 
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
@@ -23,14 +23,14 @@ export class ForwardMessagesDialogComponent {
     this.dialogRef.close();
   }
 
-  public IsConversationSelected(conversation: ConversationTemplate): boolean {
-    return this.SelectedConversations.findIndex((x) => x.conversationID == conversation.conversationID) != -1;
+  public IsConversationSelected(conversation: Chat): boolean {
+    return this.SelectedConversations.findIndex((x) => x.id == conversation.id) != -1;
   }
 
-  public SelectConversation(conversation: ConversationTemplate) {
+  public SelectConversation(conversation: Chat) {
     if (this.IsConversationSelected(conversation)) {
 
-      this.SelectedConversations.splice(this.SelectedConversations.findIndex((x) => x.conversationID == conversation.conversationID), 1);
+      this.SelectedConversations.splice(this.SelectedConversations.findIndex((x) => x.id == conversation.id), 1);
       return;
 
     }

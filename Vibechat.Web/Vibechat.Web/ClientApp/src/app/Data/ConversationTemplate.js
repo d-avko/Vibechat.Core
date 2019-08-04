@@ -12,4 +12,4 @@ var ConversationTemplate = /** @class */ (function () {
     return ConversationTemplate;
 }());
 exports.ConversationTemplate = ConversationTemplate;
-//# sourceMappingURL=ConversationTemplate.js.map
+//# sourceMappingURL=Chat.js.map

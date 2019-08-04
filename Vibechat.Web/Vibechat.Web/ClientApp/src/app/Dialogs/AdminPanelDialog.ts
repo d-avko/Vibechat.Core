@@ -1,14 +1,14 @@
-import { UserInfo } from "../Data/UserInfo";
-import { Inject, Component } from "@angular/core";
-import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material";
-import { ChatComponent } from "../Chat/chat.component";
-import { ConversationTemplate } from "../Data/ConversationTemplate";
-import { ChatRole } from "../Roles/ChatRole";
-import { AuthService } from "../Auth/AuthService";
+import {UserInfo} from "../Data/UserInfo";
+import {Component, Inject} from "@angular/core";
+import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material";
+import {ChatComponent} from "../Chat/chat.component";
+import {Chat} from "../Data/Chat";
+import {ChatRole} from "../Roles/ChatRole";
+import {AuthService} from "../Auth/AuthService";
 
 export interface AdminPanelDialogData {
   user: UserInfo;
-  chat: ConversationTemplate;
+  chat: Chat;
   kickFunc: (user: UserInfo) => void;
   banFunc: (user: UserInfo) => Promise<boolean>;
   unBanFunc: (user: UserInfo) => Promise<boolean>;
@@ -61,7 +61,7 @@ export class AdminPanelDialog {
   }
 
   public async MakeModerator() {
-    let result = await this.data.makeModerFunc(this.data.user.id, this.data.chat.conversationID);
+    let result = await this.data.makeModerFunc(this.data.user.id, this.data.chat.id);
 
     if (result) {
       this.data.user.chatRole.role = ChatRole.Moderator;
@@ -69,7 +69,7 @@ export class AdminPanelDialog {
   }
 
   public async RemoveModerator() {
-    let result = await this.data.removeModerFunc(this.data.user.id, this.data.chat.conversationID);
+    let result = await this.data.removeModerFunc(this.data.user.id, this.data.chat.id);
 
     if (result) {
       this.data.user.chatRole.role = ChatRole.NoRole;

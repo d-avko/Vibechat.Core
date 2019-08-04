@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using VibeChat.Web.Data;
 using Vibechat.Web.Data.Conversations;
 using Vibechat.Web.Data.DataModels;
-using Vibechat.Web.Data.Messages;
-using VibeChat.Web.Data;
 using VibeChat.Web.Data.DataModels;
+using Vibechat.Web.Data.Messages;
+using Vibechat.Web.Data_Layer.DataModels;
 
 namespace VibeChat.Web
 {
@@ -36,6 +37,9 @@ namespace VibeChat.Web
         public new DbSet<RoleDataModel> Roles { get; set; }
 
         public DbSet<ChatRoleDataModel> ChatRoles { get; set; }
+        
+        
+        public DbSet<LastMessageDataModel> LastViewedMessages { get; set; }
         #region Constructor
 
         /// <summary>

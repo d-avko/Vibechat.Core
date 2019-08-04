@@ -1,22 +1,22 @@
-import { Component, Inject, EventEmitter, ViewContainerRef } from "@angular/core";
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from "@angular/material";
-import { ChatComponent } from "../Chat/chat.component";
-import { ConversationTemplate } from "../Data/ConversationTemplate";
-import { UserInfo } from "../Data/UserInfo";
-import { ConversationsFormatter } from "../Formatters/ConversationsFormatter";
-import { ChangeNameDialogComponent } from "./ChangeNameDialog";
-import { FindUsersDialogComponent } from "./FindUsersDialog";
-import { ChatsService } from "../Services/ChatsService";
-import { ViewAttachmentsDialogComponent } from "./ViewAttachmentsDialog";
-import { ViewPhotoService } from "./ViewPhotoService";
-import { ChatRole } from "../Roles/ChatRole";
-import { ChatUsersDialogComponent } from "./ChatUsersDialog";
-import { AdminPanelDialog } from "./AdminPanelDialog";
-import { UsersService } from "../Services/UsersService";
-import { AuthService } from "../Auth/AuthService";
+import {Component, EventEmitter, Inject, ViewContainerRef} from "@angular/core";
+import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from "@angular/material";
+import {ChatComponent} from "../Chat/chat.component";
+import {Chat} from "../Data/Chat";
+import {UserInfo} from "../Data/UserInfo";
+import {ConversationsFormatter} from "../Formatters/ConversationsFormatter";
+import {ChangeNameDialogComponent} from "./ChangeNameDialog";
+import {FindUsersDialogComponent} from "./FindUsersDialog";
+import {ChatsService} from "../Services/ChatsService";
+import {ViewAttachmentsDialogComponent} from "./ViewAttachmentsDialog";
+import {ViewPhotoService} from "./ViewPhotoService";
+import {ChatRole} from "../Roles/ChatRole";
+import {ChatUsersDialogComponent} from "./ChatUsersDialog";
+import {AdminPanelDialog} from "./AdminPanelDialog";
+import {UsersService} from "../Services/UsersService";
+import {AuthService} from "../Auth/AuthService";
 
 export interface  GroupInfoData {
-  Conversation: ConversationTemplate;
+  Conversation: Chat;
   user: UserInfo;
   ExistsInThisGroup: boolean;
 }
@@ -29,9 +29,9 @@ export class GroupInfoDialogComponent {
 
   public OnViewUserInfo = new EventEmitter<UserInfo>();
 
-  public OnJoinGroup = new EventEmitter<ConversationTemplate>();
+  public OnJoinGroup = new EventEmitter<Chat>();
 
-  public OnViewAttachments = new EventEmitter<ConversationTemplate>();
+  public OnViewAttachments = new EventEmitter<Chat>();
 
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
@@ -54,7 +54,7 @@ export class GroupInfoDialogComponent {
     const chatUsersDialogRef = this.dialog.open(ChatUsersDialogComponent, {
       width: '450px',
       data: {
-        conversationId: this.data.Conversation.conversationID
+        conversationId: this.data.Conversation.id
       }
     }).beforeClosed().subscribe((user) => {
 
@@ -209,9 +209,9 @@ export class GroupInfoDialogComponent {
     const dialogRef = this.dialog.open(FindUsersDialogComponent, {
       width: '350px',
       data: {
-        conversationId: this.data.Conversation.conversationID,
+        conversationId: this.data.Conversation.id,
         isMultiSelect: true
-      } 
+      }
     });
 
     dialogRef.beforeClosed().subscribe(users => {

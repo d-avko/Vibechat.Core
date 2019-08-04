@@ -49,7 +49,7 @@ var ConversationsService = /** @class */ (function () {
         return this.CurrentConversation != null;
     };
     ConversationsService.prototype.GetConversationsIds = function () {
-        return this.Conversations.map(function (x) { return x.conversationID; });
+        return this.Conversations.map(function (x) { return x.id; });
     };
     ConversationsService.prototype.ChangeConversation = function (conversation) {
         return __awaiter(this, void 0, void 0, function () {
@@ -96,7 +96,7 @@ var ConversationsService = /** @class */ (function () {
             var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.requestsBuilder.GetConversationMessages(this.CurrentConversation.messages.length, count, this.CurrentConversation.conversationID)];
+                    case 0: return [4 /*yield*/, this.requestsBuilder.GetConversationMessages(this.CurrentConversation.messages.length, count, this.CurrentConversation.id)];
                     case 1:
                         result = _a.sent();
                         if (!result.isSuccessfull) {
@@ -128,7 +128,7 @@ var ConversationsService = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        currentConversationId = this.CurrentConversation.conversationID;
+                        currentConversationId = this.CurrentConversation.id;
                         notLocalMessages = messages.filter(function (x) { return x.state != MessageState_1.MessageState.Pending; });
                         //delete local unsent messages
                         this.CurrentConversation.messages = this.CurrentConversation.messages
@@ -136,13 +136,13 @@ var ConversationsService = /** @class */ (function () {
                         if (notLocalMessages.length == 0) {
                             return [2 /*return*/];
                         }
-                        return [4 /*yield*/, this.requestsBuilder.DeleteMessages(notLocalMessages, this.CurrentConversation.conversationID)];
+                        return [4 /*yield*/, this.requestsBuilder.DeleteMessages(notLocalMessages, this.CurrentConversation.id)];
                     case 1:
                         response = _a.sent();
                         if (!response.isSuccessfull) {
                             return [2 /*return*/];
                         }
-                        conversation = this.Conversations.find(function (x) { return x.conversationID == currentConversationId; });
+                        conversation = this.Conversations.find(function (x) { return x.id == currentConversationId; });
                         conversation.messages = conversation
                             .messages
                             .filter(function (msg) { return messages.findIndex(function (selected) { return selected.id == msg.id; }) == -1; });
@@ -195,7 +195,7 @@ var ConversationsService = /** @class */ (function () {
     ConversationsService.prototype.OnMessageReceived = function (data) {
         this.dateParser.ParseStringDateInMessage(data.message);
         var conversation = this.Conversations
-            .find(function (x) { return x.conversationID == data.conversationId; });
+            .find(function (x) { return x.id == data.conversationId; });
         conversation.messages = conversation.messages.slice();
         if (data.senderId != this.authService.User.id) {
             ++conversation.messagesUnread;
@@ -237,7 +237,7 @@ var ConversationsService = /** @class */ (function () {
             var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.requestsBuilder.BanFromConversation(userToBan.id, this.CurrentConversation.conversationID)];
+                    case 0: return [4 /*yield*/, this.requestsBuilder.BanFromConversation(userToBan.id, this.CurrentConversation.id)];
                     case 1:
                         result = _a.sent();
                         if (!result.isSuccessfull) {
@@ -254,7 +254,7 @@ var ConversationsService = /** @class */ (function () {
             var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.requestsBuilder.UnBanFromConversation(userToUnban.id, this.CurrentConversation.conversationID)];
+                    case 0: return [4 /*yield*/, this.requestsBuilder.UnBanFromConversation(userToUnban.id, this.CurrentConversation.id)];
                     case 1:
                         result = _a.sent();
                         if (!result.isSuccessfull) {
@@ -290,7 +290,7 @@ var ConversationsService = /** @class */ (function () {
         });
     };
     ConversationsService.prototype.SendMessage = function (message) {
-        var messageToSend = this.BuildMessage(message, this.CurrentConversation.conversationID);
+        var messageToSend = this.BuildMessage(message, this.CurrentConversation.id);
         this.CurrentConversation.messages.push(messageToSend);
         this.connectionManager.SendMessage(messageToSend, this.CurrentConversation);
     };
@@ -302,7 +302,7 @@ var ConversationsService = /** @class */ (function () {
             return;
         }
         this.PendingReadMessages.push(message.id);
-        this.connectionManager.ReadMessage(message.id, message.conversationID);
+        this.connectionManager.ReadMessage(message.id, message.id);
     };
     ConversationsService.prototype.CreateGroup = function (name, isPublic) {
         return __awaiter(this, void 0, void 0, function () {
@@ -315,7 +315,7 @@ var ConversationsService = /** @class */ (function () {
                         if (!result.isSuccessfull) {
                             return [2 /*return*/];
                         }
-                        this.connectionManager.InitiateConnections(new Array(1).fill(result.response.conversationID));
+                        this.connectionManager.InitiateConnections(new Array(1).fill(result.response.id));
                         result.response.messages = new Array();
                         this.Conversations = this.Conversations.concat([result.response]);
                         return [2 /*return*/];
@@ -334,10 +334,10 @@ var ConversationsService = /** @class */ (function () {
         this.connectionManager.AddUserToConversation(this.authService.User.id, group);
     };
     ConversationsService.prototype.KickUser = function (user) {
-        this.connectionManager.RemoveUserFromConversation(user.id, this.CurrentConversation.conversationID, false);
+        this.connectionManager.RemoveUserFromConversation(user.id, this.CurrentConversation.id, false);
     };
     ConversationsService.prototype.ExistsIn = function (id) {
-        return this.Conversations.find(function (x) { return x.conversationID == id; }) != null;
+        return this.Conversations.find(function (x) { return x.id == id; }) != null;
     };
     ConversationsService.prototype.FindDialogWith = function (user) {
         return this.Conversations.find(function (x) { return !x.isGroup && x.dialogueUser.id == user.id; });
@@ -347,7 +347,7 @@ var ConversationsService = /** @class */ (function () {
             var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.requestsBuilder.GetConversationById(target.conversationID)];
+                    case 0: return [4 /*yield*/, this.requestsBuilder.GetConversationById(target.id)];
                     case 1:
                         result = _a.sent();
                         if (!result.isSuccessfull) {
@@ -366,7 +366,7 @@ var ConversationsService = /** @class */ (function () {
         }
         destination.forEach(function (conversation) {
             messages.forEach(function (msg) {
-                var messageToSend = _this.BuildForwardedMessage(conversation.conversationID, msg.forwardedMessage ? msg.forwardedMessage : msg);
+                var messageToSend = _this.BuildForwardedMessage(conversation.id, msg.forwardedMessage ? msg.forwardedMessage : msg);
                 _this.connectionManager.SendMessage(messageToSend, conversation);
                 conversation.messages.push(messageToSend);
             });
@@ -378,7 +378,7 @@ var ConversationsService = /** @class */ (function () {
             var response;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.requestsBuilder.DeleteMessages(group.messages, group.conversationID)];
+                    case 0: return [4 /*yield*/, this.requestsBuilder.DeleteMessages(group.messages, group.id)];
                     case 1:
                         response = _a.sent();
                         if (!response.isSuccessfull) {
@@ -395,7 +395,7 @@ var ConversationsService = /** @class */ (function () {
         });
     };
     ConversationsService.prototype.Leave = function (from) {
-        this.connectionManager.RemoveUserFromConversation(this.authService.User.id, from.conversationID, true);
+        this.connectionManager.RemoveUserFromConversation(this.authService.User.id, from.id, true);
         this.CurrentConversation = null;
     };
     ConversationsService.prototype.ChangeThumbnail = function (file) {
@@ -404,14 +404,14 @@ var ConversationsService = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        currentConversationId = this.CurrentConversation.conversationID;
-                        return [4 /*yield*/, this.requestsBuilder.UploadConversationThumbnail(file, this.CurrentConversation.conversationID)];
+                        currentConversationId = this.CurrentConversation.id;
+                        return [4 /*yield*/, this.requestsBuilder.UploadConversationThumbnail(file, this.CurrentConversation.id)];
                     case 1:
                         result = _a.sent();
                         if (!result.isSuccessfull) {
                             return [2 /*return*/];
                         }
-                        conversation = this.Conversations.find(function (x) { return x.conversationID == currentConversationId; });
+                        conversation = this.Conversations.find(function (x) { return x.id == currentConversationId; });
                         conversation.thumbnailUrl = result.response.thumbnailUrl;
                         conversation.fullImageUrl = result.response.fullImageUrl;
                         return [2 /*return*/];
@@ -425,14 +425,14 @@ var ConversationsService = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        currentConversationId = this.CurrentConversation.conversationID;
-                        return [4 /*yield*/, this.requestsBuilder.ChangeConversationName(name, this.CurrentConversation.conversationID)];
+                        currentConversationId = this.CurrentConversation.id;
+                        return [4 /*yield*/, this.requestsBuilder.ChangeConversationName(name, this.CurrentConversation.id)];
                     case 1:
                         result = _a.sent();
                         if (!result.isSuccessfull) {
                             return [2 /*return*/];
                         }
-                        this.Conversations.find(function (x) { return x.conversationID == currentConversationId; }).name = name;
+                        this.Conversations.find(function (x) { return x.id == currentConversationId; }).name = name;
                         return [2 /*return*/];
                 }
             });
@@ -474,7 +474,7 @@ var ConversationsService = /** @class */ (function () {
                                 this.Conversations = this.Conversations.concat([data.conversation]);
                             }
                             else {
-                                conversation = this.Conversations.find(function (x) { return x.conversationID == data.conversation.conversationID; });
+                                conversation = this.Conversations.find(function (x) { return x.id == data.conversation.id; });
                                 conversation.participants.push(data.user);
                                 conversation.participants = conversation.participants.slice();
                             }
@@ -506,15 +506,15 @@ var ConversationsService = /** @class */ (function () {
     ConversationsService.prototype.OnRemovedFromGroup = function (data) {
         //either this client left or creator removed him.
         if (data.userId == this.authService.User.id) {
-            this.Conversations.splice(this.Conversations.findIndex(function (x) { return x.conversationID == data.conversationId; }), 1);
+            this.Conversations.splice(this.Conversations.findIndex(function (x) { return x.id == data.conversationId; }), 1);
         }
         else {
-            var participants = this.Conversations.find(function (x) { return x.conversationID == data.conversationId; }).participants;
+            var participants = this.Conversations.find(function (x) { return x.id == data.conversationId; }).participants;
             participants.splice(participants.findIndex(function (x) { return x.id == data.userId; }), 1);
         }
     };
     ConversationsService.prototype.OnMessageRead = function (msgId, conversationId) {
-        var conversation = this.Conversations.find(function (x) { return x.conversationID == conversationId; });
+        var conversation = this.Conversations.find(function (x) { return x.id == conversationId; });
         if (conversation == null) {
             return;
         }
@@ -536,7 +536,7 @@ var ConversationsService = /** @class */ (function () {
         }
     };
     ConversationsService.prototype.OnMessageDelivered = function (msgId, clientMessageId, conversationId) {
-        var conversation = this.Conversations.find(function (x) { return x.conversationID == conversationId; });
+        var conversation = this.Conversations.find(function (x) { return x.id == conversationId; });
         if (conversation == null) {
             return;
         }
@@ -558,7 +558,7 @@ var ConversationsService = /** @class */ (function () {
                         if (files.length == 0) {
                             return [2 /*return*/];
                         }
-                        conversationToSend = this.CurrentConversation.conversationID;
+                        conversationToSend = this.CurrentConversation.id;
                         return [4 /*yield*/, this.requestsBuilder.UploadImages(files)];
                     case 1:
                         result = _a.sent();

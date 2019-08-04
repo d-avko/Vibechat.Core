@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace VibeChat.Web.ApiModels
+﻿namespace VibeChat.Web.ApiModels
 {
     /// <summary>
     /// Api request for receiving messages
@@ -13,8 +7,13 @@ namespace VibeChat.Web.ApiModels
     {
         public int ConversationID { get; set; }
 
-        public int MesssagesOffset { get; set; }
+        public int MessagesOffset { get; set; }
 
         public int Count { get; set; }
+        
+        /// <summary>
+        /// Return messages starting from this id, -1 if not used.
+        /// </summary>
+        public int MaxMessageId { get; set; }
     }
 }

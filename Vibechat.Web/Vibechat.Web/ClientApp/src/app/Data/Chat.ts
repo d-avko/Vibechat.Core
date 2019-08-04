@@ -1,15 +1,15 @@
-import { UserInfo } from "./UserInfo";
-import { ChatMessage } from "./ChatMessage";
-import { ChatRoleDto } from "../Roles/ChatRoleDto";
+import {UserInfo} from "./UserInfo";
+import {ChatMessage} from "./ChatMessage";
+import {ChatRoleDto} from "../Roles/ChatRoleDto";
 
 export class DhPublicKey {
   public modulus: string;
   public generator: string;
 }
 
-export class ConversationTemplate {
+export class Chat {
 
-  public conversationID: number;
+  public id: number;
 
   public dialogueUser: UserInfo;
 
@@ -33,7 +33,7 @@ export class ConversationTemplate {
 
   public authKeyId: string;
 
-  public publicKey: DhPublicKey; 
+  public publicKey: DhPublicKey;
 
   public messagesUnread: number;
 

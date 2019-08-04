@@ -28,28 +28,28 @@
           </div>
 
           <div class="conversation-header-down">
-            <span *ngIf="formatter.IsAnyUserTyping(Conversation.conversationID)" class="typing-text">
-            {{formatter.GetUsersTypingFormatted(Conversation.conversationID)}}
+            <span *ngIf="formatter.IsAnyUserTyping(Conversation.id)" class="typing-text">
+            {{formatter.GetUsersTypingFormatted(Conversation.id)}}
             </span>
 
-            <div class="loading-dots" *ngIf="formatter.IsAnyUserTyping(Conversation.conversationID)">
+            <div class="loading-dots" *ngIf="formatter.IsAnyUserTyping(Conversation.id)">
               <i></i>
               <i></i>
               <i></i>
             </div>
 
-            <span *ngIf="!formatter.IsAnyUserTyping(Conversation.conversationID) && !Conversation.isGroup">
+            <span *ngIf="!formatter.IsAnyUserTyping(Conversation.id) && !Conversation.isGroup">
             {{formatter.GetLastSeenFormatted(Conversation.dialogueUser.lastSeen, Conversation.dialogueUser.isOnline)}}
             </span>
 
-            <span class="conversation-header-participants" *ngIf="!formatter.IsAnyUserTyping(Conversation.conversationID) && Conversation.isGroup">
+            <span class="conversation-header-participants" *ngIf="!formatter.IsAnyUserTyping(Conversation.id) && Conversation.isGroup">
               {{formatter.GetConversationMembersFormatted(Conversation)}}
             </span>
           </div>
         </div>
 
       </div>
-     
+
 
     </button>
 

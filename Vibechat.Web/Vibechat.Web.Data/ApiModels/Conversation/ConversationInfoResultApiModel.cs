@@ -4,6 +4,6 @@ namespace VibeChat.Web.ChatData
 {
     public class ConversationInfoResultApiModel
     {
-        public List<ConversationTemplate> Conversations { get; set; }
+        public List<Chat> Conversations { get; set; }
     }
 }

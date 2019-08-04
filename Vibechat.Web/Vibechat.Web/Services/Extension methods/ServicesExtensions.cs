@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
+using Microsoft.Extensions.DependencyInjection;
+using VibeChat.Web;
 using Vibechat.Web.AuthHelpers;
 using Vibechat.Web.Data.Repositories;
+using Vibechat.Web.Data_Layer.Repositories;
 using Vibechat.Web.Middleware;
 using Vibechat.Web.Services.Bans;
 using Vibechat.Web.Services.ChatDataProviders;
@@ -12,7 +14,6 @@ using Vibechat.Web.Services.Images;
 using Vibechat.Web.Services.Login;
 using Vibechat.Web.Services.Paths;
 using Vibechat.Web.Services.Users;
-using VibeChat.Web;
 using VibeChat.Web.UserProviders;
 
 namespace Vibechat.Web.Services.Extension_methods
@@ -46,6 +47,7 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddScoped<IContactsRepository, ContactsRepository>();
             services.AddScoped<IDhPublicKeysRepository, DhPublicKeysRepository>();
             services.AddScoped<IChatRolesRepository, ChatRolesRepository>();
+            services.AddScoped<ILastMessagesRepository, LastMessagesRepository>();
         }
 
         public static void AddBusinessLogic(this IServiceCollection services)
