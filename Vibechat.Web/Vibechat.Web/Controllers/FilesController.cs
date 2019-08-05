@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -34,23 +33,27 @@ namespace Vibechat.Web.Controllers
         {
             var result = new FilesUploadResponse {UploadedFiles = new List<MessageAttachment>()};
 
-            if (request.images.Count() == 0)
+            if (!request.images.Any())
+            {
                 return new ResponseApiModel<FilesUploadResponse>
                 {
                     ErrorMessage = "No files were provided.",
                     IsSuccessfull = false,
                     Response = null
                 };
+            }
 
             foreach (var image in request.images)
+            {
                 if (image.Length > 1024 * 1024 * MaxImageLengthMB)
                     return new ResponseApiModel<FilesUploadResponse>
                     {
-                        ErrorMessage = $"Some of the files was larger than {MaxImageLengthMB} Mb",
+                        ErrorMessage = $"Some of the files were larger than {MaxImageLengthMB} Mb",
                         IsSuccessfull = false
                     };
+            }
 
-            var Error = string.Empty;
+            var error = string.Empty;
             var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
             var errorLock = new object();
@@ -60,25 +63,20 @@ namespace Vibechat.Web.Controllers
             {
                 try
                 {
-                    using (var buffer = new MemoryStream())
-                    {
-                        file.CopyTo(buffer);
-                        buffer.Seek(0, SeekOrigin.Begin);
-                        var uploadedFile = filesService
-                            .SaveMessagePicture(file, buffer, file.FileName, request.ChatId, thisUserId).GetAwaiter()
-                            .GetResult();
+                    var uploadedFile = filesService
+                        .SaveMessagePicture(file, file.FileName, request.ChatId, thisUserId).GetAwaiter()
+                        .GetResult();
 
-                        lock (resultLock)
-                        {
-                            result.UploadedFiles.Add(uploadedFile);
-                        }
+                    lock (resultLock)
+                    {
+                        result.UploadedFiles.Add(uploadedFile);
                     }
                 }
                 catch (Exception ex)
                 {
                     lock (errorLock)
                     {
-                        Error = "Some of the files failed to upload. Exception type for last file was: " +
+                        error = "Some of the files failed to upload. Exception type for last file was: " +
                                 ex.GetType().ToString();
                     }
                 }
@@ -86,8 +84,8 @@ namespace Vibechat.Web.Controllers
 
             return new ResponseApiModel<FilesUploadResponse>
             {
-                ErrorMessage = Error == string.Empty ? null : Error,
-                IsSuccessfull = Error == string.Empty,
+                ErrorMessage = error == string.Empty ? null : error,
+                IsSuccessfull = error == string.Empty,
                 Response = result
             };
         }
@@ -107,20 +105,14 @@ namespace Vibechat.Web.Controllers
 
             try
             {
-                using (var buffer = new MemoryStream())
+                var savedFile = await filesService.SaveMessageFile(request.file, request.file.FileName,
+                    request.ChatId, thisUserId);
+
+                return new ResponseApiModel<MessageAttachment>
                 {
-                    await request.file.CopyToAsync(buffer);
-                    buffer.Seek(0, SeekOrigin.Begin);
-
-                    var savedFile = await filesService.SaveMessageFile(request.file, buffer, request.file.FileName,
-                        request.ChatId, thisUserId);
-
-                    return new ResponseApiModel<MessageAttachment>
-                    {
-                        IsSuccessfull = true,
-                        Response = savedFile
-                    };
-                }
+                    IsSuccessfull = true,
+                    Response = savedFile
+                };
             }
             catch (Exception ex)
             {

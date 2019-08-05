@@ -1,4 +1,5 @@
 import * as signalR from "@aspnet/signalr";
+import {HttpTransportType} from "@aspnet/signalr";
 import {Chat} from "../Data/Chat";
 import {Message} from "../Data/Message";
 import {Injectable} from "@angular/core";
@@ -30,6 +31,8 @@ export class SignalrConnection {
 
   private DHServerKeyExchangeService: DHServerKeyExchangeService;
 
+  public static DisconnectTimeout : number = 3000;
+
   public setChatsService(service: ChatsService) {
     this.chats = service;
   }
@@ -46,20 +49,31 @@ export class SignalrConnection {
   public async Start(){
 
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl("/hubs/chat", { accessTokenFactory: () => this.auth.token })
+      .withUrl("/hubs/chat", { accessTokenFactory: () => this.auth.token, transport: HttpTransportType.WebSockets })
       .build();
 
     this.messagesService.OnConnecting();
 
-    await this.connection.start();
+    try {
+      await this.connection.start();
+    }
+    catch (e) {
+      this.messagesService.TryingToReconnect();
+      setTimeout(() => {
+        this.Start();
+      }, SignalrConnection.DisconnectTimeout);
+    }
 
     this.InitiateConnections(this.chats.GetConversationsIds());
     this.messagesService.OnConnected();
+    this.chats.OnConnected();
 
     this.connection.onclose(() => {
       this.messagesService.OnDisconnected();
-
-      setTimeout(() => this.Start(), 1000);
+      this.chats.OnDisconnected();
+      setTimeout(() => {
+        this.Start();
+      }, SignalrConnection.DisconnectTimeout);
     });
 
     this.connection.on("ReceiveMessage", (senderId: string, message: Message, conversationId: number, secure: boolean) => {

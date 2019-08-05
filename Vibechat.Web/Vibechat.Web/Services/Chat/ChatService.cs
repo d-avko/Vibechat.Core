@@ -237,16 +237,11 @@ namespace Vibechat.Web.Services
 
             try
             {
-                using (var buffer = new MemoryStream())
-                {
-                    image.CopyTo(buffer);
-                    buffer.Seek(0, SeekOrigin.Begin);
-                    var thumbnailFull = await imagesService.SaveProfileOrChatPicture(image, buffer, image.FileName,
-                        conversationId.ToString(), userId);
-
-                    conversationRepository.UpdateThumbnail(thumbnailFull.Item1, thumbnailFull.Item2, conversation);
-                    await unitOfWork.Commit();
-                }
+                var (thumbnail, fullsized) = await imagesService.SaveProfileOrChatPicture(image, image.FileName,
+                    conversationId.ToString(), userId);
+ 
+                conversationRepository.UpdateThumbnail(thumbnail, fullsized, conversation);
+                await unitOfWork.Commit();
 
                 return new UpdateThumbnailResponse
                 {

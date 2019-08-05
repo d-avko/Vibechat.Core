@@ -43,9 +43,49 @@ export class ChatsService {
   public Conversations: Array<Chat>;
   public CurrentConversation: Chat;
   private PendingReadMessages: Array<number>;
+  private didDisconnect: boolean;
 
   public IsConversationSelected(): boolean {
     return this.CurrentConversation != null;
+  }
+
+  public OnDisconnected(){
+    this.didDisconnect = true;
+  }
+
+  //method updates local state of an app after disconnect.
+  public async OnConnected(){
+    if(!this.didDisconnect){
+      return;
+    }
+
+    let response = await this.requestsBuilder.GetChats(this.device.GetDeviceId());
+
+    if (!response.isSuccessfull) {
+      return;
+    }
+
+    if(!response.response){
+      this.Conversations = new Array<Chat>();
+      return;
+    }
+
+    response.response.sort(this.ChatsSortFunc);
+
+    //remove chats where we've been kicked from
+    this.Conversations = this.Conversations.filter(chat => {
+      response.response.find(x => x.id == chat.id)
+    }).sort(this.ChatsSortFunc);
+
+
+    for(let i = 0; i < this.Conversations.length - 1; ++i){
+      response.response[i].messages = this.Conversations[i].messages;
+    }
+    this.Conversations = [...response.response];
+
+    if(this.CurrentConversation){
+      this.ChangeConversation(this.Conversations.find(x => x.id == this.CurrentConversation.id));
+    }
   }
 
   public GetConversationsIds() {
@@ -57,18 +97,26 @@ export class ChatsService {
       decrements unread count and updates lastMessageId if necessary.
    * @constructor
    */
-  public async ReadExistingMessagesInGroup(maximumToRead: number){
+  public async ReadExistingMessagesInGroup(){
     if(!this.CurrentConversation.isGroup){
       return;
     }
+    //no messages to read, return.
+    if(!this.CurrentConversation.messagesUnread
+      || this.CurrentConversation.clientLastMessageId == this.CurrentConversation.lastMessage.id){
+      return;
+    }
 
-    this.CurrentConversation.messagesUnread = Math.max(0, this.CurrentConversation.messagesUnread - maximumToRead);
+    let messagesToRead = this.GetUnreadLocalMessagesCount();
+
+    this.CurrentConversation.messagesUnread = Math.max(0, this.CurrentConversation.messagesUnread - messagesToRead);
 
     let index = this.CurrentConversation.messages.length - 1;
-
+    //find biggest id excluding unsent messages.
     while(!this.CurrentConversation.messages[index].id){
       --index;
     }
+
     let lastMsgId = this.CurrentConversation.messages[index].id;
 
     if(this.CurrentConversation.clientLastMessageId != lastMsgId){
@@ -79,6 +127,15 @@ export class ChatsService {
       }
     }
 
+  }
+
+  public GetUnreadLocalMessagesCount() : number{
+    let initialIndex = this.CurrentConversation.messages.length - 1;
+    let index ;
+
+    for(index = initialIndex;
+        (this.CurrentConversation.messages[index].id > this.CurrentConversation.clientLastMessageId) && index > 0; --index) { }
+    return initialIndex - index;
   }
 
   public async ChangeConversation(conversation: Chat) {
@@ -95,7 +152,7 @@ export class ChatsService {
 
     //secure dialog might not even exist on second user side, so update will fail
     if (!(conversation.isSecure && !conversation.authKeyId)) {
-      await this.UpdateExisting(conversation);
+      this.UpdateExisting(conversation);
     }
 
     //creator should wait until other user is online, and initiate key exchange.
@@ -161,15 +218,15 @@ export class ChatsService {
   }
 
   public async MakeUserModerator(chatId: number, userId: string) {
-    return await this.ChangeUserChatRole(chatId, userId, ChatRole.Moderator);
+    return this.ChangeUserChatRole(chatId, userId, ChatRole.Moderator);
   }
 
   public async RemoveModerator(chatId: number, userId: string) {
-    return await this.ChangeUserChatRole(chatId, userId, ChatRole.NoRole);
+    return this.ChangeUserChatRole(chatId, userId, ChatRole.NoRole);
   }
 
   private async ChangeUserChatRole(chatId: number, userId: string, newRole: ChatRole) {
-    return await this.connectionManager.ChangeUserRole(chatId, userId, newRole);
+    return this.connectionManager.ChangeUserRole(chatId, userId, newRole);
   }
 
   public OnBannedInChat(chatId: number, userId: string, banType: BanEvent) {
@@ -387,6 +444,10 @@ export class ChatsService {
       chat.clientLastMessageId = Math.max(...result.response.map(msg => msg.id));
     }
 
+    chat.messages = [...chat.messages];
+
+    await this.ReadExistingMessagesInGroup();
+
     return result.response;
   }
 
@@ -400,6 +461,12 @@ export class ChatsService {
   private MessagesSortFunc(left: Message, right: Message): number {
     if (left.timeReceived < right.timeReceived) return -1;
     if (left.timeReceived > right.timeReceived) return 1;
+    return 0;
+  }
+
+  private ChatsSortFunc(left: Chat, right: Chat): number {
+    if (left.id < right.id) return -1;
+    if (left.id > right.id) return 1;
     return 0;
   }
 
@@ -425,8 +492,6 @@ export class ChatsService {
     from.messages = from
       .messages
       .filter(msg => messages.findIndex(selected => selected.id == msg.id) == -1);
-
-    messages.splice(0, messages.length);
   }
 
   public async UpdateConversations() {
