@@ -1,13 +1,9 @@
-import { Component } from '@angular/core';
-import { FormControl, Validators, FormGroup } from '@angular/forms';
-import { MatSnackBar } from '@angular/material';
-import { ChangeUserInfoRequest } from '../ApiModels/RegisterRequest';
-import { ServerResponse } from '../ApiModels/ServerResponse';
-import { LoginComponent } from '../login/login.component';
-import { Router } from '@angular/router';
-import { ApiRequestsBuilder } from '../Requests/ApiRequestsBuilder';
-import { AuthService } from '../Auth/AuthService';
-import { SnackBarHelper } from '../Snackbar/SnackbarHelper';
+import {Component} from '@angular/core';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {ChangeUserInfoRequest} from '../ApiModels/RegisterRequest';
+import {Router} from '@angular/router';
+import {ApiRequestsBuilder} from '../Requests/ApiRequestsBuilder';
+import {SnackBarHelper} from '../Snackbar/SnackbarHelper';
 
 @Component({
   selector: 'register-view',

@@ -1,6 +1,6 @@
 import {Chat} from "../Data/Chat";
 import {MessageReceivedModel} from "../Shared/MessageReceivedModel";
-import {AuthService} from "../Auth/AuthService";
+import {AuthService} from "./AuthService";
 import {AddedToGroupModel} from "../Shared/AddedToGroupModel";
 import {Message} from "../Data/Message";
 import {ApiRequestsBuilder} from "../Requests/ApiRequestsBuilder";
@@ -71,17 +71,21 @@ export class ChatsService {
       return;
     }
 
-    response.response.sort(this.ChatsSortFunc);
+    //sort to assign messages by index, find should work too.
+    response.response.sort(this.ChatsSortByIdFunc);
 
     //remove chats where we've been kicked from
     this.Conversations = this.Conversations.filter(chat => {
       response.response.find(x => x.id == chat.id)
-    }).sort(this.ChatsSortFunc);
+    }).sort(this.ChatsSortByIdFunc);
 
 
     for(let i = 0; i < this.Conversations.length - 1; ++i){
       response.response[i].messages = this.Conversations[i].messages;
     }
+
+    response.response = response.response.sort(this.ChatsSortByLastMessageFunc);
+
     this.Conversations = [...response.response];
 
     if(this.CurrentConversation){
@@ -465,7 +469,13 @@ export class ChatsService {
     return 0;
   }
 
-  private ChatsSortFunc(left: Chat, right: Chat): number {
+  private ChatsSortByIdFunc(left: Chat, right: Chat): number {
+    if (left.id < right.id) return -1;
+    if (left.id > right.id) return 1;
+    return 0;
+  }
+
+  private ChatsSortByLastMessageFunc(left: Chat, right: Chat): number {
     if (left.id < right.id) return -1;
     if (left.id > right.id) return 1;
     return 0;
@@ -733,6 +743,7 @@ export class ChatsService {
     //clientLastMessageId is updated on server automatically, so do it locally.
     chat.clientLastMessageId = message.id;
     chat.clientLastMessageId = Math.max(0, chat.clientLastMessageId - 1);
+    chat.messagesUnread = Math.max(0, chat.messagesUnread - 1);
     this.PendingReadMessages.splice(pendingIndex, 1);
   }
 

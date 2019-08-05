@@ -140,11 +140,11 @@
               query_builder
             </mat-icon>
 
-            <mat-icon class="messagestate" *ngIf="message.state == 1">
+            <mat-icon class="messagestate" *ngIf="IsDialog() && message.state == 1">
               done
             </mat-icon>
 
-            <mat-icon class="messagestate" *ngIf="message.state == 2">
+            <mat-icon class="messagestate" *ngIf="IsDialog() && message.state == 2">
               done_all
             </mat-icon>
 

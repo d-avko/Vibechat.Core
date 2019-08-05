@@ -8,7 +8,7 @@ import {ChangeNameDialogComponent} from "./ChangeNameDialog";
 import {ChatsService} from "../Services/ChatsService";
 import {UsersService} from "../Services/UsersService";
 import {ViewAttachmentsDialogComponent} from "./ViewAttachmentsDialog";
-import {AuthService} from "../Auth/AuthService";
+import {AuthService} from "../Services/AuthService";
 import {ViewPhotoService} from "./ViewPhotoService";
 
 export interface UserInfoData {

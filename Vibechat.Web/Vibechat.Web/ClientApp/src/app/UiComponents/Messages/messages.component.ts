@@ -1,6 +1,4 @@
 import {
-  AfterContentInit,
-  AfterViewChecked,
   AfterViewInit,
   Component,
   EventEmitter,
@@ -24,6 +22,7 @@ import {ForwardMessagesDialogComponent} from '../../Dialogs/ForwardMessagesDialo
 import {Chat} from '../../Data/Chat';
 import {ThemesService} from '../../Theming/ThemesService';
 import {ViewPhotoService} from '../../Dialogs/ViewPhotoService';
+import {AuthService} from "../../Services/AuthService";
 
 export class ForwardMessagesModel {
   public forwardTo: Array<number>;
@@ -49,12 +48,13 @@ export class ForwardMessagesModel {
     ])
   ]
 })
-export class MessagesComponent implements AfterViewChecked, AfterContentInit, AfterViewInit, OnChanges {
+export class MessagesComponent implements AfterViewInit, OnChanges {
 
   constructor(
     public formatter: ConversationsFormatter,
     public dialog: MatDialog,
     public chatsService: ChatsService,
+    public auth: AuthService,
     private themes: ThemesService,
     private vc: ViewContainerRef,
     private photos: ViewPhotoService) {
@@ -78,7 +78,7 @@ export class MessagesComponent implements AfterViewChecked, AfterContentInit, Af
 
   public static MessagesToScrollForGoBackButtonToShowUp: number = 20;
 
-  public static MessagesBufferLength: number = 5;
+  public static MessagesBufferLength: number = 50;
 
   public MaxErrorInPixels: number = 75;
 
@@ -90,10 +90,6 @@ export class MessagesComponent implements AfterViewChecked, AfterContentInit, Af
     this.ScrollToLastMessage();
   }
 
-  ngAfterContentInit(): void {
-
-  }
-
   async ngOnChanges(changes: SimpleChanges) {
 
     if (changes.CurrentConversation != undefined) {
@@ -103,20 +99,11 @@ export class MessagesComponent implements AfterViewChecked, AfterContentInit, Af
       this.SelectedMessages = new Array<Message>();
       await this.UpdateMessagesIfNotUpdated();
       await this.ReadMessagesInGroup();
+      await this.ReadMessagesInViewport();
       this.ScrollToLastMessage();
     }
   }
 
-  ngAfterViewChecked() {
-
-    if (!this.CurrentConversation.messages || this.CurrentConversation.messages.length == 0) {
-      return;
-    }
-
-    if(!this.CurrentConversation.isGroup){
-      this.ReadMessagesInViewport();
-    }
-  }
 
   ScrollToLastMessage() {
     if (!this.CurrentConversation.messages) {
@@ -194,6 +181,7 @@ export class MessagesComponent implements AfterViewChecked, AfterContentInit, Af
 
   }
 
+
   public async UpdateRecentMessages() {
 
     let currentChat = this.CurrentConversation;
@@ -264,18 +252,20 @@ export class MessagesComponent implements AfterViewChecked, AfterContentInit, Af
     await this.UpdateRecentMessages();
   }
 
+
   public ViewUserInfo(event: any, user: AppUser) {
   // do not highlight the message, just show user profile.
     event.stopPropagation();
     this.OnViewUserInfo.emit(user);
   }
 
-  public ReadMessagesInViewport() {
+  public async ReadMessagesInViewport() {
     let boundaries = this.CalculateMessagesViewportBoundaries();
 
     for (let i = boundaries[0]; i < boundaries[1] + 1; ++i) {
       if (this.CurrentConversation.messages[i].state == MessageState.Delivered) {
-        this.chatsService.ReadMessage(this.CurrentConversation.messages[i], this.chatsService.CurrentConversation);
+        //do sequential read, to keep lastMessageId on last read message.
+        await this.chatsService.ReadMessage(this.CurrentConversation.messages[i], this.chatsService.CurrentConversation);
       }
     }
   }
@@ -355,7 +345,7 @@ export class MessagesComponent implements AfterViewChecked, AfterContentInit, Af
       return;
     }
 
-    if (messageIndex == 0) {
+    if (this.viewport.elementRef.nativeElement.scrollTop <= 0 + this.MaxErrorInPixels) {
       await this.UpdateHistory();
       return;
     }
@@ -378,7 +368,7 @@ export class MessagesComponent implements AfterViewChecked, AfterContentInit, Af
     //reading is supported for dialogs only.
 
     if(!this.CurrentConversation.isGroup){
-      this.ReadMessagesInViewport();
+      await this.ReadMessagesInViewport();
     }
   }
 
@@ -470,6 +460,10 @@ export class MessagesComponent implements AfterViewChecked, AfterContentInit, Af
     }
 
     return message.attachmentInfo.attachmentKind == AttachmentKind.File;
+  }
+
+  public IsDialog(){
+    return !this.CurrentConversation.isGroup;
   }
 
   public DownloadFile(event: any) {

@@ -4,7 +4,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material";
 import {ChatComponent} from "../UiComponents/Chat/chat.component";
 import {Chat} from "../Data/Chat";
 import {ChatRole} from "../Roles/ChatRole";
-import {AuthService} from "../Auth/AuthService";
+import {AuthService} from "../Services/AuthService";
 
 export interface AdminPanelDialogData {
   user: AppUser;

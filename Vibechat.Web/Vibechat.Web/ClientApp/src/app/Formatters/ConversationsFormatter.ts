@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core"
 import {Message} from "../Data/Message";
 import {Chat} from "../Data/Chat";
-import {AuthService} from "../Auth/AuthService";
+import {AuthService} from "../Services/AuthService";
 import {AttachmentKind} from "../Data/AttachmentKinds";
 import {TypingService} from "../Services/TypingService";
 import {AppUser} from "../Data/AppUser";
@@ -138,17 +138,15 @@ export class ConversationsFormatter{
 
   public GetLastMessageDateFormatted(conversation: Chat) {
 
-    if (conversation.messages == null || conversation.messages.length == 0) {
+    if (!conversation.lastMessage) {
       return '';
     }
 
-    let message = conversation.messages[conversation.messages.length - 1];
-
-    if (typeof message.timeReceived !== 'object') {
-      message.timeReceived = new Date(<string>message.timeReceived);
+    if (typeof conversation.lastMessage.timeReceived !== 'object') {
+      conversation.lastMessage.timeReceived = new Date(<string>conversation.lastMessage.timeReceived);
     }
 
-    return this.DaysSinceEventFormatted((<Date>message.timeReceived));
+    return this.DaysSinceEventFormatted((<Date>conversation.lastMessage.timeReceived));
   }
 
   public GetMessagesDateStripFormatted(message: Message): string {

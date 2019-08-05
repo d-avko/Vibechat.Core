@@ -85,15 +85,3 @@
     width: 100% !important;
   }
 }
-
-.conversations_wrapper {
-  width: 30%;
-}
-
-.conversations_wrapper_light {
-  border-right: 1px solid #adadad;
-}
-
-.conversations_wrapper_dark {
-  border-right: none;
-}

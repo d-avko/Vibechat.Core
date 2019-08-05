@@ -499,14 +499,12 @@ namespace Vibechat.Web.Services
                 dtoChat.ChatRole = await GetChatRole(whoAccessedId, conversation.Id);
 
                 if (conversation.IsGroup)
-                {
-                    foreach (var user in dtoChat.Participants)
+                    foreach (var User in dtoChat.Participants)
                     {
-                        user.IsBlockedInConversation =
-                            await bansService.IsBannedFromConversation(conversation.Id, user.Id);
-                        user.ChatRole = await GetChatRole(user.Id, conversation.Id);
+                        User.IsBlockedInConversation =
+                            await bansService.IsBannedFromConversation(conversation.Id, User.Id);
+                        User.ChatRole = await GetChatRole(User.Id, conversation.Id);
                     }
-                }
 
                 returnData.Add(dtoChat);
             }

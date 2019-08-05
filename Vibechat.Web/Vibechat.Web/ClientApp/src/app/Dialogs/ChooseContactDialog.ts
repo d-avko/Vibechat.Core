@@ -1,11 +1,8 @@
-import { Component, Inject } from "@angular/core";
-import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material";
-import { ChatComponent } from "../UiComponents/Chat/chat.component";
-import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
-import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
-import { AppUser } from "../Data/AppUser";
-import { UsersService } from "../Services/UsersService";
-import { AuthService } from "../Auth/AuthService";
+import {Component} from "@angular/core";
+import {MatDialogRef} from "@angular/material";
+import {ChatComponent} from "../UiComponents/Chat/chat.component";
+import {AppUser} from "../Data/AppUser";
+import {AuthService} from "../Services/AuthService";
 
 export interface InviteUsersData {
   conversationId: number;

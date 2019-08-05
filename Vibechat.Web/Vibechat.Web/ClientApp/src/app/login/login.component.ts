@@ -1,13 +1,9 @@
-import { Component, Inject, OnInit, AfterViewInit } from '@angular/core';
-import { FormControl, Validators } from '@angular/forms';
-import { SnackBarHelper } from '../Snackbar/SnackbarHelper';
-import { MatSnackBar } from '@angular/material';
-import { ServerResponse } from '../ApiModels/ServerResponse';
-import { LoginResponse } from '../ApiModels/LoginResponse';
-import { LoginRequest } from '../ApiModels/LoginRequest';
-import { Router } from '@angular/router';
-import { ApiRequestsBuilder } from '../Requests/ApiRequestsBuilder';
-import { AuthService } from "../Auth/AuthService";
+import {Component} from '@angular/core';
+import {FormControl, Validators} from '@angular/forms';
+import {SnackBarHelper} from '../Snackbar/SnackbarHelper';
+import {Router} from '@angular/router';
+import {ApiRequestsBuilder} from '../Requests/ApiRequestsBuilder';
+import {AuthService} from "../Services/AuthService";
 import * as firebase from "firebase/app";
 
 @Component({
@@ -49,7 +45,7 @@ export class LoginComponent {
     this.recaptchaVerifier = value;
   }
 
- 
+
   public async SignIn() {
     this.canLogIn = false;
 
