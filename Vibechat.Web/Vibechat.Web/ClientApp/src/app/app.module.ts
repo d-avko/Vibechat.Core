@@ -1,15 +1,15 @@
 import {NgModule} from '@angular/core';
-import { AppRoutersModule } from './app.routes';
+import {AppRoutersModule} from './app.routes';
 
-import { AppComponent } from './app.component';
-import { ApiRequestsBuilder } from './Requests/ApiRequestsBuilder';
-import { ChatModule } from './Modules/ChatModule';
-import { LoginModule } from './Modules/LoginModule';
-import { AuthService } from './Auth/AuthService';
-import { ServiceWorkerModule } from '@angular/service-worker';
-import { environment } from '../environments/environment';
-import { MaterialModule } from './material.module';
-import { BrowserModule } from '@angular/platform-browser';
+import {AppComponent} from './app.component';
+import {ApiRequestsBuilder} from './Requests/ApiRequestsBuilder';
+import {ChatModule} from './Modules/ChatModule';
+import {LoginModule} from './Modules/LoginModule';
+import {AuthService} from './Services/AuthService';
+import {ServiceWorkerModule} from '@angular/service-worker';
+import {environment} from '../environments/environment';
+import {MaterialModule} from './material.module';
+import {BrowserModule} from '@angular/platform-browser';
 
 @NgModule({
   declarations: [

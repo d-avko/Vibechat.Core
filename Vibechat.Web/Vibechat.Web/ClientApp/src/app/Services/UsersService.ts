@@ -1,8 +1,8 @@
-import { AuthService } from "../Auth/AuthService";
-import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
-import { AppUser } from "../Data/AppUser";
-import { Injectable } from "@angular/core";
-import { SignalrConnection, BanEvent } from "../Connections/signalr-connection.service";
+import {AuthService} from "./AuthService";
+import {ApiRequestsBuilder} from "../Requests/ApiRequestsBuilder";
+import {AppUser} from "../Data/AppUser";
+import {Injectable} from "@angular/core";
+import {BanEvent, SignalrConnection} from "../Connections/signalr-connection.service";
 
 @Injectable({
   providedIn: 'root'

@@ -7,12 +7,25 @@ namespace Vibechat.Web.Services
     {
         public int Compare(Chat x, Chat y)
         {
-            if (x.LastMessage.Id == y.LastMessage.Id)
+            switch (x.LastMessage)
+            {
+                case null when y.LastMessage == null:
+                    return 0;
+                case null when y.LastMessage != null:
+                    return 1;
+            }
+            
+            if (x.LastMessage != null && y.LastMessage == null)
             {
                 return 0;
             }
+            
+            if (x.LastMessage.Id == y.LastMessage.Id)
+            {
+                return 1;
+            }
 
-            return x.LastMessage.Id.CompareTo(y.LastMessage.Id);
+            return x.LastMessage.Id > y.LastMessage.Id ? 0 : 1;
         }
     }
 }

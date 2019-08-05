@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChild} from "@angular/core";
 import {Chat} from "../../Data/Chat";
-import {AuthService} from "../../Auth/AuthService";
+import {AuthService} from "../../Services/AuthService";
 import {MatDialog, MatDrawer} from "@angular/material";
 import {animate, state, style, transition, trigger} from "@angular/animations";
 import {ConversationsFormatter} from "../../Formatters/ConversationsFormatter";

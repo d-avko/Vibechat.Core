@@ -1,20 +1,20 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {
+  HttpErrorResponse,
+  HttpEvent,
+  HttpHandler,
   HttpInterceptor,
   HttpRequest,
-  HttpResponse,
-  HttpHandler,
-  HttpEvent,
-  HttpErrorResponse
+  HttpResponse
 } from '@angular/common/http';
 
-import { Observable, throwError, from } from 'rxjs';
-import { map, catchError, switchMap } from 'rxjs/operators';
-import { SnackBarHelper } from '../Snackbar/SnackbarHelper';
-import { Router } from '@angular/router';
-import { ApiRequestsBuilder } from '../Requests/ApiRequestsBuilder';
-import { ServerResponse } from '../ApiModels/ServerResponse';
-import { AuthService } from '../Auth/AuthService';
+import {from, Observable, throwError} from 'rxjs';
+import {catchError, map, switchMap} from 'rxjs/operators';
+import {SnackBarHelper} from '../Snackbar/SnackbarHelper';
+import {Router} from '@angular/router';
+import {ApiRequestsBuilder} from '../Requests/ApiRequestsBuilder';
+import {ServerResponse} from '../ApiModels/ServerResponse';
+import {AuthService} from '../Services/AuthService';
 
 @Injectable()
 export class HttpResponseInterceptor implements HttpInterceptor {
@@ -25,12 +25,12 @@ export class HttpResponseInterceptor implements HttpInterceptor {
     public requestsBuilder: ApiRequestsBuilder,
     public authService: AuthService)
   {
-    
+
   }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     let token: string = localStorage.getItem('token');
-    
+
     if (!token || request.headers.has('unauthorized')) {
       return this.handleRequest(request, next);
     }

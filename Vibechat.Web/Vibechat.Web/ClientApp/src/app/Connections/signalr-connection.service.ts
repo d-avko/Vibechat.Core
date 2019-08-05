@@ -9,7 +9,7 @@ import {RemovedFromGroupModel} from "../Shared/RemovedFromGroupModel";
 import {AppUser} from "../Data/AppUser";
 import {ChatsService} from "../Services/ChatsService";
 import {MessageReportingService} from "../Services/MessageReportingService";
-import {AuthService} from "../Auth/AuthService";
+import {AuthService} from "../Services/AuthService";
 import {DHServerKeyExchangeService} from "../Encryption/DHServerKeyExchange";
 import {DeviceService} from "../Services/DeviceService";
 import {TypingService} from "../Services/TypingService";
@@ -49,7 +49,7 @@ export class SignalrConnection {
   public async Start(){
 
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl("/hubs/chat", { accessTokenFactory: () => this.auth.token, transport: HttpTransportType.WebSockets })
+      .withUrl("/hubs/chat", { accessTokenFactory: () => this.auth.token, transport: HttpTransportType.LongPolling })
       .build();
 
     this.messagesService.OnConnecting();

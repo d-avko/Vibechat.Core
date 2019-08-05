@@ -13,7 +13,7 @@ import {ChatRole} from "../Roles/ChatRole";
 import {ChatUsersDialogComponent} from "./ChatUsersDialog";
 import {AdminPanelDialog} from "./AdminPanelDialog";
 import {UsersService} from "../Services/UsersService";
-import {AuthService} from "../Auth/AuthService";
+import {AuthService} from "../Services/AuthService";
 
 export interface  GroupInfoData {
   Conversation: Chat;

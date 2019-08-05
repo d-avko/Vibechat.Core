@@ -146,7 +146,10 @@ namespace VibeChat.Web
 
                 var user = await userService.GetUserById(userId);
 
-                if (user.IsOnline) await SendUserBlocked(user.ConnectionId, whoSentId, blockType);
+                if (user.IsOnline && user.ConnectionId != null)
+                {
+                    await SendUserBlocked(user.ConnectionId, whoSentId, blockType);
+                }
 
                 return true;
             }
@@ -264,7 +267,10 @@ namespace VibeChat.Web
 
                 var addedUser = await chatsService.AddUserToConversation(chatId, userId);
 
-                if (addedUser.IsOnline) await Groups.AddToGroupAsync(addedUser.ConnectionId, chatId.ToString());
+                if (addedUser.IsOnline && addedUser.ConnectionId != null)
+                {
+                    await Groups.AddToGroupAsync(addedUser.ConnectionId, chatId.ToString());
+                }
 
                 await AddedToGroup(addedUser, chatId, Context.ConnectionId, true);
                 return true;
@@ -304,14 +310,20 @@ namespace VibeChat.Web
                     {
                         var userToSend = await userService.GetUserById(user.Id);
 
-                        if (userToSend.IsOnline) await RemovedFromGroup(user.Id, chat.Id);
+                        if (userToSend.IsOnline && userToSend.ConnectionId != null)
+                        {
+                            await RemovedFromGroup(user.Id, chat.Id);
+                        }
                     }
                 }
                 else
                 {
                     var userToSend = await userService.GetUserById(chat.DialogueUser.Id);
 
-                    if (userToSend.IsOnline) await RemovedFromDialog(userToSend.Id, userToSend.ConnectionId, chat.Id);
+                    if (userToSend.IsOnline && userToSend.ConnectionId != null)
+                    {
+                        await RemovedFromDialog(userToSend.Id, userToSend.ConnectionId, chat.Id);
+                    }
 
                     await RemovedFromDialog(whoSent.Id, Context.ConnectionId, chat.Id);
                 }
@@ -351,12 +363,12 @@ namespace VibeChat.Web
 
                 var userToSend = await userService.GetUserById(user.Id);
 
-                if (whoSent.IsOnline)
+                if (whoSent.IsOnline && whoSent.ConnectionId != null)
                 {
                     await AddedToDialog(new UserInfo {Id = whoSent.Id}, Context.ConnectionId, created.Id);
                 }
 
-                if (userToSend.IsOnline)
+                if (userToSend.IsOnline && userToSend.ConnectionId != null)
                 {
                     await AddedToDialog(new UserInfo {Id = userToSend.Id}, userToSend.ConnectionId, created.Id);
                 }
@@ -495,8 +507,10 @@ namespace VibeChat.Web
 
                 var userToSend = await userService.GetUserById(userToSendId);
 
-                if (userToSend.IsOnline)
+                if (userToSend.IsOnline && userToSend.ConnectionId != null)
+                {
                     await SendMessageToUser(message, whoSent.Id, userToSend.ConnectionId, conversationId);
+                }
 
                 return created.MessageID;
             }
@@ -533,7 +547,10 @@ namespace VibeChat.Web
                     User = whoSent.ToUserInfo()
                 };
 
-                if (user.IsOnline) await SendMessageToUser(toSend, whoSent.Id, user.ConnectionId, conversationId, true);
+                if (user.IsOnline && user.ConnectionId != null)
+                {
+                    await SendMessageToUser(toSend, whoSent.Id, user.ConnectionId, conversationId, true);
+                }
 
                 return toSend.Id;
             }
@@ -558,7 +575,10 @@ namespace VibeChat.Web
             {
                 var user = await userService.GetUserById(userId);
 
-                if (user.IsOnline) await SendDhParamTo(user.ConnectionId, param, thisUserId, chatId);
+                if (user.IsOnline && user.ConnectionId != null)
+                {
+                    await SendDhParamTo(user.ConnectionId, param, thisUserId, chatId);
+                }
             }
             catch (Exception ex)
             {
@@ -575,7 +595,10 @@ namespace VibeChat.Web
         {
             var user = await userService.GetUserById(whereTo);
 
-            if (user.IsOnline) await Clients.Client(user.ConnectionId).SendAsync("UserOnline", userId);
+            if (user.IsOnline && user.ConnectionId != null)
+            {
+                await Clients.Client(user.ConnectionId).SendAsync("UserOnline", userId);
+            }
         }
 
         private Task SendUserRoleChanged(int chatId, string userId, ChatRole newRole)

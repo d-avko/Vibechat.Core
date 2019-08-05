@@ -1,12 +1,13 @@
-import { LoginResponse } from "../ApiModels/LoginResponse";
-import { AppUser } from "../Data/AppUser";
-import { Router } from "@angular/router";
-import { ServerResponse } from "../ApiModels/ServerResponse";
-import { ApiRequestsBuilder } from "../Requests/ApiRequestsBuilder";
-import { Injectable } from '@angular/core';
+import {LoginResponse} from "../ApiModels/LoginResponse";
+import {AppUser} from "../Data/AppUser";
+import {Router} from "@angular/router";
+import {ServerResponse} from "../ApiModels/ServerResponse";
+import {ApiRequestsBuilder} from "../Requests/ApiRequestsBuilder";
+import {Injectable} from '@angular/core';
 import * as firebase from "firebase/app";
 import "firebase/auth";
-import { LoginRequest } from "../ApiModels/LoginRequest";
+import {LoginRequest} from "../ApiModels/LoginRequest";
+import * as jwtDecode from "jwt-decode";
 
 @Injectable({
   providedIn: 'root'
@@ -41,6 +42,8 @@ export class AuthService  {
   private confirmation: firebase.auth.ConfirmationResult;
 
   private phoneNumberToConfirm: string;
+
+  private MaxMillisecondsForTokenToExpire: number = 1000 * 60 * 2;
 
   public async SendSmsCode(phoneNumber: string, recaptcha: firebase.auth.RecaptchaVerifier) : Promise<boolean> {
     phoneNumber = this.NormalizeMobilePhone(phoneNumber);
@@ -114,7 +117,7 @@ export class AuthService  {
     this.token = newToken.response;
   }
 
-  public async RefreshToken(): Promise<ServerResponse<string>> {
+  public RefreshToken(): Promise<ServerResponse<string>> {
 
     let refreshToken: string = localStorage.getItem('refreshtoken');
 
@@ -123,7 +126,35 @@ export class AuthService  {
       return;
     }
 
-    return await this.requestsBuilder.RefreshJwtToken(refreshToken, this.User.id);
+    if(this.IsTokenExpired()){
+      return this.requestsBuilder.RefreshJwtToken(refreshToken, this.User.id);
+    }else{
+      let fakeResponse = new ServerResponse<string>();
+      fakeResponse.isSuccessfull = true;
+      fakeResponse.response = localStorage.getItem('token');
+      return Promise.resolve(fakeResponse);
+    }
+  }
+
+  public IsTokenExpired(){
+    let token = localStorage.getItem('token');
+
+    if(!token){
+      return true;
+    }
+
+    class tokenDto{
+      exp: number;
+    }
+
+    try {
+        let decoded = jwtDecode<tokenDto>(token);
+        let x = new Date().getTime();
+        return (decoded.exp - this.MaxMillisecondsForTokenToExpire) <= x;
+    }
+    catch (e) {
+        return true;
+    }
   }
 
   public OnUserLoggedIn(credentials: LoginResponse): void {
