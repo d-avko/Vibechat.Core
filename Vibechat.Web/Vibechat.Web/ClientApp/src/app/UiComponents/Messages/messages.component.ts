@@ -78,9 +78,9 @@ export class MessagesComponent implements AfterViewChecked, AfterContentInit, Af
 
   public static MessagesToScrollForGoBackButtonToShowUp: number = 20;
 
-  public static MessagesBufferLength: number = 50;
+  public static MessagesBufferLength: number = 5;
 
-  public MaxErrorInPixels: number = 25;
+  public MaxErrorInPixels: number = 75;
 
   @ViewChild(CdkVirtualScrollViewport, { static: false }) viewport: CdkVirtualScrollViewport;
 
@@ -99,6 +99,7 @@ export class MessagesComponent implements AfterViewChecked, AfterContentInit, Af
     if (changes.CurrentConversation != undefined) {
       this.IsScrollingAssistNeeded = false;
       this.IsConversationHistoryEnd = false;
+      this.IsRecentMessagesEnd = false;
       this.SelectedMessages = new Array<Message>();
       await this.UpdateMessagesIfNotUpdated();
       await this.ReadMessagesInGroup();
@@ -111,6 +112,7 @@ export class MessagesComponent implements AfterViewChecked, AfterContentInit, Af
     if (!this.CurrentConversation.messages || this.CurrentConversation.messages.length == 0) {
       return;
     }
+
     if(!this.CurrentConversation.isGroup){
       this.ReadMessagesInViewport();
     }
@@ -135,7 +137,7 @@ export class MessagesComponent implements AfterViewChecked, AfterContentInit, Af
   }
 
   public ReadMessagesInGroup(){
-    return this.chatsService.ReadExistingMessagesInGroup(MessagesComponent.MessagesBufferLength);
+    return this.chatsService.ReadExistingMessagesInGroup();
   }
 
   public ViewImage(event: Event, image: Message) {
@@ -205,14 +207,14 @@ export class MessagesComponent implements AfterViewChecked, AfterContentInit, Af
 
       let result = await this.chatsService.UpdateRecentMessages(MessagesComponent.MessagesBufferLength, currentChat);
 
+      this.RecentMessagesLoading = false;
+
       if (result == null || result.length == 0) {
-        this.RecentMessagesLoading = false;
         this.IsRecentMessagesEnd = true;
         return;
       }
 
       if (!this.CurrentConversation) {
-        this.RecentMessagesLoading = false;
         return;
       }
 
@@ -220,13 +222,14 @@ export class MessagesComponent implements AfterViewChecked, AfterContentInit, Af
         this.ScrollToLastMessage();
       }
 
-      this.RecentMessagesLoading = false;
+      this.IsRecentMessagesEnd = false;
     }
 
   }
 
   public async DeleteMessages() {
     await this.chatsService.DeleteMessages(this.SelectedMessages, this.CurrentConversation);
+    this.SelectedMessages.splice(0, this.SelectedMessages.length);
   }
 
   public ForwardMessages() {
@@ -256,8 +259,9 @@ export class MessagesComponent implements AfterViewChecked, AfterContentInit, Af
 
     if (this.CurrentConversation.messages.length <= 1) {
       await this.UpdateHistory();
-      await this.UpdateRecentMessages();
     }
+
+    await this.UpdateRecentMessages();
   }
 
   public ViewUserInfo(event: any, user: AppUser) {
@@ -319,10 +323,10 @@ export class MessagesComponent implements AfterViewChecked, AfterContentInit, Af
     let currentOffset = this.viewport.measureScrollOffset();
     let viewPortSize = this.viewport.getViewportSize();
     let messages = this.viewport.elementRef.nativeElement.children.item(0).children;
-    let startBoundary = 0;
-    let endBoundary = 0;
+    let startBoundary: number;
+    let endBoundary: number;
     let offset = 0;
-    let index = 0;
+    let index: number;
 
     for (index = 0; index < messages.length && offset < currentOffset; ++index) {
       offset += messages.item(index).clientHeight;
@@ -364,7 +368,9 @@ export class MessagesComponent implements AfterViewChecked, AfterContentInit, Af
       this.IsScrollingAssistNeeded = false;
     }
 
-    if(this.viewport.elementRef.nativeElement.scrollTop
+    let viewSize = this.viewport.getViewportSize();
+
+    if(this.viewport.elementRef.nativeElement.scrollTop + viewSize
       >= this.viewport.elementRef.nativeElement.scrollHeight - this.MaxErrorInPixels){
       await this.UpdateRecentMessages();
     }
@@ -409,11 +415,13 @@ export class MessagesComponent implements AfterViewChecked, AfterContentInit, Af
       message.timeReceived = new Date(<string>message.timeReceived);
     }
 
-    if (typeof this.CurrentConversation.messages[messageIndex - 1].timeReceived !== 'object') {
-      this.CurrentConversation.messages[messageIndex - 1].timeReceived = new Date(<string>this.CurrentConversation.messages[messageIndex - 1].timeReceived);
+    let previousMessage = this.CurrentConversation.messages[messageIndex - 1];
+
+    if (typeof previousMessage.timeReceived !== 'object') {
+      previousMessage.timeReceived = new Date(<string>previousMessage.timeReceived);
     }
 
-    return (<Date>message.timeReceived).getDay() != (<Date>this.CurrentConversation.messages[messageIndex - 1].timeReceived).getDay();
+    return (<Date>message.timeReceived).getDay() != (<Date>previousMessage.timeReceived).getDay();
   }
 
   public IsLastMessage(message: Message): boolean {

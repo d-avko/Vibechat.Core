@@ -10,7 +10,6 @@ using VibeChat.Web.ChatData;
 using Vibechat.Web.Data.Repositories;
 using Vibechat.Web.Extensions;
 using Vibechat.Web.Services.FileSystem;
-using static VibeChat.Web.Controllers.UsersController;
 
 namespace Vibechat.Web.Services.Users
 {
@@ -152,24 +151,16 @@ namespace Vibechat.Web.Services.Users
 
             try
             {
-                using (var buffer = new MemoryStream())
-                {
-                    image.CopyTo(buffer);
-                    buffer.Seek(0, SeekOrigin.Begin);
+                var (thumbnail, fullsized) = await imagesService.SaveProfileOrChatPicture(image, image.FileName, userId, userId);
 
-                    //thumbnail; fullsized
-                    thumbnailFull =
-                        await imagesService.SaveProfileOrChatPicture(image, buffer, image.FileName, userId, userId);
+                await usersRepository.UpdateAvatar(thumbnail, fullsized, userId);
 
-                    await usersRepository.UpdateAvatar(thumbnailFull.Item1, thumbnailFull.Item2, userId);
-
-                    await unitOfWork.Commit();
-                }
+                await unitOfWork.Commit();
 
                 return new UpdateProfilePictureResponse
                 {
-                    ThumbnailUrl = thumbnailFull.Item1,
-                    FullImageUrl = thumbnailFull.Item2
+                    ThumbnailUrl = thumbnail,
+                    FullImageUrl = fullsized
                 };
             }
             catch (Exception ex)
