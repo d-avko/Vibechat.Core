@@ -62,6 +62,7 @@ export class SignalrConnection {
       setTimeout(() => {
         this.Start();
       }, SignalrConnection.DisconnectTimeout);
+      return;
     }
 
     this.InitiateConnections(this.chats.GetConversationsIds());

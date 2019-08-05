@@ -1,7 +1,9 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Extensions.DependencyInjection;
 using VibeChat.Web;
 using Vibechat.Web.AuthHelpers;
+using VibeChat.Web.ChatData;
 using Vibechat.Web.Data.Repositories;
 using Vibechat.Web.Data_Layer.Repositories;
 using Vibechat.Web.Middleware;
@@ -63,6 +65,7 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddScoped<CryptoService, CryptoService>();
             services.AddSingleton<UsersSubsriptionService, UsersSubsriptionService>();
             services.AddScoped<UnitOfWork, UnitOfWork>();
+            services.AddScoped<IComparer<Chat>, ChatComparer>();
         }
     }
 }
