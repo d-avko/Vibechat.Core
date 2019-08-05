@@ -67,6 +67,7 @@ export class ChatsService {
 
     if(!response.response){
       this.Conversations = new Array<Chat>();
+      this.CurrentConversation = null;
       return;
     }
 

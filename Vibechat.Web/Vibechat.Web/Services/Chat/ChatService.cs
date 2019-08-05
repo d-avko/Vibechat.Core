@@ -34,6 +34,7 @@ namespace Vibechat.Web.Services
         private readonly IAttachmentRepository attachmentRepository;
 
         private readonly BansService bansService;
+        private readonly IComparer<Chat> chatComparer;
 
         private readonly IChatDataProvider chatDataProvider;
 
@@ -68,8 +69,9 @@ namespace Vibechat.Web.Services
             IChatRolesRepository rolesRepository,
             FilesService imagesService,
             UnitOfWork unitOfWork,
-            BansService bansService)
-        {
+            BansService bansService,
+            IComparer<Chat> chatComparer)
+        { 
             this.chatDataProvider = chatDataProvider;
             this.usersRepository = usersRepository;
             this.messagesRepository = messagesRepository;
@@ -83,6 +85,7 @@ namespace Vibechat.Web.Services
             this.imagesService = imagesService;
             this.unitOfWork = unitOfWork;
             this.bansService = bansService;
+            this.chatComparer = chatComparer;
         }
 
         #region Conversations
@@ -451,7 +454,14 @@ namespace Vibechat.Web.Services
         {
             return (await rolesRepository.GetAsync(chatId, userid)).ToChatRole();
         }
-
+        
+        /// <summary>
+        /// Returns chats sorted by most recent last message.
+        /// </summary>
+        /// <param name="deviceId"></param>
+        /// <param name="whoAccessedId"></param>
+        /// <returns></returns>
+        /// <exception cref="FormatException"></exception>
         public async Task<List<Chat>> GetConversations(string deviceId, string whoAccessedId)
         {
             var defaultError = new FormatException("User info provided was not correct.");
@@ -489,16 +499,20 @@ namespace Vibechat.Web.Services
                 dtoChat.ChatRole = await GetChatRole(whoAccessedId, conversation.Id);
 
                 if (conversation.IsGroup)
-                    foreach (var User in dtoChat.Participants)
+                {
+                    foreach (var user in dtoChat.Participants)
                     {
-                        User.IsBlockedInConversation =
-                            await bansService.IsBannedFromConversation(conversation.Id, User.Id);
-                        User.ChatRole = await GetChatRole(User.Id, conversation.Id);
+                        user.IsBlockedInConversation =
+                            await bansService.IsBannedFromConversation(conversation.Id, user.Id);
+                        user.ChatRole = await GetChatRole(user.Id, conversation.Id);
                     }
+                }
 
                 returnData.Add(dtoChat);
             }
 
+            returnData.Sort(this.chatComparer);
+            
             return returnData;
         }
 
