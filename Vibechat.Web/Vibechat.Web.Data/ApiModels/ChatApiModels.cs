@@ -1,3 +1,4 @@
+
 using Vibechat.Web.Data.Messages;
 
 namespace Vibechat.Web.ApiModels
@@ -16,18 +17,6 @@ namespace Vibechat.Web.ApiModels
         public string UsernameToFind { get; set; }
 
         public int ChatId { get; set; }
-    }
-
-    public class GetChatsRequest
-    {
-        public string deviceId { get; set; }
-    }
-
-    public class GetByIdRequest
-    {
-        public int conversationId { get; set; }
-
-        public bool updateRoles { get; set; }
     }
 
     public class SetLastMessageRequest

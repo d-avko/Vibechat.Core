@@ -14,7 +14,10 @@ using Vibechat.Web.Services.FileSystem;
 
 namespace Vibechat.Web.Controllers
 {
-    public class FilesController : Controller
+    [Route("api/v1/[controller]")]
+    [Produces("application/json")]
+    [ApiController]
+    public class FilesController : ControllerBase
     {
         public static int MaxImageLengthMB = 5;
 
@@ -28,7 +31,8 @@ namespace Vibechat.Web.Controllers
         public FilesService filesService { get; }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("Files/UploadImages")]
+        [Route("[action]")]
+        [HttpPost]
         public async Task<ResponseApiModel<FilesUploadResponse>> UploadImages([FromForm] UploadImagesRequest request)
         {
             var result = new FilesUploadResponse {UploadedFiles = new List<MessageAttachment>()};
@@ -91,7 +95,8 @@ namespace Vibechat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("Files/UploadFile")]
+        [Route("[action]")]
+        [HttpPost]
         public async Task<ResponseApiModel<MessageAttachment>> UploadFile([FromForm] UploadFileRequest request)
         {
             if (request.file.Length > 1024 * 1024 * MaxFileLengthMB)

@@ -809,6 +809,16 @@ export class ChatsService {
         && x.isSecure == secure);
   }
 
+  public async GetById(id: number){
+    let result = await this.requestsBuilder.GetConversationById(id, true);
+
+    if(!result.isSuccessfull){
+      return null;
+    }
+
+    return result.response;
+  }
+
   public async UpdateExisting(target: Chat) : Promise<void> {
     let result = await this.requestsBuilder.GetConversationById(target.id, true);
 

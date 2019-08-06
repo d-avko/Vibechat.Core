@@ -8,11 +8,11 @@ using Microsoft.Extensions.Logging;
 using VibeChat.Web.ApiModels;
 using VibeChat.Web.ChatData;
 using Vibechat.Web.Data.Conversations;
-using Vibechat.Web.Data.Repositories;
 using Vibechat.Web.Extensions;
 using Vibechat.Web.Services;
 using Vibechat.Web.Services.Bans;
 using Vibechat.Web.Services.Extension_methods;
+using Vibechat.Web.Services.Messages;
 using Vibechat.Web.Services.Users;
 using VibeChat.Web.UserProviders;
 
@@ -27,7 +27,7 @@ namespace VibeChat.Web
         }
 
         private readonly UsersSubsriptionService subscriptionService;
-        private readonly UnitOfWork unitOfWork;
+        private readonly MessagesService messagesService;
 
 
         public ChatsHub(
@@ -37,7 +37,7 @@ namespace VibeChat.Web
             BansService bansService,
             ILogger<ChatsHub> logger,
             UsersSubsriptionService subscriptionService,
-            UnitOfWork unitOfWork)
+            MessagesService messagesService)
         {
             this.userProvider = userProvider;
             this.userService = userService;
@@ -45,7 +45,7 @@ namespace VibeChat.Web
             this.bansService = bansService;
             this.logger = logger;
             this.subscriptionService = subscriptionService;
-            this.unitOfWork = unitOfWork;
+            this.messagesService = messagesService;
         }
 
         private ICustomHubUserIdProvider userProvider { get; }
@@ -415,7 +415,7 @@ namespace VibeChat.Web
                     return false;
                 }
                 
-                await chatsService.MarkMessageAsRead(msgId, conversationId, whoSent.Id);
+                await messagesService.MarkMessageAsRead(msgId, conversationId, whoSent.Id);
 
                 await MessageReadInDialog(
                     conversation.DialogueUser.IsOnline ? conversation.DialogueUser.ConnectionId : null, msgId, conversationId);
@@ -456,9 +456,9 @@ namespace VibeChat.Web
                 MessageDataModel created;
 
                 if (message.IsAttachment)
-                    created = await chatsService.AddAttachmentMessage(message, groupId, whoSent.Id);
+                    created = await messagesService.AddAttachmentMessage(message, groupId, whoSent.Id);
                 else
-                    created = await chatsService.AddMessage(message, groupId, whoSent.Id);
+                    created = await messagesService.AddMessage(message, groupId, whoSent.Id);
 
                 message.TimeReceived = created.TimeReceived.ToUTCString();
                 message.Id = created.MessageID;
@@ -497,9 +497,9 @@ namespace VibeChat.Web
                 MessageDataModel created;
 
                 if (message.IsAttachment)
-                    created = await chatsService.AddAttachmentMessage(message, conversationId, whoSent.Id);
+                    created = await messagesService.AddAttachmentMessage(message, conversationId, whoSent.Id);
                 else
-                    created = await chatsService.AddMessage(message, conversationId, whoSent.Id);
+                    created = await messagesService.AddMessage(message, conversationId, whoSent.Id);
 
                 message.TimeReceived = created.TimeReceived.ToUTCString();
                 message.Id = created.MessageID;
@@ -535,7 +535,7 @@ namespace VibeChat.Web
             {
                 await chatsService.ValidateDialog(whoSent.Id, userId, conversationId);
                 var user = await userService.GetUserById(userId);
-                var created = await chatsService.AddEncryptedMessage(encryptedMessage, conversationId, whoSent.Id);
+                var created = await messagesService.AddEncryptedMessage(encryptedMessage, conversationId, whoSent.Id);
 
                 var toSend = new Message
                 {

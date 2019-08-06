@@ -3,9 +3,9 @@
   <!--since virtual scroll doesn't work with items of variable height, load everything-->
 
   <cdk-virtual-scroll-viewport *ngIf="chatsService.CurrentConversation.messages && chatsService.CurrentConversation.messages.length"
-                               (scrolledIndexChange)="OnMessagesScrolled($event)"
-                               minBufferPx="120000"
-                               maxBufferPx="250000"
+                               (scrolledIndexChange)="OnMessagesScrolled()"
+                               minBufferPx="12000000"
+                               maxBufferPx="25000000"
                                itemSize="50"
                                class="messages_main">
 

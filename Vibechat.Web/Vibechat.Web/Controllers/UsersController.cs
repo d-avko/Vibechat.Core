@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Vibechat.Web.ApiModels;
 using VibeChat.Web.ChatData;
@@ -12,7 +11,10 @@ using Vibechat.Web.Services.Users;
 
 namespace VibeChat.Web.Controllers
 {
-    public class UsersController : Controller
+    [Route("api/v1/[controller]")]
+    [Produces("application/json")]
+    [ApiController]
+    public class UsersController : ControllerBase
     {
         protected UsersService mUsersService;
 
@@ -26,18 +28,15 @@ namespace VibeChat.Web.Controllers
 
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Users/GetById")]
-        public async Task<ResponseApiModel<UserInfo>> GetById([FromBody] UserByIdApiModel request)
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<ResponseApiModel<UserInfo>> GetById(string id)
         {
             try
             {
-                var user = await mUsersService.GetUserById(request);
-
-                user.IsMessagingRestricted =
-                    BansService.IsBannedFromMessagingWith(JwtHelper.GetNamedClaimValue(User.Claims), request.Id);
-
-                user.IsBlocked =
-                    BansService.IsBannedFromMessagingWith(request.Id, JwtHelper.GetNamedClaimValue(User.Claims));
+                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+                
+                var user = await mUsersService.GetUserById(id,thisUserId);
 
                 return new ResponseApiModel<UserInfo>
                 {
@@ -58,7 +57,8 @@ namespace VibeChat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Users/ChangeName")]
+        [HttpPost]
+        [Route("[action]")]
         public async Task<ResponseApiModel<bool>> ChangeName([FromBody] ChangeNameRequest request)
         {
             try
@@ -83,7 +83,8 @@ namespace VibeChat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Users/ChangeUsername")]
+        [HttpPost]
+        [Route("[action]")]
         public async Task<ResponseApiModel<bool>> ChangeUsername([FromBody] ChangeNameRequest request)
         {
             try
@@ -108,8 +109,9 @@ namespace VibeChat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Users/ChangeInfo")]
-        public async Task<ResponseApiModel<bool>> ChangeUsername([FromBody] UpdateUserInfoRequest request)
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<ResponseApiModel<bool>> ChangeInfo([FromBody] UpdateUserInfoRequest request)
         {
             try
             {
@@ -133,7 +135,8 @@ namespace VibeChat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Users/ChangeLastName")]
+        [HttpPost]
+        [Route("[action]")]
         public async Task<ResponseApiModel<bool>> ChangeLastName([FromBody] ChangeNameRequest request)
         {
             try
@@ -158,7 +161,8 @@ namespace VibeChat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Users/FindByNickname")]
+        [HttpPost]
+        [Route("[action]")]
         public async Task<ResponseApiModel<UsersByNickNameResultApiModel>> FindByNickName(
             [FromBody] UsersByNickNameApiModel credentials)
         {
@@ -186,8 +190,9 @@ namespace VibeChat.Web.Controllers
 
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Users/ChangePublicState")]
-        public async Task<ResponseApiModel<bool>> ChangeUserIsPublicState(
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<ResponseApiModel<bool>> ChangePublicState(
             [FromBody] ChangeUserIsPublicStateRequest request)
         {
             try
@@ -215,7 +220,8 @@ namespace VibeChat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Users/Block")]
+        [HttpPost]
+        [Route("[action]")]
         public async Task<ResponseApiModel<bool>> Block([FromBody] BlockRequest request)
         {
             try
@@ -243,7 +249,8 @@ namespace VibeChat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Users/UpdateProfilePicture")]
+        [HttpPost]
+        [Route("[action]")]
         public async Task<ResponseApiModel<UpdateProfilePictureResponse>> UpdateProfilePicture(
             [FromForm] UpdateProfilePictureRequest request)
         {
@@ -269,7 +276,8 @@ namespace VibeChat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Users/GetContacts")]
+        [HttpPost]
+        [Route("[action]")]
         public async Task<ResponseApiModel<List<UserInfo>>> GetContacts()
         {
             try
@@ -293,7 +301,8 @@ namespace VibeChat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Users/AddToContacts")]
+        [HttpPost]
+        [Route("[action]")]
         public async Task<ResponseApiModel<bool>> AddToContacts([FromBody] UserInfoRequest request)
         {
             try
@@ -317,7 +326,8 @@ namespace VibeChat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Users/RemoveFromContacts")]
+        [HttpPost]
+        [Route("[action]")]
         public async Task<ResponseApiModel<bool>> RemoveFromContacts([FromBody] UserInfoRequest request)
         {
             try
@@ -341,33 +351,8 @@ namespace VibeChat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Users/isBanned")]
-        public async Task<ResponseApiModel<bool>> IsBanned([FromBody] IsBannedRequest request)
-        {
-            try
-            {
-                var result = BansService.IsBannedFromMessagingWith(
-                    request.userid,
-                    request.byWhom);
-
-                return new ResponseApiModel<bool>
-                {
-                    IsSuccessfull = true,
-                    Response = result
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ResponseApiModel<bool>
-                {
-                    ErrorMessage = ex.Message,
-                    IsSuccessfull = false
-                };
-            }
-        }
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [Route("api/Users/Unban")]
+        [HttpPost]
+        [Route("[action]")]
         public async Task<ResponseApiModel<bool>> Unban([FromBody] UnbanRequest request)
         {
             try
@@ -391,6 +376,5 @@ namespace VibeChat.Web.Controllers
                 };
             }
         }
-        
     }
 }

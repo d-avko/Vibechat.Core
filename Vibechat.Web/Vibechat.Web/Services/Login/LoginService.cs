@@ -49,7 +49,7 @@ namespace Vibechat.Web.Services.Login
                 {
                     var username = "Generated_" + Guid.NewGuid();
 
-                    var token = await RegisterNewUserAsync(new RegisterInformationApiModel
+                    var token = await RegisterNewUserAsync(new RegisterModel
                     {
                         PhoneNumber = loginCredentials.PhoneNumber,
                         UserName = username,
@@ -81,7 +81,7 @@ namespace Vibechat.Web.Services.Login
         /// </summary>
         /// <param name="userToRegister"></param>
         /// <returns></returns>
-        private async Task<string> RegisterNewUserAsync(RegisterInformationApiModel userToRegister)
+        private async Task<string> RegisterNewUserAsync(RegisterModel userToRegister)
         {
             var defaultError = new FormatException("Check the fields and try again.");
 

@@ -74,7 +74,7 @@
           </div>
 
           <searchlist-view *ngIf="SearchString != null && SearchString !== ''"
-                           [LocalConversations]="conversationsService.Conversations"
+                           [LocalConversations]="chats.Conversations"
                            (OnViewUser)="OnViewUserInfo($event, null)"
                            (OnViewConversation)="OnViewGroupInfo($event)"
                            (OnViewLocalConversation)="ChangeConversation($event)"
@@ -83,9 +83,9 @@
           </searchlist-view>
 
           <conversationslist-view *ngIf="SearchString == null || SearchString === ''"
-                                  [CurrentConversation]="conversationsService.CurrentConversation"
+                                  [CurrentConversation]="chats.CurrentConversation"
                                   class="conversations_wrapper_conversations"
-                                  [Conversations]="conversationsService.Conversations"
+                                  [Conversations]="chats.Conversations"
                                   (OnSelectedConversationChanged)="ChangeConversation($event)">
 
           </conversationslist-view>
@@ -95,18 +95,18 @@
         <div *ngIf="IsConversationSelected()" class="messages_wrapper">
 
           <conversationHeader-view class="messages_wrapper_header"
-                                   (OnViewGroupInfo)="OnViewGroupInfo(conversationsService.CurrentConversation)"
+                                   (OnViewGroupInfo)="OnViewGroupInfo(chats.CurrentConversation)"
                                    (OnGoback)="ChangeChat(null)"
-                                   [Conversation]="conversationsService.CurrentConversation"></conversationHeader-view>
+                                   [Conversation]="chats.CurrentConversation"></conversationHeader-view>
 
           <messages-view class="messages_wrapper_messages"
-                         [CurrentConversation]="conversationsService.CurrentConversation"
+                         [CurrentConversation]="chats.CurrentConversation"
                          (OnViewUserInfo)="OnViewUserInfo($event, null)"></messages-view>
 
 
           <input-view class="messages_wrapper_input"
                       [User]="auth.User"
-                      [Conversation]="conversationsService.CurrentConversation"
+                      [Conversation]="chats.CurrentConversation"
                       (OnSendMessage)="OnSendMessage($event)"
                       (OnViewUserInfo)="OnViewUserInfo($event)"></input-view>
 

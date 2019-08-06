@@ -1,4 +1,4 @@
-import { UAParser } from "ua-parser-js";
+import {UAParser} from "ua-parser-js";
 
 export class DeviceService {
 
@@ -7,9 +7,7 @@ export class DeviceService {
     this.deviceId = (window.devicePixelRatio * window.screen.colorDepth * window.screen.pixelDepth).toString();
   }
 
-  public isSecureChatsSupported: boolean = false;
-
-  private deviceId : string;
+  private readonly deviceId : string;
 
   private browserName: string;
 

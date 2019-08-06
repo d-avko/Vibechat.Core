@@ -15,8 +15,6 @@ import {ChatsService} from "../../Services/ChatsService";
 import {ThemesService} from "../../Theming/ThemesService";
 import {ChooseContactDialogComponent} from "../../Dialogs/ChooseContactDialog";
 import {SnackBarHelper} from "../../Snackbar/SnackbarHelper";
-import {DeviceService} from "../../Services/DeviceService";
-import {Router} from "@angular/router";
 
 @Component({
   selector: 'chat-root',
@@ -51,15 +49,9 @@ export class ChatComponent implements OnInit {
     public formatter: ConversationsFormatter,
     public auth: AuthService,
     private usersService: UsersService,
-    private conversationsService: ChatsService,
+    private chats: ChatsService,
     private themesService: ThemesService,
-    private snackBar: SnackBarHelper,
-    private device: DeviceService,
-    private router: Router) { }
-
-  get IsSecureChatsSupported() {
-    return this.device.isSecureChatsSupported;
-  }
+    private snackBar: SnackBarHelper) { }
 
   async ngOnInit(): Promise<void> {
     await this.auth.RefreshLocalData();
@@ -93,12 +85,12 @@ export class ChatComponent implements OnInit {
       data: {
         Conversation: group,
         user: this.auth.User,
-        ExistsInThisGroup: this.conversationsService.ExistsIn(group.id)
+        ExistsInThisGroup: this.chats.ExistsIn(group.id)
       }
     });
 
     groupInfoRef.afterOpened().subscribe(async () => {
-      await this.conversationsService.UpdateExisting(group);
+      await this.chats.UpdateExisting(group);
 
       if (!groupInfoRef.componentInstance) {
         return;
@@ -117,15 +109,16 @@ export class ChatComponent implements OnInit {
         groupInfoRef.close();
         this.OnJoinGroup(group);
       });
+
   }
 
   public ChangeChat(chat: Chat) {
-    this.conversationsService.ChangeConversation(chat);
+    this.chats.ChangeConversation(chat);
   }
 
   public OnLogOut(): void {
     this.auth.LogOut();
-    this.conversationsService.OnLogOut();
+    this.chats.OnLogOut();
   }
 
   public CreateSecureChat() {
@@ -139,7 +132,7 @@ export class ChatComponent implements OnInit {
           return;
         }
 
-        if (!this.conversationsService.CreateSecureChat(user)) {
+        if (!this.chats.CreateSecureChat(user)) {
           this.snackBar.openSnackBar('Unable to create the chat with this user. Probably there already exists one.', 3);
         }
       }
@@ -148,8 +141,9 @@ export class ChatComponent implements OnInit {
 
   public OnJoinGroup(conversation: Chat) {
     this.SearchString = '';
-    this.conversationsService.JoinGroup(conversation);
+    this.chats.JoinGroup(conversation);
   }
+
 
   public async OnViewUserInfo(user: AppUser, chat: Chat) {
     const userInfoRef = this.dialog.open(UserInfoDialogComponent, {
@@ -180,10 +174,11 @@ export class ChatComponent implements OnInit {
         userInfoRef.componentInstance.data.user = updatedUser;
       }
     });
+
   }
 
   public CreateDialogWith(user: AppUser) {
-    this.conversationsService.CreateDialogWith(user, false);
+    this.chats.CreateDialogWith(user, false);
   }
 
   public async Search() {
@@ -208,22 +203,22 @@ export class ChatComponent implements OnInit {
         return;
       }
 
-      await this.conversationsService.CreateGroup(result.name, result.isPublic);
+      await this.chats.CreateGroup(result.name, result.isPublic);
     });
   }
 
   public IsConversationSelected(): boolean {
-    return this.conversationsService.IsConversationSelected();
+    return this.chats.IsConversationSelected();
   }
 
   public async UpdateConversations() {
-    await this.conversationsService.UpdateConversations();
+    await this.chats.UpdateConversations();
   }
 
   public async ChangeConversationTo(conversation: Chat) {
     this.SearchString = '';
-    await this.conversationsService.ChangeConversation(null);
-    await this.conversationsService.ChangeConversation(conversation);
+    await this.chats.ChangeConversation(null);
+    await this.chats.ChangeConversation(conversation);
   }
 
   public async ChangeConversation(conversation: Chat) {
@@ -231,7 +226,7 @@ export class ChatComponent implements OnInit {
 
     this.SearchString = '';
 
-    await this.conversationsService.ChangeConversation(conversation);
+    await this.chats.ChangeConversation(conversation);
   }
 
   public IsMobileDevice() {
@@ -241,7 +236,7 @@ export class ChatComponent implements OnInit {
   //input events
 
   public async OnSendMessage(message: string) {
-    await this.conversationsService.SendMessage(message, this.conversationsService.CurrentConversation);
+    await this.chats.SendMessage(message, this.chats.CurrentConversation);
     this.messages.ScrollToLastMessage();
   }
 }

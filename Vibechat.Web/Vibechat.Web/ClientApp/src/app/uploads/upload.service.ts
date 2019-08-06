@@ -1,11 +1,17 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {
-  HttpClient, HttpEvent, HttpEventType, HttpRequest, HttpErrorResponse, HttpHeaders, HttpResponse
+  HttpClient,
+  HttpErrorResponse,
+  HttpEvent,
+  HttpEventType,
+  HttpHeaders,
+  HttpRequest,
+  HttpResponse
 } from '@angular/common/http';
 
-import { of, Observable } from 'rxjs';
-import { catchError, last, map, tap } from 'rxjs/operators';
-import { SnackBarHelper } from '../Snackbar/SnackbarHelper';
+import {Observable, of} from 'rxjs';
+import {catchError, last, map, tap} from 'rxjs/operators';
+import {SnackBarHelper} from '../Snackbar/SnackbarHelper';
 
 @Injectable()
 export class UploaderService {
@@ -37,7 +43,7 @@ export class UploaderService {
     let headers = new HttpHeaders();
     headers = headers.append("ngsw-bypass", "");
 
-    const req = new HttpRequest('POST', '/Files/UploadImages', data, {
+    const req = new HttpRequest('POST', '/api/v1/Files/UploadImages', data, {
       reportProgress: true,
       headers: headers
     });
@@ -66,7 +72,7 @@ export class UploaderService {
     let headers = new HttpHeaders();
     headers = headers.append("ngsw-bypass", "");
 
-    const req = new HttpRequest('POST', 'api/Conversations/UpdateThumbnail', data, {
+    const req = new HttpRequest('POST', 'api/v1/Chats/UpdateThumbnail', data, {
       reportProgress: true,
       headers: headers
     });
@@ -94,7 +100,7 @@ export class UploaderService {
     let headers = new HttpHeaders();
     headers = headers.append("ngsw-bypass", "");
 
-    const req = new HttpRequest('POST', 'api/Users/UpdateProfilePicture', data, {
+    const req = new HttpRequest('POST', 'api/v1/Users/UpdateProfilePicture', data, {
       reportProgress: true,
       headers: headers
     });
@@ -123,7 +129,7 @@ export class UploaderService {
     let headers = new HttpHeaders();
     headers = headers.append("ngsw-bypass", "");
 
-    const req = new HttpRequest('POST', 'Files/UploadFile', data, {
+    const req = new HttpRequest('POST', '/api/v1/Files/UploadFile', data, {
       reportProgress: true,
       headers: headers
     });
@@ -163,8 +169,7 @@ export class UploaderService {
 
       case HttpEventType.UploadProgress:
         // Compute and show the % done:
-        const percentDone = Math.round(100 * event.loaded / event.total);
-        return percentDone;
+        return Math.round(100 * event.loaded / event.total);
 
       case HttpEventType.Response:
         return 100;
@@ -183,7 +188,7 @@ export class UploaderService {
 
     return (error: HttpErrorResponse) => {
 
-      console.error(error); 
+      console.error(error);
 
       const message = (error.error instanceof Error) ?
         error.error.message :

@@ -9,6 +9,7 @@ using Vibechat.Web.ApiModels;
 using VibeChat.Web.ChatData;
 using Vibechat.Web.Data.Repositories;
 using Vibechat.Web.Extensions;
+using Vibechat.Web.Services.Bans;
 using Vibechat.Web.Services.FileSystem;
 
 namespace Vibechat.Web.Services.Users
@@ -20,29 +21,51 @@ namespace Vibechat.Web.Services.Users
         private readonly IContactsRepository contactsRepository;
         private readonly FilesService imagesService;
         private readonly UnitOfWork unitOfWork;
+        private readonly BansService bansService;
         private readonly IUsersRepository usersRepository;
 
         public UsersService(
             IUsersRepository usersRepository,
             FilesService imagesService,
             IContactsRepository contactsRepository,
-            UnitOfWork unitOfWork)
+            UnitOfWork unitOfWork,
+            BansService bansService)
         {
             this.usersRepository = usersRepository;
             this.imagesService = imagesService;
             this.contactsRepository = contactsRepository;
             this.unitOfWork = unitOfWork;
+            this.bansService = bansService;
         }
 
-        public async Task<UserInfo> GetUserById(UserByIdApiModel userId)
+        public async Task<UserInfo> GetUserById(string userId, string callerId)
         {
             if (userId == null) throw new FormatException("Provided user was null");
 
-            var FoundUser = await usersRepository.GetById(userId.Id);
+            var foundUser = await usersRepository.GetById(userId);
+ 
+            if (foundUser == null) throw new FormatException("User was not found");
 
-            if (FoundUser == null) throw new FormatException("User was not found");
+            var user = foundUser.ToUserInfo();
+            
+            user.IsMessagingRestricted =
+                bansService.IsBannedFromMessagingWith(callerId, userId);
 
-            return FoundUser.ToUserInfo();
+            user.IsBlocked =
+                bansService.IsBannedFromMessagingWith(userId, callerId);
+
+            return foundUser.ToUserInfo();
+        }
+        
+        public async Task<AppUser> GetUserById(string userId)
+        {
+            if (userId == null) throw new FormatException("Provided user was null");
+
+            var foundUser = await usersRepository.GetById(userId);
+ 
+            if (foundUser == null) throw new FormatException("User was not found");
+
+            return foundUser;
         }
 
 
@@ -125,17 +148,6 @@ namespace Vibechat.Web.Services.Users
             await usersRepository.ChangeLastName(newName, whoCalled);
 
             await unitOfWork.Commit();
-        }
-
-        public async Task<AppUser> GetUserById(string userId)
-        {
-            if (userId == null) throw new FormatException("Provided user was null");
-
-            var FoundUser = await usersRepository.GetById(userId);
-
-            if (FoundUser == null) throw new FormatException("User was not found");
-
-            return FoundUser;
         }
 
         public async Task<UpdateProfilePictureResponse> UpdateThumbnail(IFormFile image, string userId)
