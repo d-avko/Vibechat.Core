@@ -1,6 +1,6 @@
 ﻿namespace VibeChat.Web.ApiModels
 {
-    public class RegisterInformationApiModel
+    public class RegisterModel
     {
         public string PhoneNumber { get; set; }
         public string UserName { get; set; }

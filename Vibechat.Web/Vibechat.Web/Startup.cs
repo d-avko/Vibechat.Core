@@ -51,7 +51,18 @@ namespace Vibechat.Web
             //set usermanager explicitly, to prevent SignalR hub methods from not being executed correctly.
 
             services.AddScoped<UserManager<AppUser>>();
-
+            
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins",
+                    builder =>
+                    {
+                        builder
+                            .AllowAnyOrigin()
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                    });
+            });
 
             services.AddAuthentication(options =>
                 {
@@ -135,12 +146,9 @@ namespace Vibechat.Web
 
             app.UseSignalR(routes => { routes.MapHub<ChatsHub>("/hubs/chat"); });
 
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    "default",
-                    "{controller}/{action=Index}/{id?}");
-            });
+            app.UseCors("AllowAllOrigins");
+            
+            app.UseMvc();
 
             app.UseSpa(spa =>
             {

@@ -1,8 +1,8 @@
-import {Observable} from "rxjs";
+import {from, Observable, of} from "rxjs";
 import {ServerResponse} from "../ApiModels/ServerResponse";
 import {LoginResponse} from "../ApiModels/LoginResponse";
 import {LoginRequest} from "../ApiModels/LoginRequest";
-import {HttpClient, HttpHeaders} from "@angular/common/http";
+import {HttpClient, HttpHeaders, HttpResponse} from "@angular/common/http";
 import {ChangeUserInfoRequest} from "../ApiModels/RegisterRequest";
 import {Inject, Injectable} from "@angular/core";
 import {Message} from "../Data/Message";
@@ -15,6 +15,7 @@ import {SnackBarHelper} from "../Snackbar/SnackbarHelper";
 import {Attachment} from "../Data/Attachment";
 import {AttachmentKind} from "../Data/AttachmentKinds";
 import {ChatState} from "./ChatState";
+import {switchMap} from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -39,22 +40,21 @@ export class ApiRequestsBuilder {
   public LoginRequest(credentials: LoginRequest): Promise<ServerResponse<LoginResponse>>{
     return this.MakeUnauthorizedCall<LoginResponse>(
       credentials,
-      'api/login'
+      'api/v1/Login'
     ).toPromise();
   }
 
   public ChangeUserInfo(credentials: ChangeUserInfoRequest): Promise<ServerResponse<boolean>> {
-    return this.MakeCall<boolean>(
+    return this.MakePostCall<boolean>(
       credentials,
-      'api/Users/ChangeInfo'
+      'api/v1/Users/ChangeInfo'
     ).toPromise();
   }
 
   public GetChats(deviceId: string, localState: Array<ChatState> = null): Promise<ServerResponse<Array<Chat>>> {
 
-    return this.MakeCall<Array<Chat>>(
-      { deviceId: deviceId, localState: localState},
-      'api/Conversations/GetAll'
+    return this.MakeGetCall<Array<Chat>>(
+      'api/v1/Chats/GetAll/' + deviceId
     ).toPromise();
   }
 
@@ -67,32 +67,32 @@ export class ApiRequestsBuilder {
 
   public GetConversationMessages(offset: number, count: number, conversationId: number, maxMessageId: number): Promise<ServerResponse<Array<Message>>> {
 
-    return this.MakeCall<Array<Message>>(
+    return this.MakePostCall<Array<Message>>(
         {
           Count: count,
           ConversationID: conversationId,
           MessagesOffset: offset,
           MaxMessageId: maxMessageId
         },
-      'api/Conversations/GetMessages'
+      'api/v1/Messages/Get'
     ).toPromise();
   }
 
   public SetLastMessageId(msgId: number, chatId: number){
-    return this.MakeCall<boolean>(
+    return this.MakePostCall<boolean>(
       { chatId: chatId, messageId: msgId },
-      'api/Conversations/SetLastMessage'
+      'api/v1/Messages/SetLast'
     ).toPromise();
   }
 
   public DeleteMessages(messages: Array<Message>, conversationId: number) : Promise<ServerResponse<string>> {
 
-    return this.MakeCall<string>(
+    return this.MakePostCall<string>(
         {
           MessagesId: messages.map(x => x.id),
           ConversationId: conversationId
         },
-      'api/Conversations/DeleteMessages'
+      'api/v1/Messages/Delete'
     ).toPromise();
 
   }
@@ -114,63 +114,61 @@ export class ApiRequestsBuilder {
   }
 
   public GetUserById(userId: string): Promise<ServerResponse<AppUser>> {
-    return this.MakeCall<AppUser>(
-      { Id: userId },
-      'api/Users/GetById'
+    return this.MakeGetCall<AppUser>(
+      'api/v1/Users/' + userId
     ).toPromise();
   }
 
   public GetConversationById(conversationId: number, updateRoles: boolean): Promise<ServerResponse<Chat>> {
-    return this.MakeCall<Chat>(
-      { conversationId: conversationId, updateRoles: updateRoles },
-      'api/Conversations/GetById'
+    return this.MakeGetCall<Chat>(
+      'api/v1/Chats/' + conversationId.toString()
     ).toPromise();
   }
 
   public ChangeCurrentUserName(newName: string): Promise<ServerResponse<boolean>> {
-    return this.MakeCall<boolean>(
+    return this.MakePostCall<boolean>(
       { newName: newName },
-      'api/Users/ChangeName'
+      'api/v1/Users/ChangeName'
     ).toPromise();
   }
 
   public ChangeCurrentUserLastName(newName: string): Promise<ServerResponse<boolean>> {
-    return this.MakeCall<boolean>(
+    return this.MakePostCall<boolean>(
       { newName: newName },
-      'api/Users/ChangeLastName'
+      'api/v1/Users/ChangeLastName'
     ).toPromise();
   }
 
   public ChangeUsername(newName: string): Promise<ServerResponse<boolean>> {
-    return this.MakeCall<boolean>(
+    return this.MakePostCall<boolean>(
       { newName: newName },
-      'api/Users/ChangeUsername'
+      'api/v1/Users/ChangeUsername'
     ).toPromise();
   }
 
   public FindUsersByUsername(username: string): Promise<ServerResponse<FoundUsersResponse>> {
-    return this.MakeCall<FoundUsersResponse>(
+    return this.MakePostCall<FoundUsersResponse>(
       { UsernameToFind: username },
-      'api/Users/FindByNickname'
+      'api/v1/Users/FindByNickname'
     ).toPromise();
   }
 
   public FindUsersInChat(username: string, chatId: number): Promise<ServerResponse<FoundUsersResponse>> {
-    return this.MakeCall<FoundUsersResponse>(
+    return this.MakePostCall<FoundUsersResponse>(
       { UsernameToFind: username, ChatId: chatId },
-      'api/Conversations/FindUsersInChat'
+      'api/v1/Chats/FindUsersInChat'
     ).toPromise();
   }
 
   public GetAttachmentsForConversation(conversationId: number, kind: AttachmentKind, offset: number, count: number) {
-    return this.MakeCall<Array<Message>>(
+    return this.MakePostCall<Array<Message>>(
       {
         conversationId: conversationId,
         kind: kind,
         offset: offset,
         count: count
       },
-      'api/Conversations/GetAttachments'
+      'api/v1/Messages/GetAttachments'
     ).toPromise();
   }
 
@@ -183,7 +181,7 @@ export class ApiRequestsBuilder {
     isPublic: boolean)
   : Promise<ServerResponse<Chat>>
   {
-    return this.MakeCall<Chat>(
+    return this.MakePostCall<Chat>(
       {
         ConversationName: name,
         CreatorId: whoCreatedId,
@@ -192,44 +190,44 @@ export class ApiRequestsBuilder {
         IsGroup: isGroup,
         IsPublic: isPublic
       },
-      'api/Conversations/Create'
+      'api/v1/Chats/Create'
     ).toPromise();
 
   }
 
   public AddToContacts(userId: string) : Promise<ServerResponse<boolean>> {
-    return this.MakeCall<boolean>(
+    return this.MakePostCall<boolean>(
       { userId: userId },
-      'api/Users/AddToContacts'
+      'api/v1/Users/AddToContacts'
     ).toPromise();
   }
 
   public RemoveFromContacts(userId: string): Promise<ServerResponse<boolean>> {
-    return this.MakeCall<boolean>(
+    return this.MakePostCall<boolean>(
       { userId: userId },
-      'api/Users/RemoveFromContacts'
+      'api/v1/Users/RemoveFromContacts'
     ).toPromise();
   }
 
   public GetContacts(): Promise<ServerResponse<Array<AppUser>>> {
-    return this.MakeCall<Array<AppUser>>(
+    return this.MakePostCall<Array<AppUser>>(
       null,
-      'api/Users/GetContacts'
+      'api/v1/Users/GetContacts'
     ).toPromise();
   }
 
   public UpdateAuthKeyId(authKeyId: string, chatId: number, deviceId: string) {
-    return this.MakeCall<boolean>(
+    return this.MakePostCall<boolean>(
       { chatId: chatId, AuthKeyId: authKeyId, deviceId: deviceId },
-      'api/Conversations/UpdateAuthKey'
+      'api/v1/Chats/UpdateAuthKey'
     ).toPromise();
   }
 
   public ChangeConversationName(newName: string, conversationId: number): Promise<ServerResponse<boolean>> {
 
-    return this.MakeCall<boolean>(
+    return this.MakePostCall<boolean>(
       { ConversationId: conversationId, Name: newName },
-      'api/Conversations/ChangeName'
+      'api/v1/Chats/ChangeName'
     ).toPromise();
 
   }
@@ -246,47 +244,66 @@ export class ApiRequestsBuilder {
 
   public SearchForGroups(searchstring: string): Promise<ServerResponse<Array<Chat>>>{
 
-    return this.MakeCall<Array<Chat>>(
+    return this.MakePostCall<Array<Chat>>(
       { SearchString: searchstring },
-      'api/Conversations/SearchGroups'
+      'api/v1/Chats/Search'
     ).toPromise();
 
   }
 
   public UnbanUser(userId: string): Promise<ServerResponse<boolean>> {
 
-    return this.MakeCall<boolean>(
+    return this.MakePostCall<boolean>(
       { userId: userId },
-      'api/Users/Unban'
+      'api/v1/Users/Unban'
     ).toPromise();
 
   }
 
   public BanUser(userId: string): Promise<ServerResponse<boolean>> {
-    return this.MakeCall<boolean>(
+    return this.MakePostCall<boolean>(
       { userId: userId},
-      'api/Users/Block'
+      'api/v1/Users/Block'
     ).toPromise();
   }
 
   public BanFromConversation(userId: string, conversationId: number): Promise<ServerResponse<boolean>> {
-    return this.MakeCall<boolean>(
+    return this.MakePostCall<boolean>(
       { userId: userId, conversationId: conversationId },
-      'api/Conversations/BanFrom'
+      'api/v1/Chats/BanFrom'
     ).toPromise();
   }
 
   public UnBanFromConversation(userId: string, conversationId: number): Promise<ServerResponse<boolean>> {
-    return this.MakeCall<boolean>(
+    return this.MakePostCall<boolean>(
       { userId: userId, conversationId: conversationId },
-      'api/Conversations/UnbanFrom'
+      'api/v1/Chats/UnbanFrom'
     ).toPromise();
   }
 
-  private MakeCall<T>(data: any, url: string): Observable<ServerResponse<T>> {
+  private MakePostCall<T>(data: any, url: string): Observable<ServerResponse<T>> {
     return this.httpClient.post<ServerResponse<T>>(
       this.baseUrl + url,
       data);
+  }
+
+  private MakeGetCall<T>(url: string): Observable<ServerResponse<T>> {
+    return this.httpClient.get<ServerResponse<T>>(
+      this.baseUrl + url);
+  }
+
+  private MakeDeleteCall<T>(data: any, url: string): Observable<ServerResponse<T>> {
+    return from(this.httpClient.delete<ServerResponse<T>>(
+      this.baseUrl + url,
+      data)).pipe(
+        switchMap(
+          response => {
+            if(response instanceof HttpResponse){
+              return of(response.body);
+            }
+          }
+        )
+    );
   }
 
   private MakeUnauthorizedCall<T>(data: any, url: string): Observable<ServerResponse<T>> {

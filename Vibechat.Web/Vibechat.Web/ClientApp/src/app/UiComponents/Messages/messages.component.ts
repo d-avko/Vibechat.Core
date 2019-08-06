@@ -82,6 +82,8 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
 
   public MaxErrorInPixels: number = 75;
 
+  public MaxErrorForHistoryLoad: number = 25;
+
   @ViewChild(CdkVirtualScrollViewport, { static: false }) viewport: CdkVirtualScrollViewport;
 
   public SelectedMessages: Array<Message>;
@@ -161,22 +163,20 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
       let result = await this.chatsService.UpdateMessagesHistory(MessagesComponent.MessagesBufferLength,
         MessagesComponent.MessagesBufferLength, currentChat);
 
+      this.HistoryLoading = false;
+
       if (result == null || result.length == 0) {
-        this.HistoryLoading = false;
         this.IsConversationHistoryEnd = true;
         return;
       }
 
       if (!this.CurrentConversation) {
-        this.HistoryLoading = false;
         return;
       }
 
       if (currentChat.id == this.CurrentConversation.id) {
-        this.ScrollToMessage(result.length);
+          this.ScrollToMessage( result.length);
       }
-
-      this.HistoryLoading = false;
     }
 
   }
@@ -247,6 +247,10 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
 
     if (this.CurrentConversation.messages.length <= 1) {
       await this.UpdateHistory();
+      //prevent updating history on scroll event,
+      // as on conversation change first message should be shown.
+      this.HistoryLoading = true;
+      setTimeout(() => this.HistoryLoading = false, 500);
     }
 
     await this.UpdateRecentMessages();
@@ -335,10 +339,9 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
 
   /**
    * Main method for handling scrolling event.
-   * @param messageIndex
    * @constructor
    */
-  public async OnMessagesScrolled(messageIndex: number) {
+  public async OnMessagesScrolled() {
     // user scrolled to last loaded message, load more messages
 
     if (this.CurrentConversation.messages == null) {

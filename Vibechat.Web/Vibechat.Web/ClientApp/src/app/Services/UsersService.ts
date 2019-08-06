@@ -10,6 +10,16 @@ import {BanEvent, SignalrConnection} from "../Connections/signalr-connection.ser
 export class UsersService {
   constructor(private requestsBuilder: ApiRequestsBuilder, private connectionManager: SignalrConnection, private auth: AuthService) { }
 
+  public async GetById(userId: string){
+    let result = await this.requestsBuilder.GetUserById(userId);
+
+    if(!result.isSuccessfull){
+      return null;
+    }
+
+    return result.response;
+  }
+
   //Fetches user info of specified user. If current user id specified,
   //updates user entry in AuthService.
   public async UpdateUserInfo(userId: string) : Promise<AppUser> {

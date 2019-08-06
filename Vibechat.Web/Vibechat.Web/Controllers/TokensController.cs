@@ -31,7 +31,9 @@ namespace Vibechat.Web.Controllers
             if (tokenInfo.RefreshToken == null || tokenInfo.userId == null) return defaultError;
 
             if (!await tokensValidator.Validate(tokenInfo.userId, tokenInfo.RefreshToken)) return defaultError;
-
+            
+            var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+            
             return new ResponseApiModel<string>
             {
                 IsSuccessfull = true,

@@ -14,6 +14,7 @@ using Vibechat.Web.Services.FileSystem;
 using Vibechat.Web.Services.Hashing;
 using Vibechat.Web.Services.Images;
 using Vibechat.Web.Services.Login;
+using Vibechat.Web.Services.Messages;
 using Vibechat.Web.Services.Paths;
 using Vibechat.Web.Services.Users;
 using VibeChat.Web.UserProviders;
@@ -29,6 +30,7 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddScoped<LoginService, LoginService>();
             services.AddScoped<FilesService, FilesService>();
             services.AddScoped<BansService, BansService>();
+            services.AddScoped<MessagesService, MessagesService>();
         }
 
         public static void AddDefaultMiddleware(this IServiceCollection services)
