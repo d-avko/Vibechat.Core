@@ -8,13 +8,14 @@ import {MessagesComponent} from "../Messages/messages.component";
 import {AppUser} from "../../Data/AppUser";
 import {AddGroupDialogComponent} from "../../Dialogs/AddGroupDialog";
 import {GroupInfoDialogComponent} from "../../Dialogs/GroupInfoDialog";
-import {SearchListComponent} from "../../Search/searchlist.component";
+import {FoundMessage, SearchListComponent} from "../../Search/searchlist.component";
 import {UserInfoDialogComponent} from "../../Dialogs/UserInfoDialog";
 import {UsersService} from "../../Services/UsersService";
 import {ChatsService} from "../../Services/ChatsService";
 import {ThemesService} from "../../Theming/ThemesService";
 import {ChooseContactDialogComponent} from "../../Dialogs/ChooseContactDialog";
 import {SnackBarHelper} from "../../Snackbar/SnackbarHelper";
+import {Message} from "../../Data/Message";
 
 @Component({
   selector: 'chat-root',
@@ -112,8 +113,8 @@ export class ChatComponent implements OnInit {
 
   }
 
-  public ChangeChat(chat: Chat) {
-    this.chats.ChangeConversation(chat);
+  public async ChangeChat(chat: Chat) {
+    return this.chats.ChangeConversation(chat);
   }
 
   public OnLogOut(): void {
@@ -182,9 +183,11 @@ export class ChatComponent implements OnInit {
   }
 
   public async Search() {
-    if (this.SearchString == null || this.SearchString == '') {
+    if (!this.SearchString) {
       return;
     }
+
+    await this.ChangeChat(null);
 
     await this.searchList.Search();
   }
@@ -238,5 +241,12 @@ export class ChatComponent implements OnInit {
   public async OnSendMessage(message: string) {
     await this.chats.SendMessage(message, this.chats.CurrentConversation);
     this.messages.ScrollToLastMessage();
+  }
+
+  public async ViewMessage(msg: FoundMessage) {
+    msg.chat.clientLastMessageId = msg.message.id;
+    msg.chat.messages = new Array<Message>();
+    await this.chats.ChangeConversation(msg.chat, false);
+    this.SearchString = '';
   }
 }

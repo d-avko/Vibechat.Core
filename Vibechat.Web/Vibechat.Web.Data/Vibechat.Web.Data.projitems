@@ -20,6 +20,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Login\LoginResultApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Messages\DeleteMessagesRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Messages\GetMessagesApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Messages\SearchMessagesRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Register\RegisterModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\ResponseApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Users Info\UsersByNickNameApiModel.cs" />

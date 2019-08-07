@@ -28,9 +28,9 @@ export class ConversationsFormatter{
     return window.innerWidth < ConversationsFormatter.MinPixelsDesktop;
   }
 
-  public GetLastMessageFormatted(conversation: Chat): string {
+  public GetLastMessageFormatted(message: Message): string {
 
-    if (!conversation.lastMessage) {
+    if (!message) {
       return "No messages...";
     }
 
@@ -41,8 +41,6 @@ export class ConversationsFormatter{
     } else {
       MaxSymbols = Math.floor((window.innerWidth * ConversationsFormatter.MaxSymbols * 0.75) / ConversationsFormatter.MaxPixelsDesktop);
     }
-
-    let message = conversation.lastMessage;
 
     let user = message.user.id == this.auth.User.id ? 'You' : message.user.userName;
 

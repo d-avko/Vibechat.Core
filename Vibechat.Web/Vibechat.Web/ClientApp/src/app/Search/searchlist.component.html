@@ -1,6 +1,7 @@
 <div class="searchlist">
 
   <mat-action-list>
+
     <mat-list-item *ngFor="let conversation of FoundLocalConversations"
                    (click)="ViewLocalConversation(conversation)">
 
@@ -23,8 +24,6 @@
 
     </mat-list-item>
   </mat-action-list>
-
-
 
 
   <mat-action-list class="searchlist_conversations">
@@ -78,6 +77,50 @@
 
   </mat-action-list>
 
+  <cdk-virtual-scroll-viewport class="found-messages" (scrolledIndexChange)="OnMessagesScrolled($event)" itemSize="72">
+    <mat-action-list>
+      <h3 mat-subheader>Messages</h3>
+      <div *cdkVirtualFor="let msg of FoundMessages" (click)="ViewMessage(msg)">
+        <mat-list-item>
+          <img matListAvatar *ngIf="msg.chat.isGroup; else dialogue" src="{{msg.chat.thumbnailUrl}}" alt="Conversation logo">
+
+          <ng-template #dialogue>
+            <img matListAvatar src="{{msg.chat.dialogueUser.imageUrl}}" alt="Dialogue logo">
+          </ng-template>
+
+          <div matLine class="chat_name_wrapper">
+            <h3 class="chat_name"
+                *ngIf="msg.chat.isGroup; else dialogueHeader">
+              {{ (msg.chat.name.length > 30)? (msg.chat.name | slice:0:30)+'..':(msg.chat.name) }}
+
+            </h3>
+
+          </div>
+
+          <ng-template #dialogueHeader>
+            <h3 class="chat_name">
+              {{ (msg.chat.dialogueUser.userName.length > 30)? (msg.chat.dialogueUser.userName | slice:0:30)+'..':(msg.chat.dialogueUser.userName) }}
+            </h3>
+          </ng-template>
+
+          <div matLine class="lastmessage_content">
+          <span class="lastmessage_content_lastmessage">
+            {{formatter.GetLastMessageFormatted(msg.message)}}
+          </span>
+          </div>
+        </mat-list-item>
+      </div>
+
+    </mat-action-list>
+
+    <mat-progress-spinner *ngIf="IsSearchingForMessages"
+                          class="load-spinner"
+                          diameter="40"
+                          color="Primary"
+                          mode="indeterminate">
+    </mat-progress-spinner>
+  </cdk-virtual-scroll-viewport>
+
 </div>
 
 <style>
@@ -96,4 +139,30 @@
   .user_lastname{
     margin-left: 5px;
   }
+
+  lastmessage_content_lastmessage {
+    width: 70%;
+    color: gray;
+  }
+
+  .lastmessage_content {
+    display: flex !important;
+    flex-direction: row;
+    align-items: center;
+  }
+  .found-messages{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 50vh;
+    overflow-y: auto;
+    overflow-anchor: none;
+  }
+
+  .chat_name{
+    margin: 0;
+    font: 600 15px/20px Roboto,"Helvetica Neue",sans-serif;
+    padding-right: 10px;
+  }
+
 </style>

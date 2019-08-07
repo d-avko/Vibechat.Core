@@ -4,6 +4,7 @@ import {ChangeUserInfoRequest} from '../ApiModels/RegisterRequest';
 import {Router} from '@angular/router';
 import {ApiRequestsBuilder} from '../Requests/ApiRequestsBuilder';
 import {SnackBarHelper} from '../Snackbar/SnackbarHelper';
+import {MessageReportingService} from "../Services/MessageReportingService";
 
 @Component({
   selector: 'register-view',
@@ -18,7 +19,9 @@ export class ChangeUserInfoComponent {
 
   public static maxNameLength: number = 120;
 
-  constructor(private requestsBuilder: ApiRequestsBuilder, private snackbar: SnackBarHelper, private router: Router) {
+  public static minUsernameLength: number = 5;
+
+  constructor(private requestsBuilder: ApiRequestsBuilder, private messagesService: MessageReportingService, private router: Router) {
 
     this.registerGroup = new FormGroup(
       {
@@ -40,8 +43,9 @@ export class ChangeUserInfoComponent {
 
     if (credentials.FirstName.length > ChangeUserInfoComponent.maxNameLength
       || credentials.LastName.length > ChangeUserInfoComponent.maxNameLength
-      || credentials.UserName.length > ChangeUserInfoComponent.maxNameLength ) {
-      this.snackbar.openSnackBar("Either username or first name or last name was too long.");
+      || credentials.UserName.length > ChangeUserInfoComponent.maxNameLength
+      || credentials.UserName.length < ChangeUserInfoComponent.minUsernameLength) {
+      this.messagesService.DisplayMessage("Either username or first name or last name was too long / too short.");
       return;
     }
 
@@ -52,7 +56,7 @@ export class ChangeUserInfoComponent {
     if (response.isSuccessfull) {
       this.router.navigateByUrl('/chat');
     } else {
-      this.snackbar.openSnackBar(response.errorMessage, 2);
+      this.messagesService.DisplayMessage(response.errorMessage);
     }
 
     this.canRegister = true;

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using VibeChat.Web;
@@ -42,6 +43,8 @@ namespace Vibechat.Web.Services.Messages
             this.attachmentKindsRepository = attachmentKindsRepository;
             this.attachmentRepository = attachmentRepository;
         }
+
+        public const int MinSymbolsInMessagesSearch = 5;
         
         public async Task<List<Message>> GetAttachments(AttachmentKind kind, int conversationId, string whoAccessedId,
             int offset, int count)
@@ -72,8 +75,24 @@ namespace Vibechat.Web.Services.Messages
             return (from msg in messages
                 select msg.ToMessage()).ToList();
         }
+
+        public async Task<List<Message>> SearchForMessages(string deviceId, string searchString, int offset, int count, string callerId)
+        {
+            if (searchString.Length < MinSymbolsInMessagesSearch)
+            {
+                throw new InvalidDataException($"Minimum symbols for search to work: {MinSymbolsInMessagesSearch}");
+            }
+            
+            List<ConversationDataModel> userChats = usersConversationsRepository.GetUserConversations(deviceId, callerId).ToList();
+            var foundMessages = messagesRepository.Search(userChats, offset, count, searchString, callerId);
+            
+            return (from msg in foundMessages
+                select msg.ToMessage()).ToList();
+        }
         
         public async Task<List<Message>> GetMessages(int chatId, int offset, int count, int maxMessageId,
+            bool history,
+            bool setLastMessage,
             string whoAccessedId)
         {
             var defaultErrorMessage = new FormatException("Wrong conversation was provided.");
@@ -95,11 +114,15 @@ namespace Vibechat.Web.Services.Messages
 
             var messages = messagesRepository.Get(
                 whoAccessedId,
-                chatId, maxMessageId, false, offset, count);
+                chatId, 
+                maxMessageId, 
+                history, 
+                offset, 
+                count);
 
             //automatically set last message in group.
 
-            if (maxMessageId != -1 && conversation.IsGroup)
+            if (setLastMessage && conversation.IsGroup)
                 if (!messages.Count().Equals(0))
                     await SetLastMessage(whoAccessedId, chatId, messages.Max(msg => msg.MessageID));
 
@@ -107,11 +130,6 @@ namespace Vibechat.Web.Services.Messages
                 select msg.ToMessage()).ToList();
         }
 
-        public async Task FindMessages(string searchFor, string userId)
-        {
-            
-        }
-        
         public async Task DeleteMessages(DeleteMessagesRequest messagesInfo, string whoAccessedId)
         {
             var messagesToDelete = messagesRepository.GetByIds(messagesInfo.MessagesId);
@@ -145,6 +163,11 @@ namespace Vibechat.Web.Services.Messages
             }
             else
             {
+                if (lastMessage.MessageID >= msgId)
+                {
+                    return;
+                }
+                
                 lastMessage.MessageID = msgId;
                 lastMessagesRepository.Update(lastMessage);
             }

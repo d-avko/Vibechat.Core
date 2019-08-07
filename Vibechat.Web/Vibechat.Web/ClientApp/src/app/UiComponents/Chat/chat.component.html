@@ -78,6 +78,7 @@
                            (OnViewUser)="OnViewUserInfo($event, null)"
                            (OnViewConversation)="OnViewGroupInfo($event)"
                            (OnViewLocalConversation)="ChangeConversation($event)"
+                           (OnViewMessage)="ViewMessage($event)"
                            [SearchString]="SearchString">
 
           </searchlist-view>
@@ -108,7 +109,7 @@
                       [User]="auth.User"
                       [Conversation]="chats.CurrentConversation"
                       (OnSendMessage)="OnSendMessage($event)"
-                      (OnViewUserInfo)="OnViewUserInfo($event)"></input-view>
+                      (OnViewUserInfo)="OnViewUserInfo($event, null)"></input-view>
 
         </div>
 

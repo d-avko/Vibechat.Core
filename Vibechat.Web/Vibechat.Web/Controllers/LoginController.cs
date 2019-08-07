@@ -18,7 +18,7 @@ namespace VibeChat.Web.Controllers
             this.loginService = loginService;
         }
 
-        [Route("[action]")]
+        [Route("")]
         [HttpPost]
         public async Task<ResponseApiModel<LoginResultApiModel>> Login(
             [FromBody] LoginCredentialsApiModel loginCredentials)

@@ -29,6 +29,10 @@
     <Content Remove="$(SpaRoot)**" />
     <Content Remove="ClientApp\src\app\messaging\**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
+    <Content Update="wwwroot\Assets\MainLogo.png">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -106,7 +110,6 @@
     <TypeScriptCompile Include="ClientApp\src\app\ApiModels\ConversationResponse.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\ApiModels\UpdateThumbnailResponse.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Auth\AuthService.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\Chat\chat.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\AttachmentKinds.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationIdsFactory.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\FoundUsersResponse.ts" />
@@ -142,6 +145,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\Services\TypingService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Services\UsersService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\AddedToGroupModel.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Shared\AsyncArray.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\EmptyModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\ImageWithLoadProgress.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\MessageReceivedModel.ts" />
@@ -165,7 +169,6 @@
 
   <ItemGroup>
     <Folder Include="ClientApp\src\app\UiComponents" />
-    <Folder Include="wwwroot\Uploads\" />
   </ItemGroup>
 
   <ItemGroup>

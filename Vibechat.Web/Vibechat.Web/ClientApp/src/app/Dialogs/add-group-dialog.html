@@ -1,13 +1,14 @@
 <h1 mat-dialog-title>Create new group.</h1>
 <div mat-dialog-content>
 
-  <h3 style="font: 400 15px/28px Roboto,'Helvetica Neue',sans-serif" >Group name:</h3>
-
   <div class="flexrow">
-    <mat-form-field>
-      <input matInput [(ngModel)]="GroupName">
+    <mat-form-field style="padding: 0 0 20px;">
+      <mat-label>Group name:</mat-label>
+      <input matInput [formControl]="GroupName">
+      <mat-error >Please provide a correct group name.</mat-error>
     </mat-form-field>
-    <mat-checkbox>Public group?</mat-checkbox>
+
+      <mat-checkbox>Public group?</mat-checkbox>
   </div>
 
 </div>

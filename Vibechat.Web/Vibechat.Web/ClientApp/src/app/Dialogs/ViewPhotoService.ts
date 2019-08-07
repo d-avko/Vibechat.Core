@@ -127,6 +127,7 @@ export class ViewPhotoComponent implements AfterContentInit  {
     let forwardMessagesDialog = this.dialog.open(
       ForwardMessagesDialogComponent,
       {
+        width: '350px',
         data: {
           conversations: this.chats.Conversations
         }

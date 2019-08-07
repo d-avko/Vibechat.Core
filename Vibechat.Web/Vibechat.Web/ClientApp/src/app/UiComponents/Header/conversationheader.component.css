@@ -1,3 +1,7 @@
+.goback-icon{
+  margin-left: 25%;
+}
+
 .messages_wrapper_conversationinfo {
   display: block;
   background-color: cadetblue;
@@ -133,7 +137,6 @@
 .conversation-viewinfoButton {
   display: flex;
   flex-direction: row;
-  height: 9vh;
   width: 100%;
 }
 

@@ -24,14 +24,36 @@ namespace Vibechat.Web.Data.Repositories
 
         void MarkAsRead(MessageDataModel message);
 
+        /// <summary>
+        /// Returns messages for specified user and chat.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="conversationId"></param>
+        /// <param name="maxMessageId">messageId to start from</param>
+        /// <param name="AllMessages"></param>
+        /// <param name="offset"></param>
+        /// <param name="count">amount to return.</param>
+        /// <returns></returns>
         IIncludableQueryable<MessageDataModel, AppUser> Get(string userId, int conversationId, int maxMessageId,
-            bool AllMessages = false,
+            bool history = false,
             int offset = 0, int count = 0);
 
         IIncludableQueryable<MessageDataModel, AppUser> GetAttachments(string userId, int conversationId,
             AttachmentKind attachmentKind, int offset, int count);
 
         MessageDataModel AddSecureMessage(AppUser whoSent, string message, int groupId);
+
+        /// <summary>
+        /// Performs case-insensitive message search.
+        /// </summary>
+        /// <param name="chats"></param>
+        /// <param name="offset"></param>
+        /// <param name="count"></param>
+        /// <param name="searchString"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        IQueryable<MessageDataModel> Search
+            (List<ConversationDataModel> chats, int offset, int count, string searchString, string userId);
 
         void Remove(List<int> messagesIds, string whoRemovedId);
 

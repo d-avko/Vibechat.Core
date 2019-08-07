@@ -65,14 +65,17 @@ export class ApiRequestsBuilder {
     return result;
   }
 
-  public GetConversationMessages(offset: number, count: number, conversationId: number, maxMessageId: number): Promise<ServerResponse<Array<Message>>> {
+  public GetChatMessages(offset: number, count: number, conversationId: number, maxMessageId: number,
+                         history: boolean, setLastMessage: boolean = true): Promise<ServerResponse<Array<Message>>> {
 
     return this.MakePostCall<Array<Message>>(
         {
           Count: count,
           ConversationID: conversationId,
           MessagesOffset: offset,
-          MaxMessageId: maxMessageId
+          MaxMessageId: maxMessageId,
+          SetLastMessage: setLastMessage,
+          History: history
         },
       'api/v1/Messages/Get'
     ).toPromise();
@@ -95,6 +98,18 @@ export class ApiRequestsBuilder {
       'api/v1/Messages/Delete'
     ).toPromise();
 
+  }
+
+  public SearchMessages(deviceId: string, searchString: string, offset: number, count: number){
+    return this.MakePostCall<Array<Message>>(
+      {
+        deviceId: deviceId,
+        searchString: searchString,
+        offset: offset,
+        count: count
+      },
+      'api/v1/Messages/Search'
+    ).toPromise();
   }
 
   public UploadImages(files: FileList, progress: (value: number) => void, chatId: number): Promise<ServerResponse<any>> {

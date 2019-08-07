@@ -15,7 +15,7 @@
       <h3 class="chat_name"
           *ngIf="conversation.isGroup; else dialogueHeader"
           [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
-        {{ (conversation.name.length > 30)? (conversation.name | slice:0:30)+'..':(conversation.name) }}  
+        {{ (conversation.name.length > 30)? (conversation.name | slice:0:30)+'..':(conversation.name) }}
       </h3>
 
       <mat-icon *ngIf="conversation.isSecure" class="secured_icon">lock</mat-icon>
@@ -39,7 +39,7 @@
 
     <div matLine class="lastmessage_content">
       <span class="lastmessage_content_lastmessage" [ngClass]="{'selected-conversation': IsCurrentConversation(conversation)}">
-        {{formatter.GetLastMessageFormatted(conversation)}}
+        {{formatter.GetLastMessageFormatted(conversation.lastMessage)}}
       </span>
 
     </div>
@@ -58,12 +58,6 @@
     height: 25px;
     border-radius: 15px;
     background-color: #436f70;
-  }
-
-  .header{
-    display: flex;
-    flex-direction: row;
-    align-items:flex-start;
   }
 
   .chat_name_wrapper{
