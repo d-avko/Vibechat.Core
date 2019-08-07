@@ -36,7 +36,8 @@ namespace VibeChat.Web
 
         public int ConversationID { get; set; }
 
-        [ForeignKey("ConversationID")] public virtual ConversationDataModel Chat { get; set; }
+        [ForeignKey("ConversationID")] 
+        public virtual ConversationDataModel Chat { get; set; }
 
         //time when this message was received
         public DateTime TimeReceived { get; set; }

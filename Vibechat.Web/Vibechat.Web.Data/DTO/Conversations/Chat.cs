@@ -65,7 +65,7 @@ namespace VibeChat.Web.ChatData
         public ChatRoleDto ChatRole { get; set; }
 
         /// <summary>
-        ///     This field is filled only once in <see cref="ConversationsController.GetAll()" /> method
+        ///     This field is filled only once in <see cref="ChatsController.GetAll()" /> method
         /// </summary>
         public int MessagesUnread { get; set; }
 

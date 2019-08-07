@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
+using Remotion.Linq.Clauses;
 using VibeChat.Web;
 using VibeChat.Web.ChatData;
 using VibeChat.Web.Data.DataModels;
@@ -17,7 +18,7 @@ namespace Vibechat.Web.Data.Repositories
             mContext = dbContext;
         }
 
-        private ApplicationDbContext mContext { get; }
+        private readonly ApplicationDbContext mContext;
 
         public MessageDataModel Add(AppUser whoSent, Message message, int groupId, MessageDataModel forwardedMessage)
         {
@@ -102,7 +103,7 @@ namespace Vibechat.Web.Data.Repositories
             string userId,
             int conversationId,
             int maxMessageId = -1,
-            bool allMessages = false,
+            bool history = false,
             int offset = 0,
             int count = 0)
         {
@@ -112,16 +113,23 @@ namespace Vibechat.Web.Data.Repositories
 
             IQueryable<MessageDataModel> query;
 
-            if (allMessages)
+            //query data considering maxMessageId
+            
+            if (maxMessageId != -1)
             {
-                query = mContext
-                    .Messages
-                    .Where(msg => msg.ConversationID == conversationId)
-                    .Where(msg => !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID));
-            }
-            else
-            {
-                if (maxMessageId != -1)
+                if (history)
+                {
+                    query = mContext
+                        .Messages
+                        .Where(msg => msg.ConversationID == conversationId
+                                      && !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID)
+                                      && msg.MessageID < maxMessageId)
+                        .OrderByDescending(msg => msg.TimeReceived)
+                        .Skip(offset)
+                        .Take(count);   
+                }
+                else
+                {
                     query = mContext
                         .Messages
                         .Where(msg => msg.ConversationID == conversationId
@@ -129,16 +137,21 @@ namespace Vibechat.Web.Data.Repositories
                                       && msg.MessageID > maxMessageId)
                         .OrderBy(msg => msg.TimeReceived)
                         .Skip(offset)
-                        .Take(count);
-                else
-                    query = mContext
-                        .Messages
-                        .Where(msg =>
-                            msg.ConversationID == conversationId &&
-                            !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID))
-                        .OrderByDescending(x => x.TimeReceived)
-                        .Skip(offset)
-                        .Take(count);
+                        .Take(count); 
+                }
+            }
+            else
+            {
+                //just query latest data.
+                
+                query = mContext
+                    .Messages
+                    .Where(msg =>
+                        msg.ConversationID == conversationId &&
+                        !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID))
+                    .OrderByDescending(x => x.TimeReceived)
+                    .Skip(offset)
+                    .Take(count);
             }
 
             return query
@@ -195,6 +208,24 @@ namespace Vibechat.Web.Data.Repositories
                 .Messages.Count(msg => msg.ConversationID == conversationId
                                        && !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID)
                                        && msg.MessageID > lastMessageId);
+        }
+        
+        public IQueryable<MessageDataModel> Search
+            (List<ConversationDataModel> chats, int offset, int count, string searchString, string userId)
+        {
+            return mContext
+                .Messages
+                .Where(msg => !mContext.DeletedMessages.Any(deleted => deleted.UserId == userId && deleted.MessageID == msg.MessageID))
+                .Where(msg => chats.Any(chat => chat.Id == msg.ConversationID))
+                .Where(msg => !msg.IsAttachment)
+                .Where(msg => 
+                   EF.Functions.Like(msg.MessageContent.ToLower(), $"%{searchString.ToLower()}%")
+                || EF.Functions.Like(msg.ForwardedMessage.MessageContent.ToLower(), $"%{searchString.ToLower()}%"))
+                .OrderByDescending(msg => msg.TimeReceived)
+                .Skip(offset)
+                .Take(count)
+                .Include(msg => msg.ForwardedMessage)
+                .Include(x => x.User);
         }
 
         public bool Empty()

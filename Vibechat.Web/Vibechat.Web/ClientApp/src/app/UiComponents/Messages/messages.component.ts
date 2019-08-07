@@ -78,11 +78,9 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
 
   public static MessagesToScrollForGoBackButtonToShowUp: number = 20;
 
-  public static MessagesBufferLength: number = 50;
+  public static MessagesBufferLength: number = 10;
 
   public MaxErrorInPixels: number = 75;
-
-  public MaxErrorForHistoryLoad: number = 25;
 
   @ViewChild(CdkVirtualScrollViewport, { static: false }) viewport: CdkVirtualScrollViewport;
 
@@ -174,13 +172,12 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
         return;
       }
 
-      if (currentChat.id == this.CurrentConversation.id) {
-          this.ScrollToMessage( result.length);
-      }
+       if (currentChat.id == this.CurrentConversation.id) {
+           this.ScrollToMessage(result.length);
+       }
     }
 
   }
-
 
   public async UpdateRecentMessages() {
 
@@ -202,14 +199,6 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
         return;
       }
 
-      if (!this.CurrentConversation) {
-        return;
-      }
-
-      if (currentChat.id == this.CurrentConversation.id) {
-        this.ScrollToLastMessage();
-      }
-
       this.IsRecentMessagesEnd = false;
     }
 
@@ -224,6 +213,7 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
     let forwardMessagesDialog = this.dialog.open(
       ForwardMessagesDialogComponent,
       {
+        width: '350px',
         data: {
           conversations: this.chatsService.Conversations
         }
@@ -237,7 +227,6 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
         this.chatsService.ForwardMessagesTo(result, this.SelectedMessages);
       })
   }
-
 
   public async UpdateMessagesIfNotUpdated() {
 
@@ -256,7 +245,6 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
     await this.UpdateRecentMessages();
   }
 
-
   public ViewUserInfo(event: any, user: AppUser) {
   // do not highlight the message, just show user profile.
     event.stopPropagation();
@@ -264,6 +252,10 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
   }
 
   public async ReadMessagesInViewport() {
+    if(!this.viewport){
+      return;
+    }
+
     let boundaries = this.CalculateMessagesViewportBoundaries();
 
     for (let i = boundaries[0]; i < boundaries[1] + 1; ++i) {
@@ -313,6 +305,9 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
   }
 
   public CalculateMessagesViewportBoundaries(): Array<number> {
+    if(!this.viewport){
+      return;
+    }
 
     let currentOffset = this.viewport.measureScrollOffset();
     let viewPortSize = this.viewport.getViewportSize();
@@ -335,7 +330,6 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
 
     return new Array<number>(startBoundary, endBoundary);
   }
-
 
   /**
    * Main method for handling scrolling event.

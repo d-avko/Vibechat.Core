@@ -428,38 +428,45 @@ namespace Vibechat.Web.Services
 
             if (user == null) throw defaultError;
 
-            var conversations = usersConversationsRepository.GetUserConversations(deviceId, whoAccessedId);
+            var chats = usersConversationsRepository.GetUserConversations(deviceId, whoAccessedId);
 
             var returnData = new List<Chat>();
 
-            foreach (var conversation in conversations)
+            foreach (var chat in chats)
             {
-                var lastMessage = (await messagesService.GetMessages(conversation.Id, 0, 1, -1, whoAccessedId))
+                var lastMessage = (await messagesService.GetMessages(
+                        chat.Id, 
+                        0, 
+                        1, 
+                        -1, 
+                        false, 
+                        false, 
+                        whoAccessedId))
                     .FirstOrDefault();
 
-                var dtoChat = conversation.ToChatDto(
-                    conversation.IsGroup ? await GetParticipants(conversation.Id, MaxParticipantsToReturn) : null,
-                    conversation.IsGroup
+                var dtoChat = chat.ToChatDto(
+                    chat.IsGroup ? await GetParticipants(chat.Id, MaxParticipantsToReturn) : null,
+                    chat.IsGroup
                         ? null
-                        : usersConversationsRepository.GetUserInDialog(conversation.Id, whoAccessedId),
-                    conversation.PublicKey,
-                    await rolesRepository.GetAsync(conversation.Id, whoAccessedId),
-                    conversation.IsSecure ? await GetDeviceId(conversation.Id, whoAccessedId) : null,
-                    lastMessagesRepository.Get(whoAccessedId, conversation.Id)?.MessageID ?? 0,
+                        : usersConversationsRepository.GetUserInDialog(chat.Id, whoAccessedId),
+                    chat.PublicKey,
+                    await rolesRepository.GetAsync(chat.Id, whoAccessedId),
+                    chat.IsSecure ? await GetDeviceId(chat.Id, whoAccessedId) : null,
+                    lastMessagesRepository.Get(whoAccessedId, chat.Id)?.MessageID ?? 0,
                     lastMessage
                 );
 
                 dtoChat.IsMessagingRestricted =
-                    await bansService.IsBannedFromConversation(conversation.Id, whoAccessedId);
+                    await bansService.IsBannedFromConversation(chat.Id, whoAccessedId);
                 dtoChat.MessagesUnread = await GetUnreadMessagesAmount(dtoChat, whoAccessedId);
-                dtoChat.ChatRole = await GetChatRole(whoAccessedId, conversation.Id);
+                dtoChat.ChatRole = await GetChatRole(whoAccessedId, chat.Id);
 
-                if (conversation.IsGroup)
+                if (chat.IsGroup)
                     foreach (var User in dtoChat.Participants)
                     {
                         User.IsBlockedInConversation =
-                            await bansService.IsBannedFromConversation(conversation.Id, User.Id);
-                        User.ChatRole = await GetChatRole(User.Id, conversation.Id);
+                            await bansService.IsBannedFromConversation(chat.Id, User.Id);
+                        User.ChatRole = await GetChatRole(User.Id, chat.Id);
                     }
 
                 returnData.Add(dtoChat);
@@ -546,7 +553,8 @@ namespace Vibechat.Web.Services
                 null);
 
             dtoChat.IsMessagingRestricted = await bansService.IsBannedFromConversation(dtoChat.Id, whoAccessedId);
-
+            dtoChat.ClientLastMessageId = lastMessagesRepository.Get(whoAccessedId, conversationId)?.MessageID ?? 0;
+            
             if (conversation.IsGroup)
                 foreach (var User in dtoChat.Participants)
                 {

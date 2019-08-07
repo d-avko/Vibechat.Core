@@ -44,6 +44,8 @@ export class ChatsService {
   public CurrentConversation: Chat;
   private PendingReadMessages: Array<number>;
   private didDisconnect: boolean;
+  public static MinGroupNameLength = 5;
+  public static MaxGroupNameLength = 128;
 
   public IsConversationSelected(): boolean {
     return this.CurrentConversation != null;
@@ -89,7 +91,7 @@ export class ChatsService {
     this.Conversations = [...response.response];
 
     if(this.CurrentConversation){
-      this.ChangeConversation(this.Conversations.find(x => x.id == this.CurrentConversation.id));
+      await this.ChangeConversation(this.Conversations.find(x => x.id == this.CurrentConversation.id));
     }
   }
 
@@ -143,7 +145,7 @@ export class ChatsService {
     return initialIndex - index;
   }
 
-  public async ChangeConversation(conversation: Chat) {
+  public async ChangeConversation(conversation: Chat, updateLastMessageId: boolean = true) {
     if (conversation == this.CurrentConversation) {
       this.CurrentConversation = null;
       return;
@@ -156,8 +158,8 @@ export class ChatsService {
     }
 
     //secure dialog might not even exist on second user side, so update will fail
-    if (!(conversation.isSecure && !conversation.authKeyId)) {
-      this.UpdateExisting(conversation);
+    if (!(conversation.isSecure && !conversation.authKeyId) && updateLastMessageId) {
+      await this.UpdateExisting(conversation);
     }
 
     //creator should wait until other user is online, and initiate key exchange.
@@ -334,19 +336,14 @@ export class ChatsService {
    * considers recentMessagesMaxCount and length of local messages array.
    */
   public async UpdateMessagesHistory(count: number, recentMessagesMaxCount: number, chat: Chat) {
-    let offset;
-    //recent messages will be loaded, do not include them in offset.
-    if(chat.messagesUnread <= recentMessagesMaxCount){
-      offset = chat.messages.length;
-    }else{
-      offset = chat.messages.length + chat.messagesUnread;
-    }
+    let offset = chat.messages.filter(msg => msg.id < chat.clientLastMessageId).length;
 
-    let result = await this.requestsBuilder.GetConversationMessages(
+    let result = await this.requestsBuilder.GetChatMessages(
       offset,
       count,
       chat.id,
-      -1);
+      chat.clientLastMessageId,
+      true);
 
     if (!result.isSuccessfull) {
       return;
@@ -380,7 +377,7 @@ export class ChatsService {
       result.response = decryptedMessages;
     }
 
-    result.response = result.response.sort(this.MessagesSortFunc);
+    result.response = result.response.sort(this.MessagesSortAscFunc);
 
     //apply scaling to images
     this.images.ScaleImages(result.response);
@@ -394,11 +391,12 @@ export class ChatsService {
   public async UpdateRecentMessages(count: number, chat: Chat){
     let offset = chat.messages.filter(msg => msg.id > chat.clientLastMessageId).length;
 
-    let result = await this.requestsBuilder.GetConversationMessages(
+    let result = await this.requestsBuilder.GetChatMessages(
       offset,
       count,
       chat.id,
-      chat.clientLastMessageId);
+      chat.clientLastMessageId,
+      false);
 
     if (!result.isSuccessfull) {
       return;
@@ -434,7 +432,7 @@ export class ChatsService {
       result.response = decryptedMessages;
     }
 
-    result.response = result.response.sort(this.MessagesSortFunc);
+    result.response = result.response.sort(this.MessagesSortAscFunc);
 
     //apply scaling to images
     this.images.ScaleImages(result.response);
@@ -463,9 +461,15 @@ export class ChatsService {
     decrypted.user = container.user;
   }
 
-  private MessagesSortFunc(left: Message, right: Message): number {
+  private MessagesSortAscFunc(left: Message, right: Message): number {
     if (left.timeReceived < right.timeReceived) return -1;
     if (left.timeReceived > right.timeReceived) return 1;
+    return 0;
+  }
+
+  private  MessagesSortDescFunc(left: Message, right: Message): number {
+    if (left.timeReceived < right.timeReceived) return 1;
+    if (left.timeReceived > right.timeReceived) return -1;
     return 0;
   }
 
@@ -748,6 +752,12 @@ export class ChatsService {
   }
 
   public async CreateGroup(name: string, isPublic: boolean) {
+    if(name.length < ChatsService.MinGroupNameLength || name.length > ChatsService.MaxGroupNameLength){
+      this.messagesService.DisplayMessage(`Chat name should be from ${ChatsService.MinGroupNameLength} to
+      ${ChatsService.MaxGroupNameLength}`);
+      return;
+    }
+
     let result = await this.requestsBuilder.CreateConversation(
       name, this.authService.User.id, null, null, true, isPublic);
 
@@ -809,14 +819,55 @@ export class ChatsService {
         && x.isSecure == secure);
   }
 
-  public async GetById(id: number){
-    let result = await this.requestsBuilder.GetConversationById(id, true);
+  public async SearchMessages(searchFor: string, offset: number, count: number){
+    let messages = await this.requestsBuilder.SearchMessages(this.device.GetDeviceId(), searchFor, offset, count);
 
-    if(!result.isSuccessfull){
+    if(!messages.isSuccessfull){
       return null;
     }
 
-    return result.response;
+    return messages.response;
+  }
+
+  /**
+   * Returns chat by specified id.
+   * @param id chat id
+   * @param apiRequest make api call if no chat exists?
+   * @constructor
+   */
+  public async GetByIdAsync(id: number, apiRequest: boolean){
+    let local = this.Conversations.find(chat => chat.id == id);
+
+    if(local){
+      return local;
+    }
+
+    if(apiRequest){
+      let result = await this.requestsBuilder.GetConversationById(id, true);
+
+      if(!result.isSuccessfull){
+        return null;
+      }
+
+      return result.response;
+    }else{
+      return null;
+    }
+  }
+
+  /**
+   * Returns local chat by id.
+   * @param id
+   * @constructor
+   */
+  public GetById(id: number){
+    let local = this.Conversations.find(chat => chat.id == id);
+
+    if(local){
+      return local;
+    }
+
+    return null;
   }
 
   public async UpdateExisting(target: Chat) : Promise<void> {
@@ -1088,5 +1139,6 @@ export class ChatsService {
     old.thumbnailUrl = New.thumbnailUrl;
     old.participants = New.participants;
     old.isMessagingRestricted = New.isMessagingRestricted;
+    old.clientLastMessageId = New.clientLastMessageId;
   }
 }

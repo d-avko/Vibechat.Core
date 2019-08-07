@@ -18,6 +18,7 @@ namespace Vibechat.Web.Services.Users
     {
         public const int MaxThumbnailLengthMB = 5;
         public const int MaxNameLength = 128;
+        public const int MinNameLength = 5;
         private readonly IContactsRepository contactsRepository;
         private readonly FilesService imagesService;
         private readonly UnitOfWork unitOfWork;
@@ -91,7 +92,8 @@ namespace Vibechat.Web.Services.Users
         {
             newName = newName.Replace(" ", "");
 
-            if (newName.Length > MaxNameLength) throw new FormatException("Name was too long.");
+            if (newName.Length > MaxNameLength || newName.Length < MinNameLength) 
+                throw new FormatException("Name was too long or too short.");
 
             var foundUser = await usersRepository.GetByUsername(newName);
 

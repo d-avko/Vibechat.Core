@@ -15,5 +15,9 @@
         ///     Return messages starting from this id, -1 if not used.
         /// </summary>
         public int MaxMessageId { get; set; }
+        
+        public bool History { get; set; }
+        
+        public bool SetLastMessage { get; set; }
     }
 }

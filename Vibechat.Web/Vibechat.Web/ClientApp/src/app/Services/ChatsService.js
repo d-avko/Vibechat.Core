@@ -96,7 +96,7 @@ var ConversationsService = /** @class */ (function () {
             var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.requestsBuilder.GetConversationMessages(this.CurrentConversation.messages.length, count, this.CurrentConversation.id)];
+                    case 0: return [4 /*yield*/, this.requestsBuilder.GetChatMessages(this.CurrentConversation.messages.length, count, this.CurrentConversation.id)];
                     case 1:
                         result = _a.sent();
                         if (!result.isSuccessfull) {

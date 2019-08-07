@@ -14,7 +14,7 @@
       <h3 matLine
           *ngIf="conversation.isGroup"
           [ngClass]="{'selected-user': IsConversationSelected(conversation)}">
-        {{conversation.name}}{{ (conversation.name.length > 20 )? (conversation.name | slice:0:20)+'..':(conversation.name) }}
+        {{ (conversation.name.length > 20 )? (conversation.name | slice:0:20)+'..':(conversation.name) }}
       </h3>
 
       <h3 matLine

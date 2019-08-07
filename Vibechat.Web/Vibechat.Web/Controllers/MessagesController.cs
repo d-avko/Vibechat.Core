@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using VibeChat.Web;
 using Vibechat.Web.ApiModels;
 using VibeChat.Web.ApiModels;
+using Vibechat.Web.ApiModels.Messages;
 using VibeChat.Web.ChatData;
 using Vibechat.Web.Data.ApiModels.Messages;
 using Vibechat.Web.Services.Messages;
@@ -70,6 +71,8 @@ namespace Vibechat.Web.Controllers
                     credentials.MessagesOffset,
                     credentials.Count,
                     credentials.MaxMessageId,
+                    credentials.History,
+                    credentials.SetLastMessage,
                     JwtHelper.GetNamedClaimValue(User.Claims));
 
                 return new ResponseApiModel<List<Message>>
@@ -150,6 +153,40 @@ namespace Vibechat.Web.Controllers
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
                     Response = false
+                };
+            }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<ResponseApiModel<List<Message>>> Search([FromBody] SearchMessagesRequest request)
+        {
+            try
+            {
+                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+            
+                var messages = await messagesService.SearchForMessages(
+                    request.deviceId, 
+                    request.searchString, 
+                    request.offset,
+                    request.count,
+                    thisUserId);
+            
+                return new ResponseApiModel<List<Message>>
+                {
+                    IsSuccessfull = true,
+                    ErrorMessage = null,
+                    Response = messages
+                };
+            }
+            catch (Exception e)
+            {
+                return new ResponseApiModel<List<Message>>
+                {
+                    IsSuccessfull = true,
+                    ErrorMessage = e.Message,
+                    Response = null
                 };
             }
         }
