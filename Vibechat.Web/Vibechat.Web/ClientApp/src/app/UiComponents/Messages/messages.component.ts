@@ -23,6 +23,7 @@ import {Chat} from '../../Data/Chat';
 import {ThemesService} from '../../Theming/ThemesService';
 import {ViewPhotoService} from '../../Dialogs/ViewPhotoService';
 import {AuthService} from "../../Services/AuthService";
+import {MessageViewOptions, ScrollingBehaviour} from "../../Shared/MessageViewOptions";
 
 export class ForwardMessagesModel {
   public forwardTo: Array<number>;
@@ -34,17 +35,30 @@ export class ForwardMessagesModel {
   templateUrl: './messages.component.html',
   styleUrls: ['./messages.component.css'],
   animations: [
-    trigger('slideIn', [
-      state('*', style({ 'overflow-y': 'hidden' })),
-      state('void', style({ 'overflow-y': 'hidden' })),
-      transition('* => void', [
-        style({ height: '*' }),
-        animate(250, style({ height: 0 }))
+    trigger('slideInOut', [
+      transition(':enter', [
+        style({transform: 'translateY(-100%)'}),
+        animate('200ms ease-in', style({transform: 'translateY(0%)'}))
       ]),
-      transition('void => *', [
-        style({ height: '0' }),
-        animate(250, style({ height: '*' }))
+      transition(':leave', [
+        animate('200ms ease-in', style({transform: 'translateY(-100%)'}))
       ])
+    ]),
+    trigger('highlight-message', [
+      state('not-selected', style({
+
+      })),
+      state('selected', style(
+        {
+          color: 'white',
+          backgroundColor:'cadetblue'
+        })),
+      transition('not-selected => selected', [
+        animate(1500)
+      ]),
+      transition('selected => not-selected', [
+        animate(1500)
+      ]),
     ])
   ]
 })
@@ -57,7 +71,8 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
     public auth: AuthService,
     private themes: ThemesService,
     private vc: ViewContainerRef,
-    private photos: ViewPhotoService) {
+    private photos: ViewPhotoService,
+    private options: MessageViewOptions) {
 
     this.SelectedMessages = new Array<Message>();
   }
@@ -97,14 +112,17 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
       this.IsConversationHistoryEnd = false;
       this.IsRecentMessagesEnd = false;
       this.SelectedMessages = new Array<Message>();
+      this._firstRecentMessageIndex = 0;
       await this.UpdateMessagesIfNotUpdated();
       await this.ReadMessagesInGroup();
-      await this.ReadMessagesInViewport();
+
+      if(!this.CurrentConversation.isGroup){
+        await this.ReadMessagesInViewport();
+      }
+
       this.ScrollToLastMessage();
     }
   }
-
-
   ScrollToLastMessage() {
     if (!this.CurrentConversation.messages) {
       return;
@@ -147,6 +165,32 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
     this.chatsService.ResendMessages(this.SelectedMessages, this.CurrentConversation);
   }
 
+  /**
+   * Remembers first clientLastMessageId index.
+   */
+  private _firstRecentMessageIndex : number = -1;
+
+  public _firstRecentMsgId: number;
+
+  private get FirstRecentMessageIndex(){
+    if(!this.CurrentConversation.messages[this._firstRecentMessageIndex]){
+      this._firstRecentMessageIndex = this.CurrentConversation.messages.length - 1;
+    }
+
+    return this._firstRecentMessageIndex;
+  }
+
+  private UpdateFirstRecentMessage(lastMessageId: number){
+    if(this._firstRecentMessageIndex != -1){
+      this._firstRecentMessageIndex = this.CurrentConversation.messages
+        .findIndex(msg => msg.id == lastMessageId);
+
+      if(this._firstRecentMessageIndex != -1){
+        this._firstRecentMsgId = this.CurrentConversation.messages[this._firstRecentMessageIndex].id;
+      }
+    }
+  }
+
   public async UpdateHistory() {
 
     let currentChat = this.CurrentConversation;
@@ -172,12 +216,14 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
         return;
       }
 
-       if (currentChat.id == this.CurrentConversation.id) {
-           this.ScrollToMessage(result.length);
-       }
+      if (currentChat.id == this.CurrentConversation.id) {
+        this.ScrollToMessage(result.length);
+      }
     }
 
   }
+
+  private didViewLastMessage: boolean = false;
 
   public async UpdateRecentMessages() {
 
@@ -185,10 +231,13 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
 
     if (!this.RecentMessagesLoading && !this.IsRecentMessagesEnd) {
       this.RecentMessagesLoading = true;
+      this.didViewLastMessage = false;
 
       if (!currentChat.messages) {
         return;
       }
+
+      let initialLastMsgId = currentChat.clientLastMessageId;
 
       let result = await this.chatsService.UpdateRecentMessages(MessagesComponent.MessagesBufferLength, currentChat);
 
@@ -199,6 +248,21 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
         return;
       }
 
+      if(this.options.ViewBehaviour == ScrollingBehaviour.Lock){
+
+        this.UpdateFirstRecentMessage(initialLastMsgId);
+        this.ScrollToMessage(this.FirstRecentMessageIndex - 1);
+        this.didViewLastMessage = true;
+
+        setTimeout(() => {
+          if(this.didViewLastMessage){
+            this.options.ViewBehaviour = ScrollingBehaviour.Normal;
+            this._firstRecentMsgId = -1;
+          }else{
+            this.ScrollToMessage(this.FirstRecentMessageIndex - 1);
+          }
+        }, 200);
+      }
       this.IsRecentMessagesEnd = false;
     }
 
@@ -206,6 +270,7 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
 
   public async DeleteMessages() {
     await this.chatsService.DeleteMessages(this.SelectedMessages, this.CurrentConversation);
+
     this.SelectedMessages.splice(0, this.SelectedMessages.length);
   }
 
@@ -234,6 +299,8 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
       this.CurrentConversation.messages = new Array<Message>();
     }
 
+    await this.UpdateRecentMessages();
+
     if (this.CurrentConversation.messages.length <= 1) {
       await this.UpdateHistory();
       //prevent updating history on scroll event,
@@ -241,8 +308,6 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
       this.HistoryLoading = true;
       setTimeout(() => this.HistoryLoading = false, 500);
     }
-
-    await this.UpdateRecentMessages();
   }
 
   public ViewUserInfo(event: any, user: AppUser) {
@@ -335,19 +400,19 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
    * Main method for handling scrolling event.
    * @constructor
    */
-  public async OnMessagesScrolled() {
+  public async OnMessagesScrolled(index: number) {
     // user scrolled to last loaded message, load more messages
+
 
     if (this.CurrentConversation.messages == null) {
       return;
     }
 
-    if (this.viewport.elementRef.nativeElement.scrollTop <= 0 + this.MaxErrorInPixels) {
+    if (index == 0) {
       await this.UpdateHistory();
-      return;
     }
 
-    let currentMessageIndex = this.CalculateCurrentMessageIndex();
+     let currentMessageIndex = this.CalculateCurrentMessageIndex();
 
     if (this.CurrentConversation.messages.length - currentMessageIndex > MessagesComponent.MessagesToScrollForGoBackButtonToShowUp) {
       this.IsScrollingAssistNeeded = true;
@@ -409,14 +474,6 @@ export class MessagesComponent implements AfterViewInit, OnChanges {
     }
 
     return (<Date>message.timeReceived).getDay() != (<Date>previousMessage.timeReceived).getDay();
-  }
-
-  public IsLastMessage(message: Message): boolean {
-
-    if (this.CurrentConversation.messages == null)
-      return false;
-
-    return this.CurrentConversation.messages.findIndex((x) => x.id == message.id) == 0;
   }
 
   public IsMessageSelected(message: Message): boolean {
