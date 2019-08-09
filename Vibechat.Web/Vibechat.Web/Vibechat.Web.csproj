@@ -150,6 +150,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\Shared\ImageWithLoadProgress.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\MessageReceivedModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\MessageState.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Shared\MessageViewOptions.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\RemovedFromGroupModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Theming\ThemesService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\uploads\upload.service.ts" />

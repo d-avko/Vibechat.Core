@@ -76,6 +76,15 @@ namespace Vibechat.Web.Services.Messages
                 select msg.ToMessage()).ToList();
         }
 
+        /// <summary>
+        /// Performs case-insensitive message search.
+        /// </summary>
+        /// <param name="offset"></param>
+        /// <param name="count"></param>
+        /// <param name="deviceId"></param>
+        /// <param name="searchString"></param>
+        /// <param name="callerId"></param>
+        /// <returns></returns>
         public async Task<List<Message>> SearchForMessages(string deviceId, string searchString, int offset, int count, string callerId)
         {
             if (searchString.Length < MinSymbolsInMessagesSearch)
@@ -90,6 +99,18 @@ namespace Vibechat.Web.Services.Messages
                 select msg.ToMessage()).ToList();
         }
         
+        /// <summary>
+        /// Returns messages for specified user and chat.
+        /// </summary>
+        /// <param name="whoAccessedId"></param>
+        /// <param name="chatId"></param>
+        /// <param name="maxMessageId">messageId to start from</param>
+        /// <param name="history">if true, return messages which ids are lower than maxMessageId, greater otherwise.
+        /// When false, maxMessageId is inclusive, and is not inclusive when true.</param>
+        /// <param name="offset"></param>
+        /// <param name="count">amount to return.</param>
+        /// <param name="setLastMessage">Set last loaded msg of a client after querying the messages, if chatId is group.</param>
+        /// <returns></returns>
         public async Task<List<Message>> GetMessages(int chatId, int offset, int count, int maxMessageId,
             bool history,
             bool setLastMessage,
@@ -123,8 +144,12 @@ namespace Vibechat.Web.Services.Messages
             //automatically set last message in group.
 
             if (setLastMessage && conversation.IsGroup)
+            {
                 if (!messages.Count().Equals(0))
+                {
                     await SetLastMessage(whoAccessedId, chatId, messages.Max(msg => msg.MessageID));
+                }
+            }
 
             return (from msg in messages
                 select msg.ToMessage()).ToList();
@@ -228,8 +253,8 @@ namespace Vibechat.Web.Services.Messages
             }
 
             var result = messagesRepository.Add(whoSent, message, groupId, forwardedMessage);
-            await SetLastMessage(senderId, groupId, result.MessageID);
             await unitOfWork.Commit();
+            await SetLastMessage(senderId, groupId, result.MessageID);
             return result;
         }
 
@@ -242,8 +267,8 @@ namespace Vibechat.Web.Services.Messages
                     $"Failed to retrieve user with id {senderId} from database: no such user exists");
 
             var result = messagesRepository.AddSecureMessage(whoSent, message, groupId);
-            await SetLastMessage(senderId, groupId, result.MessageID);
             await unitOfWork.Commit();
+            await SetLastMessage(senderId, groupId, result.MessageID);
             return result;
         }
 
@@ -260,8 +285,8 @@ namespace Vibechat.Web.Services.Messages
             var attachment = attachmentRepository.Add(attachmentKind, message);
 
             var result = messagesRepository.AddAttachment(whoSent, attachment, message, groupId);
-            await SetLastMessage(senderId, groupId, result.MessageID);
             await unitOfWork.Commit();
+            await SetLastMessage(senderId, groupId, result.MessageID);
             return result;
         }
     }

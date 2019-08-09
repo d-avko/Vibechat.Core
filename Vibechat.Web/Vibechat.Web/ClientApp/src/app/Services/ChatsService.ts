@@ -74,19 +74,19 @@ export class ChatsService {
     }
 
     //sort to assign messages by index, find should work too.
-    response.response.sort(this.ChatsSortByIdFunc);
+    response.response.sort(ChatsService.ChatsSortByIdFunc);
 
     //remove chats where we've been kicked from
     this.Conversations = this.Conversations.filter(chat => {
       response.response.find(x => x.id == chat.id)
-    }).sort(this.ChatsSortByIdFunc);
+    }).sort(ChatsService.ChatsSortByIdFunc);
 
 
     for(let i = 0; i < this.Conversations.length - 1; ++i){
       response.response[i].messages = this.Conversations[i].messages;
     }
 
-    response.response = response.response.sort(this.ChatsSortByLastMessageFunc);
+    response.response = response.response.sort(ChatsService.ChatsSortByLastMessageFunc);
 
     this.Conversations = [...response.response];
 
@@ -367,7 +367,7 @@ export class ChatsService {
           return;
         }
 
-        this.DecryptedMessageToLocalMessage(
+        ChatsService.DecryptedMessageToLocalMessage(
           x,
           decrypted);
 
@@ -377,7 +377,7 @@ export class ChatsService {
       result.response = decryptedMessages;
     }
 
-    result.response = result.response.sort(this.MessagesSortAscFunc);
+    result.response = result.response.sort(ChatsService.MessagesSortAscFunc);
 
     //apply scaling to images
     this.images.ScaleImages(result.response);
@@ -389,7 +389,7 @@ export class ChatsService {
   }
 
   public async UpdateRecentMessages(count: number, chat: Chat){
-    let offset = chat.messages.filter(msg => msg.id > chat.clientLastMessageId).length;
+    let offset = chat.messages.filter(msg => msg.id >= chat.clientLastMessageId).length;
 
     let result = await this.requestsBuilder.GetChatMessages(
       offset,
@@ -422,7 +422,7 @@ export class ChatsService {
           return;
         }
 
-        this.DecryptedMessageToLocalMessage(
+        ChatsService.DecryptedMessageToLocalMessage(
           x,
           decrypted);
 
@@ -432,7 +432,7 @@ export class ChatsService {
       result.response = decryptedMessages;
     }
 
-    result.response = result.response.sort(this.MessagesSortAscFunc);
+    result.response = result.response.sort(ChatsService.MessagesSortAscFunc);
 
     //apply scaling to images
     this.images.ScaleImages(result.response);
@@ -454,32 +454,32 @@ export class ChatsService {
     return result.response;
   }
 
-  private DecryptedMessageToLocalMessage(container: Message, decrypted: Message) {
+  private static DecryptedMessageToLocalMessage(container: Message, decrypted: Message) {
     decrypted.id = container.id;
     decrypted.state = container.state;
     decrypted.timeReceived = container.timeReceived;
     decrypted.user = container.user;
   }
 
-  private MessagesSortAscFunc(left: Message, right: Message): number {
+  public  static MessagesSortAscFunc(left: Message, right: Message): number {
     if (left.timeReceived < right.timeReceived) return -1;
     if (left.timeReceived > right.timeReceived) return 1;
     return 0;
   }
 
-  private  MessagesSortDescFunc(left: Message, right: Message): number {
+  public static MessagesSortDescFunc(left: Message, right: Message): number {
     if (left.timeReceived < right.timeReceived) return 1;
     if (left.timeReceived > right.timeReceived) return -1;
     return 0;
   }
 
-  private ChatsSortByIdFunc(left: Chat, right: Chat): number {
+  public  static ChatsSortByIdFunc(left: Chat, right: Chat): number {
     if (left.id < right.id) return -1;
     if (left.id > right.id) return 1;
     return 0;
   }
 
-  private ChatsSortByLastMessageFunc(left: Chat, right: Chat): number {
+  public  static ChatsSortByLastMessageFunc(left: Chat, right: Chat): number {
     if (left.id < right.id) return -1;
     if (left.id > right.id) return 1;
     return 0;
@@ -563,7 +563,7 @@ export class ChatsService {
               return;
             }
 
-            this.DecryptedMessageToLocalMessage(
+            ChatsService.DecryptedMessageToLocalMessage(
               msg,
               decrypted);
 
@@ -614,7 +614,7 @@ export class ChatsService {
         return;
       }
 
-      this.DecryptedMessageToLocalMessage(data.message, decrypted);
+      ChatsService.DecryptedMessageToLocalMessage(data.message, decrypted);
 
       data.message = decrypted;
     }
@@ -882,6 +882,15 @@ export class ChatsService {
 
   public ForwardMessagesTo(destination: Array<Chat>, messages: Array<Message>) {
     if (destination == null || destination.length == 0) {
+      return;
+    }
+
+    //couldn't forward unsent messages.
+
+    messages = messages.filter(msg => msg.id);
+
+    if(!messages || !messages.length){
+      this.messagesService.DisplayMessage("Couldn't forward these messages.");
       return;
     }
 

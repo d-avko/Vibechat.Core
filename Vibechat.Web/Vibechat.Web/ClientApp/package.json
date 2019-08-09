@@ -41,6 +41,7 @@
     "firebase": "^6.2.4",
     "hammerjs": "^2.0.8",
     "jwt-decode": "^2.2.0",
+    "ngx-ui-scroll": "^1.1.0",
     "reflect-metadata": "0.1.13",
     "rxjs": "6.5.2",
     "rxjs-tslint": "0.1.7",
