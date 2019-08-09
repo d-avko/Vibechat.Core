@@ -6,7 +6,6 @@ import {UsersService} from "../Services/UsersService";
 import {MessageReportingService} from "../Services/MessageReportingService";
 import {Message} from "../Data/Message";
 import {ConversationsFormatter} from "../Formatters/ConversationsFormatter";
-import {AsyncArray} from "../Shared/AsyncArray";
 
 export class FoundMessage{
   public constructor(init?: Partial<FoundMessage>) {
@@ -60,6 +59,8 @@ export class SearchListComponent implements OnChanges{
       this.IsSearchingForGroups = false;
       this.IsSearchingForMessages = false;
       this.IsSearchingForUsers = false;
+      this.IsMessagesEnd = false;
+      this.FoundMessages = new Array<FoundMessage>();
     }
   }
 

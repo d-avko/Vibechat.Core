@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
-using Remotion.Linq.Clauses;
 using VibeChat.Web;
 using VibeChat.Web.ChatData;
 using VibeChat.Web.Data.DataModels;
@@ -112,7 +111,6 @@ namespace Vibechat.Web.Data.Repositories
                 .Where(msg => msg.Message.ConversationID == conversationId && msg.UserId == userId);
 
             IQueryable<MessageDataModel> query;
-
             //query data considering maxMessageId
             
             if (maxMessageId != -1)
@@ -134,7 +132,7 @@ namespace Vibechat.Web.Data.Repositories
                         .Messages
                         .Where(msg => msg.ConversationID == conversationId
                                       && !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID)
-                                      && msg.MessageID > maxMessageId)
+                                      && msg.MessageID >= maxMessageId)
                         .OrderBy(msg => msg.TimeReceived)
                         .Skip(offset)
                         .Take(count); 

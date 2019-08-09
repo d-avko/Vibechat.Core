@@ -2,26 +2,25 @@
 
   <!--since virtual scroll doesn't work with items of variable height, load everything-->
 
-  <cdk-virtual-scroll-viewport *ngIf="chatsService.CurrentConversation.messages && chatsService.CurrentConversation.messages.length"
-                               (scrolledIndexChange)="OnMessagesScrolled()"
-                               minBufferPx="12000000"
-                               maxBufferPx="25000000"
+  <cdk-virtual-scroll-viewport class="messages_main"
+                               *ngIf="chatsService.CurrentConversation.messages && chatsService.CurrentConversation.messages.length"
                                itemSize="50"
-                               class="messages_main">
+                               [maxBufferPx]="1000000000000000000000000"
+                               [minBufferPx]="1000000000000000000000000"
+                               (scrolledIndexChange)="OnMessagesScrolled($event)">
+
+    <div *ngIf="HistoryLoading" class="padding10px">
+      <mat-progress-spinner class="load-spinner"
+                            diameter="60"
+                            color="Primary"
+                            mode="indeterminate">
+      </mat-progress-spinner>
+    </div>
 
     <div *cdkVirtualFor="let message of chatsService.CurrentConversation.messages;">
 
-      <div (click)="SelectMessage(message)">
-
-        <!--loading progress spinner-->
-
-        <div *ngIf="HistoryLoading && IsLastMessage(message)" class="padding10px">
-          <mat-progress-spinner class="load-spinner"
-                                diameter="60"
-                                color="Primary"
-                                mode="indeterminate">
-          </mat-progress-spinner>
-        </div>
+      <div (click)="SelectMessage(message)"
+           [@highlight-message]="message.id == _firstRecentMsgId ? 'selected' : 'not-selected'">
 
         <!--Today, yesterday . .etc-->
 
@@ -218,6 +217,14 @@
       </div>
 
     </div>
+
+    <div *ngIf="RecentMessagesLoading" class="padding10px">
+      <mat-progress-spinner class="load-spinner"
+                            diameter="60"
+                            color="Primary"
+                            mode="indeterminate">
+      </mat-progress-spinner>
+    </div>
   </cdk-virtual-scroll-viewport>
 
   <h4 *ngIf="!chatsService.CurrentConversation.messages
@@ -226,7 +233,7 @@
     Empty in here...
   </h4>
 
-  <div (click)="ScrollToLastMessage()" class="chat_misc_backtonow" *ngIf="IsScrollingAssistNeeded" [@slideIn]>
+  <div (click)="ScrollToLastMessage()" class="chat_misc_backtonow" *ngIf="IsScrollingAssistNeeded" [@slideInOut]>
     <mat-icon>keyboard_arrow_down</mat-icon>
     <span>Back to now</span>
   </div>
@@ -237,7 +244,7 @@
             class="marginleft10px"
             *ngIf="SelectedMessages.length !== 0"
             (click)="DeleteMessages()"
-            [@slideIn]>
+            [@slideInOut]>
       <span  *ngIf="!formatter.IsMobileDevice()">Delete messages</span>
 
       <mat-icon>
@@ -250,7 +257,7 @@
             color="primary"
             *ngIf="! chatsService.CurrentConversation.isSecure && SelectedMessages.length !== 0"
             (click)="ForwardMessages()"
-            [@slideIn]>
+            [@slideInOut]>
       <span *ngIf="!formatter.IsMobileDevice()">Forward messages</span>
 
       <mat-icon>
@@ -262,12 +269,12 @@
             color="primary"
             *ngIf="IsAllSelectedMessagesPending()"
             (click)="ResendMessages()"
-            [@slideIn]>
+            [@slideInOut]>
       <span *ngIf="!formatter.IsMobileDevice()">Resend messages</span>
 
       <mat-icon
                 color="primary"
-                [@slideIn]>
+                [@slideInOut]>
         restore
       </mat-icon>
     </button>

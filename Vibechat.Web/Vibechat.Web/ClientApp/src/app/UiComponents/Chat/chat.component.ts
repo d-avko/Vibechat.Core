@@ -16,6 +16,7 @@ import {ThemesService} from "../../Theming/ThemesService";
 import {ChooseContactDialogComponent} from "../../Dialogs/ChooseContactDialog";
 import {SnackBarHelper} from "../../Snackbar/SnackbarHelper";
 import {Message} from "../../Data/Message";
+import {MessageViewOptions, ScrollingBehaviour} from "../../Shared/MessageViewOptions";
 
 @Component({
   selector: 'chat-root',
@@ -52,7 +53,8 @@ export class ChatComponent implements OnInit {
     private usersService: UsersService,
     private chats: ChatsService,
     private themesService: ThemesService,
-    private snackBar: SnackBarHelper) { }
+    private snackBar: SnackBarHelper,
+    private viewOptions: MessageViewOptions) { }
 
   async ngOnInit(): Promise<void> {
     await this.auth.RefreshLocalData();
@@ -246,6 +248,7 @@ export class ChatComponent implements OnInit {
   public async ViewMessage(msg: FoundMessage) {
     msg.chat.clientLastMessageId = msg.message.id;
     msg.chat.messages = new Array<Message>();
+    this.viewOptions.ViewBehaviour = ScrollingBehaviour.Lock;
     await this.chats.ChangeConversation(msg.chat, false);
     this.SearchString = '';
   }

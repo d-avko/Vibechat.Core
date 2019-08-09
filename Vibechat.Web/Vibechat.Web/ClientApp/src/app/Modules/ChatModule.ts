@@ -3,7 +3,7 @@ import {ChatComponent} from "../UiComponents/Chat/chat.component";
 import {InputComponent} from "../UiComponents/Input/input.component";
 import {ConversationHeaderComponent} from "../UiComponents/Header/conversationheader.component";
 import {MessagesComponent} from "../UiComponents/Messages/messages.component";
-import {ScrollDispatchModule} from "@angular/cdk/scrolling";
+import {ScrollingModule} from "@angular/cdk/scrolling";
 import {ConversationsFormatter} from "../Formatters/ConversationsFormatter";
 import {MaterialModule} from "../material.module";
 import {CommonModule} from "@angular/common";
@@ -38,6 +38,8 @@ import {TypingService} from "../Services/TypingService";
 import {ChatUsersDialogComponent} from "../Dialogs/ChatUsersDialog";
 import {AdminPanelDialog} from "../Dialogs/AdminPanelDialog";
 import {ImageWithLoadProgress} from "../Shared/ImageWithLoadProgress";
+import {MessageViewOptions} from "../Shared/MessageViewOptions";
+import {UiScrollModule} from "ngx-ui-scroll";
 
 @NgModule({
   declarations: [
@@ -60,7 +62,7 @@ import {ImageWithLoadProgress} from "../Shared/ImageWithLoadProgress";
     ViewPhotoComponent
   ],
   imports: [
-    ScrollDispatchModule,
+    ScrollingModule,
     MaterialModule,
     CommonModule,
     ReactiveFormsModule,
@@ -68,7 +70,8 @@ import {ImageWithLoadProgress} from "../Shared/ImageWithLoadProgress";
     AppRoutersModule,
     HttpClientModule,
     BrowserAnimationsModule,
-    FormsModule
+    FormsModule,
+    UiScrollModule
   ],
   exports: [AddGroupDialogComponent],
   entryComponents: [
@@ -99,6 +102,7 @@ import {ImageWithLoadProgress} from "../Shared/ImageWithLoadProgress";
     ViewPhotoService,
     DeviceService,
     TypingService,
-    ImageWithLoadProgress]
+    ImageWithLoadProgress,
+    MessageViewOptions]
 })
 export class ChatModule { }
