@@ -15,8 +15,7 @@ import {ChatsService} from "../../Services/ChatsService";
 import {ThemesService} from "../../Theming/ThemesService";
 import {ChooseContactDialogComponent} from "../../Dialogs/ChooseContactDialog";
 import {SnackBarHelper} from "../../Snackbar/SnackbarHelper";
-import {Message} from "../../Data/Message";
-import {MessageViewOptions, ScrollingBehaviour} from "../../Shared/MessageViewOptions";
+import {MessageViewOption, MessageViewOptions} from "../../Shared/MessageViewOptions";
 
 @Component({
   selector: 'chat-root',
@@ -246,10 +245,9 @@ export class ChatComponent implements OnInit {
   }
 
   public async ViewMessage(msg: FoundMessage) {
-    msg.chat.clientLastMessageId = msg.message.id;
-    msg.chat.messages = new Array<Message>();
-    this.viewOptions.ViewBehaviour = ScrollingBehaviour.Lock;
+    this.viewOptions.MessageToViewId = msg.message.id;
     await this.chats.ChangeConversation(msg.chat, false);
+    this.viewOptions.Option.next(MessageViewOption.ViewMessage);
     this.SearchString = '';
   }
 }

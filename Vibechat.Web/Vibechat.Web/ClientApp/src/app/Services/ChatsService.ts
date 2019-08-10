@@ -95,6 +95,18 @@ export class ChatsService {
     }
   }
 
+  public IsUptoDate(){
+    if(!this.CurrentConversation){
+      return false;
+    }
+
+    if(!this.CurrentConversation.lastMessage){
+      return true;
+    }
+
+    return this.CurrentConversation.lastMessage.id == this.CurrentConversation.clientLastMessageId;
+  }
+
   public GetConversationsIds() {
     return this.Conversations.map(x => x.id);
   }
@@ -746,7 +758,6 @@ export class ChatsService {
 
     //clientLastMessageId is updated on server automatically, so do it locally.
     chat.clientLastMessageId = message.id;
-    chat.clientLastMessageId = Math.max(0, chat.clientLastMessageId - 1);
     chat.messagesUnread = Math.max(0, chat.messagesUnread - 1);
     this.PendingReadMessages.splice(pendingIndex, 1);
   }

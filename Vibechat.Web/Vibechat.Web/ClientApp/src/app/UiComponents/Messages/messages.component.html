@@ -20,7 +20,7 @@
     <div *cdkVirtualFor="let message of chatsService.CurrentConversation.messages;">
 
       <div (click)="SelectMessage(message)"
-           [@highlight-message]="message.id == _firstRecentMsgId ? 'selected' : 'not-selected'">
+           [@highlight-message]="message.id == _lockedMsgId ? 'selected' : 'not-selected'">
 
         <!--Today, yesterday . .etc-->
 
@@ -151,7 +151,7 @@
         </div>
 
         <!--Forwarded message-->
-        <div *ngIf="message.forwardedMessage" class="forwarded_message">
+        <div *ngIf="message.forwardedMessage" (click)="ViewForwardedMessage($event, message.forwardedMessage)" class="forwarded_message">
 
           <div>
 
