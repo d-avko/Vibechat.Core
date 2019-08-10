@@ -1,8 +1,15 @@
-export enum ScrollingBehaviour {
-  Normal,
-  Lock
+import {BehaviorSubject} from "rxjs";
+
+export enum MessageViewOption {
+  NoOption,
+  ViewMessage,
+  GotoMessage
 }
 
 export class MessageViewOptions {
-  public ViewBehaviour: ScrollingBehaviour;
+  constructor(){
+    this.Option = new BehaviorSubject<MessageViewOption>(MessageViewOption.NoOption);
+  }
+  public Option: BehaviorSubject<MessageViewOption>;
+  public MessageToViewId: number = -1;
 }

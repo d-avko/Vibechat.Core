@@ -67,7 +67,6 @@ export class ApiRequestsBuilder {
 
   public GetChatMessages(offset: number, count: number, conversationId: number, maxMessageId: number,
                          history: boolean, setLastMessage: boolean = true): Promise<ServerResponse<Array<Message>>> {
-
     return this.MakePostCall<Array<Message>>(
         {
           Count: count,
