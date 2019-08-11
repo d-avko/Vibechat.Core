@@ -13,26 +13,18 @@ namespace Vibechat.Web.Data.Repositories
             this.mUserManager = mUserManager;
         }
 
-        private UserManager<AppUser> mUserManager { get; }
+        private readonly UserManager<AppUser> mUserManager;
 
-        public async Task MakeUserOnline(string userId, string signalRConnectionId)
+        public async Task MakeUserOnline(string userId, bool updateConnectionId = false, string signalRConnectionId = null)
         {
             var user = await GetById(userId);
-
             user.IsOnline = true;
-
             user.LastSeen = DateTime.UtcNow;
-
-            user.ConnectionId = signalRConnectionId;
-        }
-
-        public async Task MakeUserOnline(string userId)
-        {
-            var user = await GetById(userId);
-
-            user.IsOnline = true;
-
-            user.LastSeen = DateTime.UtcNow;
+            
+            if (updateConnectionId)
+            {
+                user.ConnectionId = signalRConnectionId;   
+            }
         }
 
         public async Task MakeUserOffline(string userId)

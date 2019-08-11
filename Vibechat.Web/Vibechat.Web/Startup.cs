@@ -127,7 +127,7 @@ namespace Vibechat.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
+        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
         {
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
@@ -165,7 +165,17 @@ namespace Vibechat.Web
                 Credential = GoogleCredential.GetApplicationDefault()
             });
 
-            serviceProvider.GetService<ApplicationDbContext>().Database.Migrate();
+            var db = serviceProvider.GetService<ApplicationDbContext>();
+            db.Database.Migrate();
+            
+            await serviceProvider.GetService<UserManager<AppUser>>().Users.ForEachAsync(user =>
+            {
+                user.ConnectionId = null;
+                user.IsOnline = false;
+            });
+            
+            db.SaveChanges();
+
         }
     }
 }

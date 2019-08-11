@@ -245,9 +245,14 @@ export class ChatComponent implements OnInit {
   }
 
   public async ViewMessage(msg: FoundMessage) {
-    this.viewOptions.MessageToViewId = msg.message.id;
     await this.chats.ChangeConversation(msg.chat, false);
     this.viewOptions.Option.next(MessageViewOption.ViewMessage);
+    this.viewOptions.MessageToViewId = msg.message.id;
+
+    requestAnimationFrame(async () => {
+      await this.messages.ResolveProvidedOptions();
+    });
+
     this.SearchString = '';
   }
 }

@@ -1,5 +1,5 @@
 import {
-  AfterViewChecked,
+  AfterContentChecked,
   AfterViewInit,
   Component,
   EventEmitter,
@@ -78,7 +78,7 @@ export class ForwardMessagesModel {
     ])
   ]
 })
-export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnChanges {
+export class MessagesComponent implements AfterContentChecked, AfterViewInit, OnChanges {
 
   constructor(
     public formatter: ConversationsFormatter,
@@ -108,7 +108,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
 
   public static MessagesToScrollForGoBackButtonToShowUp: number = 20;
 
-  public static MessagesBufferLength: number = 10;
+  public static MessagesBufferLength: number = 50;
 
   public MaxErrorInPixels: number = 75;
 
@@ -116,12 +116,25 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
 
   public SelectedMessages: Array<Message>;
 
-  ngAfterViewChecked(): void {
-    this.ResolveProvidedOptions(this.options.Option.getValue());
+  ngAfterViewInit() {
+    this.ScrollToLastMessage(true);
   }
 
-  ngAfterViewInit() {
-    this.ScrollToLastMessage();
+  ngAfterContentChecked(): void {
+    if(!this.viewport){
+      return;
+    }
+
+    let currentMessageIndex = this.CalculateCurrentMessageIndex();
+
+    if (this.CurrentConversation.messages.length - currentMessageIndex
+      > MessagesComponent.MessagesToScrollForGoBackButtonToShowUp
+      || !this.chatsService.IsUptoDate()
+      && !(this.chatsService.IsCurrentChatDialog() && this.chatsService.IsAnyUnreadMessagesInCurrentChat())) {
+      this.IsScrollingAssistNeeded = true;
+    } else {
+      this.IsScrollingAssistNeeded = false;
+    }
   }
 
   async ngOnChanges(changes: SimpleChanges) {
@@ -157,13 +170,13 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
    * Does actions considering this.options.
    * @constructor
    */
-  public async ResolveProvidedOptions(option: MessageViewOption){
+  public async ResolveProvidedOptions(){
 
     if(this.busy){
       return;
     }
 
-    switch (option) {
+    switch (this.options.Option.getValue()) {
       case MessageViewOption.ViewMessage:{
         try {
           this.busy = true;
@@ -212,7 +225,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     }
   }
 
-  ScrollToLastMessage() {
+  ScrollToLastMessage(onlyLocal: boolean = false) {
     if (!this.CurrentConversation.messages) {
       return;
     }
@@ -223,19 +236,30 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     //all messages are already loaded, we can scroll already, if we are in group.
     //if this is dialog, let user read all messages first.
     if(this.chatsService.IsUptoDate()){
+
+      if(this.chatsService.IsCurrentChatDialog() && this.chatsService.IsAnyUnreadMessagesInCurrentChat()){
+        return;
+      }
+
       requestAnimationFrame(() => {
+
+        if(!this.viewport){
+          return;
+        }
+
         this.viewport.elementRef.nativeElement.scrollTop = this.viewport.elementRef.nativeElement.scrollHeight;
       });
     }else{
+
+      if(onlyLocal){
+        return;
+      }
+
       //reload messages if we can.
       if(this.chatsService.CurrentConversation.messagesUnread == 0){
         this.options.MessageToViewId = this.chatsService.CurrentConversation.lastMessage.id;
         this.options.Option.next(MessageViewOption.GotoMessage);
-      }else{
-        //we can't : scroll locally instead.
-        requestAnimationFrame(() => {
-          this.viewport.elementRef.nativeElement.scrollTop = this.viewport.elementRef.nativeElement.scrollHeight;
-        });
+        this.ResolveProvidedOptions();
       }
     }
   }
@@ -434,7 +458,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
     let boundaries = this.CalculateMessagesViewportBoundaries();
 
     for (let i = boundaries[0]; i < boundaries[1] + 1; ++i) {
-      if (this.CurrentConversation.messages[i].state == MessageState.Delivered) {
+      if (this.CurrentConversation.messages[i] && this.CurrentConversation.messages[i].state == MessageState.Delivered) {
         //do sequential read, to keep lastMessageId on last read message.
         await this.chatsService.ReadMessage(this.CurrentConversation.messages[i], this.chatsService.CurrentConversation);
       }
@@ -520,16 +544,6 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
 
     if (index == 0) {
       await this.UpdateHistory();
-    }
-
-     let currentMessageIndex = this.CalculateCurrentMessageIndex();
-
-    if (this.CurrentConversation.messages.length - currentMessageIndex
-      > MessagesComponent.MessagesToScrollForGoBackButtonToShowUp
-      || !this.chatsService.IsUptoDate()) {
-      this.IsScrollingAssistNeeded = true;
-    } else {
-      this.IsScrollingAssistNeeded = false;
     }
 
     let viewSize = this.viewport.getViewportSize();
@@ -645,6 +659,7 @@ export class MessagesComponent implements AfterViewChecked, AfterViewInit, OnCha
 
     this.options.MessageToViewId = message.id;
     this.options.Option.next(MessageViewOption.ViewMessage);
+    this.ResolveProvidedOptions();
   }
 }
 

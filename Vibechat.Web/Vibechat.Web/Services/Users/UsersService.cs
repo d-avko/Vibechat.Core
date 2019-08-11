@@ -211,9 +211,25 @@ namespace Vibechat.Web.Services.Users
             await unitOfWork.Commit();
         }
 
+        /// <summary>
+        /// Updates IsOnline user field and connectionId, if no open connection is found.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="signalRConnectionId"></param>
+        /// <returns></returns>
         public async Task MakeUserOnline(string userId, string signalRConnectionId)
         {
-            await usersRepository.MakeUserOnline(userId, signalRConnectionId);
+            var user = await usersRepository.GetById(userId);
+
+            if (user.ConnectionId != null)
+            {
+                await usersRepository.MakeUserOnline(userId);   
+            }
+            else
+            {
+                await usersRepository.MakeUserOnline(userId, true, signalRConnectionId);   
+            }
+            
             await unitOfWork.Commit();
         }
 

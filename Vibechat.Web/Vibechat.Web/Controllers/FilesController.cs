@@ -123,7 +123,7 @@ namespace Vibechat.Web.Controllers
             {
                 return new ResponseApiModel<MessageAttachment>
                 {
-                    IsSuccessfull = true,
+                    IsSuccessfull = false,
                     ErrorMessage = "Failed to upload. Exception type: " + ex.GetType().Name
                 };
             }

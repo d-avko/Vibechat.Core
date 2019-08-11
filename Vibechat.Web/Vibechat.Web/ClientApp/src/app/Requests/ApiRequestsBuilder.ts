@@ -74,7 +74,7 @@ export class ApiRequestsBuilder {
           MessagesOffset: offset,
           MaxMessageId: maxMessageId,
           SetLastMessage: setLastMessage,
-          History: history
+          History: history,
         },
       'api/v1/Messages/Get'
     ).toPromise();
@@ -296,12 +296,15 @@ export class ApiRequestsBuilder {
   }
 
   private MakePostCall<T>(data: any, url: string): Observable<ServerResponse<T>> {
+    console.log(`post api call : ${url}, data: ${JSON.stringify(data)}`);
+
     return this.httpClient.post<ServerResponse<T>>(
       this.baseUrl + url,
       data);
   }
 
   private MakeGetCall<T>(url: string): Observable<ServerResponse<T>> {
+    console.log(`get api call : ${url}`);
     return this.httpClient.get<ServerResponse<T>>(
       this.baseUrl + url);
   }

@@ -3,6 +3,7 @@ import {Chat} from "../../Data/Chat";
 import {MatFormField} from "@angular/material";
 import {AppUser} from "../../Data/AppUser";
 import {ChatsService} from "../../Services/ChatsService";
+import {MessageReportingService} from "../../Services/MessageReportingService";
 
 @Component({
   selector: 'input-view',
@@ -19,7 +20,7 @@ export class InputComponent {
 
   @ViewChild(MatFormField, { static: false }) inputfield: MatFormField;
 
-  constructor(private chats: ChatsService) {
+  constructor(private chats: ChatsService, private messages: MessageReportingService) {
 
   }
 
@@ -51,7 +52,11 @@ export class InputComponent {
   public async UploadFile(event: Event) {
     try {
       this.uploading = true;
-      await this.chats.UploadFile((<HTMLInputElement>event.target).files[0], this.ProgressCallback.bind(this), this.Conversation);
+      let res = await this.chats.UploadFile((<HTMLInputElement>event.target).files[0], this.ProgressCallback.bind(this), this.Conversation);
+
+      if(!res){
+        this.messages.DisplayMessage("Failed to upload files. Try again later.");
+      }
     } finally {
       this.ResetInput(<HTMLInputElement>event.target);
       this.uploading = false;

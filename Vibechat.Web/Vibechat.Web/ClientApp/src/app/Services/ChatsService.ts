@@ -19,6 +19,7 @@ import {DeviceService} from "./DeviceService";
 import {ChatRole} from "../Roles/ChatRole";
 import {AttachmentKind} from "../Data/AttachmentKinds";
 import {ChatRoleDto} from "../Roles/ChatRoleDto";
+import {AsyncArray} from "../Shared/AsyncArray";
 
 @Injectable({
   providedIn: 'root'
@@ -88,11 +89,28 @@ export class ChatsService {
 
     response.response = response.response.sort(ChatsService.ChatsSortByLastMessageFunc);
 
+    response.response.forEach(chat => {
+      if(chat.isSecure){
+       let decrypted = this.DecryptMessage(chat, chat.lastMessage);
+       if(decrypted){
+         chat.lastMessage = decrypted;
+       }
+      }
+    });
+
     this.Conversations = [...response.response];
 
     if(this.CurrentConversation){
       await this.ChangeConversation(this.Conversations.find(x => x.id == this.CurrentConversation.id));
     }
+  }
+
+  public IsAnyUnreadMessagesInCurrentChat(){
+    return this.CurrentConversation.messagesUnread != 0;
+  }
+
+  public IsCurrentChatDialog(){
+    return !this.CurrentConversation.isGroup;
   }
 
   public IsUptoDate(){
@@ -105,6 +123,7 @@ export class ChatsService {
     }
 
     return this.CurrentConversation.lastMessage.id == this.CurrentConversation.clientLastMessageId;
+
   }
 
   public GetConversationsIds() {
@@ -157,29 +176,43 @@ export class ChatsService {
     return initialIndex - index;
   }
 
-  public async ChangeConversation(conversation: Chat, updateLastMessageId: boolean = true) {
-    if (conversation == this.CurrentConversation) {
+  public async ChangeConversation(chat: Chat, updateLastMessageId: boolean = true) {
+    if (chat == this.CurrentConversation) {
       this.CurrentConversation = null;
       return;
     }
 
-    this.CurrentConversation = conversation;
-
-    if (!this.CurrentConversation) {
+    if (!chat) {
+      this.CurrentConversation = chat;
       return;
     }
 
     //secure dialog might not even exist on second user side, so update will fail
-    if (!(conversation.isSecure && !conversation.authKeyId) && updateLastMessageId) {
-      await this.UpdateExisting(conversation);
+    if (!(chat.isSecure && !chat.authKeyId) && updateLastMessageId) {
+      //update is needed.
+      let initialLastMsgId = chat.clientLastMessageId;
+      await this.UpdateExisting(chat, true);
+
+      if(chat.clientLastMessageId != initialLastMsgId){
+        let newLastMsgExists = chat.messages.find(msg => msg.id == chat.clientLastMessageId);
+
+        if(!newLastMsgExists){
+          chat.messages = null;
+        }else{
+          chat.clientLastMessageId = initialLastMsgId;
+        }
+      }
     }
 
+    //change chat only after state is updated.
+    this.CurrentConversation = chat;
+
     //creator should wait until other user is online, and initiate key exchange.
-    if (conversation.isSecure && !conversation.authKeyId && conversation.chatRole.role == ChatRole.Creator) {
+    if (chat.isSecure && !chat.authKeyId && chat.chatRole.role == ChatRole.Creator) {
 
-      if (!conversation.dialogueUser.isOnline) {
+      if (!chat.dialogueUser.isOnline) {
 
-        if (!this.connectionManager.SubscribeToUserOnlineStatusChanges(conversation.dialogueUser.id)) {
+        if (!this.connectionManager.SubscribeToUserOnlineStatusChanges(chat.dialogueUser.id)) {
           this.messagesService.OnFailedToSubsribeToUserStatusChanges();
         } else {
           this.messagesService.OnWaitingForUserToComeOnline()
@@ -187,7 +220,7 @@ export class ChatsService {
 
       } else {
 
-        this.dh.InitiateKeyExchange(conversation);
+        this.dh.InitiateKeyExchange(chat);
 
       }
 
@@ -372,18 +405,11 @@ export class ChatsService {
 
       result.response.forEach(x => {
 
-        let decrypted = this.encryptionService.Decrypt(chat.dialogueUser.id, x.encryptedPayload);
+        let decrypted = this.DecryptMessage(chat, x);
 
-        if (!decrypted) {
-          this.OnAuthKeyLost(chat);
-          return;
+        if(decrypted){
+          decryptedMessages.push(decrypted);
         }
-
-        ChatsService.DecryptedMessageToLocalMessage(
-          x,
-          decrypted);
-
-        decryptedMessages.push(decrypted);
       });
 
       result.response = decryptedMessages;
@@ -427,18 +453,11 @@ export class ChatsService {
 
       result.response.forEach(x => {
 
-        let decrypted = this.encryptionService.Decrypt(chat.dialogueUser.id, x.encryptedPayload);
+        let decrypted = this.DecryptMessage(chat, x);
 
-        if (!decrypted) {
-          this.OnAuthKeyLost(chat);
-          return;
+        if(decrypted){
+          decryptedMessages.push(decrypted);
         }
-
-        ChatsService.DecryptedMessageToLocalMessage(
-          x,
-          decrypted);
-
-        decryptedMessages.push(decrypted);
       });
 
       result.response = decryptedMessages;
@@ -547,13 +566,19 @@ export class ChatsService {
 
     let toDeleteIndexes = [];
 
-    response.response.forEach(async (chat, index) => {
+    await AsyncArray.asyncForEach(response.response, (async (chat, index) => {
       if (chat.isSecure) {
 
         //deviceId is not set, fix it.
 
         if (chat.authKeyId && this.secureChatsService.AuthKeyExists(chat.authKeyId) && !chat.deviceId) {
-          await this.requestsBuilder.UpdateAuthKeyId(chat.authKeyId, chat.id, this.device.GetDeviceId());
+          let result = await this.requestsBuilder.UpdateAuthKeyId(chat.authKeyId, chat.id, this.device.GetDeviceId());
+
+          if(!result.isSuccessfull){
+            toDeleteIndexes.push(index);
+            return;
+          }
+
           chat.deviceId = this.device.GetDeviceId();
         }
 
@@ -565,24 +590,25 @@ export class ChatsService {
         } else {
 
           let decryptedMessages = [];
-
+          //decrypt chat messages
           chat.messages.forEach(msg => {
 
-            let decrypted = this.encryptionService.Decrypt(chat.dialogueUser.id, msg.encryptedPayload);
+            let decrypted = this.DecryptMessage(chat, msg);
 
-            if (!decrypted) {
-              this.OnAuthKeyLost(chat);
-              return;
+            if(decrypted){
+              decryptedMessages.push(decrypted);
             }
-
-            ChatsService.DecryptedMessageToLocalMessage(
-              msg,
-              decrypted);
-
-            decryptedMessages.push(decrypted);
           });
 
           chat.messages = decryptedMessages;
+
+          //decrypt last message
+
+          let decrypted = this.DecryptMessage(chat, chat.lastMessage);
+
+          if(decrypted){
+            chat.lastMessage = decrypted;
+          }
         }
       } else {
 
@@ -590,7 +616,7 @@ export class ChatsService {
           chat.isMessagingRestricted = chat.dialogueUser.isMessagingRestricted;
         }
       }
-    });
+    }));
 
     let chatsToDelete = Array<Chat>();
 
@@ -609,6 +635,24 @@ export class ChatsService {
     });
   }
 
+  public DecryptMessage(chat: Chat, msg: Message) : Message{
+    if(!msg){
+      return null;
+    }
+
+    let decrypted = this.encryptionService.Decrypt(chat.dialogueUser.id, msg.encryptedPayload);
+
+    if (!decrypted) {
+      this.OnAuthKeyLost(chat);
+      return null;
+    }
+
+    ChatsService.DecryptedMessageToLocalMessage(
+      msg,
+      decrypted);
+
+    return decrypted;
+  }
 
   public async OnMessageReceived(data: MessageReceivedModel) {
     let chat = this.Conversations
@@ -881,14 +925,14 @@ export class ChatsService {
     return null;
   }
 
-  public async UpdateExisting(target: Chat) : Promise<void> {
+  public async UpdateExisting(target: Chat, updateLastMsgId: boolean = false) : Promise<void> {
     let result = await this.requestsBuilder.GetConversationById(target.id, true);
 
     if (!result.isSuccessfull) {
       return;
     }
 
-    this.UpdateConversationFields(target, result.response);
+    this.UpdateConversationFields(target, result.response, updateLastMsgId);
   }
 
   public ForwardMessagesTo(destination: Array<Chat>, messages: Array<Message>) {
@@ -1111,12 +1155,12 @@ export class ChatsService {
     }
   }
 
-  public async UploadFile(file: File, progress: (value: number) => void, to: Chat) {
+  public async UploadFile(file: File, progress: (value: number) => void, to: Chat) : Promise<boolean> {
 
     let response = await this.requestsBuilder.UploadFile(file, progress, to.id);
 
     if (!response.isSuccessfull) {
-      return;
+      return false;
     }
 
     let message = this.BuildMessage(null, to.id, true, response.response);
@@ -1126,6 +1170,8 @@ export class ChatsService {
     if(successfull){
       this.images.ScaleImage(message);
     }
+
+    return true;
   }
 
   public async UploadImages(files: FileList, progress: (value: number) => void, to: Chat) {
@@ -1153,12 +1199,15 @@ export class ChatsService {
       })
   }
 
-  public UpdateConversationFields(old: Chat, New: Chat): void {
+  public UpdateConversationFields(old: Chat, New: Chat, updateLastMsgId: boolean = false): void {
     old.name = New.name;
     old.fullImageUrl = New.fullImageUrl;
     old.thumbnailUrl = New.thumbnailUrl;
     old.participants = New.participants;
     old.isMessagingRestricted = New.isMessagingRestricted;
-    old.clientLastMessageId = New.clientLastMessageId;
+    if(updateLastMsgId){
+      old.clientLastMessageId = New.clientLastMessageId;
+    }
+    old.dialogueUser = New.dialogueUser;
   }
 }
