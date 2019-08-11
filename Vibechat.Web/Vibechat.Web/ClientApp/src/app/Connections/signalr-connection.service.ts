@@ -49,7 +49,7 @@ export class SignalrConnection {
   public async Start(){
 
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl("/hubs/chat", { accessTokenFactory: () => this.auth.token, transport: HttpTransportType.LongPolling })
+      .withUrl("/hubs/chat", { accessTokenFactory: () => this.auth.token, transport: HttpTransportType.WebSockets })
       .build();
 
     this.messagesService.OnConnecting();

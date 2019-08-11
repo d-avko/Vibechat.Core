@@ -20,9 +20,7 @@ namespace Vibechat.Web.Data.Repositories
         Task<AppUser> GetByEmail(string email);
         Task<AppUser> GetById(string id);
         Task MakeUserOffline(string userId);
-        Task MakeUserOnline(string userId, string signalRConnectionId);
-
-        Task MakeUserOnline(string userId);
+        Task MakeUserOnline(string userId, bool updateConnectionId = false, string signalRConnectionId = null);
 
         Task ChangeUserPublicState(string userId);
 

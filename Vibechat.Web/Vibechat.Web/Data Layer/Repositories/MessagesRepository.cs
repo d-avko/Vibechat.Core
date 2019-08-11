@@ -211,14 +211,27 @@ namespace Vibechat.Web.Data.Repositories
         public IQueryable<MessageDataModel> Search
             (List<ConversationDataModel> chats, int offset, int count, string searchString, string userId)
         {
-            return mContext
+            var forwardedMessages = mContext
                 .Messages
-                .Where(msg => !mContext.DeletedMessages.Any(deleted => deleted.UserId == userId && deleted.MessageID == msg.MessageID))
+                .Where(msg => !mContext.DeletedMessages.Any(deleted =>
+                    deleted.UserId == userId && deleted.MessageID == msg.MessageID))
                 .Where(msg => chats.Any(chat => chat.Id == msg.ConversationID))
-                .Where(msg => !msg.IsAttachment)
-                .Where(msg => 
-                   EF.Functions.Like(msg.MessageContent.ToLower(), $"%{searchString.ToLower()}%")
-                || EF.Functions.Like(msg.ForwardedMessage.MessageContent.ToLower(), $"%{searchString.ToLower()}%"))
+                .Where(msg => msg.ForwardedMessage != null && !msg.ForwardedMessage.IsAttachment)
+                .Where(msg =>
+                    EF.Functions.Like(msg.ForwardedMessage.MessageContent.ToLower(), $"%{searchString.ToLower()}%"));
+
+            var notForwarded = mContext
+                .Messages
+                .Where(msg =>
+                    !mContext.DeletedMessages.Any(deleted =>
+                        deleted.UserId == userId && deleted.MessageID == msg.MessageID))
+                .Where(msg => chats.Any(chat => chat.Id == msg.ConversationID))
+                .Where(msg => msg.ForwardedMessage == null && !msg.IsAttachment)
+                .Where(msg =>
+                    EF.Functions.Like(msg.MessageContent.ToLower(), $"%{searchString.ToLower()}%"));
+
+            return 
+                forwardedMessages.Concat(notForwarded)
                 .OrderByDescending(msg => msg.TimeReceived)
                 .Skip(offset)
                 .Take(count)
