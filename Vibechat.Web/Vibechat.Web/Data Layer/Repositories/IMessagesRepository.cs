@@ -10,11 +10,7 @@ namespace Vibechat.Web.Data.Repositories
 {
     public interface IMessagesRepository
     {
-        MessageDataModel Add(AppUser whoSent, Message message, int groupId, MessageDataModel forwardedMessage);
-
-        MessageDataModel AddAttachment(AppUser whoSent, MessageAttachmentDataModel attachment, Message message,
-            int groupId);
-
+        MessageDataModel Add(MessageDataModel message);
         bool Empty();
         IQueryable<MessageDataModel> GetByIds(List<int> ids);
 
@@ -24,15 +20,12 @@ namespace Vibechat.Web.Data.Repositories
 
         void MarkAsRead(MessageDataModel message);
 
-        IIncludableQueryable<MessageDataModel, AppUser> Get(string userId, int conversationId, int maxMessageId,
+        IQueryable<MessageDataModel> Get(string userId, int conversationId, int maxMessageId,
             bool history = false,
             int offset = 0, int count = 0);
 
-        IIncludableQueryable<MessageDataModel, AppUser> GetAttachments(string userId, int conversationId,
+        IQueryable<MessageDataModel> GetAttachments(string userId, int conversationId,
             AttachmentKind attachmentKind, int offset, int count);
-
-        MessageDataModel AddSecureMessage(AppUser whoSent, string message, int groupId);
-
         IQueryable<MessageDataModel> Search
             (List<ConversationDataModel> chats, int offset, int count, string searchString, string userId);
 

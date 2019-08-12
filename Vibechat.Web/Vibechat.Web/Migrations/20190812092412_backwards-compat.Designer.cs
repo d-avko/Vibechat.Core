@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VibeChat.Web;
@@ -9,9 +10,10 @@ using VibeChat.Web;
 namespace Vibechat.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190812092412_backwards-compat")]
+    partial class backwardscompat
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -310,8 +312,6 @@ namespace Vibechat.Web.Migrations
 
                     b.Property<string>("EncryptedPayload");
 
-                    b.Property<int?>("EventId");
-
                     b.Property<int?>("ForwardedMessageMessageID");
 
                     b.Property<string>("MessageContent");
@@ -327,8 +327,6 @@ namespace Vibechat.Web.Migrations
                     b.HasKey("MessageID");
 
                     b.HasIndex("ConversationID");
-
-                    b.HasIndex("EventId");
 
                     b.HasIndex("ForwardedMessageMessageID");
 
@@ -477,26 +475,6 @@ namespace Vibechat.Web.Migrations
                     b.ToTable("UsersBans");
                 });
 
-            modelBuilder.Entity("Vibechat.Web.Data_Layer.DataModels.ChatEventDataModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("ActorId");
-
-                    b.Property<int>("EventType");
-
-                    b.Property<string>("UserInvolvedId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ActorId");
-
-                    b.HasIndex("UserInvolvedId");
-
-                    b.ToTable("ChatEvents");
-                });
-
             modelBuilder.Entity("Vibechat.Web.Data_Layer.DataModels.LastMessageDataModel", b =>
                 {
                     b.Property<int>("ChatID");
@@ -592,10 +570,6 @@ namespace Vibechat.Web.Migrations
                         .HasForeignKey("ConversationID")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Vibechat.Web.Data_Layer.DataModels.ChatEventDataModel", "Event")
-                        .WithMany()
-                        .HasForeignKey("EventId");
-
                     b.HasOne("VibeChat.Web.MessageDataModel", "ForwardedMessage")
                         .WithMany()
                         .HasForeignKey("ForwardedMessageMessageID");
@@ -673,17 +647,6 @@ namespace Vibechat.Web.Migrations
                         .WithMany()
                         .HasForeignKey("BannedID")
                         .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Vibechat.Web.Data_Layer.DataModels.ChatEventDataModel", b =>
-                {
-                    b.HasOne("VibeChat.Web.AppUser", "Actor")
-                        .WithMany()
-                        .HasForeignKey("ActorId");
-
-                    b.HasOne("VibeChat.Web.AppUser", "UserInvolved")
-                        .WithMany()
-                        .HasForeignKey("UserInvolvedId");
                 });
 
             modelBuilder.Entity("Vibechat.Web.Data_Layer.DataModels.LastMessageDataModel", b =>

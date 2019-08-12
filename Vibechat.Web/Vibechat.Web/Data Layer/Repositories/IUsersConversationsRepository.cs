@@ -13,6 +13,8 @@ namespace Vibechat.Web.Data.Repositories
         IQueryable<ConversationDataModel> GetUserConversations(string deviceId, string userId);
         AppUser GetUserInDialog(int convId, string FirstUserInDialogueId);
 
+        int GetParticipantsCount(int chatId);
+
         Task<bool> Exists(string userId, int conversationId);
 
         void UpdateDeviceId(string deviceId, string userId, int chatId);

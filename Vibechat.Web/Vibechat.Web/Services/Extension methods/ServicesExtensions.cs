@@ -52,6 +52,7 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddScoped<IDhPublicKeysRepository, DhPublicKeysRepository>();
             services.AddScoped<IChatRolesRepository, ChatRolesRepository>();
             services.AddScoped<ILastMessagesRepository, LastMessagesRepository>();
+            services.AddScoped<IChatEventsRepository, ChatEventsRepository>();
         }
 
         public static void AddBusinessLogic(this IServiceCollection services)

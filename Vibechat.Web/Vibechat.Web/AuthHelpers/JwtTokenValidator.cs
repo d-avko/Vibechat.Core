@@ -20,15 +20,24 @@ namespace Vibechat.Web.AuthHelpers
         {
             var user = await UsersRepository.GetById(userId);
 
-            if (user == null) return false;
+            if (user == null)
+            {
+                return false;
+            }
 
             var token = await UsersRepository.GetRefreshToken(userId);
 
-            if (token != refreshToken) return false;
+            if (token != refreshToken)
+            {
+                return false;
+            }
 
             var parsedToken = tokensHandler.ReadJwtToken(refreshToken);
 
-            if (parsedToken.ValidTo < DateTime.Now) return false;
+            if (parsedToken.ValidTo < DateTime.Now)
+            {
+                return false;
+            }
 
             return true;
         }

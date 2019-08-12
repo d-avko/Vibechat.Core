@@ -7,6 +7,7 @@ using Vibechat.Web.Data.Conversations;
 using Vibechat.Web.Data.DataModels;
 using VibeChat.Web.Data.DataModels;
 using Vibechat.Web.Data.Messages;
+using Vibechat.Web.Data_Layer.DataModels;
 using Vibechat.Web.Services.Extension_methods;
 
 namespace Vibechat.Web.Extensions
@@ -91,10 +92,23 @@ namespace Vibechat.Web.Extensions
                 TimeReceived = value.TimeReceived.ToUTCString(),
                 User = value.User?.ToUserInfo(),
                 AttachmentInfo = value.AttachmentInfo?.ToMessageAttachment(),
-                IsAttachment = value.IsAttachment,
+                Type = value.Type,
                 ForwardedMessage = value.ForwardedMessage?.ToMessage(),
                 State = value.State,
-                EncryptedPayload = value.EncryptedPayload
+                EncryptedPayload = value.EncryptedPayload,
+                Event = value.Event?.ToChatEvent()
+            };
+        }
+
+        private static ChatEventDto ToChatEvent(this ChatEventDataModel value)
+        {
+            return new ChatEventDto()
+            {
+                Actor = value.ActorId,
+                Type = value.EventType,
+                UserInvolved = value.UserInvolvedId,
+                ActorName = value.Actor?.UserName,
+                UserInvolvedName = value.UserInvolved?.UserName
             };
         }
 

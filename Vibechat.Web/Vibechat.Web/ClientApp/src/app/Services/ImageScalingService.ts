@@ -2,6 +2,7 @@ import {Injectable} from "@angular/core";
 import {Message} from "../Data/Message";
 import {AttachmentKind} from "../Data/AttachmentKinds";
 import {ConversationsFormatter} from "../Formatters/ConversationsFormatter";
+import {MessageType} from "../Data/MessageType";
 
 export class Dimensions {
   height: number;
@@ -43,17 +44,17 @@ export class ImageScalingService {
     }
   }
 
-  public IsImage(chat: Message) {
-    if (!chat) {
+  public IsImage(msg: Message) {
+    if (!msg) {
       return false;
     }
 
-    return chat.isAttachment && chat.attachmentInfo.attachmentKind == AttachmentKind.Image;
+    return msg.type == MessageType.Attachment && msg.attachmentInfo.attachmentKind == AttachmentKind.Image;
   }
 
   public ScaleImage(message: Message) {
 
-    if (message.isAttachment && message.attachmentInfo.attachmentKind == AttachmentKind.Image) {
+    if (message.type == MessageType.Attachment && message.attachmentInfo.attachmentKind == AttachmentKind.Image) {
       let d = this.GetChatImageDimensions(message.attachmentInfo.imageWidth, message.attachmentInfo.imageHeight);
       message.attachmentInfo.imageWidth = d.width;
       message.attachmentInfo.imageHeight = d.height;

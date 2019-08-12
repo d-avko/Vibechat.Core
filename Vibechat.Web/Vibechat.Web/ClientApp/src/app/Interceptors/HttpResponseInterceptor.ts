@@ -68,8 +68,6 @@ export class HttpResponseInterceptor implements HttpInterceptor {
       return;
     }
 
-    this.authService.token = response.response;
-    localStorage.setItem('token', response.response);
     return response.response;
   }
 

@@ -25,6 +25,7 @@ import {ThemesService} from '../../Theming/ThemesService';
 import {ViewPhotoService} from '../../Dialogs/ViewPhotoService';
 import {AuthService} from "../../Services/AuthService";
 import {MessageViewOption, MessageViewOptions} from "../../Shared/MessageViewOptions";
+import {MessageType} from "../../Data/MessageType";
 
 export class ForwardMessagesModel {
   public forwardTo: Array<number>;
@@ -46,13 +47,11 @@ export class ForwardMessagesModel {
       ])
     ]),
     trigger('highlight-message', [
-      state('not-selected', style({
-
-      })),
+      state('not-selected', style({})),
       state('selected', style(
         {
           color: 'white',
-          backgroundColor:'cadetblue'
+          backgroundColor: 'cadetblue'
         })),
       transition('not-selected => selected', [
         animate('1500ms ease-out', keyframes(
@@ -66,7 +65,7 @@ export class ForwardMessagesModel {
         ))
       ]),
       transition('selected => not-selected', [
-        animate('1500ms ease-out',keyframes(
+        animate('1500ms ease-out', keyframes(
           [
             style({backgroundColor: 'cadetblue'}),
             style({backgroundColor: 'white'}),
@@ -94,7 +93,7 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
 
   @Input() public CurrentConversation: Chat;
 
-  @Output() public OnViewUserInfo = new EventEmitter<AppUser>();
+  @Output() public OnViewUserInfo = new EventEmitter<AppUser | string>();
 
   public HistoryLoading: boolean;
 
@@ -108,11 +107,11 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
 
   public static MessagesToScrollForGoBackButtonToShowUp: number = 20;
 
-  public static MessagesBufferLength: number = 50;
+  public static MessagesBufferLength: number = 20;
 
   public MaxErrorInPixels: number = 75;
 
-  @ViewChild(CdkVirtualScrollViewport, { static: false }) viewport: CdkVirtualScrollViewport;
+  @ViewChild(CdkVirtualScrollViewport, {static: false}) viewport: CdkVirtualScrollViewport;
 
   public SelectedMessages: Array<Message>;
 
@@ -120,8 +119,14 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
     this.ScrollToLastMessage(true);
   }
 
-  ngAfterContentChecked(): void {
-    if(!this.viewport){
+  private _updatingOldValue = false;
+
+  ngAfterContentChecked() {
+    if (!this.viewport) {
+      return;
+    }
+
+    if(!this.CurrentConversation.messages){
       return;
     }
 
@@ -135,25 +140,33 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
     } else {
       this.IsScrollingAssistNeeded = false;
     }
+
+    if (this.chatsService.isUpdatingCurrentChat != this._updatingOldValue) {
+      this._updatingOldValue = this.chatsService.isUpdatingCurrentChat;
+
+      if (!this.chatsService.isUpdatingCurrentChat && this.options.Option.getValue() == MessageViewOption.NoOption) {
+        this.UpdateMessagesIfNotUpdated();
+      }
+    }
   }
 
   async ngOnChanges(changes: SimpleChanges) {
-    if(changes.CurrentConversation){
-      if(this.options.Option.getValue() != MessageViewOption.NoOption){
+    if (changes.CurrentConversation) {
+      if (this.options.Option.getValue() != MessageViewOption.NoOption) {
         return;
       }
 
       await this.UpdateMessagesIfNotUpdated();
       await this.ReadMessagesInGroup();
 
-      if(!this.CurrentConversation.isGroup){
+      if (!this.CurrentConversation.isGroup) {
         await this.ReadMessagesInViewport();
       }
       this.ScrollToLastMessage();
     }
   }
 
-  private ResetState(){
+  private ResetState() {
     this.SelectedMessages = new Array<Message>();
     this.IsScrollingAssistNeeded = false;
     this.IsConversationHistoryEnd = false;
@@ -170,14 +183,14 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
    * Does actions considering this.options.
    * @constructor
    */
-  public async ResolveProvidedOptions(){
+  public async ResolveProvidedOptions() {
 
-    if(this.busy){
+    if (this.busy) {
       return;
     }
 
     switch (this.options.Option.getValue()) {
-      case MessageViewOption.ViewMessage:{
+      case MessageViewOption.ViewMessage: {
         try {
           this.busy = true;
 
@@ -190,7 +203,7 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
 
           //message exists, just scroll to it.
 
-          if(messageIndex != -1){
+          if (messageIndex != -1) {
             this.updatingMessagesAllowed = false;
             this.LockedMessageIndex = this.options.MessageToViewId;
             this.ScrollToMessage(messageIndex);
@@ -203,21 +216,19 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
           this.chatsService.CurrentConversation.clientLastMessageId = this.options.MessageToViewId;
           this.ResetState();
           await this.UpdateMessagesIfNotUpdated();
-        }
-        finally {
+        } finally {
           this.busy = false;
         }
         break;
       }
-      case MessageViewOption.GotoMessage:{
+      case MessageViewOption.GotoMessage: {
         try {
           this.busy = true;
           this.chatsService.CurrentConversation.messages = null;
           this.chatsService.CurrentConversation.clientLastMessageId = this.options.MessageToViewId;
           this.ResetState();
           await this.UpdateMessagesIfNotUpdated();
-        }
-        finally {
+        } finally {
           this.busy = false;
         }
         break;
@@ -230,33 +241,33 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
       return;
     }
 
-    if(!this.viewport){
+    if (!this.viewport) {
       return;
     }
     //all messages are already loaded, we can scroll already, if we are in group.
     //if this is dialog, let user read all messages first.
-    if(this.chatsService.IsUptoDate()){
+    if (this.chatsService.IsUptoDate()) {
 
-      if(this.chatsService.IsCurrentChatDialog() && this.chatsService.IsAnyUnreadMessagesInCurrentChat()){
+      if (this.chatsService.IsCurrentChatDialog() && this.chatsService.IsAnyUnreadMessagesInCurrentChat()) {
         return;
       }
 
       requestAnimationFrame(() => {
 
-        if(!this.viewport){
+        if (!this.viewport) {
           return;
         }
 
         this.viewport.elementRef.nativeElement.scrollTop = this.viewport.elementRef.nativeElement.scrollHeight;
       });
-    }else{
+    } else {
 
-      if(onlyLocal){
+      if (onlyLocal) {
         return;
       }
 
       //reload messages if we can.
-      if(this.chatsService.CurrentConversation.messagesUnread == 0){
+      if (this.chatsService.CurrentConversation.messagesUnread == 0) {
         this.options.MessageToViewId = this.chatsService.CurrentConversation.lastMessage.id;
         this.options.Option.next(MessageViewOption.GotoMessage);
         this.ResolveProvidedOptions();
@@ -268,7 +279,7 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
     return this.themes.currentThemeName == 'dark';
   }
 
-  public ReadMessagesInGroup(){
+  public ReadMessagesInGroup() {
     return this.chatsService.ReadExistingMessagesInGroup();
   }
 
@@ -295,12 +306,12 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
   /**
    * Remembers first clientLastMessageId index.
    */
-  private _lockedMsgIndex : number = -1;
+  private _lockedMsgIndex: number = -1;
 
   public _lockedMsgId: number = -1;
 
-  private get LockedMessageIndex(){
-    if(!this.CurrentConversation.messages[this._lockedMsgIndex]){
+  private get LockedMessageIndex() {
+    if (!this.CurrentConversation.messages[this._lockedMsgIndex]) {
       this._lockedMsgIndex = this.CurrentConversation.messages.length - 1;
       this._lockedMsgId = this.CurrentConversation.messages[this.CurrentConversation.messages.length - 1].id;
     }
@@ -313,16 +324,16 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
    * @param lastMessageId
    * @constructor
    */
-  private set LockedMessageIndex(lastMessageId: number){
+  private set LockedMessageIndex(lastMessageId: number) {
     this._lockedMsgIndex = this.chatsService.CurrentConversation.messages
       .findIndex(msg => msg.id == lastMessageId);
 
-    if(this._lockedMsgIndex != -1){
+    if (this._lockedMsgIndex != -1) {
       this._lockedMsgId = this.CurrentConversation.messages[this._lockedMsgIndex].id;
     }
   }
 
-  private ResetLockedMessage(){
+  private ResetLockedMessage() {
     this._lockedMsgId = -1;
     this._lockedMsgIndex = -1;
   }
@@ -331,15 +342,23 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
 
     let currentChat = this.CurrentConversation;
 
-    if (!this.HistoryLoading && !this.IsConversationHistoryEnd && this.updatingMessagesAllowed) {
+    if (!this.HistoryLoading
+      && !this.IsConversationHistoryEnd
+      && this.updatingMessagesAllowed
+      && !this.chatsService.isUpdatingCurrentChat) {
       this.HistoryLoading = true;
 
       if (currentChat.messages == null) {
         return;
       }
-
-      let result = await this.chatsService.UpdateMessagesHistory(MessagesComponent.MessagesBufferLength,
-        MessagesComponent.MessagesBufferLength, currentChat);
+      let option = this.options.Option.getValue();
+      let result;
+      if (option != MessageViewOption.NoOption) {
+        result = await this.chatsService.UpdateMessagesHistory(MessagesComponent.MessagesBufferLength, currentChat,
+          this.options.MessageToViewId);
+      } else {
+        result = await this.chatsService.UpdateMessagesHistory(MessagesComponent.MessagesBufferLength, currentChat);
+      }
 
       this.HistoryLoading = false;
 
@@ -363,14 +382,25 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
 
     let currentChat = this.chatsService.CurrentConversation;
 
-    if (!this.RecentMessagesLoading && !this.IsRecentMessagesEnd && this.updatingMessagesAllowed) {
+    if (!this.RecentMessagesLoading
+      && !this.IsRecentMessagesEnd
+      && this.updatingMessagesAllowed
+      && !this.chatsService.isUpdatingCurrentChat) {
       this.RecentMessagesLoading = true;
 
       if (!currentChat.messages) {
         return;
       }
 
-      let result = await this.chatsService.UpdateRecentMessages(MessagesComponent.MessagesBufferLength, currentChat);
+      let option = this.options.Option.getValue();
+      let result;
+
+      if (option != MessageViewOption.NoOption) {
+        result = await this.chatsService.UpdateRecentMessages(MessagesComponent.MessagesBufferLength, currentChat,
+          this.options.MessageToViewId);
+      } else {
+        result = await this.chatsService.UpdateRecentMessages(MessagesComponent.MessagesBufferLength, currentChat);
+      }
 
       this.RecentMessagesLoading = false;
 
@@ -380,16 +410,19 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
       }
 
       switch (this.options.Option.getValue()) {
-        case MessageViewOption.ViewMessage:{
+        case MessageViewOption.ViewMessage: {
           this.LockedMessageIndex = this.options.MessageToViewId;
           this.ScrollToMessage(this.LockedMessageIndex - 1);
           this.OnMessageViewed();
           break;
         }
-        case MessageViewOption.GotoMessage:{
+        case MessageViewOption.GotoMessage: {
           //do not highlight the message
           this.options.Option.next(MessageViewOption.NoOption);
           break;
+        }
+        case MessageViewOption.NoOption:{
+          this.ReadMessagesInViewport();
         }
       }
 
@@ -398,7 +431,7 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
 
   }
 
-  private OnMessageViewed(){
+  private OnMessageViewed() {
     this.options.Option.next(MessageViewOption.NoOption);
     setTimeout(() => this.ResetLockedMessage(), 200);
   }
@@ -432,37 +465,40 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
     if (!this.chatsService.CurrentConversation.messages) {
       this.CurrentConversation.messages = new Array<Message>();
     }
-
     await this.UpdateRecentMessages();
 
     if (this.chatsService.CurrentConversation.messages.length <= 1) {
+
       await this.UpdateHistory();
-      //prevent updating history on scroll event,
-      // as on conversation change first message should be shown.
-      this.HistoryLoading = true;
-      setTimeout(() => this.HistoryLoading = false, 500);
     }
   }
 
   public ViewUserInfo(event: any, user: AppUser) {
-  // do not highlight the message, just show user profile.
+    // do not highlight the message, just show user profile.
     event.stopPropagation();
     this.OnViewUserInfo.emit(user);
   }
 
+  public ViewUserInfoWithoutEvent(user: string) {
+    this.OnViewUserInfo.emit(user);
+  }
+  private readingMessages: boolean = false
   public async ReadMessagesInViewport() {
-    if(!this.viewport){
+    if (!this.viewport || this.readingMessages) {
       return;
     }
-
+    this.readingMessages = true;
     let boundaries = this.CalculateMessagesViewportBoundaries();
-
-    for (let i = boundaries[0]; i < boundaries[1] + 1; ++i) {
+    let left = boundaries[0] - Math.floor(MessagesComponent.MessagesBufferLength / 5);
+    let right = boundaries[1] + Math.ceil(MessagesComponent.MessagesBufferLength / 5);
+    for (let i = left; i < right; ++i) {
       if (this.CurrentConversation.messages[i] && this.CurrentConversation.messages[i].state == MessageState.Delivered) {
         //do sequential read, to keep lastMessageId on last read message.
         await this.chatsService.ReadMessage(this.CurrentConversation.messages[i], this.chatsService.CurrentConversation);
       }
     }
+
+    this.readingMessages = false;
   }
 
   public CalculateOffsetToMessage(index: number) {
@@ -476,17 +512,17 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
   }
 
   public ScrollToMessage(scrollToMessageIndex: number) {
-      requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
 
-        if (!this.viewport) {
-          return;
-        }
+      if (!this.viewport) {
+        return;
+      }
 
-        this.viewport.scrollToOffset(this.CalculateOffsetToMessage(scrollToMessageIndex));
+      this.viewport.scrollToOffset(this.CalculateOffsetToMessage(scrollToMessageIndex));
     });
   }
 
-  public CalculateCurrentMessageIndex() : number {
+  public CalculateCurrentMessageIndex(): number {
     let currentOffset = this.viewport.measureScrollOffset();
 
     if (currentOffset == 0) {
@@ -504,7 +540,7 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
   }
 
   public CalculateMessagesViewportBoundaries(): Array<number> {
-    if(!this.viewport){
+    if (!this.viewport) {
       return;
     }
 
@@ -548,19 +584,22 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
 
     let viewSize = this.viewport.getViewportSize();
 
-    if(this.viewport.elementRef.nativeElement.scrollTop + viewSize
-      >= this.viewport.elementRef.nativeElement.scrollHeight - this.MaxErrorInPixels){
+    if (this.viewport.elementRef.nativeElement.scrollTop + viewSize
+      >= this.viewport.elementRef.nativeElement.scrollHeight - this.MaxErrorInPixels) {
       await this.UpdateRecentMessages();
     }
 
     //reading is supported for dialogs only.
 
-    if(!this.CurrentConversation.isGroup){
+    if (!this.CurrentConversation.isGroup) {
       await this.ReadMessagesInViewport();
     }
   }
 
   public SelectMessage(message: Message): void {
+    if(message.type == MessageType.Event){
+      return;
+    }
 
     let messageIndex = this.SelectedMessages.findIndex(x => x.id == message.id);
 
@@ -574,18 +613,12 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
     }
   }
 
-  public IsPreviousMessageOnAnotherDay(message: Message): boolean {
+  public IsPreviousMessageOnAnotherDay(message: Message, index: number): boolean {
     if (this.CurrentConversation.messages == null) {
       return false;
     }
 
-    let messageIndex = this.CurrentConversation.messages.findIndex((x) => x.id == message.id);
-
-    if (messageIndex == -1) {
-      return false;
-    }
-
-    if (messageIndex == 0) {
+    if (index == 0) {
       return true;
     }
 
@@ -593,7 +626,7 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
       message.timeReceived = new Date(<string>message.timeReceived);
     }
 
-    let previousMessage = this.CurrentConversation.messages[messageIndex - 1];
+    let previousMessage = this.CurrentConversation.messages[index - 1];
 
     if (typeof previousMessage.timeReceived !== 'object') {
       previousMessage.timeReceived = new Date(<string>previousMessage.timeReceived);
@@ -606,27 +639,34 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
     return this.SelectedMessages.find(x => x.id == message.id) != null;
   }
 
-  public IsFirstMessageInSequence(message: Message): boolean {
+  public IsFirstMessageInSequence(message: Message, index: number): boolean {
     if (this.CurrentConversation.messages == null) {
       return false;
     }
 
-    let messageIndex = this.CurrentConversation.messages.findIndex((x) => x.id == message.id);
-
-    if (messageIndex == 0) {
-      return true;
-    }
-
-    if (messageIndex == -1) {
+    if(message.type == MessageType.Event){
       return false;
     }
 
-    return this.CurrentConversation.messages[messageIndex - 1].user.userName != message.user.userName;
+    if (index == 0) {
+      return true;
+    }
+
+    if(this.CurrentConversation.messages[index - 1].type == MessageType.Event){
+      return true;
+    }
+
+    return this.CurrentConversation.messages[index].user.userName != message.user.userName;
+  }
+
+
+  public IsText(msg : Message){
+    return msg.type == MessageType.Text;
   }
 
   public IsImage(message: Message): boolean {
 
-    if (!message.isAttachment) {
+    if (message.type != MessageType.Attachment) {
       return false;
     }
 
@@ -635,14 +675,22 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
 
   public IsFile(message: Message): boolean {
 
-    if (!message.isAttachment) {
+    if (message.type != MessageType.Attachment) {
       return false;
     }
 
     return message.attachmentInfo.attachmentKind == AttachmentKind.File;
   }
 
-  public IsDialog(){
+  public IsEvent(msg: Message){
+    return msg.type == MessageType.Event;
+  }
+
+  public IsForwarded(msg: Message){
+    return msg.type == MessageType.Forwarded;
+  }
+
+  public IsDialog() {
     return !this.CurrentConversation.isGroup;
   }
 
@@ -650,10 +698,10 @@ export class MessagesComponent implements AfterContentChecked, AfterViewInit, On
     event.stopPropagation();
   }
 
-  ViewForwardedMessage(event:Event, message: Message) {
+  ViewForwardedMessage(event: Event, message: Message) {
     event.stopPropagation();
 
-    if(this.chatsService.CurrentConversation.id != message.conversationID){
+    if (this.chatsService.CurrentConversation.id != message.conversationID) {
       return;
     }
 

@@ -16,6 +16,7 @@ import {ThemesService} from "../../Theming/ThemesService";
 import {ChooseContactDialogComponent} from "../../Dialogs/ChooseContactDialog";
 import {SnackBarHelper} from "../../Snackbar/SnackbarHelper";
 import {MessageViewOption, MessageViewOptions} from "../../Shared/MessageViewOptions";
+import {MessageReportingService} from "../../Services/MessageReportingService";
 
 @Component({
   selector: 'chat-root',
@@ -53,7 +54,8 @@ export class ChatComponent implements OnInit {
     private chats: ChatsService,
     private themesService: ThemesService,
     private snackBar: SnackBarHelper,
-    private viewOptions: MessageViewOptions) { }
+    private viewOptions: MessageViewOptions,
+    private display: MessageReportingService) { }
 
   async ngOnInit(): Promise<void> {
     await this.auth.RefreshLocalData();
@@ -147,7 +149,16 @@ export class ChatComponent implements OnInit {
   }
 
 
-  public async OnViewUserInfo(user: AppUser, chat: Chat) {
+  public async OnViewUserInfo(user: AppUser | string, chat: Chat) {
+    if(typeof user === 'string'){
+      user = await this.usersService.GetById(<string>user);
+    }
+
+    if(!user){
+      this.display.DisplayMessage(`Couldn't open user profile, try again later.`);
+      return;
+    }
+
     const userInfoRef = this.dialog.open(UserInfoDialogComponent, {
       width: '450px',
       autoFocus: false,
@@ -160,7 +171,7 @@ export class ChatComponent implements OnInit {
     });
 
     userInfoRef.afterOpened().subscribe(async () => {
-      let updatedUser = await this.usersService.UpdateUserInfo(user.id);
+      let updatedUser = await this.usersService.UpdateUserInfo((<AppUser>user).id);
 
       if (!updatedUser) {
         return;
@@ -219,18 +230,13 @@ export class ChatComponent implements OnInit {
     await this.chats.UpdateConversations();
   }
 
-  public async ChangeConversationTo(conversation: Chat) {
-    this.SearchString = '';
-    await this.chats.ChangeConversation(null);
-    await this.chats.ChangeConversation(conversation);
-  }
-
   public async ChangeConversation(conversation: Chat) {
     //if we were on search screen, we should hide it
 
     this.SearchString = '';
 
     await this.chats.ChangeConversation(conversation);
+    await this.messages.UpdateMessagesIfNotUpdated();
   }
 
   public IsMobileDevice() {

@@ -217,7 +217,9 @@ namespace Vibechat.Web.Services.FileSystem
                 var response = await client.PostAsync(DI.Configuration["FileServer:UploadFileUrl"], content);
 
                 if (!bool.Parse(await response.Content.ReadAsStringAsync()))
+                {
                     throw new InvalidDataException("Failed to upload this file.");
+                }
             }
         }
     }

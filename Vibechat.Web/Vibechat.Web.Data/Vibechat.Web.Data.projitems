@@ -33,6 +33,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DTO\Messages\AttachmentKind.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DTO\Messages\Message.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DTO\Messages\MessageAttachment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DTO\Messages\MessageType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DTO\Users\UserInfo.cs" />
   </ItemGroup>
 </Project>

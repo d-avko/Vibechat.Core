@@ -46,6 +46,15 @@ a{
   align-items: center;
 }
 
+.chat-event .event-text{
+  font: 500 15px/19px Roboto,"Helvetica Neue",sans-serif;
+}
+
+.event-text .event-link{
+  color: #5b89a0;
+  text-decoration: none;
+}
+
 .chat_misc_backtonow:hover {
   transition: all 0.3s ease 0s;
   background-color: #99c1c2 !important;
@@ -127,6 +136,12 @@ a{
   max-width: 50vw;
 }
 
+.chat-event{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
 .image_attachment {
   display: flex;
   flex-direction: row;
@@ -165,4 +180,61 @@ a{
   flex-direction: column;
   width: 100%;
   height: calc(100vh - 12vh - 65px);
+}
+
+.user-avatar {
+  width: 35px;
+  height: 35px;
+  margin-right: 15px;
+  cursor: pointer;
+}
+
+.file-wrapper_info {
+  display: flex;
+  flex-direction: column;
+}
+
+.file-name_text {
+  font: 500 14px/18px Roboto,"Helvetica Neue",sans-serif;
+  word-break: break-word;
+}
+
+.file-size_text {
+  font: 300 12px/14px Roboto,"Helvetica Neue",sans-serif;
+}
+
+.file-size {
+  border-top: 5px solid cadetblue;
+}
+
+.file-wrapper_iconwrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.file-wrapper {
+  display: flex;
+  flex-direction: row;
+  width: 54vw;
+  margin-right: 20px;
+}
+
+.file-wrapper_iconwrapper {
+  cursor: pointer;
+  margin-right: 2.5%;
+  margin-top: 2.5%;
+}
+
+.file-icon {
+  background-color: #335657;
+  border-radius: 20px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.file-icon_icon {
+  color: cadetblue;
 }

@@ -117,7 +117,7 @@ export class AuthService  {
     this.token = newToken.response;
   }
 
-  public RefreshToken(): Promise<ServerResponse<string>> {
+  public async RefreshToken(): Promise<ServerResponse<string>> {
 
     let refreshToken: string = localStorage.getItem('refreshtoken');
 
@@ -127,7 +127,13 @@ export class AuthService  {
     }
 
     if(this.IsTokenExpired()){
-      return this.requestsBuilder.RefreshJwtToken(refreshToken, this.User.id);
+      let token = await this.requestsBuilder.RefreshJwtToken(refreshToken, this.User.id);
+
+      if(token.isSuccessfull){
+        localStorage.setItem('token', token.response);
+        this.token = token.response;
+      }
+      return token;
     }else{
       let fakeResponse = new ServerResponse<string>();
       fakeResponse.isSuccessfull = true;
@@ -150,7 +156,7 @@ export class AuthService  {
     try {
         let decoded = jwtDecode<tokenDto>(token);
         let x = new Date().getTime();
-        return (decoded.exp - this.MaxMillisecondsForTokenToExpire) <= x;
+        return (decoded.exp * 1000 - this.MaxMillisecondsForTokenToExpire) <= x;
     }
     catch (e) {
         return true;

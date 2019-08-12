@@ -1,4 +1,5 @@
 ﻿using Vibechat.Web.ChatData.Messages;
+using Vibechat.Web.DTO.Messages;
 
 namespace VibeChat.Web.ChatData
 {
@@ -11,8 +12,10 @@ namespace VibeChat.Web.ChatData
         public string TimeReceived { get; set; }
 
         public Message ForwardedMessage { get; set; }
-
-        public bool IsAttachment { get; set; }
+        
+        public MessageType Type { get; set; }
+        
+        public ChatEventDto Event { get; set; }
 
         public MessageAttachment AttachmentInfo { get; set; }
 

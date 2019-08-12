@@ -32,14 +32,20 @@ namespace Vibechat.Web.Data.Repositories
                           (userConversation.DeviceId == deviceId || userConversation.DeviceId == null)
                     select userConversation.Conversation
                 )
-                .Include(x => x.PublicKey);
+                .Include(x => x.PublicKey)
+                .AsNoTracking();
         }
 
         public IQueryable<AppUser> GetConversationParticipants(int conversationId)
         {
-            return from userConversation in mContext.UsersConversations
+            return (from userConversation in mContext.UsersConversations
                 where userConversation.ChatID == conversationId
-                select userConversation.User;
+                select userConversation.User).AsNoTracking();
+        }
+
+        public int GetParticipantsCount(int chatId)
+        {
+            return mContext.UsersConversations.Count(chat => chat.ChatID == chatId);
         }
 
         public Task<List<AppUser>> FindUsersInChat(string username, int chatId)
@@ -97,20 +103,16 @@ namespace Vibechat.Web.Data.Repositories
                 .Include(x => x.User);
 
             foreach (var conversation in firstUserConversations)
+            {
                 if (await mContext
                     .UsersConversations
                     .AnyAsync(x => x.ChatID == conversation.ChatID && x.UserID == secondUserId))
+                {
                     return conversation;
+                }
+            }
 
             return null;
-        }
-
-        public async Task<bool> Exists(AppUser user, ConversationDataModel conversation)
-        {
-            return await mContext
-                       .UsersConversations
-                       .FirstOrDefaultAsync(x => x.ChatID == conversation.Id && x.UserID == user.Id) !=
-                   default(UsersConversationDataModel);
         }
     }
 }

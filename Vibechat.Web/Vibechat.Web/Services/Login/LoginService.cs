@@ -45,6 +45,7 @@ namespace Vibechat.Web.Services.Login
             var IsNewUser = false;
 
             if (identityUser == null)
+            {
                 try
                 {
                     var username = "Generated_" + Guid.NewGuid();
@@ -66,6 +67,7 @@ namespace Vibechat.Web.Services.Login
                 {
                     throw new FormatException("Couldn't register this user.", ex);
                 }
+            }
 
             return new LoginResultApiModel
             {
@@ -85,14 +87,22 @@ namespace Vibechat.Web.Services.Login
         {
             var defaultError = new FormatException("Check the fields and try again.");
 
-            if (userToRegister == null) throw defaultError;
+            if (userToRegister == null)
+            {
+                throw defaultError;
+            }
 
-            if (string.IsNullOrWhiteSpace(userToRegister.UserName)) throw defaultError;
+            if (string.IsNullOrWhiteSpace(userToRegister.UserName))
+            {
+                throw defaultError;
+            }
 
             // if UserName and email is not unique
 
             if (await usersRepository.GetByUsername(userToRegister.UserName) != null)
+            {
                 throw new FormatException("The username is not unique.");
+            }
 
             var imageUrl = chatDataProvider.GetProfilePictureUrl();
 
@@ -110,8 +120,10 @@ namespace Vibechat.Web.Services.Login
             var result = await usersRepository.CreateUser(userToCreate);
 
             if (!result.Succeeded)
+            {
                 throw new FormatException(result.Errors?.ToList()[0].Description ??
                                           "Couldn't create user because of unexpected error.");
+            }
 
             var token = userToCreate.GenerateRefreshToken();
 

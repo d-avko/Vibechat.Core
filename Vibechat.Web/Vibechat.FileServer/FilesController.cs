@@ -39,7 +39,9 @@ namespace Vibechat.FileServer
             catch
             {
                 if (System.IO.File.Exists(contentPath + request.Path))
+                {
                     System.IO.File.Delete(contentPath + request.Path);
+                }
 
                 return false;
             }
