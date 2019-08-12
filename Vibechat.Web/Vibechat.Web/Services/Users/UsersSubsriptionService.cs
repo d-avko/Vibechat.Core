@@ -14,28 +14,45 @@ namespace Vibechat.Web.Services.Users
 
         public List<string> GetSubscribers(string userId)
         {
-            if (!UsersSubsriptions.ContainsKey(userId)) return null;
+            if (!UsersSubsriptions.ContainsKey(userId))
+            {
+                return null;
+            }
 
             return UsersSubsriptions[userId];
         }
 
         public void RemoveSubsriber(string userId, string subsriber)
         {
-            if (!UsersSubsriptions.ContainsKey(userId)) return;
+            if (!UsersSubsriptions.ContainsKey(userId))
+            {
+                return;
+            }
 
             var subs = UsersSubsriptions[userId];
 
             if (subs != null && subs.Count().Equals(0))
+            {
                 if (subs.FirstOrDefault(x => x == subsriber) != default)
+                {
                     subs.Remove(subsriber);
+                }
+            }
         }
 
         public void AddSubsriber(string userId, string subsriber)
         {
-            if (!UsersSubsriptions.ContainsKey(userId)) UsersSubsriptions.Add(userId, new List<string>());
+            if (!UsersSubsriptions.ContainsKey(userId))
+            {
+                UsersSubsriptions.Add(userId, new List<string>());
+            }
+
             var subs = UsersSubsriptions[userId];
 
-            if (subs.FirstOrDefault(x => x == subsriber) != default) UsersSubsriptions[userId].Remove(subsriber);
+            if (subs.FirstOrDefault(x => x == subsriber) != default)
+            {
+                UsersSubsriptions[userId].Remove(subsriber);
+            }
 
             UsersSubsriptions[userId].Add(subsriber);
         }

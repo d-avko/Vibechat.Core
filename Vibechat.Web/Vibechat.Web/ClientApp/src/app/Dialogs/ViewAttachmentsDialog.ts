@@ -9,6 +9,7 @@ import {ConversationsFormatter} from "../Formatters/ConversationsFormatter";
 import {CdkVirtualScrollViewport} from "@angular/cdk/scrolling";
 import {ChatsService} from "../Services/ChatsService";
 import {ViewPhotoService} from "./ViewPhotoService";
+import {MessageType} from "../Data/MessageType";
 
 export interface AttachmentsData {
   conversation: Chat;
@@ -133,7 +134,7 @@ export class ViewAttachmentsDialogComponent {
     if (this.data.conversation.messages) {
       let attachments =
         this.data.conversation.messages
-        .filter(x => x.isAttachment && x.attachmentInfo.attachmentKind == AttachmentKind.Image)
+        .filter(x => x.type == MessageType.Attachment && x.attachmentInfo.attachmentKind == AttachmentKind.Image)
           .reverse();
 
       this.AddPhotos(attachments);
@@ -158,7 +159,7 @@ export class ViewAttachmentsDialogComponent {
     if (this.data.conversation.messages) {
       let attachments =
         this.data.conversation.messages
-          .filter(x => x.isAttachment && x.attachmentInfo.attachmentKind == AttachmentKind.File)
+          .filter(x => x.type == MessageType.Attachment && x.attachmentInfo.attachmentKind == AttachmentKind.File)
           .reverse();
 
       this.AddFiles(attachments);

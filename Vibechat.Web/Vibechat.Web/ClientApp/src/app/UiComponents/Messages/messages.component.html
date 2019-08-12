@@ -3,7 +3,6 @@
   <!--since virtual scroll doesn't work with items of variable height, load everything-->
 
   <cdk-virtual-scroll-viewport class="messages_main"
-                               *ngIf="chatsService.CurrentConversation.messages && chatsService.CurrentConversation.messages.length"
                                itemSize="50"
                                [maxBufferPx]="1000000000000000000000000"
                                [minBufferPx]="1000000000000000000000000"
@@ -17,14 +16,14 @@
       </mat-progress-spinner>
     </div>
 
-    <div *cdkVirtualFor="let message of chatsService.CurrentConversation.messages;">
+    <div *cdkVirtualFor="let message of chatsService.CurrentConversation.messages; let index = index">
 
       <div (click)="SelectMessage(message)"
            [@highlight-message]="message.id == _lockedMsgId ? 'selected' : 'not-selected'">
 
         <!--Today, yesterday . .etc-->
 
-        <div *ngIf="IsPreviousMessageOnAnotherDay(message)" class="messages_datestrip_wrapper padding10px">
+        <div *ngIf="IsPreviousMessageOnAnotherDay(message, index)" class="messages_datestrip_wrapper padding10px">
           <span class="datestrip_text">{{formatter.GetMessagesDateStripFormatted(message)}}</span>
         </div>
 
@@ -32,14 +31,14 @@
 
           <!--name and avatar-->
 
-          <div style="width: 35px; height: 35px; margin-right: 15px; cursor:pointer" (click)="ViewUserInfo($event, message.user)">
-            <img *ngIf="IsFirstMessageInSequence(message) || (message.forwardedMessage)" class="rounded-chat-image" src="{{message.user.imageUrl}}" />
+          <div class="user-avatar" *ngIf="!IsEvent(message)" (click)="ViewUserInfo($event, message.user)">
+            <img *ngIf="IsFirstMessageInSequence(message, index) || IsForwarded(message)" class="rounded-chat-image" src="{{message.user.imageUrl}}" />
           </div>
 
           <div class="content_messageAndName">
-            <span *ngIf="IsFirstMessageInSequence(message) || (message.forwardedMessage)" class="message_header">{{message.user.userName}}</span>
+            <span *ngIf="IsFirstMessageInSequence(message, index) || IsForwarded(message)" class="message_header">{{message.user.userName}}</span>
 
-            <p *ngIf="! message.isAttachment" class="message_text">{{message.messageContent}}</p>
+            <p *ngIf="IsText(message)" class="message_text">{{message.messageContent}}</p>
 
             <!--Attachments-->
 
@@ -76,60 +75,12 @@
               </div>
             </div>
 
-            <style>
-              .file-wrapper_info {
-                display: flex;
-                flex-direction: column;
-              }
-
-              .file-name_text {
-                font: 500 14px/18px Roboto,"Helvetica Neue",sans-serif;
-                word-break: break-word;
-              }
-
-              .file-size_text {
-                font: 300 12px/14px Roboto,"Helvetica Neue",sans-serif;
-              }
-
-              .file-size {
-                border-top: 5px solid cadetblue;
-              }
-
-              .file-wrapper_iconwrapper {
-                display: flex;
-                flex-direction: column;
-              }
-
-              .file-wrapper {
-                display: flex;
-                flex-direction: row;
-                width: 54vw;
-                margin-right: 20px;
-              }
-
-              .file-wrapper_iconwrapper {
-                cursor: pointer;
-                margin-right: 2.5%;
-                margin-top: 2.5%;
-              }
-
-              .file-icon {
-                background-color: #335657;
-                border-radius: 20px;
-                width: 40px;
-                height: 40px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-              }
-
-              .file-icon_icon {
-                color: cadetblue;
-              }
-            </style>
+            <div class="chat-event" *ngIf="IsEvent(message)">
+              <chat-event [event]="message.event" (OnViewUserInfo)="ViewUserInfoWithoutEvent($event)"></chat-event>
+            </div>
           </div>
 
-          <div class="time-and-states-wrapper">
+          <div *ngIf="!IsEvent(message)" class="time-and-states-wrapper">
 
             <span [ngClass]="{'message_timereceived-dark': IsDarkTheme(),
             'message_timereceived-light': !IsDarkTheme()}">{{message.timeReceived | date: 'shortTime'}}</span>
@@ -151,7 +102,8 @@
         </div>
 
         <!--Forwarded message-->
-        <div *ngIf="message.forwardedMessage" (click)="ViewForwardedMessage($event, message.forwardedMessage)" class="forwarded_message">
+        <div *ngIf="IsForwarded(message)" (click)="ViewForwardedMessage($event, message.forwardedMessage)"
+             class="forwarded_message">
 
           <div>
 
@@ -168,7 +120,7 @@
               <div class="content_messageAndName">
                 <span class="message_header">{{message.forwardedMessage.user.userName}}</span>
 
-                <p *ngIf="! message.forwardedMessage.isAttachment" class="message_text">{{message.forwardedMessage.messageContent}}</p>
+                <p *ngIf="IsText(message.forwardedMessage)" class="message_text">{{message.forwardedMessage.messageContent}}</p>
 
                 <!--Attachments-->
 
@@ -227,11 +179,9 @@
     </div>
   </cdk-virtual-scroll-viewport>
 
-  <h4 *ngIf="!chatsService.CurrentConversation.messages
-      || !chatsService.CurrentConversation.messages.length "
-      class="no-messages">
-    Empty in here...
-  </h4>
+  <mat-spinner *ngIf="chatsService.isUpdatingCurrentChat" style="position: absolute; margin-top: 25%; margin-left: calc(50% - 80px);" diameter="160">
+
+  </mat-spinner>
 
   <div (click)="ScrollToLastMessage()" class="chat_misc_backtonow" *ngIf="IsScrollingAssistNeeded" [@slideInOut]>
     <mat-icon>keyboard_arrow_down</mat-icon>

@@ -36,11 +36,15 @@ namespace Vibechat.Web
         public void ConfigureServices(IServiceCollection services)
         {
             if (environment.IsDevelopment())
+            {
                 services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseNpgsql(Configuration["ConnectionStrings:Development"]));
+            }
             else
+            {
                 services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseNpgsql(Configuration["ConnectionStrings:DefaultConnection"]));
+            }
 
             services.AddIdentity<AppUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -104,7 +108,10 @@ namespace Vibechat.Web
                             if (!string.IsNullOrEmpty(accessToken) &&
                                 path.StartsWithSegments("/hubs/chat"))
                                 // Read the token out of the query string
+                            {
                                 context.Token = accessToken;
+                            }
+
                             return Task.CompletedTask;
                         }
                     };
@@ -130,9 +137,14 @@ namespace Vibechat.Web
         public async void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
         {
             if (env.IsDevelopment())
+            {
                 app.UseDeveloperExceptionPage();
+            }
             else
+            {
                 app.UseHsts();
+            }
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles(new StaticFileOptions
@@ -157,7 +169,10 @@ namespace Vibechat.Web
 
                 spa.Options.SourcePath = "ClientApp";
                 spa.Options.StartupTimeout = TimeSpan.FromMinutes(5);
-                if (env.IsDevelopment()) spa.UseAngularCliServer("start");
+                if (env.IsDevelopment())
+                {
+                    spa.UseAngularCliServer("start");
+                }
             });
 
             FirebaseApp.Create(new AppOptions

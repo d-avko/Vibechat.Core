@@ -40,6 +40,7 @@ import {AdminPanelDialog} from "../Dialogs/AdminPanelDialog";
 import {ImageWithLoadProgress} from "../Shared/ImageWithLoadProgress";
 import {MessageViewOptions} from "../Shared/MessageViewOptions";
 import {UiScrollModule} from "ngx-ui-scroll";
+import { ChatEventComponent } from '../chat-event-module/chat-event.component';
 
 @NgModule({
   declarations: [
@@ -59,7 +60,8 @@ import {UiScrollModule} from "ngx-ui-scroll";
     ChooseContactDialogComponent,
     ChatUsersDialogComponent,
     AdminPanelDialog,
-    ViewPhotoComponent
+    ViewPhotoComponent,
+    ChatEventComponent
   ],
   imports: [
     ScrollingModule,

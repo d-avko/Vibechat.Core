@@ -41,11 +41,17 @@ namespace Vibechat.Web.Services.Users
 
         public async Task<UserInfo> GetUserById(string userId, string callerId)
         {
-            if (userId == null) throw new FormatException("Provided user was null");
+            if (userId == null)
+            {
+                throw new FormatException("Provided user was null");
+            }
 
             var foundUser = await usersRepository.GetById(userId);
  
-            if (foundUser == null) throw new FormatException("User was not found");
+            if (foundUser == null)
+            {
+                throw new FormatException("User was not found");
+            }
 
             var user = foundUser.ToUserInfo();
             
@@ -60,11 +66,17 @@ namespace Vibechat.Web.Services.Users
         
         public async Task<AppUser> GetUserById(string userId)
         {
-            if (userId == null) throw new FormatException("Provided user was null");
+            if (userId == null)
+            {
+                throw new FormatException("Provided user was null");
+            }
 
             var foundUser = await usersRepository.GetById(userId);
  
-            if (foundUser == null) throw new FormatException("User was not found");
+            if (foundUser == null)
+            {
+                throw new FormatException("User was not found");
+            }
 
             return foundUser;
         }
@@ -81,7 +93,10 @@ namespace Vibechat.Web.Services.Users
         {
             newName = newName.Replace(" ", "");
 
-            if (newName.Length > MaxNameLength) throw new FormatException("Name was too long.");
+            if (newName.Length > MaxNameLength)
+            {
+                throw new FormatException("Name was too long.");
+            }
 
             await usersRepository.ChangeName(newName, whoCalled);
 
@@ -92,12 +107,17 @@ namespace Vibechat.Web.Services.Users
         {
             newName = newName.Replace(" ", "");
 
-            if (newName.Length > MaxNameLength || newName.Length < MinNameLength) 
+            if (newName.Length > MaxNameLength || newName.Length < MinNameLength)
+            {
                 throw new FormatException("Name was too long or too short.");
+            }
 
             var foundUser = await usersRepository.GetByUsername(newName);
 
-            if (foundUser != null) throw new InvalidDataException("New username was not unique.");
+            if (foundUser != null)
+            {
+                throw new InvalidDataException("New username was not unique.");
+            }
 
             await usersRepository.ChangeUsername(newName, whoCalled);
         }
@@ -106,7 +126,10 @@ namespace Vibechat.Web.Services.Users
         {
             var caller = await usersRepository.GetById(callerId);
 
-            if (caller == null) throw new ArgumentException("caller id was wrong.");
+            if (caller == null)
+            {
+                throw new ArgumentException("caller id was wrong.");
+            }
 
             return contactsRepository.GetContactsOf(callerId)
                 .Select(x => x.Contact.ToUserInfo())
@@ -115,7 +138,10 @@ namespace Vibechat.Web.Services.Users
 
         public async Task AddToContacts(string userId, string callerId)
         {
-            if (userId == callerId) throw new InvalidDataException("Can't add yourself to contacts.");
+            if (userId == callerId)
+            {
+                throw new InvalidDataException("Can't add yourself to contacts.");
+            }
 
             try
             {
@@ -145,7 +171,10 @@ namespace Vibechat.Web.Services.Users
         {
             newName = newName.Replace(" ", "");
 
-            if (newName.Length > MaxNameLength) throw new FormatException("Name was too long.");
+            if (newName.Length > MaxNameLength)
+            {
+                throw new FormatException("Name was too long.");
+            }
 
             await usersRepository.ChangeLastName(newName, whoCalled);
 
@@ -155,11 +184,16 @@ namespace Vibechat.Web.Services.Users
         public async Task<UpdateProfilePictureResponse> UpdateThumbnail(IFormFile image, string userId)
         {
             if (image.Length / (1024 * 1024) > MaxThumbnailLengthMB)
+            {
                 throw new InvalidDataException($"Thumbnail was larger than {MaxThumbnailLengthMB}");
+            }
 
             var user = usersRepository.GetById(userId);
 
-            if (user == null) throw new FormatException("User was not found");
+            if (user == null)
+            {
+                throw new FormatException("User was not found");
+            }
 
             ValueTuple<string, string> thumbnailFull;
 
@@ -185,15 +219,20 @@ namespace Vibechat.Web.Services.Users
 
         public async Task<UsersByNickNameResultApiModel> FindUsersByNickName(UsersByNickNameApiModel credentials)
         {
-            if (credentials.UsernameToFind == null) throw new FormatException("Nickname was null");
+            if (credentials.UsernameToFind == null)
+            {
+                throw new FormatException("Nickname was null");
+            }
 
             var result = (await usersRepository.FindByUsername(credentials.UsernameToFind)).ToList();
 
             if (result.Count() == 0)
+            {
                 return new UsersByNickNameResultApiModel
                 {
                     UsersFound = null
                 };
+            }
 
             return new UsersByNickNameResultApiModel
             {
@@ -205,7 +244,10 @@ namespace Vibechat.Web.Services.Users
 
         public async Task ChangeUserIsPublicState(string userId, string whoAccessedId)
         {
-            if (whoAccessedId != userId) throw new FormatException("Can only call this method for yourself.");
+            if (whoAccessedId != userId)
+            {
+                throw new FormatException("Can only call this method for yourself.");
+            }
 
             await usersRepository.ChangeUserPublicState(userId);
             await unitOfWork.Commit();

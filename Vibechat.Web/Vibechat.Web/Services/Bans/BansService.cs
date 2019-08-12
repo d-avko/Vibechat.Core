@@ -37,7 +37,10 @@ namespace Vibechat.Web.Services.Bans
 
         public async Task BanUserFromConversation(int conversationId, string userToBanId, string whoAccessedId)
         {
-            if (userToBanId == whoAccessedId) throw new FormatException("Can't ban yourself.");
+            if (userToBanId == whoAccessedId)
+            {
+                throw new FormatException("Can't ban yourself.");
+            }
 
             var conversation = ConversationRepository.GetById(conversationId);
             var banned = await UsersRepository.GetById(userToBanId);
@@ -45,11 +48,19 @@ namespace Vibechat.Web.Services.Bans
             var userRole = await rolesRepository.GetAsync(conversationId, whoAccessedId);
 
             if (userRole.RoleId != ChatRole.Moderator && userRole.RoleId != ChatRole.Creator)
+            {
                 throw new FormatException("Only creator / moderator can ban users.");
+            }
 
-            if (banned == null) throw new FormatException("Wrong user to ban id was provided.");
+            if (banned == null)
+            {
+                throw new FormatException("Wrong user to ban id was provided.");
+            }
 
-            if (conversation == null) throw new FormatException("Wrong conversation id was provided.");
+            if (conversation == null)
+            {
+                throw new FormatException("Wrong conversation id was provided.");
+            }
 
             try
             {
@@ -64,12 +75,18 @@ namespace Vibechat.Web.Services.Bans
 
         public async Task BanDialog(string UserToBanId, string whoAccessedId)
         {
-            if (UserToBanId == whoAccessedId) throw new FormatException("Can't ban yourself.");
+            if (UserToBanId == whoAccessedId)
+            {
+                throw new FormatException("Can't ban yourself.");
+            }
 
             var bannedBy = await UsersRepository.GetById(whoAccessedId);
             var banned = await UsersRepository.GetById(UserToBanId);
 
-            if (banned == null || bannedBy == null) throw new FormatException("Wrong id of person to ban.");
+            if (banned == null || bannedBy == null)
+            {
+                throw new FormatException("Wrong id of person to ban.");
+            }
 
             try
             {
@@ -83,7 +100,9 @@ namespace Vibechat.Web.Services.Bans
             UsersConversationDataModel dialog;
 
             if ((dialog = await usersConversationsRepository.GetDialog(UserToBanId, whoAccessedId)) != null)
+            {
                 ConversationsBansRepository.BanUserInGroup(banned, dialog.Conversation);
+            }
 
             await unitOfWork.Commit();
         }
@@ -92,7 +111,10 @@ namespace Vibechat.Web.Services.Bans
         {
             var who = await UsersRepository.GetById(Who);
 
-            if (who == null) throw new FormatException("Wrong id of a person to check.");
+            if (who == null)
+            {
+                throw new FormatException("Wrong id of a person to check.");
+            }
 
             return ConversationsBansRepository.IsBanned(who, conversationId);
         }
@@ -117,14 +139,19 @@ namespace Vibechat.Web.Services.Bans
             UsersConversationDataModel dialog;
 
             if ((dialog = await usersConversationsRepository.GetDialog(userId, whoUnbans)) != null)
+            {
                 ConversationsBansRepository.UnbanUserInGroup(userId, dialog.Conversation.Id);
+            }
 
             await unitOfWork.Commit();
         }
 
         public async Task UnbanUserFromConversation(int conversationId, string userToUnbanId, string whoAccessedId)
         {
-            if (userToUnbanId == whoAccessedId) throw new FormatException("Can't unban yourself.");
+            if (userToUnbanId == whoAccessedId)
+            {
+                throw new FormatException("Can't unban yourself.");
+            }
 
             var conversation = ConversationRepository.GetById(conversationId);
             var banned = await UsersRepository.GetById(userToUnbanId);
@@ -132,11 +159,19 @@ namespace Vibechat.Web.Services.Bans
             var userRole = await rolesRepository.GetAsync(conversationId, whoAccessedId);
 
             if (userRole.RoleId != ChatRole.Moderator && userRole.RoleId != ChatRole.Creator)
+            {
                 throw new FormatException("Only creator / moderator can unban users.");
+            }
 
-            if (banned == null) throw new FormatException("Wrong user to unban id was provided.");
+            if (banned == null)
+            {
+                throw new FormatException("Wrong user to unban id was provided.");
+            }
 
-            if (conversation == null) throw new FormatException("Wrong conversation id was provided.");
+            if (conversation == null)
+            {
+                throw new FormatException("Wrong conversation id was provided.");
+            }
 
             try
             {

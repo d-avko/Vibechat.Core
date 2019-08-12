@@ -50,11 +50,13 @@ namespace Vibechat.Web.Controllers
             foreach (var image in request.images)
             {
                 if (image.Length > 1024 * 1024 * MaxImageLengthMB)
+                {
                     return new ResponseApiModel<FilesUploadResponse>
                     {
                         ErrorMessage = $"Some of the files were larger than {MaxImageLengthMB} Mb",
                         IsSuccessfull = false
                     };
+                }
             }
 
             var error = string.Empty;
@@ -100,11 +102,13 @@ namespace Vibechat.Web.Controllers
         public async Task<ResponseApiModel<MessageAttachment>> UploadFile([FromForm] UploadFileRequest request)
         {
             if (request.file.Length > 1024 * 1024 * MaxFileLengthMB)
+            {
                 return new ResponseApiModel<MessageAttachment>
                 {
                     ErrorMessage = $"File was larger than {MaxFileLengthMB} Mb",
                     IsSuccessfull = false
                 };
+            }
 
             var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 

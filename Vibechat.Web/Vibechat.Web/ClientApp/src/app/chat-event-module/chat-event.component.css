@@ -1,0 +1,19 @@
+.event-text{
+  font: 500 16px/18px Roboto,"Helvetica Neue",sans-serif;
+}
+
+.event-link{
+  color: #5b89a0;
+  text-decoration: none;
+}
+
+.event-wrapper{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.padding{
+  padding: 0 .5rem;
+}

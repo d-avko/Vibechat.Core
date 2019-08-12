@@ -109,8 +109,9 @@
     <TypeScriptCompile Include="ClientApp\src\app\ApiModels\ConversationRequest.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\ApiModels\ConversationResponse.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\ApiModels\UpdateThumbnailResponse.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\Auth\AuthService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\AttachmentKinds.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Data\BannedEvent.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Data\ChatEvent.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\ConversationIdsFactory.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\FoundUsersResponse.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Data\UploadFilesResponse.ts" />

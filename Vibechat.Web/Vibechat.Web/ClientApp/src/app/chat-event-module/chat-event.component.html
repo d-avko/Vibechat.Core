@@ -1,0 +1,5 @@
+<div class="event-wrapper">
+  <a class="event-text event-link" (click)="ViewUser(firstUserid)">{{firstUsername}}</a>
+  <p class="event-text padding">{{action}}</p>
+  <a class="event-text event-link" *ngIf="secondUserId" (click)="ViewUser(secondUserId)">{{secondUsername}}</a>
+</div>

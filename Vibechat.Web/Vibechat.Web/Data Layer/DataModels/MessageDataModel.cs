@@ -1,7 +1,10 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using VibeChat.Web.Data.DataModels;
+using Vibechat.Web.Data_Layer.DataModels;
+using Vibechat.Web.DTO.Messages;
 
 namespace VibeChat.Web
 {
@@ -11,9 +14,6 @@ namespace VibeChat.Web
         Read = 2
     }
 
-    /// <summary>
-    ///     Data model for messages
-    /// </summary>
     public class MessageDataModel
     {
         [Key] public int MessageID { get; set; }
@@ -28,8 +28,10 @@ namespace VibeChat.Web
 
         public MessageAttachmentDataModel AttachmentInfo { get; set; }
 
-        public bool IsAttachment { get; set; }
-
+        public MessageType Type { get; set; }
+        
+        public ChatEventDataModel Event { get; set; }
+        
         public MessageDataModel ForwardedMessage { get; set; }
 
         //Id of a conversation where this message was sent 

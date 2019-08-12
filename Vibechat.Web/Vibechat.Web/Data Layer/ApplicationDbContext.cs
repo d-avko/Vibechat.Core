@@ -48,9 +48,10 @@ namespace VibeChat.Web
         public new DbSet<RoleDataModel> Roles { get; set; }
 
         public DbSet<ChatRoleDataModel> ChatRoles { get; set; }
-
-
+        
         public DbSet<LastMessageDataModel> LastViewedMessages { get; set; }
+        
+        public DbSet<ChatEventDataModel> ChatEvents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

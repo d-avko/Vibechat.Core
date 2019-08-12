@@ -20,6 +20,7 @@ import {ChatRole} from "../Roles/ChatRole";
 import {AttachmentKind} from "../Data/AttachmentKinds";
 import {ChatRoleDto} from "../Roles/ChatRoleDto";
 import {AsyncArray} from "../Shared/AsyncArray";
+import {MessageType} from "../Data/MessageType";
 
 @Injectable({
   providedIn: 'root'
@@ -47,6 +48,7 @@ export class ChatsService {
   private didDisconnect: boolean;
   public static MinGroupNameLength = 5;
   public static MaxGroupNameLength = 128;
+  public isUpdatingCurrentChat: boolean = false;
 
   public IsConversationSelected(): boolean {
     return this.CurrentConversation != null;
@@ -191,6 +193,11 @@ export class ChatsService {
     if (!(chat.isSecure && !chat.authKeyId) && updateLastMessageId) {
       //update is needed.
       let initialLastMsgId = chat.clientLastMessageId;
+
+      this.isUpdatingCurrentChat = true;
+
+      this.CurrentConversation = chat;
+
       await this.UpdateExisting(chat, true);
 
       if(chat.clientLastMessageId != initialLastMsgId){
@@ -202,10 +209,13 @@ export class ChatsService {
           chat.clientLastMessageId = initialLastMsgId;
         }
       }
+
+      this.isUpdatingCurrentChat = false;
     }
 
-    //change chat only after state is updated.
-    this.CurrentConversation = chat;
+    if(!this.CurrentConversation || this.CurrentConversation.id != chat.id){
+      this.CurrentConversation = chat;
+    }
 
     //creator should wait until other user is online, and initiate key exchange.
     if (chat.isSecure && !chat.authKeyId && chat.chatRole.role == ChatRole.Creator) {
@@ -378,16 +388,18 @@ export class ChatsService {
 
   /**
    * To calculate the offset for messages,
-   * considers recentMessagesMaxCount and length of local messages array.
+   * considers chat.clientLastMessageId or customLastMessageId
    */
-  public async UpdateMessagesHistory(count: number, recentMessagesMaxCount: number, chat: Chat) {
-    let offset = chat.messages.filter(msg => msg.id < chat.clientLastMessageId).length;
+  public async UpdateMessagesHistory(count: number, chat: Chat, customLastMessageId: number = -1) {
+    let lastMessageId = customLastMessageId == -1 ? chat.clientLastMessageId : customLastMessageId;
+
+    let offset = chat.messages.filter(msg => msg.id < lastMessageId).length;
 
     let result = await this.requestsBuilder.GetChatMessages(
       offset,
       count,
       chat.id,
-      chat.clientLastMessageId,
+      lastMessageId,
       true);
 
     if (!result.isSuccessfull) {
@@ -426,14 +438,17 @@ export class ChatsService {
     return result.response;
   }
 
-  public async UpdateRecentMessages(count: number, chat: Chat){
-    let offset = chat.messages.filter(msg => msg.id >= chat.clientLastMessageId).length;
+  public async UpdateRecentMessages(count: number, chat: Chat, customLastMessageId: number = -1){
+
+    let lastMessageId = customLastMessageId == -1 ? chat.clientLastMessageId : customLastMessageId;
+
+    let offset = chat.messages.filter(msg => msg.id >= lastMessageId).length;
 
     let result = await this.requestsBuilder.GetChatMessages(
       offset,
       count,
       chat.id,
-      chat.clientLastMessageId,
+      lastMessageId,
       false);
 
     if (!result.isSuccessfull) {
@@ -443,8 +458,6 @@ export class ChatsService {
     //server sent zero messages, we reached end of our history.
 
     if (!result.response || !result.response.length) {
-      //only allow receiving messages, if client loaded all recent messages.
-      chat.canReceiveMessages = true;
       return result.response;
     }
 
@@ -475,7 +488,10 @@ export class ChatsService {
     //for dialogs, they are updated as we read messages.
     if(chat.isGroup){
       chat.messagesUnread = Math.max(0, chat.messagesUnread - result.response.length);
-      chat.clientLastMessageId = Math.max(...result.response.map(msg => msg.id));
+
+      if(customLastMessageId == -1){
+        chat.clientLastMessageId = Math.max(...result.response.map(msg => msg.id));
+      }
     }
 
     chat.messages = [...chat.messages];
@@ -677,8 +693,8 @@ export class ChatsService {
 
     this.images.ScaleImage(data.message);
 
-    //we can accept message only if chat.canAcceptMessages is true.
-    if(chat.canReceiveMessages){
+    //we can accept message only if all messages are loaded
+    if(chat.messages.find(msg => msg.id == chat.lastMessage.id)){
       chat.messages.push(data.message);
       chat.messages = [...chat.messages];
 
@@ -699,7 +715,7 @@ export class ChatsService {
     return new Message(
       {
         id: 0,
-        isAttachment: false,
+        type: MessageType.Forwarded,
         user: this.authService.User,
         conversationID: whereTo,
         state: MessageState.Pending,
@@ -713,7 +729,7 @@ export class ChatsService {
       {
         id: 0,
         messageContent: message,
-        isAttachment: isAttachment,
+        type: isAttachment ? MessageType.Attachment : MessageType.Text,
         attachmentInfo: AttachmentInfo,
         user: this.authService.User,
         conversationID: whereTo,

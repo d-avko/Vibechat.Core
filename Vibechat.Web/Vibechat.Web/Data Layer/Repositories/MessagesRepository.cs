@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using VibeChat.Web;
 using VibeChat.Web.ChatData;
 using VibeChat.Web.Data.DataModels;
 using Vibechat.Web.Data.Messages;
+using Vibechat.Web.DTO.Messages;
 
 namespace Vibechat.Web.Data.Repositories
 {
@@ -19,49 +21,9 @@ namespace Vibechat.Web.Data.Repositories
 
         private readonly ApplicationDbContext mContext;
 
-        public MessageDataModel Add(AppUser whoSent, Message message, int groupId, MessageDataModel forwardedMessage)
+        public MessageDataModel Add(MessageDataModel message)
         {
-            return mContext.Messages.Add(new MessageDataModel
-            {
-                ConversationID = groupId,
-                MessageContent = message.MessageContent,
-                TimeReceived = DateTime.UtcNow,
-                User = whoSent,
-                IsAttachment = false,
-                ForwardedMessage = forwardedMessage,
-                State = MessageState.Delivered
-            })?.Entity;
-        }
-
-        public MessageDataModel AddSecureMessage(AppUser whoSent, string message, int groupId)
-        {
-            return mContext.Messages.Add(new MessageDataModel
-            {
-                ConversationID = groupId,
-                TimeReceived = DateTime.UtcNow,
-                User = whoSent,
-                IsAttachment = false,
-                State = MessageState.Delivered,
-                EncryptedPayload = message
-            })?.Entity;
-        }
-
-        public MessageDataModel AddAttachment(
-            AppUser whoSent,
-            MessageAttachmentDataModel attachment,
-            Message message,
-            int groupId)
-        {
-            return mContext.Messages.Add(new MessageDataModel
-            {
-                ConversationID = groupId,
-                MessageContent = message.MessageContent,
-                TimeReceived = DateTime.UtcNow,
-                User = whoSent,
-                AttachmentInfo = attachment,
-                IsAttachment = true,
-                State = MessageState.Delivered
-            })?.Entity;
+            return mContext.Messages.Add(message)?.Entity;
         }
 
         public void Remove(List<int> messagesIds, string whoRemovedId)
@@ -98,7 +60,7 @@ namespace Vibechat.Web.Data.Repositories
             message.State = MessageState.Read;
         }
 
-        public IIncludableQueryable<MessageDataModel, AppUser> Get(
+        public IQueryable<MessageDataModel> Get(
             string userId,
             int conversationId,
             int maxMessageId = -1,
@@ -162,10 +124,15 @@ namespace Vibechat.Web.Data.Repositories
                 .ThenInclude(x => x.AttachmentInfo)
                 .ThenInclude(x => x.AttachmentKind)
                 .Include(x => x.ForwardedMessage)
-                .ThenInclude(x => x.User);
+                .ThenInclude(x => x.User)
+                .Include(x => x.Event)
+                .ThenInclude(x => x.Actor)
+                .Include(x => x.Event)
+                .ThenInclude(x => x.UserInvolved)
+                .AsNoTracking();
         }
 
-        public IIncludableQueryable<MessageDataModel, AppUser> GetAttachments(
+        public IQueryable<MessageDataModel> GetAttachments(
             string userId,
             int conversationId,
             AttachmentKind attachmentKind,
@@ -180,7 +147,7 @@ namespace Vibechat.Web.Data.Repositories
                 .Messages
                 .Where(msg =>
                     msg.ConversationID == conversationId
-                    && msg.IsAttachment
+                    && msg.Type == MessageType.Attachment
                     && msg.AttachmentInfo.AttachmentKind.Kind == attachmentKind
                     && !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID))
                 .OrderByDescending(x => x.TimeReceived)
@@ -193,7 +160,8 @@ namespace Vibechat.Web.Data.Repositories
                 .ThenInclude(x => x.AttachmentInfo)
                 .ThenInclude(x => x.AttachmentKind)
                 .Include(x => x.ForwardedMessage)
-                .ThenInclude(x => x.User);
+                .ThenInclude(x => x.User)
+                .AsNoTracking();
         }
 
         public int GetUnreadAmount(int conversationId, string userId, int lastMessageId)
@@ -216,7 +184,7 @@ namespace Vibechat.Web.Data.Repositories
                 .Where(msg => !mContext.DeletedMessages.Any(deleted =>
                     deleted.UserId == userId && deleted.MessageID == msg.MessageID))
                 .Where(msg => chats.Any(chat => chat.Id == msg.ConversationID))
-                .Where(msg => msg.ForwardedMessage != null && !msg.ForwardedMessage.IsAttachment)
+                .Where(msg => msg.Type == MessageType.Forwarded && msg.ForwardedMessage.Type == MessageType.Text)
                 .Where(msg =>
                     EF.Functions.Like(msg.ForwardedMessage.MessageContent.ToLower(), $"%{searchString.ToLower()}%"));
 
@@ -226,7 +194,7 @@ namespace Vibechat.Web.Data.Repositories
                     !mContext.DeletedMessages.Any(deleted =>
                         deleted.UserId == userId && deleted.MessageID == msg.MessageID))
                 .Where(msg => chats.Any(chat => chat.Id == msg.ConversationID))
-                .Where(msg => msg.ForwardedMessage == null && !msg.IsAttachment)
+                .Where(msg => msg.Type == MessageType.Text)
                 .Where(msg =>
                     EF.Functions.Like(msg.MessageContent.ToLower(), $"%{searchString.ToLower()}%"));
 
@@ -236,7 +204,8 @@ namespace Vibechat.Web.Data.Repositories
                 .Skip(offset)
                 .Take(count)
                 .Include(msg => msg.ForwardedMessage)
-                .Include(x => x.User);
+                .Include(x => x.User)
+                .AsNoTracking();
         }
 
         public bool Empty()

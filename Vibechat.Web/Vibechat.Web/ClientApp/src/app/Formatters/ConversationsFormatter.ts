@@ -6,13 +6,20 @@ import {AttachmentKind} from "../Data/AttachmentKinds";
 import {TypingService} from "../Services/TypingService";
 import {AppUser} from "../Data/AppUser";
 import {ChatRole} from "../Roles/ChatRole";
+import {MessageType} from "../Data/MessageType";
+import {ChatEvent} from "../Data/ChatEvent";
+import {ChatEventType} from "../Data/ChatEventType";
+import {DomSanitizer} from "@angular/platform-browser";
 
 @Injectable({
   providedIn: 'root'
 })
-export class ConversationsFormatter{
+export class ConversationsFormatter {
 
-  constructor(private auth: AuthService, private typing: TypingService) {}
+  constructor(private auth: AuthService,
+              private typing: TypingService,
+              private sanitizer: DomSanitizer) {
+  }
 
   public static MaxSymbols = 38;
 
@@ -42,30 +49,66 @@ export class ConversationsFormatter{
       MaxSymbols = Math.floor((window.innerWidth * ConversationsFormatter.MaxSymbols * 0.75) / ConversationsFormatter.MaxPixelsDesktop);
     }
 
-    let user = message.user.id == this.auth.User.id ? 'You' : message.user.userName;
-
-    if (message.forwardedMessage) {
-      return "Forwarded message";
+    let user;
+    if(!message.user){
+      user = '';
+    }else{
+      user = message.user.id == this.auth.User.id ? 'You' : message.user.userName;
     }
 
-    if (message.isAttachment) {
-      let msg = user + ": " + this.GetFormattedAttachmentName(message.attachmentInfo.attachmentKind);
+    switch (message.type) {
+      case MessageType.Attachment: {
+        let msg = user + ": " + this.GetFormattedAttachmentName(message.attachmentInfo.attachmentKind);
 
-      if (msg.length > MaxSymbols) {
-        msg = msg.slice(0, MaxSymbols) + "...";
+        if (msg.length > MaxSymbols) {
+          msg = msg.slice(0, MaxSymbols) + "...";
+        }
+
+        return msg;
+        break;
       }
+      case MessageType.Forwarded: {
+        return "Forwarded message";
+      }
+      case MessageType.Event: {
+        let msg = this.GetChatEventFormatted(message.event);
+        if (msg.length > MaxSymbols) {
+          msg = msg.slice(0, MaxSymbols) + "...";
+        }
 
-      return msg;
+        return msg;
+      }
+      case MessageType.Text: {
+        let msg = user + ": " + message.messageContent;
+
+        if (msg.length > MaxSymbols) {
+          msg = msg.slice(0, MaxSymbols) + "...";
+        }
+
+        return msg;
+      }
     }
+  }
 
-
-    let msg = user + ": " + message.messageContent;
-
-    if (msg.length > MaxSymbols) {
-      msg = msg.slice(0, MaxSymbols) + "...";
+  public GetChatEventFormatted(event: ChatEvent): string {
+    let result = 'User';
+    switch (event.type) {
+      case ChatEventType.Joined: {
+        return result + ` ${event.actorName} joined the chat.`;
+      }
+      case ChatEventType.Banned:{
+        return result + ` ${event.userInvolvedName} was banned by ${event.actorName}`;
+      }
+      case ChatEventType.Invited:{
+        return result + ` ${event.userInvolvedName} was invited by ${event.actorName}`;
+      }
+      case ChatEventType.Left:{
+        return result + `${event.actorName} has left the chat.`;
+      }
+      case ChatEventType.Kicked:{
+        return result + ` ${event.userInvolvedName} was kicked by ${event.actorName}`;
+      }
     }
-
-    return msg;
   }
 
   public GetUserRoleFormatted(user: AppUser) {
@@ -111,16 +154,16 @@ export class ConversationsFormatter{
       case (amount >= 1024) && (amount < 1024 * 1024): {
         return `${Math.floor(amount / 1024)} kB.`
       }
-      case (amount >= 1024 * 1024) && (amount < 1024 * 1024 * 1024):{
+      case (amount >= 1024 * 1024) && (amount < 1024 * 1024 * 1024): {
         return `${Math.floor(amount / (1024 * 1024))} MB.`
       }
       case (amount >= 1024 * 1024 * 1024): {
-        return `${Math.floor(amount / (1024 * 1024 * 1024))} GB.`
+        return`${Math.floor(amount / (1024 * 1024 * 1024))} GB.`
       }
     }
   }
 
-  public GetFormattedAttachmentName(kind: AttachmentKind) : string {
+  public GetFormattedAttachmentName(kind: AttachmentKind): string {
     switch (kind) {
       case AttachmentKind.Image: {
         return "Image"
@@ -183,7 +226,7 @@ export class ConversationsFormatter{
       case daysSinceReceived <= ConversationsFormatter.MAX_FORMATTABLE_DAYS: {
         let currentDay = currentTime.getDay();
         let eventDay = eventDate.getDay();
-        let realDaysBetween : number;
+        let realDaysBetween: number;
 
         if (currentDay < eventDay) {
           realDaysBetween = currentDay + Math.abs(eventDay - ConversationsFormatter.DAYS_IN_A_WEEK);
@@ -266,7 +309,7 @@ export class ConversationsFormatter{
     }
 
     let attachmentDate = <Date>attachments[0].timeReceived;
-                                      //take zero element, as it's the most recent attachment
+    //take zero element, as it's the most recent attachment
     let daysSinceReceived = (date.getTime() - attachmentDate.getTime()) / (1000 * 60 * 60 * 24);
 
     switch (true) {

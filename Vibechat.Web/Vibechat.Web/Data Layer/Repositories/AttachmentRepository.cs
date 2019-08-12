@@ -31,7 +31,10 @@ namespace Vibechat.Web.Data.Repositories
 
         public void Remove(List<MessageAttachmentDataModel> attachments)
         {
-            foreach (var attachment in attachments) mContext.Attachments.Remove(attachment);
+            foreach (var attachment in attachments)
+            {
+                mContext.Attachments.Remove(attachment);
+            }
         }
     }
 }

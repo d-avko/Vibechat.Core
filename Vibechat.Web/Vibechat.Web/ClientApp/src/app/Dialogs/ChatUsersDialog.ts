@@ -24,7 +24,10 @@ export class ChatUsersDialogComponent {
 
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ChatUsersDialogData, public chats: ChatsService, public snackBar: SnackBarHelper, public auth: AuthService) { }
+    @Inject(MAT_DIALOG_DATA) public data: ChatUsersDialogData,
+    public chats: ChatsService,
+    public snackBar: SnackBarHelper,
+    public auth: AuthService) { }
 
   public async OnFindUsers(): Promise<void> {
 
