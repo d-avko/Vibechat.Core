@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Identity;
@@ -126,9 +126,8 @@ namespace Vibechat.Web.Data.Repositories
                 .Include(x => x.ForwardedMessage)
                 .ThenInclude(x => x.User)
                 .Include(x => x.Event)
-                .ThenInclude(x => x.Actor)
-                .Include(x => x.Event)
-                .ThenInclude(x => x.UserInvolved)
+                .Include(x => x.Event.Actor)
+                .Include(x => x.Event.UserInvolved)
                 .AsNoTracking();
         }
 
@@ -177,35 +176,35 @@ namespace Vibechat.Web.Data.Repositories
         }
         
         public IQueryable<MessageDataModel> Search
-            (List<ConversationDataModel> chats, int offset, int count, string searchString, string userId)
+            (int offset, int count, string searchString, string userId)
         {
-            var forwardedMessages = mContext
+            var Base = mContext
                 .Messages
                 .Where(msg => !mContext.DeletedMessages.Any(deleted =>
                     deleted.UserId == userId && deleted.MessageID == msg.MessageID))
-                .Where(msg => chats.Any(chat => chat.Id == msg.ConversationID))
+                .Where(msg => mContext.UsersConversations.Any(chat => 
+                    chat.ChatID == msg.ConversationID && chat.UserID == userId));
+            
+            var forwardedMessages = 
+                Base
                 .Where(msg => msg.Type == MessageType.Forwarded && msg.ForwardedMessage.Type == MessageType.Text)
                 .Where(msg =>
                     EF.Functions.Like(msg.ForwardedMessage.MessageContent.ToLower(), $"%{searchString.ToLower()}%"));
 
-            var notForwarded = mContext
-                .Messages
-                .Where(msg =>
-                    !mContext.DeletedMessages.Any(deleted =>
-                        deleted.UserId == userId && deleted.MessageID == msg.MessageID))
-                .Where(msg => chats.Any(chat => chat.Id == msg.ConversationID))
+            var notForwarded = 
+                Base
                 .Where(msg => msg.Type == MessageType.Text)
                 .Where(msg =>
                     EF.Functions.Like(msg.MessageContent.ToLower(), $"%{searchString.ToLower()}%"));
 
             return 
                 forwardedMessages.Concat(notForwarded)
-                .OrderByDescending(msg => msg.TimeReceived)
-                .Skip(offset)
-                .Take(count)
-                .Include(msg => msg.ForwardedMessage)
-                .Include(x => x.User)
-                .AsNoTracking();
+                    .OrderByDescending(msg => msg.TimeReceived)
+                    .Skip(offset)
+                    .Take(count)
+                    .Include(msg => msg.ForwardedMessage)
+                    .Include(x => x.User)
+                    .AsNoTracking();
         }
 
         public bool Empty()

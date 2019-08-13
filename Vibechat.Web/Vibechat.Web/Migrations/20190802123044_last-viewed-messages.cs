@@ -20,7 +20,7 @@ namespace Vibechat.Web.Migrations
                     table.ForeignKey(
                         "FK_LastViewedMessages_Conversations_ChatID",
                         x => x.ChatID,
-                        "Conversations",
+                        "Chats",
                         "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(

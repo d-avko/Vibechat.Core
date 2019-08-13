@@ -41,7 +41,7 @@ namespace Vibechat.Web.Data.Repositories
 
         public void Remove(ChatRoleDataModel chatRole)
         {
-            dbContext.Remove(chatRole);
+            dbContext.ChatRoles.Remove(chatRole);
         }
 
         public void Update(ChatRole role, ChatRoleDataModel chatRole)

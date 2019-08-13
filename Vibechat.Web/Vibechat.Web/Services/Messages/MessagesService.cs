@@ -105,10 +105,8 @@ namespace Vibechat.Web.Services.Messages
             {
                 throw new InvalidDataException($"Minimum symbols for search to work: {MinSymbolsInMessagesSearch}");
             }
-
-            List<ConversationDataModel> userChats =
-                usersConversationsRepository.GetUserConversations(deviceId, callerId).ToList();
-            var foundMessages = messagesRepository.Search(userChats, offset, count, searchString, callerId);
+            
+            var foundMessages = messagesRepository.Search(offset, count, searchString, callerId);
 
             return (from msg in foundMessages
                 select msg.ToMessage()).ToList();

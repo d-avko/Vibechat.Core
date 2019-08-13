@@ -8,7 +8,7 @@ namespace Vibechat.Web.Migrations
         {
             migrationBuilder.DropColumn(
                 "DeviceId",
-                "Conversations");
+                "Chats");
 
             migrationBuilder.AddColumn<string>(
                 "DeviceId",
@@ -24,7 +24,7 @@ namespace Vibechat.Web.Migrations
 
             migrationBuilder.AddColumn<string>(
                 "DeviceId",
-                "Conversations",
+                "Chats",
                 nullable: true);
         }
     }

@@ -21,6 +21,7 @@ import {AttachmentKind} from "../Data/AttachmentKinds";
 import {ChatRoleDto} from "../Roles/ChatRoleDto";
 import {AsyncArray} from "../Shared/AsyncArray";
 import {MessageType} from "../Data/MessageType";
+import {BehaviorSubject} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -42,8 +43,9 @@ export class ChatsService {
     this.dh.setChatService(this);
   }
 
-  public Conversations: Array<Chat>;
-  public CurrentConversation: Chat;
+  public Chats: Array<Chat>;
+  public _currentChat = new BehaviorSubject<Chat>(null);
+  public CurrentChat: Chat;
   private PendingReadMessages: Array<number>;
   private didDisconnect: boolean;
   public static MinGroupNameLength = 5;
@@ -51,7 +53,7 @@ export class ChatsService {
   public isUpdatingCurrentChat: boolean = false;
 
   public IsConversationSelected(): boolean {
-    return this.CurrentConversation != null;
+    return this.CurrentChat != null;
   }
 
   public OnDisconnected(){
@@ -71,8 +73,8 @@ export class ChatsService {
     }
 
     if(!response.response){
-      this.Conversations = new Array<Chat>();
-      this.CurrentConversation = null;
+      this.Chats = new Array<Chat>();
+      this.CurrentChat = null;
       return;
     }
 
@@ -80,13 +82,13 @@ export class ChatsService {
     response.response.sort(ChatsService.ChatsSortByIdFunc);
 
     //remove chats where we've been kicked from
-    this.Conversations = this.Conversations.filter(chat => {
+    this.Chats = this.Chats.filter(chat => {
       response.response.find(x => x.id == chat.id)
     }).sort(ChatsService.ChatsSortByIdFunc);
 
 
-    for(let i = 0; i < this.Conversations.length - 1; ++i){
-      response.response[i].messages = this.Conversations[i].messages;
+    for(let i = 0; i < this.Chats.length - 1; ++i){
+      response.response[i].messages = this.Chats[i].messages;
     }
 
     response.response = response.response.sort(ChatsService.ChatsSortByLastMessageFunc);
@@ -100,36 +102,41 @@ export class ChatsService {
       }
     });
 
-    this.Conversations = [...response.response];
+    this.Chats = [...response.response];
 
-    if(this.CurrentConversation){
-      await this.ChangeConversation(this.Conversations.find(x => x.id == this.CurrentConversation.id));
+    if(this.CurrentChat){
+      await this.ChangeChat(this.Chats.find(x => x.id == this.CurrentChat.id));
     }
   }
 
   public IsAnyUnreadMessagesInCurrentChat(){
-    return this.CurrentConversation.messagesUnread != 0;
-  }
-
-  public IsCurrentChatDialog(){
-    return !this.CurrentConversation.isGroup;
-  }
-
-  public IsUptoDate(){
-    if(!this.CurrentConversation){
+    if(!this.CurrentChat || !this.CurrentChat.messages){
       return false;
     }
 
-    if(!this.CurrentConversation.lastMessage){
+    return this.CurrentChat.messages.find(msg =>
+      (msg.state == MessageState.Delivered) && (this.authService.User.id != msg.user.id)) != null;
+  }
+
+  public IsCurrentChatDialog(){
+    return !this.CurrentChat.isGroup;
+  }
+
+  public IsUptoDate(){
+    if(!this.CurrentChat){
+      return false;
+    }
+
+    if(!this.CurrentChat.lastMessage){
       return true;
     }
 
-    return this.CurrentConversation.lastMessage.id == this.CurrentConversation.clientLastMessageId;
+    return this.CurrentChat.lastMessage.id == this.CurrentChat.clientLastMessageId;
 
   }
 
   public GetConversationsIds() {
-    return this.Conversations.map(x => x.id);
+    return this.Chats.map(x => x.id);
   }
 
   /**
@@ -138,102 +145,107 @@ export class ChatsService {
    * @constructor
    */
   public async ReadExistingMessagesInGroup(){
-    if(!this.CurrentConversation.isGroup){
+    if(!this.CurrentChat.isGroup){
       return;
     }
     //no messages to read, return.
-    if(!this.CurrentConversation.messagesUnread
-      || this.CurrentConversation.clientLastMessageId == this.CurrentConversation.lastMessage.id){
+    if(!this.CurrentChat.messagesUnread
+      || this.CurrentChat.clientLastMessageId == this.CurrentChat.lastMessage.id){
       return;
     }
 
     let messagesToRead = this.GetUnreadLocalMessagesCount();
 
-    this.CurrentConversation.messagesUnread = Math.max(0, this.CurrentConversation.messagesUnread - messagesToRead);
+    this.CurrentChat.messagesUnread = Math.max(0, this.CurrentChat.messagesUnread - messagesToRead);
 
-    let index = this.CurrentConversation.messages.length - 1;
+    let index = this.CurrentChat.messages.length - 1;
     //find biggest id excluding unsent messages.
-    while(!this.CurrentConversation.messages[index].id){
+    while(!this.CurrentChat.messages[index].id){
       --index;
     }
 
-    let lastMsgId = this.CurrentConversation.messages[index].id;
+    let lastMsgId = this.CurrentChat.messages[index].id;
 
-    if(this.CurrentConversation.clientLastMessageId != lastMsgId){
-      let response = await this.requestsBuilder.SetLastMessageId(lastMsgId, this.CurrentConversation.id);
+    if(this.CurrentChat.clientLastMessageId != lastMsgId){
+      let response = await this.requestsBuilder.SetLastMessageId(lastMsgId, this.CurrentChat.id);
 
       if(response.isSuccessfull){
-        this.CurrentConversation.clientLastMessageId = lastMsgId;
+        this.CurrentChat.clientLastMessageId = lastMsgId;
       }
     }
 
   }
 
   public GetUnreadLocalMessagesCount() : number{
-    let initialIndex = this.CurrentConversation.messages.length - 1;
+    let initialIndex = this.CurrentChat.messages.length - 1;
     let index ;
 
     for(index = initialIndex;
-        (this.CurrentConversation.messages[index].id > this.CurrentConversation.clientLastMessageId) && index > 0; --index) { }
+        (this.CurrentChat.messages[index].id > this.CurrentChat.clientLastMessageId) && index > 0; --index) { }
     return initialIndex - index;
   }
 
-  public async ChangeConversation(chat: Chat, updateLastMessageId: boolean = true) {
-    if (chat == this.CurrentConversation) {
-      this.CurrentConversation = null;
-      return;
-    }
-
-    if (!chat) {
-      this.CurrentConversation = chat;
-      return;
-    }
-
-    //secure dialog might not even exist on second user side, so update will fail
-    if (!(chat.isSecure && !chat.authKeyId) && updateLastMessageId) {
-      //update is needed.
-      let initialLastMsgId = chat.clientLastMessageId;
-
-      this.isUpdatingCurrentChat = true;
-
-      this.CurrentConversation = chat;
-
-      await this.UpdateExisting(chat, true);
-
-      if(chat.clientLastMessageId != initialLastMsgId){
-        let newLastMsgExists = chat.messages.find(msg => msg.id == chat.clientLastMessageId);
-
-        if(!newLastMsgExists){
-          chat.messages = null;
-        }else{
-          chat.clientLastMessageId = initialLastMsgId;
-        }
+  public async ChangeChat(chat: Chat, updateLastMessageId: boolean = true) {
+    try {
+      if (chat == this.CurrentChat) {
+        this.CurrentChat = null;
+        return;
       }
 
-      this.isUpdatingCurrentChat = false;
-    }
+      if (!chat) {
+        this.CurrentChat = chat;
+        return;
+      }
 
-    if(!this.CurrentConversation || this.CurrentConversation.id != chat.id){
-      this.CurrentConversation = chat;
-    }
+      //secure dialog might not even exist on second user side, so update will fail
+      if (!(chat.isSecure && !chat.authKeyId) && updateLastMessageId) {
+        //update is needed.
+        let initialLastMsgId = chat.clientLastMessageId;
 
-    //creator should wait until other user is online, and initiate key exchange.
-    if (chat.isSecure && !chat.authKeyId && chat.chatRole.role == ChatRole.Creator) {
+        this.isUpdatingCurrentChat = true;
 
-      if (!chat.dialogueUser.isOnline) {
+        this.CurrentChat = chat;
 
-        if (!this.connectionManager.SubscribeToUserOnlineStatusChanges(chat.dialogueUser.id)) {
-          this.messagesService.OnFailedToSubsribeToUserStatusChanges();
+        await this.UpdateExisting(chat, true);
+
+        if(chat.clientLastMessageId != initialLastMsgId){
+          let newLastMsgExists = chat.messages.find(msg => msg.id == chat.clientLastMessageId);
+
+          if(!newLastMsgExists){
+            chat.messages = null;
+          }else{
+            chat.clientLastMessageId = initialLastMsgId;
+          }
+        }
+
+        this.isUpdatingCurrentChat = false;
+      }
+
+      if(!this.CurrentChat || this.CurrentChat.id != chat.id){
+        this.CurrentChat = chat;
+      }
+
+      //creator should wait until other user is online, and initiate key exchange.
+      if (chat.isSecure && !chat.authKeyId && chat.chatRole.role == ChatRole.Creator) {
+
+        if (!chat.dialogueUser.isOnline) {
+
+          if (!this.connectionManager.SubscribeToUserOnlineStatusChanges(chat.dialogueUser.id)) {
+            this.messagesService.OnFailedToSubsribeToUserStatusChanges();
+          } else {
+            this.messagesService.OnWaitingForUserToComeOnline()
+          }
+
         } else {
-          this.messagesService.OnWaitingForUserToComeOnline()
+
+          this.dh.InitiateKeyExchange(chat);
+
         }
 
-      } else {
-
-        this.dh.InitiateKeyExchange(chat);
-
       }
-
+    }
+    finally {
+      this._currentChat.next(this.CurrentChat);
     }
   }
 
@@ -259,7 +271,7 @@ export class ChatsService {
   }
 
   public OnUserRoleChanged(chatId: number, userId: string, newRole: ChatRole) {
-    let chat = this.Conversations.find(x => x.id == chatId);
+    let chat = this.Chats.find(x => x.id == chatId);
 
     if (!chat) {
       return;
@@ -292,7 +304,7 @@ export class ChatsService {
   }
 
   public OnBannedInChat(chatId: number, userId: string, banType: BanEvent) {
-    let chat = this.Conversations.find(x => x.id == chatId);
+    let chat = this.Chats.find(x => x.id == chatId);
 
     if (!chat) {
       return;
@@ -328,8 +340,8 @@ export class ChatsService {
   }
 
   public OnLogOut() {
-    this.Conversations = new Array<Chat>();
-    this.CurrentConversation = null;
+    this.Chats = new Array<Chat>();
+    this.CurrentChat = null;
     this.PendingReadMessages = new Array<number>();
   }
 
@@ -360,7 +372,7 @@ export class ChatsService {
       for (let i = 0; i < result.response.length; ++i) {
         //we'll send only global(non-local groups as a result.)
 
-        if (!this.Conversations.find(x => x.id == result.response[i].id)) {
+        if (!this.Chats.find(x => x.id == result.response[i].id)) {
           resultArr.push(result.response[i]);
         }
       }
@@ -434,6 +446,12 @@ export class ChatsService {
 
     //append old messages to new ones.
     chat.messages = [...result.response.concat(chat.messages)];
+
+    chat.messages.forEach(x => {
+      if(x.type == MessageType.Event){
+        console.log(`event: ${JSON.stringify(x)}`);
+      }
+    });
 
     return result.response;
   }
@@ -564,7 +582,7 @@ export class ChatsService {
     }
 
     if (!response.response) {
-      this.Conversations = new Array<Chat>();
+      this.Chats = new Array<Chat>();
       await this.connectionManager.Start();
       return;
     }
@@ -640,7 +658,7 @@ export class ChatsService {
       chatsToDelete.push(response.response.splice(x, 1)[0]);
     });
 
-    this.Conversations = response.response;
+    this.Chats = response.response;
 
     //Initiate signalR group connections
 
@@ -671,11 +689,15 @@ export class ChatsService {
   }
 
   public async OnMessageReceived(data: MessageReceivedModel) {
-    let chat = this.Conversations
+    let chat = this.Chats
       .find(x => x.id == data.conversationId);
 
     if (!chat) {
       return;
+    }
+
+    if(!chat.messages){
+      chat.messages = new Array<Message>();
     }
 
     if (data.secure) {
@@ -694,13 +716,13 @@ export class ChatsService {
     this.images.ScaleImage(data.message);
 
     //we can accept message only if all messages are loaded
-    if(chat.messages.find(msg => msg.id == chat.lastMessage.id)){
+    if(!chat.lastMessage || chat.messages.find(msg => msg.id == chat.lastMessage.id)){
       chat.messages.push(data.message);
       chat.messages = [...chat.messages];
 
       //if user was in different chat, increment unread counter.
       //if not, UI should automatically update clientLastMessageId.
-      if(!this.CurrentConversation || chat.id != this.CurrentConversation.id){
+      if(!this.CurrentChat || chat.id != this.CurrentChat.id){
         ++chat.messagesUnread;
       }
 
@@ -840,7 +862,7 @@ export class ChatsService {
 
     result.response.messages = new Array<Message>();
 
-    this.Conversations = [...this.Conversations, result.response];
+    this.Chats = [...this.Chats, result.response];
   }
 
   public CreateDialogWith(user: AppUser, secure: boolean) {
@@ -864,7 +886,7 @@ export class ChatsService {
       return;
     }
 
-    this.Conversations = [...this.Conversations, chat.response];
+    this.Chats = [...this.Chats, chat.response];
   }
 
   public KickUser(user: AppUser, from: Chat) {
@@ -872,19 +894,19 @@ export class ChatsService {
   }
 
   public ExistsIn(id: number) {
-    return this.Conversations.find(x => x.id == id) != null;
+    return this.Chats.find(x => x.id == id) != null;
   }
 
   public FindDialogWith(user: AppUser) {
-    return this.Conversations.find(x => !x.isGroup && x.dialogueUser.id == user.id);
+    return this.Chats.find(x => !x.isGroup && x.dialogueUser.id == user.id);
   }
 
   public FindDialogWithById(userId: string) {
-    return this.Conversations.find(x => !x.isGroup && x.dialogueUser.id == userId);
+    return this.Chats.find(x => !x.isGroup && x.dialogueUser.id == userId);
   }
 
   public FindDialogWithSecurityCheck(user: AppUser, secure: boolean) {
-    return this.Conversations.find(x =>
+    return this.Chats.find(x =>
         !x.isGroup
         && x.dialogueUser.id == user.id
         && x.isSecure == secure);
@@ -907,7 +929,7 @@ export class ChatsService {
    * @constructor
    */
   public async GetByIdAsync(id: number, apiRequest: boolean){
-    let local = this.Conversations.find(chat => chat.id == id);
+    let local = this.Chats.find(chat => chat.id == id);
 
     if(local){
       return local;
@@ -932,7 +954,7 @@ export class ChatsService {
    * @constructor
    */
   public GetById(id: number){
-    let local = this.Conversations.find(chat => chat.id == id);
+    let local = this.Chats.find(chat => chat.id == id);
 
     if(local){
       return local;
@@ -995,12 +1017,12 @@ export class ChatsService {
       group.messages.splice(0, group.messages.length);
     }
 
-    this.CurrentConversation = null;
+    this.CurrentChat = null;
   }
 
   public Leave(from: Chat) {
     this.connectionManager.RemoveUserFromConversation(this.authService.User.id, from.id, true);
-    this.CurrentConversation = null;
+    this.CurrentChat = null;
   }
 
   public async ChangeThumbnail(file: File, where: Chat, progress: (value: number) => void): Promise<void> {
@@ -1053,7 +1075,7 @@ export class ChatsService {
     //when current user was added to group
 
     if (data.user.id == this.authService.User.id) {
-      this.Conversations = [...this.Conversations, chat.response];
+      this.Chats = [...this.Chats, chat.response];
       return;
     }
 
@@ -1063,7 +1085,7 @@ export class ChatsService {
   }
 
   public OnRemovedFromGroup(data: RemovedFromGroupModel) {
-    let chatIndex = this.Conversations.findIndex(x => x.id == data.conversationId);
+    let chatIndex = this.Chats.findIndex(x => x.id == data.conversationId);
 
     if (chatIndex == -1) {
       return;
@@ -1073,22 +1095,22 @@ export class ChatsService {
     //either this client left or creator removed him.
     if (data.userId == this.authService.User.id) {
 
-      if (this.CurrentConversation && this.CurrentConversation.id == data.conversationId) {
-          this.CurrentConversation = null;
+      if (this.CurrentChat && this.CurrentChat.id == data.conversationId) {
+          this.CurrentChat = null;
       }
 
-      this.Conversations.splice(chatIndex, 1);
+      this.Chats.splice(chatIndex, 1);
 
     } else {
 
-      let participants = this.Conversations[chatIndex].participants;
+      let participants = this.Chats[chatIndex].participants;
 
       participants.splice(participants.findIndex(x => x.id == data.userId), 1);
     }
   }
 
   public OnMessageRead(msgId: number, conversationId: number) {
-    let conversation = this.Conversations.find(x => x.id == conversationId);
+    let conversation = this.Chats.find(x => x.id == conversationId);
 
     if (conversation == null || conversation.isGroup) {
       return;
@@ -1110,7 +1132,7 @@ export class ChatsService {
   }
 
   public OnMessageDelivered(msgId: number, clientMessageId: number, conversationId: number) {
-    let conversation = this.Conversations.find(x => x.id == conversationId);
+    let conversation = this.Chats.find(x => x.id == conversationId);
 
     if (conversation == null) {
       return;

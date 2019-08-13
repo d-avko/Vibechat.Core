@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using VibeChat.Web;
 
 namespace Vibechat.Web.Data.Repositories
@@ -76,7 +77,7 @@ namespace Vibechat.Web.Data.Repositories
             return mUserManager
                 .Users
                 .Where(user => user.IsPublic)
-                .Where(user => user.UserName.StartsWith(username, StringComparison.InvariantCultureIgnoreCase));
+                .Where(user => EF.Functions.Like(user.UserName.ToLower(), username.ToLower() + "%"));
         }
 
         public async Task ChangeUserPublicState(string userId)

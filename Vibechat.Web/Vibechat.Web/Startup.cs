@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
@@ -117,7 +119,9 @@ namespace Vibechat.Web
                     };
                 });
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc(x => x.EnableEndpointRouting = false)
+                .AddNewtonsoftJson()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services.AddSignalR();
 
@@ -147,16 +151,13 @@ namespace Vibechat.Web
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseSpaStaticFiles(new StaticFileOptions
-            {
-                ServeUnknownFileTypes = true
-            });
+            app.UseSpaStaticFiles();
 
             app.UseAuthentication();
 
             app.UseMiddleware<UserStatusMiddleware>();
-
-            app.UseSignalR(routes => { routes.MapHub<ChatsHub>("/hubs/chat"); });
+            app.UseRouting();
+            app.UseEndpoints(builder => { builder.MapHub<ChatsHub>("/hubs/chat"); });
 
             app.UseCors("AllowAllOrigins");
             
@@ -183,13 +184,13 @@ namespace Vibechat.Web
             var db = serviceProvider.GetService<ApplicationDbContext>();
             db.Database.Migrate();
             
-            await serviceProvider.GetService<UserManager<AppUser>>().Users.ForEachAsync(user =>
+            var users = serviceProvider.GetService<UserManager<AppUser>>();
+
+            foreach (var user in users.Users)
             {
                 user.ConnectionId = null;
                 user.IsOnline = false;
-            });
-            
-            db.SaveChanges();
+            }
 
         }
     }

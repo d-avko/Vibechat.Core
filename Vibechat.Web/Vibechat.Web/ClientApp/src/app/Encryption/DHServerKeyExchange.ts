@@ -99,7 +99,7 @@ export class DHServerKeyExchangeService {
 
     entry.value.secondUserS = s;
 
-    let chat = this.chatService.Conversations.find(x => x.id == chatId);
+    let chat = this.chatService.Chats.find(x => x.id == chatId);
 
     //only creator could initiate key exchange.
     //Here non - creator sends generated param to creator.

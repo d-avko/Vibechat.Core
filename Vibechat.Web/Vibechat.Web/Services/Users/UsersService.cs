@@ -195,8 +195,6 @@ namespace Vibechat.Web.Services.Users
                 throw new FormatException("User was not found");
             }
 
-            ValueTuple<string, string> thumbnailFull;
-
             try
             {
                 var (thumbnail, fullsized) = await imagesService.SaveProfileOrChatPicture(image, image.FileName, userId, userId);

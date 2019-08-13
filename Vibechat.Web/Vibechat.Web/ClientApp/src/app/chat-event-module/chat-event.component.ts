@@ -18,10 +18,11 @@ export class ChatEventComponent implements AfterContentInit, AfterContentChecked
   action: string;
 
   ngAfterContentInit(): void {
+    console.log(JSON.stringify(this.event));
+
     if(!this.event){
       return;
     }
-
     switch (this.event.type) {
       case ChatEventType.Joined: {
         this.firstUsername = this.event.actorName;

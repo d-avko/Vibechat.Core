@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using System;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using VibeChat.Web.Data;
 using Vibechat.Web.Data.DataModels;
@@ -10,15 +12,18 @@ namespace VibeChat.Web
 {
     public class ApplicationDbContext : IdentityDbContext<AppUser>
     {
+        private readonly IServiceProvider provider;
+
         #region Constructor
 
         /// <summary>
         ///     Default constructor, expecting database options passed in
         /// </summary>
         /// <param name="options">The database context options</param>
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
+        , IServiceProvider provider) : base(options)
         {
-            
+            this.provider = provider;
         }
 
         #endregion
@@ -53,7 +58,7 @@ namespace VibeChat.Web
         
         public DbSet<ChatEventDataModel> ChatEvents { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override async void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
