@@ -19,7 +19,6 @@ namespace Vibechat.Web.Data.Repositories
         public async Task Add(DhPublicKeyDataModel value)
         {
             mContext.PublicKeys.Add(value);
-            await mContext.SaveChangesAsync();
         }
 
         public async Task<DhPublicKeyDataModel> GetRandomKey()

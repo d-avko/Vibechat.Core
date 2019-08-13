@@ -27,7 +27,7 @@ namespace Vibechat.Web.Data.Repositories
         IQueryable<MessageDataModel> GetAttachments(string userId, int conversationId,
             AttachmentKind attachmentKind, int offset, int count);
         IQueryable<MessageDataModel> Search
-            (List<ConversationDataModel> chats, int offset, int count, string searchString, string userId);
+            (int offset, int count, string searchString, string userId);
 
         void Remove(List<int> messagesIds, string whoRemovedId);
 

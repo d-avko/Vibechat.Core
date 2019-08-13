@@ -117,7 +117,7 @@ export class ChatComponent implements OnInit {
   }
 
   public async ChangeChat(chat: Chat) {
-    return this.chats.ChangeConversation(chat);
+    return this.chats.ChangeChat(chat);
   }
 
   public OnLogOut(): void {
@@ -234,9 +234,7 @@ export class ChatComponent implements OnInit {
     //if we were on search screen, we should hide it
 
     this.SearchString = '';
-
-    await this.chats.ChangeConversation(conversation);
-    await this.messages.UpdateMessagesIfNotUpdated();
+    await this.chats.ChangeChat(conversation);
   }
 
   public IsMobileDevice() {
@@ -246,14 +244,15 @@ export class ChatComponent implements OnInit {
   //input events
 
   public async OnSendMessage(message: string) {
-    await this.chats.SendMessage(message, this.chats.CurrentConversation);
+    await this.chats.SendMessage(message, this.chats.CurrentChat);
     this.messages.ScrollToLastMessage();
   }
 
   public async ViewMessage(msg: FoundMessage) {
-    await this.chats.ChangeConversation(msg.chat, false);
     this.viewOptions.Option.next(MessageViewOption.ViewMessage);
     this.viewOptions.MessageToViewId = msg.message.id;
+    msg.chat.clientLastMessageId = msg.message.id;
+    await this.chats.ChangeChat(msg.chat, false);
 
     requestAnimationFrame(async () => {
       await this.messages.ResolveProvidedOptions();

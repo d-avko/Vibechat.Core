@@ -1,9 +1,9 @@
-FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-stretch-slim AS base
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.0 AS base
 WORKDIR /app
 ENV GOOGLE_APPLICATION_CREDENTIALS="/app/vibechat-ng-firebase-adminsdk-te5qc-a9cfc0974d.json"
 ENV ASPNETCORE_URLS=https://denisavko.me:443
 
-FROM mcr.microsoft.com/dotnet/core/sdk:2.2-stretch AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.0 AS build
 WORKDIR /src
 COPY ["Vibechat.Web/Vibechat.Web.csproj", "Vibechat.Web/"]
 COPY . .
@@ -11,7 +11,7 @@ WORKDIR "/src/Vibechat.Web"
 RUN dotnet build "Vibechat.Web.csproj" -c Release -o /app
 
 FROM build AS publish
-RUN dotnet publish "Vibechat.Web.csproj" -c Release -r linux-x64 -o /app
+RUN dotnet publish "Vibechat.Web.csproj" -c Release -o /app
 
 FROM base AS published
 WORKDIR /app

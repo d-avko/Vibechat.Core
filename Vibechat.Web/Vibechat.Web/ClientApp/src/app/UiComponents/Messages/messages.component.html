@@ -3,6 +3,7 @@
   <!--since virtual scroll doesn't work with items of variable height, load everything-->
 
   <cdk-virtual-scroll-viewport class="messages_main"
+                               [hidden]="CurrentChat != null"
                                itemSize="50"
                                [maxBufferPx]="1000000000000000000000000"
                                [minBufferPx]="1000000000000000000000000"
@@ -16,7 +17,7 @@
       </mat-progress-spinner>
     </div>
 
-    <div *cdkVirtualFor="let message of chatsService.CurrentConversation.messages; let index = index">
+    <div *cdkVirtualFor="let message of CurrentChat?.messages; let index = index">
 
       <div (click)="SelectMessage(message)"
            [@highlight-message]="message.id == _lockedMsgId ? 'selected' : 'not-selected'">
@@ -205,7 +206,7 @@
 
     <button mat-button
             color="primary"
-            *ngIf="! chatsService.CurrentConversation.isSecure && SelectedMessages.length !== 0"
+            *ngIf="! chatsService.CurrentChat.isSecure && SelectedMessages.length !== 0"
             (click)="ForwardMessages()"
             [@slideInOut]>
       <span *ngIf="!formatter.IsMobileDevice()">Forward messages</span>

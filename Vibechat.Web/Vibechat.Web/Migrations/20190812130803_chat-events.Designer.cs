@@ -221,7 +221,7 @@ namespace Vibechat.Web.Migrations
 
                     b.HasIndex("PublicKeyId");
 
-                    b.ToTable("Conversations");
+                    b.ToTable("Chats");
                 });
 
             modelBuilder.Entity("VibeChat.Web.Data.DataModels.AttachmentKindDataModel", b =>

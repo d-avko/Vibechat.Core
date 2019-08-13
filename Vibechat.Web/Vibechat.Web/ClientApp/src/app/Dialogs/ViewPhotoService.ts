@@ -129,7 +129,7 @@ export class ViewPhotoComponent implements AfterContentInit  {
       {
         width: '350px',
         data: {
-          conversations: this.chats.Conversations
+          conversations: this.chats.Chats
         }
       }
     );
