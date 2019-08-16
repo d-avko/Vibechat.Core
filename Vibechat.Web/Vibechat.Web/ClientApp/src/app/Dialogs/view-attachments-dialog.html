@@ -1,11 +1,11 @@
-<h1 mat-dialog-title>Attachments</h1>
+<h1 mat-dialog-title i18n>Attachments</h1>
 <mat-tab-group (selectedTabChange)="TabChanged($event)">
 
   <mat-tab>
 
     <ng-template mat-tab-label>
       <mat-icon class="example-tab-icon">photo</mat-icon>
-      Images
+      <span i18n>Images</span>
     </ng-template>
 
     <!--Photos-->
@@ -51,7 +51,7 @@
 
     <ng-template mat-tab-label>
       <mat-icon class="example-tab-icon">insert_drive_file</mat-icon>
-      Files
+      <span i18n>Files</span>
     </ng-template>
 
     <!--Photos-->
@@ -74,7 +74,7 @@
 
             <div class="file_info_wrapper">
                   <div class="file-name">
-                    <a (click)="DownloadFile($event)" class="file-name_text" href="{{file.attachmentInfo.contentUrl}}" download>{{file.attachmentInfo.attachmentName}}</a>
+                    <a class="file-name_text" href="{{file.attachmentInfo.contentUrl}}" download>{{file.attachmentInfo.attachmentName}}</a>
                   </div>
 
                   <div class="file-size">
@@ -100,7 +100,7 @@
   </mat-tab>
 
 </mat-tab-group>
-
+<formatter></formatter>
 <style>
   a{
   text-decoration: none;

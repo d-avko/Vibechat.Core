@@ -14,7 +14,7 @@ export class Dimensions {
 })
 export class ImageScalingService {
 
-  constructor(private formatter: ConversationsFormatter) { }
+  constructor() { }
 
   public chatImageMaxHeightRatio = 0.3;
 
@@ -68,7 +68,7 @@ export class ImageScalingService {
 
     let desiredWidth;
 
-    if (this.formatter.IsMobileDevice()) {
+    if (ConversationsFormatter.IsMobileDevice()) {
       desiredWidth = document.documentElement.clientWidth * this.chatImageWidthRatioMobile;
     } else {
       desiredWidth = document.documentElement.clientWidth * this.chatImageWidthRatioDesktop;
@@ -97,7 +97,7 @@ export class ImageScalingService {
 /* Method is used to get dimensions of image in full-screen
  * */
   public AdjustFullSizedImageDimensions(imageW: number, imageH: number) {
-    let appropriateHeight = this.formatter.IsMobileDevice()
+    let appropriateHeight = ConversationsFormatter.IsMobileDevice()
       ? Math.floor(document.documentElement.clientHeight * this.fullScreenImageToScreenMobileRatio)
       : Math.floor(document.documentElement.clientHeight * this.fullScreenImageToScreenDesktopRatio);
 

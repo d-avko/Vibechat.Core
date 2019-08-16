@@ -3,7 +3,5 @@
     public class ChangeConversationNameRequest
     {
         public string Name { get; set; }
-
-        public int ConversationId { get; set; }
     }
 }

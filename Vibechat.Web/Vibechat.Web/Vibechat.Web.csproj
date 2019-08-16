@@ -11,24 +11,29 @@
 
   <ItemGroup>
     <PackageReference Include="FirebaseAdmin" Version="1.7.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0-preview7.19365.7" />
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.0.0-preview7.19365.7" />
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.0.0-preview7.19365.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.0.0-preview6.19307.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.0.0-preview6.19307.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0-preview6.19307.2" />
+    <PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.0.0-preview6.19307.2" />
+    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.0.0-preview6.19307.2" />
     <PackageReference Include="Microsoft.IdentityModel.Logging" Version="5.5.0" />
     <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="5.5.0" />
     <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="5.5.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-<!--    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.7.9" />-->
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.2.4" />
+    <!--    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.7.9" />-->
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.0.0-preview7" />
     <PackageReference Include="OpenSSL.NETStandard" Version="0.6.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0-rc2" />
     <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- Don't publish the SPA source files, but do show them in the project files list -->
     <Compile Remove="ClientApp\src\app\messaging\**" />
+    <Compile Remove="ClientApp\src\app\uploads\**" />
     <Content Remove="$(SpaRoot)**" />
     <Content Remove="ClientApp\src\app\messaging\**" />
+    <Content Remove="ClientApp\src\app\uploads\**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
     <Content Update="wwwroot\Assets\MainLogo.png">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
@@ -38,7 +43,9 @@
 
   <ItemGroup>
     <EmbeddedResource Remove="ClientApp\src\app\messaging\**" />
+    <EmbeddedResource Remove="ClientApp\src\app\uploads\**" />
     <None Remove="ClientApp\src\app\messaging\**" />
+    <None Remove="ClientApp\src\app\uploads\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -96,7 +103,6 @@
     <None Remove="ClientApp\src\app\Shared\MessageState.ts" />
     <None Remove="ClientApp\src\app\Shared\RemovedFromGroupModel.ts" />
     <None Remove="ClientApp\src\app\Theming\ThemesService.ts" />
-    <None Remove="ClientApp\src\app\uploads\upload.service.ts" />
   </ItemGroup>
 
   <ItemGroup>
@@ -136,13 +142,13 @@
     <TypeScriptCompile Include="ClientApp\src\app\Interceptors\HttpResponseInterceptor.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Modules\ChatModule.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Modules\LoginModule.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\Requests\ApiRequestsBuilder.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Roles\ChatRoleDto.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Search\searchlist.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Roles\ChatRole.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Services\ChatsService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Services\DeviceService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Services\ImageScalingService.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\Services\LocalesService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Services\MessageReportingService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Services\TypingService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Services\UsersService.ts" />
@@ -155,7 +161,6 @@
     <TypeScriptCompile Include="ClientApp\src\app\Shared\MessageViewOptions.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\RemovedFromGroupModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Theming\ThemesService.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\uploads\upload.service.ts" />
   </ItemGroup>
 
   <!--<ItemGroup>
@@ -178,24 +183,6 @@
     <None Update="certificate_combined.pfx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Microsoft.AspNetCore.Authentication.JwtBearer, Version=2.2.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
-      <HintPath>..\..\..\..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.aspnetcore.authentication.jwtbearer\2.2.0\lib\netstandard2.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore, Version=2.2.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
-      <HintPath>..\..\..\..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.aspnetcore.identity.entityframeworkcore\2.2.0\lib\netstandard2.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel.JsonWebTokens, Version=5.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
-      <HintPath>..\..\..\..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.identitymodel.jsonwebtokens\5.3.0\lib\netstandard2.0\Microsoft.IdentityModel.JsonWebTokens.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel.Tokens, Version=5.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
-      <HintPath>..\..\..\..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.identitymodel.tokens\5.3.0\lib\netstandard2.0\Microsoft.IdentityModel.Tokens.dll</HintPath>
-    </Reference>
-    <Reference Include="System.IdentityModel.Tokens.Jwt, Version=5.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
-      <HintPath>..\..\..\..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\system.identitymodel.tokens.jwt\5.3.0\lib\netstandard2.0\System.IdentityModel.Tokens.Jwt.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

@@ -19,7 +19,8 @@
   </div>
 
   <mat-form-field class="input_field">
-    <textarea class="input-textarea" cdkTextareaAutosize (input)="SetTyping()" (keydown.control.enter)="SendMessage()" matInput placeholder="Type in your message..."></textarea>
+    <textarea class="input-textarea" cdkTextareaAutosize (input)="SetTyping()" (keydown.control.enter)="SendMessage()" matInput
+              placeholder="Type in your message..." i18n-placeholder></textarea>
   </mat-form-field>
 
   <button mat-button style="color:cadetblue" (click)="SendMessage()">
@@ -30,13 +31,13 @@
 
 <div *ngIf="Conversation.isMessagingRestricted" class="banned-input">
   <mat-icon style="color: indianred">report_problem</mat-icon>
-  <p class="banned-text">You were banned from writing in this conversation.</p>
+  <p class="banned-text" i18n>You were banned from writing in this conversation.</p>
 </div>
 
 <!--Wait until keys for private chat are exchanged.-->
 <div *ngIf="Conversation.isSecure && !Conversation.authKeyId" class="banned-input">
   <mat-icon style="color: cadetblue">report_problem</mat-icon>
-  <p>Secure chat will be activated after {{Conversation.dialogueUser.userName}} is online.</p>
+  <p i18n>Secure chat will be activated after {{Conversation.dialogueUser.userName}} is online.</p>
 </div>
 
 <style>

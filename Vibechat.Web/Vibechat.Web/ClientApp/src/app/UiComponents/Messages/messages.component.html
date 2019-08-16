@@ -180,13 +180,13 @@
     </div>
   </cdk-virtual-scroll-viewport>
 
-  <mat-spinner *ngIf="chatsService.isUpdatingCurrentChat" style="position: absolute; margin-top: 25%; margin-left: calc(50% - 80px);" diameter="160">
+  <mat-spinner *ngIf="chatsService.isUpdatingCurrentChat" class="chat-updating-spinner" diameter="160">
 
   </mat-spinner>
 
   <div (click)="ScrollToLastMessage()" class="chat_misc_backtonow" *ngIf="IsScrollingAssistNeeded" [@slideInOut]>
     <mat-icon>keyboard_arrow_down</mat-icon>
-    <span>Back to now</span>
+    <span i18n>Back to now</span>
   </div>
 
   <div class="chat_misc">
@@ -196,7 +196,7 @@
             *ngIf="SelectedMessages.length !== 0"
             (click)="DeleteMessages()"
             [@slideInOut]>
-      <span  *ngIf="!formatter.IsMobileDevice()">Delete messages</span>
+      <span  *ngIf="!formatter._IsMobileDevice()" i18n>Delete messages</span>
 
       <mat-icon>
         highlight_off
@@ -209,7 +209,7 @@
             *ngIf="! chatsService.CurrentChat.isSecure && SelectedMessages.length !== 0"
             (click)="ForwardMessages()"
             [@slideInOut]>
-      <span *ngIf="!formatter.IsMobileDevice()">Forward messages</span>
+      <span *ngIf="!formatter._IsMobileDevice()" i18n>Forward messages</span>
 
       <mat-icon>
         reply
@@ -221,7 +221,7 @@
             *ngIf="IsAllSelectedMessagesPending()"
             (click)="ResendMessages()"
             [@slideInOut]>
-      <span *ngIf="!formatter.IsMobileDevice()">Resend messages</span>
+      <span *ngIf="!formatter._IsMobileDevice()" i18n>Resend messages</span>
 
       <mat-icon
                 color="primary"
@@ -232,3 +232,5 @@
   </div>
 
 </div>
+
+<formatter></formatter>

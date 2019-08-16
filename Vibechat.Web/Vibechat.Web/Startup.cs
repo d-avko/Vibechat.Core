@@ -1,7 +1,6 @@
 using System;
-using System.Linq;
+using System.IO;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
@@ -10,23 +9,30 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Rewrite;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using VibeChat.Web;
 using Vibechat.Web.Middleware;
 using Vibechat.Web.Services.Extension_methods;
+using Vibechat.Web.Services.Users;
 
 namespace Vibechat.Web
 {
     public class Startup
     {
-        private readonly IHostingEnvironment environment;
+        private readonly IWebHostEnvironment environment;
+        private readonly UserCultureService cultureService;
 
-        public Startup(IConfiguration configuration, IHostingEnvironment environment)
-        {
+        public Startup(IConfiguration configuration, 
+            IWebHostEnvironment environment)
+        { 
             Configuration = configuration;
             this.environment = environment;
             DI.Configuration = configuration;
@@ -37,12 +43,12 @@ namespace Vibechat.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            if (environment.IsDevelopment())
+            if (environment.IsStaging() || environment.IsDevelopment())
             {
                 services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseNpgsql(Configuration["ConnectionStrings:Development"]));
             }
-            else
+            else if(environment.IsProduction())
             {
                 services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseNpgsql(Configuration["ConnectionStrings:DefaultConnection"]));
@@ -118,10 +124,15 @@ namespace Vibechat.Web
                         }
                     };
                 });
-
+            
             services.AddMvc(x => x.EnableEndpointRouting = false)
                 .AddNewtonsoftJson()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Vibechat API", Version = "v1" });
+            });
 
             services.AddSignalR();
 
@@ -132,13 +143,12 @@ namespace Vibechat.Web
             services.AddBusinessLogic();
 
             services.AddDefaultMiddleware();
-
-            // In production, the Angular files will be served from this directory
-            services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/dist"; });
+            
+            services.AddSpaStaticFiles(opts => opts.RootPath = "ClientApp/dist");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
             if (env.IsDevelopment())
             {
@@ -150,30 +160,86 @@ namespace Vibechat.Web
             }
 
             app.UseHttpsRedirection();
+            
+            app.UseRequestLocalization();
+
+            app.UseRewriter(new RewriteOptions().AddRewrite(".*/api(.*)", "/api$1", 
+                false));
+            
+            app.MapWhen(context => context.IsSpaPath(), builder =>
+            {
+                builder.MapWhen(context => context.IsEnglishRequest(builder.ApplicationServices.GetService<IServiceProvider>()),
+                    config =>
+                    {
+                        config.UseSpaStaticFiles(new StaticFileOptions()
+                        {
+                            FileProvider = new PhysicalFileProvider(
+                                Path.Combine(Directory.GetCurrentDirectory(), "ClientApp/dist")),
+                            ServeUnknownFileTypes = true
+                        });
+
+                        config.UseSpa(spa =>
+                        {
+                            // To learn more about options for serving an Angular SPA from ASP.NET Core,
+                            // see https://go.microsoft.com/fwlink/?linkid=864501
+
+                            spa.Options.SourcePath = "ClientApp";
+                            spa.Options.DefaultPage = "/en/index.html";
+                            spa.Options.StartupTimeout = TimeSpan.FromMinutes(5);
+                            if (env.IsDevelopment())
+                            {
+                                spa.UseAngularCliServer("start");
+                            }
+                        });
+                    }
+                ).MapWhen(context => context.IsRussianRequest(builder.ApplicationServices.GetService<IServiceProvider>()), 
+                    config =>
+                {
+                    config.UseSpaStaticFiles(new StaticFileOptions()
+                    {
+                        FileProvider = new PhysicalFileProvider(
+                            Path.Combine(Directory.GetCurrentDirectory(), "ClientApp/dist")),
+                        ServeUnknownFileTypes = true
+                    });
+
+                    config.UseSpa(spa =>
+                    {
+                        // To learn more about options for serving an Angular SPA from ASP.NET Core,
+                        // see https://go.microsoft.com/fwlink/?linkid=864501
+
+                        spa.Options.SourcePath = "ClientApp";
+                        spa.Options.DefaultPage = "/ru/index.html";
+                        spa.Options.StartupTimeout = TimeSpan.FromMinutes(5);
+                        if (env.IsDevelopment())
+                        {
+                            spa.UseAngularCliServer("start");
+                        }
+                    });
+                });
+            });
+
             app.UseStaticFiles();
-            app.UseSpaStaticFiles();
 
             app.UseAuthentication();
 
             app.UseMiddleware<UserStatusMiddleware>();
+            
             app.UseRouting();
-            app.UseEndpoints(builder => { builder.MapHub<ChatsHub>("/hubs/chat"); });
+            
+            app.UseEndpoints(builder =>
+            {
+                builder.MapHub<ChatsHub>("/hubs/chat");
+            });
 
             app.UseCors("AllowAllOrigins");
             
             app.UseMvc();
-
-            app.UseSpa(spa =>
+            
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
             {
-                // To learn more about options for serving an Angular SPA from ASP.NET Core,
-                // see https://go.microsoft.com/fwlink/?linkid=864501
-
-                spa.Options.SourcePath = "ClientApp";
-                spa.Options.StartupTimeout = TimeSpan.FromMinutes(5);
-                if (env.IsDevelopment())
-                {
-                    spa.UseAngularCliServer("start");
-                }
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Vibechat API V1");
+                c.RoutePrefix = string.Empty;
             });
 
             FirebaseApp.Create(new AppOptions

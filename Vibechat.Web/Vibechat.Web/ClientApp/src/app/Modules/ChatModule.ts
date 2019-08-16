@@ -19,7 +19,7 @@ import {GroupInfoDialogComponent} from "../Dialogs/GroupInfoDialog";
 import {ChangeNameDialogComponent} from "../Dialogs/ChangeNameDialog";
 import {SearchListComponent} from "../Search/searchlist.component";
 import {UserInfoDialogComponent} from "../Dialogs/UserInfoDialog";
-import {UploaderService} from "../uploads/upload.service";
+import {UploaderService} from "../Services/Api/uploads/upload.service";
 import {ViewAttachmentsDialogComponent} from "../Dialogs/ViewAttachmentsDialog";
 import {HttpResponseInterceptor} from "../Interceptors/HttpResponseInterceptor";
 import {SnackBarHelper} from "../Snackbar/SnackbarHelper";
@@ -40,7 +40,10 @@ import {AdminPanelDialog} from "../Dialogs/AdminPanelDialog";
 import {ImageWithLoadProgress} from "../Shared/ImageWithLoadProgress";
 import {MessageViewOptions} from "../Shared/MessageViewOptions";
 import {UiScrollModule} from "ngx-ui-scroll";
-import { ChatEventComponent } from '../chat-event-module/chat-event.component';
+import {ChatEventComponent} from "../UiComponents/Messages/ChatEvent/chat-event.component";
+import {UploadsApi} from "../Services/Api/UploadsApi";
+import {LocalesService} from "../Services/LocalesService";
+import {TranslationModule} from "./translation/translation.module";
 
 @NgModule({
   declarations: [
@@ -73,7 +76,8 @@ import { ChatEventComponent } from '../chat-event-module/chat-event.component';
     HttpClientModule,
     BrowserAnimationsModule,
     FormsModule,
-    UiScrollModule
+    UiScrollModule,
+    TranslationModule
   ],
   exports: [AddGroupDialogComponent],
   entryComponents: [
@@ -87,10 +91,10 @@ import { ChatEventComponent } from '../chat-event-module/chat-event.component';
     ChooseContactDialogComponent,
     ChatUsersDialogComponent,
     AdminPanelDialog,
-    ViewPhotoComponent],
+    ViewPhotoComponent,
+    ConversationsFormatter],
 
   providers: [
-    ConversationsFormatter,
     UploaderService,
     SnackBarHelper,
     ChatsService,
@@ -105,6 +109,8 @@ import { ChatEventComponent } from '../chat-event-module/chat-event.component';
     DeviceService,
     TypingService,
     ImageWithLoadProgress,
-    MessageViewOptions]
+    MessageViewOptions,
+    UploadsApi,
+    LocalesService]
 })
 export class ChatModule { }

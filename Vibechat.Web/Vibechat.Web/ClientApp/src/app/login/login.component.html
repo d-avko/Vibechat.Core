@@ -10,25 +10,25 @@
       <mat-card-header>
         <div mat-card-avatar class="login_card--logo"></div>
         <mat-card-title>Vibechat</mat-card-title>
-        <mat-card-subtitle>Login</mat-card-subtitle>
+        <mat-card-subtitle i18n>Login</mat-card-subtitle>
       </mat-card-header>
 
       <mat-card-content>
 
         <div class="validate_fieldswrapper">
           <mat-form-field appearance="outline">
-            <mat-label>Phone number:</mat-label>
+            <mat-label i18n>Phone number:</mat-label>
             <input matInput [formControl]="phoneNumber" required>
-            <mat-error>Required</mat-error>
+            <mat-error i18n>Required</mat-error>
           </mat-form-field>
 
         </div>
 
         <div *ngIf="isCodeSent" class="validate_fieldswrapper">
           <mat-form-field appearance="outline">
-            <mat-label>Code from SMS:</mat-label>
+            <mat-label i18n>Code from SMS:</mat-label>
             <input matInput [formControl]="smsCode" required>
-            <mat-error>Required</mat-error>
+            <mat-error i18n>Required</mat-error>
           </mat-form-field>
 
         </div>
@@ -40,13 +40,13 @@
                   id="sign-in-button"
                   mat-flat-button
                   color="primary"
-                  (click)="SendCode()">Send code</button>
+                  (click)="SendCode()" i18n>Send code</button>
 
           <button *ngIf="isCodeSent"
                   [disabled]="! canLogIn"
                   class="button"
                   mat-flat-button color="primary"
-                  (click)="SignIn()">Sign in</button>
+                  (click)="SignIn()" i18n>Sign in</button>
 
         </div>
 
@@ -56,3 +56,5 @@
   </div>
 
 </div>
+
+<formatter></formatter>

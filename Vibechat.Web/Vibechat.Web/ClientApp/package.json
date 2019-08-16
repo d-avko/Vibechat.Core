@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "build.prod": "ng build --prod"
+    "start": "ng serve --deployUrl=/ru/ --servePath=/ru/ --baseHref=/ru/",
+    "build": "ng build --configuration=development --output-path dist/en",
+    "build.prod": "ng build --configuration=production --output-path dist/en",
+    "build.prod:ru": "ng build --configuration=production-ru --output-path dist/ru"
   },
   "private": true,
   "dependencies": {

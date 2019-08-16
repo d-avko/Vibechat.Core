@@ -5,6 +5,7 @@ import {SnackBarHelper} from "../Snackbar/SnackbarHelper";
 import {AppUser} from "../Data/AppUser";
 import {ChatsService} from "../Services/ChatsService";
 import {AuthService} from "../Services/AuthService";
+import {MessageReportingService} from "../Services/MessageReportingService";
 
 export interface ChatUsersDialogData {
   conversationId: number;
@@ -27,19 +28,19 @@ export class ChatUsersDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: ChatUsersDialogData,
     public chats: ChatsService,
     public snackBar: SnackBarHelper,
-    public auth: AuthService) { }
+    public auth: AuthService,
+    public messages: MessageReportingService) { }
 
   public async OnFindUsers(): Promise<void> {
 
     if (this.usernameToFind == '' || this.usernameToFind == null) {
-      this.snackBar.openSnackBar('Please enter a username in search bar.', 2);
       return;
     }
 
     let users = await this.chats.FindUsersInChat(this.usernameToFind, this.data.conversationId);
 
     if (!users) {
-      this.snackBar.openSnackBar('Noone was found.', 2);
+      this.messages.SearchUsersNoResults();
 
       this.FoundUsers = new Array<AppUser>();
 

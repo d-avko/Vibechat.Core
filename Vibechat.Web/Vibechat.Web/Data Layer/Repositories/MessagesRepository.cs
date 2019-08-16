@@ -1,12 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 using VibeChat.Web;
-using VibeChat.Web.ChatData;
-using VibeChat.Web.Data.DataModels;
 using Vibechat.Web.Data.Messages;
 using Vibechat.Web.DTO.Messages;
 
@@ -175,36 +170,37 @@ namespace Vibechat.Web.Data.Repositories
                                        && msg.MessageID > lastMessageId);
         }
         
-        public IQueryable<MessageDataModel> Search
+        public List<MessageDataModel> Search
             (int offset, int count, string searchString, string userId)
         {
             var Base = mContext
                 .Messages
                 .Where(msg => !mContext.DeletedMessages.Any(deleted =>
                     deleted.UserId == userId && deleted.MessageID == msg.MessageID))
-                .Where(msg => mContext.UsersConversations.Any(chat => 
+                .Where(msg => mContext.UsersConversations.Any(chat =>
                     chat.ChatID == msg.ConversationID && chat.UserID == userId));
-            
-            var forwardedMessages = 
+
+            var forwardedMessages =
                 Base
                 .Where(msg => msg.Type == MessageType.Forwarded && msg.ForwardedMessage.Type == MessageType.Text)
                 .Where(msg =>
-                    EF.Functions.Like(msg.ForwardedMessage.MessageContent.ToLower(), $"%{searchString.ToLower()}%"));
+                    EF.Functions.Like(msg.ForwardedMessage.MessageContent.ToLower(), $"%{searchString.ToLower()}%"))
+                .Include(x => x.User)
+                .Include(x => x.ForwardedMessage).ToList();
 
-            var notForwarded = 
+            var notForwarded =
                 Base
                 .Where(msg => msg.Type == MessageType.Text)
                 .Where(msg =>
-                    EF.Functions.Like(msg.MessageContent.ToLower(), $"%{searchString.ToLower()}%"));
+                    EF.Functions.Like(msg.MessageContent.ToLower(), $"%{searchString.ToLower()}%"))
+                .Include(x => x.User)
+                .Include(x => x.ForwardedMessage).ToList();
 
-            return 
+            return
                 forwardedMessages.Concat(notForwarded)
                     .OrderByDescending(msg => msg.TimeReceived)
                     .Skip(offset)
-                    .Take(count)
-                    .Include(msg => msg.ForwardedMessage)
-                    .Include(x => x.User)
-                    .AsNoTracking();
+                    .Take(count).ToList();
         }
 
         public bool Empty()

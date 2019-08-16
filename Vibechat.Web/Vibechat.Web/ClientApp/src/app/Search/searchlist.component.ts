@@ -1,6 +1,6 @@
 import {Chat} from "../Data/Chat";
 import {AppUser} from "../Data/AppUser";
-import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from "@angular/core";
+import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild} from "@angular/core";
 import {ChatsService} from "../Services/ChatsService";
 import {UsersService} from "../Services/UsersService";
 import {MessageReportingService} from "../Services/MessageReportingService";
@@ -45,10 +45,11 @@ export class SearchListComponent implements OnChanges{
   public MinSearchChars = 5;
   public static MessagesBufferLength = 50;
 
+  @ViewChild(ConversationsFormatter, {static: true}) formatter;
+
   constructor(private chats: ChatsService,
               private usersService: UsersService,
-              private messages: MessageReportingService,
-              private formatter: ConversationsFormatter) {
+              private messages: MessageReportingService) {
     this.FoundLocalConversations = new Array<Chat>();
     this.FoundMessages = new Array<FoundMessage>();
   }
@@ -67,7 +68,7 @@ export class SearchListComponent implements OnChanges{
   public async Search() {
 
     if(this.SearchString.length < this.MinSearchChars){
-      this.messages.DisplayMessage(`Please enter at least ${this.MinSearchChars} symbols.`);
+      this.messages.EnterAtLeast(this.MinSearchChars);
       return;
     }
     this.SearchLocalGroups();

@@ -5,7 +5,11 @@
     /// </summary>
     public class LoginCredentialsApiModel
     {
+        /// <summary>
+        /// Firebase-issued JWT token.
+        /// </summary>
         public string UidToken { get; set; }
+
 
         public string PhoneNumber { get; set; }
     }

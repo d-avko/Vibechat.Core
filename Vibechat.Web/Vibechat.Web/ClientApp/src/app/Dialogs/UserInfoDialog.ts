@@ -1,4 +1,4 @@
-import {Component, Inject, ViewContainerRef} from "@angular/core";
+import {Component, Inject, ViewChild, ViewContainerRef} from "@angular/core";
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from "@angular/material";
 import {ChatComponent} from "../UiComponents/Chat/chat.component";
 import {AppUser} from "../Data/AppUser";
@@ -23,12 +23,13 @@ export interface UserInfoData {
 })
 export class UserInfoDialogComponent {
 
+  @ViewChild(ConversationsFormatter, {static: true}) formatter;
+
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
     @Inject(MAT_DIALOG_DATA) public data: UserInfoData,
     public dialog: MatDialog,
-    public formatter: ConversationsFormatter,
-    public conversationsService: ChatsService,
+    public chats: ChatsService,
     public usersService: UsersService,
     public auth: AuthService,
     public viewContainerRef: ViewContainerRef,
@@ -50,19 +51,19 @@ export class UserInfoDialogComponent {
 
     if (!this.data.conversation) {
       //we are viewing user info outside the chat.
-      return this.conversationsService.FindDialogWithSecurityCheck(this.data.user, false) != null;
+      return this.chats.FindDialogWithSecurityCheck(this.data.user, false) != null;
     }
     //we are viewing user info inside the chat.
-    return this.conversationsService.FindDialogWithSecurityCheck(this.data.user, this.data.conversation.isSecure) != null;
+    return this.chats.FindDialogWithSecurityCheck(this.data.user, this.data.conversation.isSecure) != null;
   }
 
   public DeleteConversation(): void {
-    this.conversationsService.RemoveGroup(this.data.conversation);
+    this.chats.RemoveGroup(this.data.conversation);
     this.dialogRef.close();
   }
 
   public CreateDialog(): void {
-    this.conversationsService.CreateDialogWith(this.data.user, false);
+    this.chats.CreateDialogWith(this.data.user, false);
   }
 
   public IsInContactList(): boolean {
@@ -170,5 +171,10 @@ export class UserInfoDialogComponent {
         await this.usersService.ChangeLastname(name);
       }
     )
+  }
+
+  async ClearMessages() {
+    await this.chats.RemoveAllMessages(this.data.conversation);
+    this.dialogRef.close();
   }
 }

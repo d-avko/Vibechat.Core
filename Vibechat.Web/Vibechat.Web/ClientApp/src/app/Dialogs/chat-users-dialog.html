@@ -1,10 +1,11 @@
-<h1 mat-dialog-title>Select user(s).</h1>
+<h1 mat-dialog-title i18n>Select user(s)</h1>
 <div mat-dialog-content style="overflow: unset !important">
 
   <div class="find-header">
     <mat-form-field appearance="standard">
-      <mat-label>Type in username...</mat-label>
-      <input matInput (keydown.enter)="OnFindUsers()" [(ngModel)]="usernameToFind">
+      <mat-label i18n>Type in username...</mat-label>
+      <input matInput (keydown.enter)="OnFindUsers()" [(ngModel)]="usernameToFind" required>
+      <mat-error i18n>Please enter a username</mat-error>
     </mat-form-field>
 
     <button mat-button (click)="OnFindUsers()">
@@ -13,7 +14,7 @@
   </div>
 
   <mat-action-list style="height: 200px; overflow-y: scroll;">
-    <h3 mat-subheader>Found users</h3>
+    <h3 mat-subheader i18n>Found users</h3>
 
     <mat-list-item *ngFor="let user of FoundUsers"
                    (click)="SelectUser(user)"
@@ -31,8 +32,8 @@
   </mat-action-list>
 
   <div mat-dialog-actions>
-    <button mat-button [mat-dialog-close]="SelectedUser" cdkFocusInitial>Select</button>
-    <button mat-button (click)="onCancelClick()">Cancel</button>
+    <button mat-button [mat-dialog-close]="SelectedUser" cdkFocusInitial i18n>Select</button>
+    <button mat-button (click)="onCancelClick()" i18n>Cancel</button>
   </div>
 
   <style>

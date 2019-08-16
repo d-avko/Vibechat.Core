@@ -11,30 +11,30 @@
       <mat-card-header>
         <div mat-card-avatar class="register_card--logo"></div>
         <mat-card-title>Vibechat</mat-card-title>
-        <mat-card-subtitle>Change your info.</mat-card-subtitle>
+        <mat-card-subtitle i18n>Change your info.</mat-card-subtitle>
       </mat-card-header>
 
       <mat-card-content class="register_card--content">
 
         <div class="validate_fieldswrapper">
           <mat-form-field class="register_input">
-            <mat-label>First Name</mat-label>
+            <mat-label i18n>First Name</mat-label>
             <input matInput formControlName="firstName">
           </mat-form-field>
 
           <mat-form-field class="register_input">
-            <mat-label>Last Name</mat-label>
+            <mat-label i18n>Last Name</mat-label>
             <input matInput formControlName="lastName">
           </mat-form-field>
 
           <mat-form-field class="register_input">
-            <mat-label>Username</mat-label>
+            <mat-label i18n>Username</mat-label>
             <input matInput formControlName="username" required>
-            <mat-error>Required</mat-error>
+            <mat-error i18n>Minimal length is 5</mat-error>
           </mat-form-field>
 
           <div class="validate_wrapper">
-            <button [disabled]="! canRegister" class="button" mat-flat-button color="primary" (click)="Register()">Register</button>
+            <button [disabled]="! canRegister" class="button" mat-flat-button color="primary" (click)="Register()" i18n>Register</button>
           </div>
 
         </div>
@@ -46,3 +46,5 @@
   </div>
 
 </div>
+
+<formatter></formatter>

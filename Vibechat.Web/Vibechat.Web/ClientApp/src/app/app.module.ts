@@ -2,7 +2,7 @@ import {NgModule} from '@angular/core';
 import {AppRoutersModule} from './app.routes';
 
 import {AppComponent} from './app.component';
-import {ApiRequestsBuilder} from './Requests/ApiRequestsBuilder';
+import {Api} from './Services/Api/api.service';
 import {ChatModule} from './Modules/ChatModule';
 import {LoginModule} from './Modules/LoginModule';
 import {AuthService} from './Services/AuthService';
@@ -23,7 +23,7 @@ import {BrowserModule} from '@angular/platform-browser';
     MaterialModule,
     ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
   ],
-  providers: [ApiRequestsBuilder, AuthService],
+  providers: [Api, AuthService],
   bootstrap: [AppComponent]
 })
 export class AppModule {}

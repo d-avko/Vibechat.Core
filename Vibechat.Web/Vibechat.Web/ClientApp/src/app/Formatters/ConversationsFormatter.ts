@@ -1,4 +1,4 @@
-import {Injectable} from "@angular/core"
+import {Component, ViewChild} from "@angular/core"
 import {Message} from "../Data/Message";
 import {Chat} from "../Data/Chat";
 import {AuthService} from "../Services/AuthService";
@@ -9,16 +9,21 @@ import {ChatRole} from "../Roles/ChatRole";
 import {MessageType} from "../Data/MessageType";
 import {ChatEvent} from "../Data/ChatEvent";
 import {ChatEventType} from "../Data/ChatEventType";
-import {DomSanitizer} from "@angular/platform-browser";
+import {TranslateComponent, Translation} from "../translate/translate.component";
 
-@Injectable({
-  providedIn: 'root'
+@Component({
+  selector: 'formatter',
+  template: '' +
+    '<div style="display: none">' +
+    '<app-translate></app-translate>'+
+    '</div>'
 })
 export class ConversationsFormatter {
 
+  @ViewChild(TranslateComponent, {static: true}) public translations;
+
   constructor(private auth: AuthService,
-              private typing: TypingService,
-              private sanitizer: DomSanitizer) {
+              private typing: TypingService) {
   }
 
   public static MaxSymbols = 38;
@@ -31,29 +36,33 @@ export class ConversationsFormatter {
 
   public static MaxSymbolsForNameInTypingStripe = 20;
 
-  public IsMobileDevice() {
+  public _IsMobileDevice(){
     return window.innerWidth < ConversationsFormatter.MinPixelsDesktop;
   }
 
+  public static IsMobileDevice() {
+    return window.innerWidth < ConversationsFormatter.MinPixelsDesktop;
+  }
   public GetLastMessageFormatted(message: Message): string {
 
     if (!message) {
-      return "No messages...";
+      return this.translations.GetTranslation(Translation.LastMsgNoMessages);
     }
 
     let MaxSymbols = 0;
 
-    if (this.IsMobileDevice()) {
+    if (ConversationsFormatter.IsMobileDevice()) {
       MaxSymbols = ConversationsFormatter.MaxSymbolsMobile;
     } else {
-      MaxSymbols = Math.floor((window.innerWidth * ConversationsFormatter.MaxSymbols * 0.75) / ConversationsFormatter.MaxPixelsDesktop);
+      MaxSymbols = Math.floor((window.innerWidth * ConversationsFormatter.MaxSymbols * 0.75)
+        / ConversationsFormatter.MaxPixelsDesktop);
     }
 
     let user;
     if(!message.user){
       user = '';
     }else{
-      user = message.user.id == this.auth.User.id ? 'You' : message.user.userName;
+      user = message.user.id == this.auth.User.id ? this.translations.GetTranslation(Translation.MessageSenderYou) : message.user.userName;
     }
 
     switch (message.type) {
@@ -65,10 +74,9 @@ export class ConversationsFormatter {
         }
 
         return msg;
-        break;
       }
       case MessageType.Forwarded: {
-        return "Forwarded message";
+        return this.translations.GetTranslation(Translation.LastMsgForwarded);
       }
       case MessageType.Event: {
         let msg = this.GetChatEventFormatted(message.event);
@@ -91,22 +99,22 @@ export class ConversationsFormatter {
   }
 
   public GetChatEventFormatted(event: ChatEvent): string {
-    let result = 'User';
+    let result = this.translations.GetTranslation(Translation.ChatEventUser);
     switch (event.type) {
       case ChatEventType.Joined: {
-        return result + ` ${event.actorName} joined the chat.`;
+        return result + ` ${event.actorName} ${this.translations.GetTranslation(Translation.ChatEventJoined)}.`;
       }
       case ChatEventType.Banned:{
-        return result + ` ${event.userInvolvedName} was banned by ${event.actorName}`;
+        return result + ` ${event.userInvolvedName} ${this.translations.GetTranslation(Translation.ChatEventBanned)} ${event.actorName}`;
       }
       case ChatEventType.Invited:{
-        return result + ` ${event.userInvolvedName} was invited by ${event.actorName}`;
+          return result + ` ${event.userInvolvedName} ${this.translations.GetTranslation(Translation.ChatEventInvited)} ${event.actorName}`;
       }
       case ChatEventType.Left:{
-        return result + `${event.actorName} has left the chat.`;
+        return result + `${event.actorName} ${this.translations.GetTranslation(Translation.ChatEventLeft)}`;
       }
       case ChatEventType.Kicked:{
-        return result + ` ${event.userInvolvedName} was kicked by ${event.actorName}`;
+        return result + ` ${event.userInvolvedName} ${this.translations.GetTranslation(Translation.ChatEventKicked)} ${event.actorName}`;
       }
     }
   }
@@ -114,10 +122,10 @@ export class ConversationsFormatter {
   public GetUserRoleFormatted(user: AppUser) {
     switch (user.chatRole.role) {
       case ChatRole.Creator: {
-        return "Creator";
+        return this.translations.GetTranslation(Translation.ChatRoleCreator);
       }
       case ChatRole.Moderator: {
-        return "Moderator";
+        return this.translations.GetTranslation(Translation.ChatRoleModerator);
       }
       default: {
         return "";
@@ -135,9 +143,10 @@ export class ConversationsFormatter {
     let firstUserName = users[0].firstName.substr(0, ConversationsFormatter.MaxSymbolsForNameInTypingStripe);
 
     if (users.length === 1) {
-      return firstUserName + " is typing";
+      return firstUserName + " "+ this.translations.GetTranslation(Translation.UserTyping);
     } else {
-      return `${firstUserName} and ${users.length - 1} more people are typing`;
+      return `${firstUserName} ${this.translations.GetTranslation(Translation.And)} 
+      ${users.length - 1} ${this.translations.GetTranslation(Translation.ManyPeopleTyping)}`;
     }
   }
 
@@ -166,13 +175,13 @@ export class ConversationsFormatter {
   public GetFormattedAttachmentName(kind: AttachmentKind): string {
     switch (kind) {
       case AttachmentKind.Image: {
-        return "Image"
+        return this.translations.GetTranslation(Translation.AttachmentImage);
       }
       case AttachmentKind.File: {
-        return "File"
+        return this.translations.GetTranslation(Translation.AttachmentFile);
       }
       default: {
-        return "Unknown attachment"
+        return this.translations.GetTranslation(Translation.AttachmentUnknown);
       }
     }
   }
@@ -236,13 +245,13 @@ export class ConversationsFormatter {
 
         switch (realDaysBetween) {
           case 0: {
-            return "Today";
+            return this.translations.GetTranslation(Translation.Today);
           }
           case 1: {
-            return "Yesterday";
+            return this.translations.GetTranslation(Translation.Yesterday);
           }
           default: {
-            return realDaysBetween.toString() + " days ago";
+            return realDaysBetween.toString() + " " + this.translations.GetTranslation(Translation.ManyDaysAgo);
           }
         }
       }
@@ -255,19 +264,19 @@ export class ConversationsFormatter {
   public GetConversationMembersFormatted(conversation: Chat) {
     let membersAmount = conversation.participants == null ? 0 : conversation.participants.length;
 
-    return membersAmount.toString() + " Member(s)";
+    return membersAmount.toString() + " " + this.translations.GetTranslation(Translation.ChatMembers);
   }
 
   public GetLastSeenFormatted(dateString: string, isOnline: boolean): string {
     if (isOnline) {
-      return "Online";
+      return this.translations.GetTranslation(Translation.Online);
     }
 
     let date = new Date(dateString).getTime();
 
     let daysSinceOnline = (new Date().getTime() - date) / (1000 * 60 * 60 * 24);
 
-    let result = "Offline. Last seen: ";
+    let result = this.translations.GetTranslation(Translation.Offline) + " ";
 
     switch (true) {
       case daysSinceOnline <= 1: {
@@ -278,25 +287,28 @@ export class ConversationsFormatter {
           case hoursSinceOnline <= 1: {
             let minutesSinceOnline = (new Date().getTime() - date) / (1000 * 60);
 
-            if (minutesSinceOnline <= 10) {
-              return result + "less than 10 minutes ago.";
+            if (minutesSinceOnline <= 5) {
+              return result + this.translations.GetTranslation(Translation.LastSeenLessThan5);
             }
 
-            return result + Math.floor(minutesSinceOnline).toString() + " minutes ago";
+            return result + Math.floor(minutesSinceOnline).toString() + " " +
+              this.translations.GetTranslation(Translation.LastSeenMinutes);
           }
           default: {
 
-            return result + Math.floor(hoursSinceOnline).toString() + " hours ago";
+            return result + Math.floor(hoursSinceOnline).toString() + " " +
+              this.translations.GetTranslation(Translation.LastSeenHours);
 
           }
         }
 
       }
       case daysSinceOnline <= 2: {
-        return result + "Yesterday";
+        return result + this.translations.GetTranslation(Translation.Yesterday);
       }
       case daysSinceOnline > 2: {
-        return result + Math.floor(daysSinceOnline).toString() + " days ago";
+        return result + Math.floor(daysSinceOnline).toString() + " " +
+          this.translations.GetTranslation(Translation.LastSeenDays);
       }
     }
   }
@@ -314,13 +326,13 @@ export class ConversationsFormatter {
 
     switch (true) {
       case daysSinceReceived <= 7: {
-        return "This week";
+        return this.translations.GetTranslation(Translation.ThisWeek);
       }
       case daysSinceReceived <= 14: {
-        return "A week ago.";
+        return this.translations.GetTranslation(Translation.WeekAgo);
       }
       case daysSinceReceived <= 21: {
-        return "Two weeks ago.";
+        return this.translations.GetTranslation(Translation.TwoWeeksAgo);
       }
       default: {
         return attachmentDate.toLocaleDateString();

@@ -10,42 +10,42 @@
         <button mat-button (click)="OnViewUserInfo(this.auth.User, null)">
           <div class="padding10px flexaligned">
             <mat-icon>sentiment_satisfied</mat-icon>
-            <span class="padding5px">My profile</span>
+            <span class="padding5px" i18n>My profile</span>
           </div>
         </button>
 
         <button mat-button (click)="CreateGroup()">
           <div class="padding10px flexaligned">
             <mat-icon>people</mat-icon>
-            <span class="padding5px">New chat</span>
+            <span class="padding5px" i18n>New chat</span>
           </div>
         </button>
 
         <button mat-button (click)="CreateSecureChat()">
           <div class="padding10px flexaligned">
             <mat-icon>security</mat-icon>
-            <span class="padding5px">New secure chat</span>
+            <span class="padding5px" i18n>New secure chat</span>
           </div>
         </button>
 
         <button mat-button (click)="OnLogOut()">
           <div class="padding10px flexaligned">
             <mat-icon>cancel</mat-icon>
-            <span class="padding5px">Log out</span>
+            <span class="padding5px" i18n>Log out</span>
           </div>
         </button>
 
         <button *ngIf="IsDarkTheme()" mat-button (click)="SwitchTheme('white')">
           <div class="padding10px flexaligned">
             <mat-icon>wb_sunny</mat-icon>
-            <span class="padding5px">White theme</span>
+            <span class="padding5px" i18n>White theme</span>
           </div>
         </button>
 
         <button *ngIf="!IsDarkTheme()" mat-button (click)="SwitchTheme('dark')">
           <div class="padding10px flexaligned">
             <mat-icon>brightness_2</mat-icon>
-            <span class="padding5px">Dark theme</span>
+            <span class="padding5px" i18n>Dark theme</span>
           </div>
         </button>
       </div>
@@ -66,8 +66,12 @@
             </button>
 
             <mat-form-field style="margin-left: 5%; width: 60%;" appearance="standard">
-              <mat-label>Search</mat-label>
-              <input matInput placeholder="Type in something..." type="search" [(ngModel)]="SearchString" (ngModelChange)="ChangeChat(null)" (keydown.enter)="Search()">
+              <mat-label i18n>Search</mat-label>
+              <input matInput placeholder="Type in something..." type="search"
+                     [(ngModel)]="SearchString"
+                     (ngModelChange)="ChangeChat(null)"
+                     (keydown.enter)="Search()"
+                     i18n-placeholder>
               <mat-icon matSuffix>search</mat-icon>
             </mat-form-field>
 
@@ -116,7 +120,7 @@
              'hidden': IsMobileDevice() && !IsConversationSelected()
              }"
             *ngIf="! IsConversationSelected()"
-            class="no-chat-selected">Choose chat from the left to start chatting...</h4>
+            class="no-chat-selected" i18n>Choose chat from the left to start chatting...</h4>
 
       </mat-card-content>
 
@@ -124,5 +128,7 @@
 
   </mat-drawer-container>
 </mat-card>
+
+<formatter></formatter>
 
 

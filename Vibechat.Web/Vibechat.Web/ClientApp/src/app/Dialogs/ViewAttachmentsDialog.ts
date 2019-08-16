@@ -29,6 +29,8 @@ export class ViewAttachmentsDialogComponent {
 
   @ViewChild(CdkVirtualScrollViewport, { static: true }) scroll: CdkVirtualScrollViewport;
 
+  @ViewChild(ConversationsFormatter, {static: true}) formatter;
+
   private static attachmentsToLoadAmount: number = 50;
 
   private static allowedErrorInOffset: number = 60;
@@ -46,7 +48,6 @@ export class ViewAttachmentsDialogComponent {
   constructor(public dialogRef: MatDialogRef<ChatComponent>,
     @Inject(MAT_DIALOG_DATA) public data: AttachmentsData,
     public photoDialog: MatDialog,
-    public formatter: ConversationsFormatter,
     public conversationsService: ChatsService,
     public photos: ViewPhotoService,
     public viewContainerRef: ViewContainerRef)

@@ -1,9 +1,10 @@
-import { Component, Inject } from "@angular/core";
-import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material";
-import { ChatComponent } from "../UiComponents/Chat/chat.component";
-import { SnackBarHelper } from "../Snackbar/SnackbarHelper";
-import { AppUser } from "../Data/AppUser";
-import { UsersService } from "../Services/UsersService";
+import {Component, Inject} from "@angular/core";
+import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material";
+import {ChatComponent} from "../UiComponents/Chat/chat.component";
+import {SnackBarHelper} from "../Snackbar/SnackbarHelper";
+import {AppUser} from "../Data/AppUser";
+import {UsersService} from "../Services/UsersService";
+import {MessageReportingService} from "../Services/MessageReportingService";
 
 export interface InviteUsersData {
   conversationId: number;
@@ -24,21 +25,23 @@ export class FindUsersDialogComponent {
 
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: InviteUsersData, public usersService: UsersService, public snackBar: SnackBarHelper) {
+    @Inject(MAT_DIALOG_DATA) public data: InviteUsersData,
+    public usersService: UsersService,
+    public snackBar: SnackBarHelper,
+    public messages: MessageReportingService) {
     this.SelectedUsers = new Array<AppUser>();
   }
 
   public async OnFindUsers(): Promise<void> {
 
     if (this.usernameToFind == '' || this.usernameToFind == null) {
-      this.snackBar.openSnackBar('Please enter a username in search bar.', 2);
       return;
     }
 
     let users = await this.usersService.FindUsersByUsername(this.usernameToFind);
 
     if (users == null) {
-      this.snackBar.openSnackBar('Noone was found.', 2);
+      this.messages.SearchUsersNoResults();
 
       this.FoundUsers = new Array<AppUser>();
 

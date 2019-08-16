@@ -17,9 +17,7 @@ namespace Vibechat.Web.Data.Repositories
         {
             return mContext
                 .Conversations
-                .Where(x => x.Id == id)
-                .Include(x => x.PublicKey)
-                .Single();
+                .Single(x => x.Id == id);
         }
 
         public void UpdateThumbnail(string thumbnailUrl, string fullimageUrl, ConversationDataModel entity)

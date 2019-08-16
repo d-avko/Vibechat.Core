@@ -1,4 +1,4 @@
-<h1 class="profile-dialog_header-text" mat-dialog-title>User profile</h1>
+<h1 class="profile-dialog_header-text" mat-dialog-title i18n>User profile</h1>
 <div mat-dialog-content style="overflow: unset !important">
 
   <!--This user-->
@@ -41,26 +41,26 @@
 
         <mat-icon class="cadetBlue">edit</mat-icon>
 
-        <h3 matLine>Change username(@)</h3>
+        <h3 matLine i18n>Change username(@)</h3>
       </mat-list-item>
 
       <mat-list-item (click)="ChangeName()">
 
         <mat-icon class="cadetBlue">edit</mat-icon>
 
-        <h3 matLine>Change first name</h3>
+        <h3 matLine i18n>Change first name</h3>
       </mat-list-item>
 
       <mat-list-item (click)="ChangeLastname()">
 
         <mat-icon class="cadetBlue">edit</mat-icon>
 
-        <h3 matLine>Change last name</h3>
+        <h3 matLine i18n>Change last name</h3>
       </mat-list-item>
 
       <mat-list-item>
         <mat-icon class="cadetBlue">add_photo_alternate</mat-icon>
-        <h3 matLine>Change profile picture </h3>
+        <h3 matLine i18n>Change profile picture </h3>
         <input type="file" (change)="UpdateThumbnail($event)" accept="image/*" class="thumbnail-input" name="picture" />
       </mat-list-item>
 
@@ -100,35 +100,35 @@
 
         <mat-icon class="cadetBlue">person_add</mat-icon>
 
-        <h3 matLine>Start chatting</h3>
+        <h3 matLine i18n>Start chatting</h3>
       </mat-list-item>
 
       <mat-list-item *ngIf="!IsInContactList()" (click)="AddToContacts()">
 
         <!--<mat-icon class="cadetBlue">person_add</mat-icon>-->
 
-        <h3 matLine>Add to contacts</h3>
+        <h3 matLine i18n>Add to contacts</h3>
       </mat-list-item>
 
       <mat-list-item *ngIf="IsInContactList()" (click)="RemoveFromContacts()">
 
         <!--<mat-icon class="cadetBlue">person_add</mat-icon>-->
 
-        <h3 matLine>Remove from contacts</h3>
+        <h3 matLine i18n>Remove from contacts</h3>
       </mat-list-item>
 
       <mat-list-item *ngIf="HasConversationWith() && data.conversation" (click)="ViewAttachments()">
 
         <mat-icon class="cadetBlue">attach_file</mat-icon>
 
-        <h3 matLine>Attachments</h3>
+        <h3 matLine i18n>Attachments</h3>
       </mat-list-item>
 
       <mat-list-item *ngIf="HasConversationWith() && data.conversation" (click)="DeleteConversation()">
 
         <mat-icon class="cadetBlue">clear</mat-icon>
 
-        <h3 matLine>Delete conversation</h3>
+        <h3 matLine i18n>Delete conversation</h3>
       </mat-list-item>
 
       <mat-list-item *ngIf="HasConversationWith() && data.conversation" (click)="ClearMessages()">
@@ -137,7 +137,7 @@
           remove_circle
         </mat-icon>
 
-        <h3 matLine>Clear messages</h3>
+        <h3 matLine i18n>Clear messages</h3>
       </mat-list-item>
 
     </mat-action-list>
@@ -148,7 +148,7 @@
 
         <mat-icon class="cadetBlue">voice_over_off</mat-icon>
 
-        <h3 matLine>Block this user</h3>
+        <h3 matLine i18n>Block this user</h3>
 
       </mat-list-item>
 
@@ -156,18 +156,18 @@
 
         <mat-icon class="cadetBlue">voice_over_off</mat-icon>
 
-        <h3 matLine>Unblock this user</h3>
+        <h3 matLine i18n>Unblock this user</h3>
       </mat-list-item>
 
     </mat-action-list>
 
-    <p *ngIf="data.user.isMessagingRestricted" class="subHeader flexrow centered blocked">
+    <p *ngIf="data.user.isMessagingRestricted" class="subHeader flexrow centered blocked" i18n>
     You were blocked from talking with this user. Actions unavailable.
     </p>
   </div>
 
 </div>
-
+<formatter></formatter>
   <style>
     .user_thumbnail {
       cursor: pointer;
@@ -246,3 +246,4 @@
       opacity: .01;
     }
   </style>
+

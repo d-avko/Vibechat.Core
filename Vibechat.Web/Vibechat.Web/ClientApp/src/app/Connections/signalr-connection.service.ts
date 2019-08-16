@@ -67,8 +67,7 @@ export class SignalrConnection {
 
     this.InitiateConnections(this.chats.GetConversationsIds());
     this.messagesService.OnConnected();
-    this.chats.OnConnected();
-
+    await this.chats.OnConnected();
     this.connection.onclose(() => {
       this.messagesService.OnDisconnected();
       this.chats.OnDisconnected();

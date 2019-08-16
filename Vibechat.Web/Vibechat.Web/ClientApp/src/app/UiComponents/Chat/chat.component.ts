@@ -44,11 +44,11 @@ export class ChatComponent implements OnInit {
   @ViewChild(MessagesComponent, { static: false }) messages: MessagesComponent;
   @ViewChild(MatDrawer, { static: true }) sideDrawer: MatDrawer;
   @ViewChild(SearchListComponent, { static: false }) searchList: SearchListComponent;
+  @ViewChild(ConversationsFormatter, {static: true}) formatter;
   over: any;
 
   constructor(
     public dialog: MatDialog,
-    public formatter: ConversationsFormatter,
     public auth: AuthService,
     private usersService: UsersService,
     private chats: ChatsService,
@@ -137,7 +137,7 @@ export class ChatComponent implements OnInit {
         }
 
         if (!this.chats.CreateSecureChat(user)) {
-          this.snackBar.openSnackBar('Unable to create the chat with this user. Probably there already exists one.', 3);
+          this.display.DialogFailedToCreate();
         }
       }
     )
@@ -155,7 +155,7 @@ export class ChatComponent implements OnInit {
     }
 
     if(!user){
-      this.display.DisplayMessage(`Couldn't open user profile, try again later.`);
+      this.display.CouldntViewUserProfile();
       return;
     }
 
@@ -227,7 +227,7 @@ export class ChatComponent implements OnInit {
   }
 
   public async UpdateConversations() {
-    await this.chats.UpdateConversations();
+    await this.chats.UpdateChats();
   }
 
   public async ChangeConversation(conversation: Chat) {
@@ -249,10 +249,11 @@ export class ChatComponent implements OnInit {
   }
 
   public async ViewMessage(msg: FoundMessage) {
+    await this.chats.ChangeChat(msg.chat, false);
+
     this.viewOptions.Option.next(MessageViewOption.ViewMessage);
     this.viewOptions.MessageToViewId = msg.message.id;
     msg.chat.clientLastMessageId = msg.message.id;
-    await this.chats.ChangeChat(msg.chat, false);
 
     requestAnimationFrame(async () => {
       await this.messages.ResolveProvidedOptions();

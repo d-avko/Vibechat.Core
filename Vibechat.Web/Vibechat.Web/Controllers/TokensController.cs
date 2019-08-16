@@ -7,8 +7,12 @@ using Vibechat.Web.Services.Users;
 
 namespace Vibechat.Web.Controllers
 {
-    public class TokensController : Controller
+    [Route("api/v1/[controller]")]
+    [Produces("application/json")]
+    [ApiController]
+    public class TokensController : ControllerBase
     {
+
         public TokensController(ITokenValidator tokensValidator, UsersService userService)
         {
             this.tokensValidator = tokensValidator;
@@ -19,8 +23,9 @@ namespace Vibechat.Web.Controllers
 
         protected UsersService userService { get; set; }
 
-        [Route("api/Tokens/Refresh")]
-        public async Task<ResponseApiModel<string>> RefreshToken([FromBody] RefreshTokenRequest tokenInfo)
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<ResponseApiModel<string>> Refresh([FromBody] RefreshTokenRequest tokenInfo)
         {
             var defaultError = new ResponseApiModel<string>
             {
@@ -38,8 +43,6 @@ namespace Vibechat.Web.Controllers
                 return defaultError;
             }
 
-            var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
-            
             return new ResponseApiModel<string>
             {
                 IsSuccessfull = true,

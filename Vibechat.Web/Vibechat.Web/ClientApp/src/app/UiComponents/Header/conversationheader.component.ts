@@ -1,9 +1,8 @@
-import {Component, EventEmitter, Input, Output} from "@angular/core";
+import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
 import {Chat} from "../../Data/Chat";
 import {ConversationsFormatter} from "../../Formatters/ConversationsFormatter";
-import {MatDialog, MatSnackBar} from "@angular/material";
-import {ApiRequestsBuilder} from "../../Requests/ApiRequestsBuilder";
-import {SnackBarHelper} from "../../Snackbar/SnackbarHelper";
+import {MatDialog} from "@angular/material";
+import {Api} from "../../Services/Api/api.service";
 
 @Component({
   selector: 'conversationHeader-view',
@@ -12,14 +11,11 @@ import {SnackBarHelper} from "../../Snackbar/SnackbarHelper";
 })
 export class ConversationHeaderComponent {
 
-  protected snackbar: SnackBarHelper;
+  @ViewChild(ConversationsFormatter, {static: true}) formatter;
 
   constructor(
-    public formatter: ConversationsFormatter,
     public dialog: MatDialog,
-    protected requestsBuilder: ApiRequestsBuilder,
-    snackbar: MatSnackBar) {
-    this.snackbar = new SnackBarHelper(snackbar);
+    protected requestsBuilder: Api) {
   }
 
   @Input() public Conversation: Chat;

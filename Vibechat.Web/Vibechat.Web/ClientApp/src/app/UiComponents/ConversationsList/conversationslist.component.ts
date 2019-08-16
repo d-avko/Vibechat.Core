@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from "@angular/core";
+import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
 import {Chat} from "../../Data/Chat";
 import {ConversationsFormatter} from "../../Formatters/ConversationsFormatter";
 
@@ -9,7 +9,7 @@ import {ConversationsFormatter} from "../../Formatters/ConversationsFormatter";
 })
 export class ConversationsListComponent {
 
-  public formatter: ConversationsFormatter;
+  @ViewChild(ConversationsFormatter, {static: true}) formatter;
 
   @Input() public Conversations: Array<Chat>;
 
@@ -17,8 +17,8 @@ export class ConversationsListComponent {
 
   @Input() public CurrentConversation: Chat;
 
-  constructor(formatter: ConversationsFormatter) {
-    this.formatter = formatter;
+  constructor() {
+
   }
 
   public ChangeConversation(conversation: Chat) {

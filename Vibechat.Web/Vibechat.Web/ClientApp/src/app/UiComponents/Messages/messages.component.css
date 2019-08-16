@@ -12,6 +12,12 @@ a{
   overflow-anchor: none;
 }
 
+.chat-updating-spinner{
+  position: absolute;
+  margin-top: 25%;
+  margin-left: calc(50% - 80px);
+}
+
 .chat_misc_backtonow {
   display: flex;
   flex-direction: row;
@@ -34,6 +40,12 @@ a{
 @media screen and (max-width: 880px) {
   .chat_misc_backtonow{
     margin-left: 41vw !important;
+  }
+}
+
+@media screen and (min-width: 880px) {
+  .chat-updating-spinner{
+    margin-left: calc(35% - 80px);
   }
 }
 

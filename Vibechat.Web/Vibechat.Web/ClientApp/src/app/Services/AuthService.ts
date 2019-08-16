@@ -2,7 +2,7 @@ import {LoginResponse} from "../ApiModels/LoginResponse";
 import {AppUser} from "../Data/AppUser";
 import {Router} from "@angular/router";
 import {ServerResponse} from "../ApiModels/ServerResponse";
-import {ApiRequestsBuilder} from "../Requests/ApiRequestsBuilder";
+import {Api} from "./Api/api.service";
 import {Injectable} from '@angular/core';
 import * as firebase from "firebase/app";
 import "firebase/auth";
@@ -13,8 +13,8 @@ import * as jwtDecode from "jwt-decode";
   providedIn: 'root'
 })
 export class AuthService  {
-  constructor(public router: Router, public requestsBuilder: ApiRequestsBuilder) {
-    var firebaseConfig = {
+  constructor(public router: Router, public requestsBuilder: Api) {
+    const firebaseConfig = {
       apiKey: "AIzaSyDqVFEN02Mvb2UU4bcrCDmTtDmV7RMla8E",
       authDomain: "vibechat-ng.firebaseapp.com",
       databaseURL: "https://vibechat-ng.firebaseio.com",
@@ -52,6 +52,7 @@ export class AuthService  {
       this.confirmation = await firebase.auth().signInWithPhoneNumber(phoneNumber, recaptcha);
       return true;
     } catch (e) {
+      console.log(e);
       return false;
     }
   }
