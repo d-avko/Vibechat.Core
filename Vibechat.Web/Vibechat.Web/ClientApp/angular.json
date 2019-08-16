@@ -47,7 +47,33 @@
               "vendorChunk": false,
               "buildOptimizer": true,
               "serviceWorker": true,
+              "ngswConfigPath": "src/ngsw-config.json",
+              "deployUrl": "/en/",
+              "baseHref": "/en/"
+            },
+            "production-ru": {
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "aot": true,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "serviceWorker": true,
+              "outputPath": "dist/ru",
+              "i18nFile": "src/locale/messages.ru.xlf",
+              "baseHref": "/ru/",
+              "i18nFormat": "xlf",
+              "i18nLocale": "ru",
+              "i18nMissingTranslation": "Translation is not ready yet.",
+              "deployUrl": "/ru/",
               "ngswConfigPath": "src/ngsw-config.json"
+            },
+            "development": {
+              "outputPath": "dist/en",
+              "baseHref": "/en/"
             }
           }
         },
@@ -59,6 +85,9 @@
           "configurations": {
             "production": {
               "browserTarget": "Vibechat:build:production"
+            },
+            "ru": {
+              "browserTarget": "Vibechat:build:ru"
             }
           }
         },

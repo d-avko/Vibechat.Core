@@ -1,4 +1,4 @@
-<h1 class="profile-dialog_header-text" mat-dialog-title>Group profile</h1>
+<h1 class="profile-dialog_header-text" mat-dialog-title i18n>Group profile</h1>
 <div mat-dialog-content style="overflow: unset !important">
 
   <div class="groupinfo_header">
@@ -24,34 +24,34 @@
     <mat-list-item *ngIf="IsJoined() && !data.Conversation.isMessagingRestricted" (click)="ViewAttachments()">
       <mat-icon class="cadetBlue">attach_file</mat-icon>
 
-      <h3 matLine>Attachments</h3>
+      <h3 matLine i18n>Attachments</h3>
     </mat-list-item>
 
     <mat-list-item *ngIf="IsJoined() && !data.Conversation.isMessagingRestricted" (click)="InviteUsers()">
       <mat-icon class="cadetBlue">person_add</mat-icon>
 
-      <h3 matLine>Invite users</h3>
+      <h3 matLine i18n>Invite users</h3>
     </mat-list-item>
 
     <mat-list-item *ngIf="IsJoined() && !data.Conversation.isMessagingRestricted" (click)="ChangeName()">
 
       <mat-icon class="cadetBlue">create</mat-icon>
 
-      <h3 matLine>Change name</h3>
+      <h3 matLine i18n>Change name</h3>
     </mat-list-item>
 
     <mat-list-item *ngIf="!IsJoined() && !data.Conversation.isMessagingRestricted" (click)="JoinGroup()">
 
       <mat-icon class="cadetBlue">person</mat-icon>
 
-      <h3 matLine>Join</h3>
+      <h3 matLine i18n>Join</h3>
     </mat-list-item>
 
     <mat-list-item *ngIf="IsJoined()" (click)="LeaveGroup()">
 
       <mat-icon class="cadetBlue">clear</mat-icon>
 
-      <h3 matLine>Leave</h3>
+      <h3 matLine i18n>Leave</h3>
     </mat-list-item>
 
     <mat-list-item *ngIf="IsJoined() && !data.Conversation.isMessagingRestricted" (click)="ClearMessages()">
@@ -60,7 +60,7 @@
         delete_sweep
       </mat-icon>
 
-      <h3 matLine>Clear messages</h3>
+      <h3 matLine i18n>Clear messages</h3>
     </mat-list-item>
 
     <mat-list-item *ngIf="IsJoined() && IsCurrentUserCreatorOfConversation()" (click)="RemoveGroup()">
@@ -69,12 +69,12 @@
         remove_circle
       </mat-icon>
 
-      <h3 matLine>Remove group</h3>
+      <h3 matLine i18n>Remove group</h3>
     </mat-list-item>
 
     <mat-list-item *ngIf="IsJoined()">
       <mat-icon class="cadetBlue">add_photo_alternate</mat-icon>
-      <h3 matLine>Change group picture </h3>
+      <h3 matLine i18n>Change group picture </h3>
       <input *ngIf="!data.Conversation.isMessagingRestricted" type="file" (change)="UpdateThumbnail($event)" accept="image/*" class="thumbnail-input" name="thumbnail" />
     </mat-list-item>
 
@@ -84,12 +84,12 @@
         assignment_ind
       </mat-icon>
 
-      <h3 matLine>Admin panel</h3>
+      <h3 matLine i18n>Admin panel</h3>
     </mat-list-item>
   </mat-action-list>
 
   <mat-action-list *ngIf="!data.Conversation.isMessagingRestricted" class="users_in_Conversation_list">
-    <h3 mat-subheader>Users in group</h3>
+    <h3 mat-subheader i18n>Users in group</h3>
 
     <mat-list-item *ngFor="let user of data.Conversation.participants">
       <div class="viewuser" (click)="ViewUserInfo(user)">
@@ -108,87 +108,87 @@
 
   <div *ngIf="data.Conversation.isMessagingRestricted" class="banned-text_wrapper">
     <mat-icon class="bannedicon">report_problem</mat-icon>
-    <p class="banned-text subHeader">You were banned from this group.</p>
+    <p class="banned-text subHeader" i18n>You were banned from this group.</p>
   </div>
 
-  <style>
-    .group_thumbnail {
-      cursor: pointer;
-      background-size: cover;
-      height: 80px;
-      width: 80px;
-      border-radius: 40px;
-    }
-
-    .load-spinner{
-      position: absolute;
-    }
-
-    .viewuser_name{
-      font-size: 14px;
-      margin-left: 14px;
-      font-weight: lighter;
-    }
-
-    .viewuser{
-      display: flex;
-      flex-direction:row;
-      align-items:center;
-      width: 70%;
-    }
-
-    .users_in_Conversation_list{
-      height: 200px;
-      overflow-y: scroll;
-    }
-
-    .groupinfo_info {
-      display: flex;
-      flex-direction: column;
-      margin-left: 5%;
-    }
-
-    .groupinfo_header {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      padding: 0 20px;
-    }
-
-    .banned-text_wrapper {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content:center;
-    }
-
-    .role-name{
-      color: dimgray;
-      margin-left: .5rem;
-    }
-
-    .banned-text{
-      margin-left:10px;
-    }
-
-    .defaultFont{
-      font: 500 20px/32px Roboto,"Helvetica Neue",sans-serif;
-    }
-
-    .subHeader{
-      font: 400 15px/20px Roboto,"Helvetica Neue",sans-serif;
-    }
-
-    .cadetBlue{
-      color:cadetblue;
-    }
-
-    .thumbnail-input{
-      opacity: .01;
-      position: absolute;
-      width: 100%;
-      height: 100%;
-    }
-  </style>
-
 </div>
+<formatter></formatter>
+<style>
+  .group_thumbnail {
+    cursor: pointer;
+    background-size: cover;
+    height: 80px;
+    width: 80px;
+    border-radius: 40px;
+  }
+
+  .load-spinner{
+    position: absolute;
+  }
+
+  .viewuser_name{
+    font-size: 14px;
+    margin-left: 14px;
+    font-weight: lighter;
+  }
+
+  .viewuser{
+    display: flex;
+    flex-direction:row;
+    align-items:center;
+    width: 70%;
+  }
+
+  .users_in_Conversation_list{
+    height: 200px;
+    overflow-y: scroll;
+  }
+
+  .groupinfo_info {
+    display: flex;
+    flex-direction: column;
+    margin-left: 5%;
+  }
+
+  .groupinfo_header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 20px;
+  }
+
+  .banned-text_wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content:center;
+  }
+
+  .role-name{
+    color: dimgray;
+    margin-left: .5rem;
+  }
+
+  .banned-text{
+    margin-left:10px;
+  }
+
+  .defaultFont{
+    font: 500 20px/32px Roboto,"Helvetica Neue",sans-serif;
+  }
+
+  .subHeader{
+    font: 400 15px/20px Roboto,"Helvetica Neue",sans-serif;
+  }
+
+  .cadetBlue{
+    color:cadetblue;
+  }
+
+  .thumbnail-input{
+    opacity: .01;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+</style>

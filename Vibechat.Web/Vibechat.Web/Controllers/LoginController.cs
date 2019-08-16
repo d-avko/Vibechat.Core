@@ -18,6 +18,11 @@ namespace VibeChat.Web.Controllers
             this.loginService = loginService;
         }
 
+        /// <summary>
+        /// Signs in user using firebase-issued JWT token (obtained via SMS confirmation).
+        /// </summary>
+        /// <param name="loginCredentials"></param>
+        /// <returns></returns>
         [Route("")]
         [HttpPost]
         public async Task<ResponseApiModel<LoginResultApiModel>> Login(

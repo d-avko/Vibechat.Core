@@ -9,6 +9,7 @@ import {AppRoutersModule} from "../app.routes";
 import {HttpClientModule} from "@angular/common/http";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {AuthService} from "../Services/AuthService";
+import {TranslationModule} from "./translation/translation.module";
 
 @NgModule({
   declarations: [
@@ -22,8 +23,10 @@ import {AuthService} from "../Services/AuthService";
     BrowserModule,
     AppRoutersModule,
     HttpClientModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    TranslationModule
   ],
+  entryComponents:[],
   providers: [AuthService]
 })
 export class LoginModule { }

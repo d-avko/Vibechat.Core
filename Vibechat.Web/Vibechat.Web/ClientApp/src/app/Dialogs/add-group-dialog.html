@@ -1,25 +1,18 @@
-<h1 mat-dialog-title>Create new group.</h1>
+<h1 mat-dialog-title i18n>Create new group.</h1>
 <div mat-dialog-content>
 
   <div class="flexrow">
     <mat-form-field style="padding: 0 0 20px;">
-      <mat-label>Group name:</mat-label>
+      <mat-label i18n>Group name:</mat-label>
       <input matInput [formControl]="GroupName">
-      <mat-error >Please provide a correct group name.</mat-error>
+      <mat-error i18n>Please provide a correct group name.</mat-error>
     </mat-form-field>
 
-      <mat-checkbox>Public group?</mat-checkbox>
+      <mat-checkbox i18n>Public group?</mat-checkbox>
   </div>
 
 </div>
 <div mat-dialog-actions>
-  <button mat-button (click)="CreateGroup()" cdkFocusInitial>Create</button>
-  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-button (click)="CreateGroup()" cdkFocusInitial i18n>Create</button>
+  <button mat-button (click)="onNoClick()" i18n>Cancel</button>
 </div>
-
-<style>
-  .flexcolumn{
-    display:flex;
-    flex-direction:column;
-  }
-</style>

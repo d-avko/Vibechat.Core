@@ -94,7 +94,7 @@ namespace Vibechat.Web.Controllers
         }
         
         /// <summary>
-        /// Delete many entities by one request, as DELETE doesn't allow body.
+        /// Delete many entities by one request, as DELETE doesn't allow body (at least js libraries)
         /// </summary>
         /// <param name="messagesInfo"></param>
         /// <returns></returns>
@@ -129,7 +129,7 @@ namespace Vibechat.Web.Controllers
         }
         
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost]
+        [HttpPut]
         [Route("[action]")]
         public async Task<ResponseApiModel<bool>> SetLast([FromBody] SetLastMessageRequest request)
         { 

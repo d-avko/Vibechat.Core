@@ -1,0 +1,1027 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en" datatype="plaintext" original="ng2.template">
+    <body>
+      <trans-unit id="da44a52626e2d60ceeba44564333dd1c4a745785" datatype="html">
+        <source>No messages...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="84fe2e59a6853e31a24c3ecc7e218bd95135f062" datatype="html">
+        <source>You</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="84ea8505c362b1621a3b50ab0815736a46ef902b" datatype="html">
+        <source>Forwarded message</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="242c00bc0be26f2a818f1afea9158b908ef7150b" datatype="html">
+        <source>joined the chat</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="44fa8f46a4b2c70093d072dd340017a7ce0dce01" datatype="html">
+        <source>was banned by</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="ec1397ebc1b86a8e58d128eb4c14f80d2e3f107e" datatype="html">
+        <source>was kicked by</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="43c68d1331e8d29b7445d95a020caa9057df7c0c" datatype="html">
+        <source>was invited by</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="e54fd28a8972680e28564b998c2d9e3872aaf834" datatype="html">
+        <source>has left the chat.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="e08a77594f3d89311cdf6da5090044270909c194" datatype="html">
+        <source>User</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="a20424156b8816671f61879f0574a4f27d7b16b9" datatype="html">
+        <source>Creator</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="38c877fb0a5fdcadc379256953ad2d1eb8233fdf" datatype="html">
+        <source>Moderator</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="ff5df075999c34ecab6eb305badbb7eebf7f9a54" datatype="html">
+        <source>is typing</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="dce4fb53bd401f2ded36a8c45cb471eff6b529d4" datatype="html">
+        <source>and</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="b7880b3384e5005c1b3117d54a18e071d9dc7f4c" datatype="html">
+        <source>more people are typing</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="a5f9ba9bb9faa8284bcadb1cdbc6aaf969e9c4bb" datatype="html">
+        <source>Image</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="48139a8f408fb79f24e82673e89e23c2ac314f23" datatype="html">
+        <source>File</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="360cfb18b07caa407ab7202154794c2802ee7ff6" datatype="html">
+        <source>Unknown attachment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7fb1099e29660162f9154d5b2feee7743a423df6" datatype="html">
+        <source>Today</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="e430eda9c785cd43465b7cbb400ee914f1057247" datatype="html">
+        <source>Yesterday</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7247fa2f3d78b845cb6ce1f462a9066e60bfb4c4" datatype="html">
+        <source>days ago</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="98197a3ae0c5553811d7e35d66ce806a131cc247" datatype="html">
+        <source>Member(s)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="f96ccbb54a3cdb84da625e10074258a29ee6b19c" datatype="html">
+        <source>Online</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="f12f28a6d3f1546a44ca3fbaa9d5effbc17dab1a" datatype="html">
+        <source>Offline. Last seen:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4757f041ef9a73ebb8d87ecb98b47f1ea1c25aff" datatype="html">
+        <source>less than 5 minutes ago.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="53f67466b1a971150106cf239a6300ad7049a20a" datatype="html">
+        <source>minutes ago</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="fd3282aa8b5e21230525b55f0e734c8ccfa20270" datatype="html">
+        <source>hours ago</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">27</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="b036e40577baa6b918b2267d319d4b3aeaa88a5a" datatype="html">
+        <source>This week</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="83934bc0a7eb86a4f7a2b7071433846032fc2529" datatype="html">
+        <source>A week ago</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8887590deb5407a83a6364da5fadb66f52964fd1" datatype="html">
+        <source>Two weeks ago</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="a1ac96ecad0cce1a7ce97c0255e3a48af92fea08" datatype="html">
+        <source>Connected.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9a8130c97e6279381ce4251dae2abee459607873" datatype="html">
+        <source>Disconnected, retrying in 3s...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">33</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="271df97c79897f434a962e3b565bdeb0a5249cad" datatype="html">
+        <source>Failed to connect, retrying in 3s...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="ac263f8607db7c7e2e38d45a50d29f80611e8105" datatype="html">
+        <source>Connecting...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">35</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="f773e5ca298cb4d84e924e927c4ac2b15d21613e" datatype="html">
+        <source>Couldn&apos;t perform actions while not connected...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="71bb5fda01a276bb3c3c9f8a9a52e10aea7a919e" datatype="html">
+        <source>Waiting for user to come online...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="d21bdd15ca382447ece8e5b8bcb0a56183aa6adf" datatype="html">
+        <source>Error: Please re-enter this chat.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4389d3a533df32b7f913690487ed3cc446f013db" datatype="html">
+        <source>Wrong code, try again.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6b5caaa429709925938241d030c3fc3339027623" datatype="html">
+        <source>Couldn&apos;t send the message...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="53998e99ff41dbf76df817de9134717efbc4f4b2" datatype="html">
+        <source>Noone was found</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="09c70a73051a538a940d1db075ff32d9278a8753" datatype="html">
+        <source>Some of the files were larger than...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">42</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="60ca1a1310b9e1d36afe21ed006b4b98c7ee7ca7" datatype="html">
+        <source>Unable to create the chat with this user. Probably there already exists one.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="429b40ab35ccac08beef08ff157cf2105e943a07" datatype="html">
+        <source>Server returned code</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="f362a469d9fbcb2bb1a9ff42fd3e4fe02a533142" datatype="html">
+        <source>with error</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">45</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="cfaab0df4ab500421d9ef47382c6004b1febf06d" datatype="html">
+        <source>Server is down or there is no internet connection at the moment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">46</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="45dd81fcbde051783b05fe60c8d0bab8e7e097a9" datatype="html">
+        <source>Error:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">47</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="d6a3ccfbfa3e0f01608a0996eb0931ca482825bf" datatype="html">
+        <source>Wrong messages to forward</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">48</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="78ebd1e15bdd281a196bd29772b638ef89af11da" datatype="html">
+        <source>Some files were not uploaded.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">49</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="ef0821e7e88b37a9d7de765897e5d7d72737308a" datatype="html">
+        <source>Couldn&apos;t view user profile.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">50</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="37b15d1bb8270154cfd79d34056fc1842e408a70" datatype="html">
+        <source>Either username or first name or last name was too long / too short</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="b1d2b1da6483a932320e854c62d4d4f4bc044a46" datatype="html">
+        <source>Please enter at least</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">52</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1797376844a89aa4bc2acb48fff1150a1f556226" datatype="html">
+        <source>symbols</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">53</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="58410a6949541d595c4f49e839ed874d28334ab1" datatype="html">
+        <source>File failed to upload</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/translate/translate.component.html</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="46deeb4add3e2d78cc9627c6dd407ff358d88bed" datatype="html">
+        <source>Change name.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/change-name-dialog.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="b5e498d8f0dcbb26b65c6775668f6ab720cc0b74" datatype="html">
+        <source>New name:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/change-name-dialog.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="024cdb2814b0cb3f4ced148f1a0b9854447cb214" datatype="html">
+        <source>Change</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/change-name-dialog.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="d7b35c384aecd25a516200d6921836374613dfe7" datatype="html">
+        <source>Cancel</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/change-name-dialog.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/forward-messages-dialog.html</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/find-users-dialog.html</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/chat-users-dialog.html</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/choose-contact-dialog.html</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/add-group-dialog.html</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="cedf260459b996c03a37fa5adb67cda52a9399c0" datatype="html">
+        <source>Forward messages</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/forward-messages-dialog.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/UiComponents/Messages/messages.component.html</context>
+          <context context-type="linenumber">212</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4c282b40bce795725f84a87b345e18578d460a06" datatype="html">
+        <source>Your conversations</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/forward-messages-dialog.html</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="15190a72588104f247364afed95892ef568c2129" datatype="html">
+        <source>Forward</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/forward-messages-dialog.html</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="fdaace3b87747f2d7380af30f5d54ddc49680272" datatype="html">
+        <source>Attachments</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/view-attachments-dialog.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/user-info-dialog.html</context>
+          <context context-type="linenumber">124</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/group-info-dialog.html</context>
+          <context context-type="linenumber">27</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="b73f7f5060fb22a1e9ec462b1bb02493fa3ab866" datatype="html">
+        <source>Images</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/view-attachments-dialog.html</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="19e10367dbc2a3c308a0dc9bab9acddb1b67534a" datatype="html">
+        <source>Files</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/view-attachments-dialog.html</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="65b0617aa0cf48c0fc1ab0fe2bd0ebc8834b13a3" datatype="html">
+        <source>User profile</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/user-info-dialog.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6f43c8e89b8a1f868f591d582a3ea0dc33888718" datatype="html">
+        <source>Change username(@)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/user-info-dialog.html</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5463e1552e579bbe2a5ff668d4bca0e9955b062a" datatype="html">
+        <source>Change first name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/user-info-dialog.html</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="e35e3a0b49c3cdaeb93b3118add3e22c8165680f" datatype="html">
+        <source>Change last name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/user-info-dialog.html</context>
+          <context context-type="linenumber">58</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2af425b931601a3b93eabd36628f5bef30531f77" datatype="html">
+        <source>Change profile picture </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/user-info-dialog.html</context>
+          <context context-type="linenumber">63</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="358275f2003139ace3d305ade29ed8f85082b9db" datatype="html">
+        <source>Start chatting</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/user-info-dialog.html</context>
+          <context context-type="linenumber">103</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="a97ddd44ceff186b8e2174e7e92abf8057415e9b" datatype="html">
+        <source>Add to contacts</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/user-info-dialog.html</context>
+          <context context-type="linenumber">110</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6e5a54ebcce07d35802b3b03a6ef29b34711d3b8" datatype="html">
+        <source>Remove from contacts</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/user-info-dialog.html</context>
+          <context context-type="linenumber">117</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="f2fad767ab3ac6a13caf4a30619589e2bac69755" datatype="html">
+        <source>Delete conversation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/user-info-dialog.html</context>
+          <context context-type="linenumber">131</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="fefb3d3f7573eab1a5008aadf1d8ed9b5dda4e9b" datatype="html">
+        <source>Clear messages</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/user-info-dialog.html</context>
+          <context context-type="linenumber">140</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/group-info-dialog.html</context>
+          <context context-type="linenumber">63</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3c698c6711ff285a70563612c9eebaee04e689fc" datatype="html">
+        <source>Block this user</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/user-info-dialog.html</context>
+          <context context-type="linenumber">151</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="f973ca15d6a878d5e11d7cc80fd17ce2e648e3ba" datatype="html">
+        <source>Unblock this user</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/user-info-dialog.html</context>
+          <context context-type="linenumber">159</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="f72b5d24e9720e0d9587b57a3c765d969166bf16" datatype="html">
+        <source>
+    You were blocked from talking with this user. Actions unavailable.
+    </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/user-info-dialog.html</context>
+          <context context-type="linenumber">164</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="d44459f8f677fdd8fd22ecec1c9c169edd36cd84" datatype="html">
+        <source>Back to now</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/UiComponents/Messages/messages.component.html</context>
+          <context context-type="linenumber">189</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7d059e47d167eb9ab51d3773d3492d17e90cce07" datatype="html">
+        <source>Delete messages</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/UiComponents/Messages/messages.component.html</context>
+          <context context-type="linenumber">199</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="0730ced6483c87ca6472562d85565763679f3ac7" datatype="html">
+        <source>Resend messages</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/UiComponents/Messages/messages.component.html</context>
+          <context context-type="linenumber">224</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="c0e43809faf4112f9c5509f27ebe66cca0f18cf9" datatype="html">
+        <source>Select users.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/find-users-dialog.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="b56077af01dde4f4d86030c3d616ce0013ee3eba" datatype="html">
+        <source>Please enter a username</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/find-users-dialog.html</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/chat-users-dialog.html</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="878bb821fe9dbb9f0bf3bb00741e1cf9bd37091d" datatype="html">
+        <source>Found users</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/find-users-dialog.html</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/chat-users-dialog.html</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9ca82952a6bc860b5391d5975322d8af8ceddfa4" datatype="html">
+        <source>Select</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/find-users-dialog.html</context>
+          <context context-type="linenumber">35</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/chat-users-dialog.html</context>
+          <context context-type="linenumber">35</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/choose-contact-dialog.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8cdd7ad2437262db0173aebab4a3522f2e429cf6" datatype="html">
+        <source>Select user(s)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/chat-users-dialog.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="89cc0008090ac7295612eb7a9dee0656866b0f94" datatype="html">
+        <source>Type in username...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/chat-users-dialog.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2b4034cba97d052fc1bc4d462754d9f24f904c9e" datatype="html">
+        <source>
+  Actions with <x id="INTERPOLATION" equiv-text="{{ (data.user.userName.length &gt; 10 )? (data.user.userName | slice:0:10)+&apos;..&apos;:(data.user.userName) }}"/>
+</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/admin-panel-dialog.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6329a70a084ffd325dac4c5bef0dfa8a75c337bd" datatype="html">
+        <source>Kick this user</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/admin-panel-dialog.html</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="35fdca47605de8113a0db7f587f7c099abec8020" datatype="html">
+        <source>Ban this user</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/admin-panel-dialog.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="60b86a113a6d772694188f403359fc1cdd1c3a79" datatype="html">
+        <source>Unban this user</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/admin-panel-dialog.html</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="fddc0e423b3c4f7fd21552d3dc37e80202c764ba" datatype="html">
+        <source>Make a moderator</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/admin-panel-dialog.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5dd7e8aecb53b06e811c84bc0040909b1d54cd8e" datatype="html">
+        <source>Remove moderator privileges</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/admin-panel-dialog.html</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9642af56e0265b370cc4db149ab7c71087f3ed2a" datatype="html">
+        <source>No actions are available for this user.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/admin-panel-dialog.html</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="fb458f8a9b306a192039d8af62306a03fbf54312" datatype="html">
+        <source>Group profile</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/group-info-dialog.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6bd2f0853db4b0fdd084502433f5d658cdb05a0e" datatype="html">
+        <source>Invite users</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/group-info-dialog.html</context>
+          <context context-type="linenumber">33</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="285a16fec72f3b92e5327ddedb8a2ad08d9306fd" datatype="html">
+        <source>Change name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/group-info-dialog.html</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="db5cc0c8d9d80c653f1b78ce2bfb1b41bc84ceeb" datatype="html">
+        <source>Join</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/group-info-dialog.html</context>
+          <context context-type="linenumber">47</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3eed3c0167ac14df9b8fcf72108d32ea25436c5d" datatype="html">
+        <source>Leave</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/group-info-dialog.html</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="ffcfb09643edc5443786d22061a7edfd4a083108" datatype="html">
+        <source>Remove group</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/group-info-dialog.html</context>
+          <context context-type="linenumber">72</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="d978a43b3bbf5d0e001551529b56011e790b5cc1" datatype="html">
+        <source>Change group picture </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/group-info-dialog.html</context>
+          <context context-type="linenumber">77</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="0d4afa59dcfdcc7a11294b7d4632c143450405c9" datatype="html">
+        <source>Admin panel</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/group-info-dialog.html</context>
+          <context context-type="linenumber">87</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="67338f8d5278c281091e0bdf10391d83692f9273" datatype="html">
+        <source>Users in group</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/group-info-dialog.html</context>
+          <context context-type="linenumber">92</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="e9c86e35e91205d74425a72c083286c4972fda87" datatype="html">
+        <source>You were banned from this group.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/group-info-dialog.html</context>
+          <context context-type="linenumber">111</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3681465bb6a858f731b89d39f84afa61194e9554" datatype="html">
+        <source>Global search</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Search/searchlist.component.html</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="a7a65ade52946511645ab031902263190c492826" datatype="html">
+        <source>Conversations</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Search/searchlist.component.html</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/UiComponents/ConversationsList/conversationslist.component.html</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4d13a9cd5ed3dcee0eab22cb25198d43886942be" datatype="html">
+        <source>Users</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Search/searchlist.component.html</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="ea965d544a7dfd8185064c52cdfff553cf94d585" datatype="html">
+        <source>Messages</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Search/searchlist.component.html</context>
+          <context context-type="linenumber">82</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="f4cb6dcbd48617d2fa49fcc3f1e6bd4bd204093e" datatype="html">
+        <source>Choose a contact.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/choose-contact-dialog.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9b475bb63675494482effde989c7f1f18c232620" datatype="html">
+        <source>Contacts</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/choose-contact-dialog.html</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3ac9a098a34b04923bf20ec0c754bab138750b79" datatype="html">
+        <source>My profile</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/UiComponents/Chat/chat.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7665b2f68b7b76c2d408601e568922f99d233761" datatype="html">
+        <source>New chat</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/UiComponents/Chat/chat.component.html</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="ece6c98605b8efb2ed563cafbb50954b3b313944" datatype="html">
+        <source>New secure chat</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/UiComponents/Chat/chat.component.html</context>
+          <context context-type="linenumber">27</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3fdc751b264ca9998e1542fcf5794e274cd56344" datatype="html">
+        <source>Log out</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/UiComponents/Chat/chat.component.html</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="14fab4a4ce64068d04ed76cda9438dbb280d6c8d" datatype="html">
+        <source>White theme</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/UiComponents/Chat/chat.component.html</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7bfa30b6cd6b020c84efa4c554890bf49932de18" datatype="html">
+        <source>Dark theme</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/UiComponents/Chat/chat.component.html</context>
+          <context context-type="linenumber">48</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7e892ba15f2c6c17e83510e273b3e10fc32ea016" datatype="html">
+        <source>Search</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/UiComponents/Chat/chat.component.html</context>
+          <context context-type="linenumber">69</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="d3965dc339157e608637fabc6509a716cd83b788" datatype="html">
+        <source>Type in something...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/UiComponents/Chat/chat.component.html</context>
+          <context context-type="linenumber">70</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="730f4a16433463c766f98d4388e0bd583d345ace" datatype="html">
+        <source>Choose chat from the left to start chatting...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/UiComponents/Chat/chat.component.html</context>
+          <context context-type="linenumber">123</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1e9db81c69d7db87b167abb68877be21def56a92" datatype="html">
+        <source>Create new group.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/add-group-dialog.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5f4775f9d19bf227b49d7d78cb0500d998006772" datatype="html">
+        <source>Group name:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/add-group-dialog.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2466967f705a4a4b64a0271ada295b0475d4b199" datatype="html">
+        <source>Please provide a correct group name.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/add-group-dialog.html</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="ed4f2381af304a6ba10d0ccacd75f74fe8bb34ae" datatype="html">
+        <source>Public group?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/add-group-dialog.html</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="70a67e04629f6d412db0a12d51820b480788d795" datatype="html">
+        <source>Create</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/add-group-dialog.html</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6765b4c916060f6bc42d9bb69e80377dbcb5e4e9" datatype="html">
+        <source>Login</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/login/login.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="0e4e3b25113d87a4f9c2cab344d40c31cc23bfe4" datatype="html">
+        <source>Phone number:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/login/login.component.html</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="e5f24fc7a2bf50bd61d109dd9cad3fbff6ec7add" datatype="html">
+        <source>Required</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/login/login.component.html</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/login/login.component.html</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1670649c78c678e083397f36959ccb50a20e2dcf" datatype="html">
+        <source>Code from SMS:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/login/login.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="cdf9f043345ae471d365cbd84533347eea954171" datatype="html">
+        <source>Send code</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/login/login.component.html</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="287d3301a32a65a1b31116bda5d3a6463158c42a" datatype="html">
+        <source>Sign in</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/login/login.component.html</context>
+          <context context-type="linenumber">49</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5845950c72ae62c3db7e1a71b347c1a9e6d3ec44" datatype="html">
+        <source>Change your info.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/registration/register.component.html</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="c83b838d845690bcb897f775f53b5316535306dc" datatype="html">
+        <source>First Name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/registration/register.component.html</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="166b2cc65003221ff5f3ec05d5baca41e6821396" datatype="html">
+        <source>Last Name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/registration/register.component.html</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="08c74dc9762957593b91f6eb5d65efdfc975bf48" datatype="html">
+        <source>Username</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/registration/register.component.html</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="50df8845cdc09c7e642220eaa269d3a6bab675a7" datatype="html">
+        <source>Minimal length is 5</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/registration/register.component.html</context>
+          <context context-type="linenumber">33</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="cfc2f436ec2beffb042e7511a73c89c372e86a6c" datatype="html">
+        <source>Register</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/registration/register.component.html</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="ad035ffadf71716f9aec93282b7e845e6bf4dcb3" datatype="html">
+        <source>Type in your message...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/UiComponents/Input/input.component.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1682297a2fb8a171fefd0fdb6147026c0a38253b" datatype="html">
+        <source>You were banned from writing in this conversation.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/UiComponents/Input/input.component.html</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8b3d7a79e170fa463c92bd79e87f8637b7a10b5d" datatype="html">
+        <source>Secure chat will be activated after <x id="INTERPOLATION" equiv-text="{{Conversation.dialogueUser.userName}}"/> is online.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/UiComponents/Input/input.component.html</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

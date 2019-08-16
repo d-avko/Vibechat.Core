@@ -1,14 +1,18 @@
 import {AuthService} from "./AuthService";
-import {ApiRequestsBuilder} from "../Requests/ApiRequestsBuilder";
+import {Api} from "./Api/api.service";
 import {AppUser} from "../Data/AppUser";
 import {Injectable} from "@angular/core";
 import {BanEvent, SignalrConnection} from "../Connections/signalr-connection.service";
+import {UploadsApi} from "./Api/UploadsApi";
 
 @Injectable({
   providedIn: 'root'
 })
 export class UsersService {
-  constructor(private requestsBuilder: ApiRequestsBuilder, private connectionManager: SignalrConnection, private auth: AuthService) { }
+  constructor(private requestsBuilder: Api,
+              private connectionManager: SignalrConnection,
+              private auth: AuthService,
+              private uploads: UploadsApi) { }
 
   public async GetById(userId: string){
     let result = await this.requestsBuilder.GetUserById(userId);
@@ -146,7 +150,7 @@ export class UsersService {
   }
 
   public async UpdateProfilePicture(file: File, progressCallback: (value: number) => void) {
-    let result = await this.requestsBuilder.UploadUserProfilePicture(file, progressCallback);
+    let result = await this.uploads.UploadUserProfilePicture(file, progressCallback);
 
     if (!result.isSuccessfull) {
       return;

@@ -1,6 +1,6 @@
 import {AfterContentChecked, AfterContentInit, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {ChatEvent} from "../Data/ChatEvent";
-import {ChatEventType} from "../Data/ChatEventType";
+import {ChatEvent} from "../../../Data/ChatEvent";
+import {ChatEventType} from "../../../Data/ChatEventType";
 
 @Component({
   selector: 'chat-event',

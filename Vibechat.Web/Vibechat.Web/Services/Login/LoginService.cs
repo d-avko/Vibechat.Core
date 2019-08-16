@@ -38,6 +38,11 @@ namespace Vibechat.Web.Services.Login
             var verified = await auth.VerifyIdTokenAsync(loginCredentials.UidToken);
 
             var identityUser = await usersRepository.GetById(verified.Uid);
+            
+            if(identityUser.PhoneNumber != loginCredentials.PhoneNumber)
+            {
+                throw new UnauthorizedAccessException("Please provide a phone number that correlates to firebase JWT token.");
+            }
 
             //user confirmed his phone number, but has not registered yet; 
             //Register him now in that case 
@@ -112,6 +117,7 @@ namespace Vibechat.Web.Services.Login
                 UserName = userToRegister.UserName,
                 FirstName = userToRegister.FirstName,
                 LastName = userToRegister.LastName,
+                PhoneNumber = userToRegister.PhoneNumber,
                 ProfilePicImageURL = imageUrl,
                 FullImageUrl = imageUrl,
                 IsPublic = true

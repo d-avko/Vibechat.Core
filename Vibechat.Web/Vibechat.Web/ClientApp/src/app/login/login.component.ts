@@ -2,9 +2,10 @@ import {Component} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 import {SnackBarHelper} from '../Snackbar/SnackbarHelper';
 import {Router} from '@angular/router';
-import {ApiRequestsBuilder} from '../Requests/ApiRequestsBuilder';
+import {Api} from '../Services/Api/api.service';
 import {AuthService} from "../Services/AuthService";
 import * as firebase from "firebase/app";
+import {MessageReportingService} from "../Services/MessageReportingService";
 
 @Component({
   selector: 'login-view',
@@ -13,7 +14,10 @@ import * as firebase from "firebase/app";
 })
 export class LoginComponent {
 
-  constructor(private requestsBuilder: ApiRequestsBuilder, private snackbar: SnackBarHelper,private router: Router, private auth: AuthService) {
+  constructor(private requestsBuilder: Api,
+              private snackbar: SnackBarHelper,
+              private router: Router, private auth: AuthService,
+              private messages: MessageReportingService) {
     this.phoneNumber = new FormControl('',
       Validators.compose(
         [
@@ -50,7 +54,7 @@ export class LoginComponent {
     this.canLogIn = false;
 
     if (!await this.auth.SignIn(this.smsCode.value)) {
-      this.snackbar.openSnackBar("Wrong code, try again.");
+      this.messages.WrongSmsCode();
     }
 
     this.canLogIn = true;
@@ -65,7 +69,7 @@ export class LoginComponent {
     if (result) {
       this.isCodeSent = true;
     } else {
-      this.snackbar.openSnackBar("Couldn't send the message.");
+      this.messages.CouldntSendSms();
     }
 
     this.canLogIn = true;

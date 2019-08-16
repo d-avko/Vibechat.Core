@@ -3,7 +3,7 @@ import {Injectable} from "@angular/core";
 import {Chat} from "../Data/Chat";
 import {ChatsService} from "../Services/ChatsService";
 import {SecureChatsService} from "./SecureChatsService";
-import {ApiRequestsBuilder} from "../Requests/ApiRequestsBuilder";
+import {Api} from "../Services/Api/api.service";
 import {E2EencryptionService} from "./E2EencryptionService";
 import * as biginteger from "big-integer";
 import {DeviceService} from "../Services/DeviceService";
@@ -36,7 +36,7 @@ export class DHServerKeyExchangeService {
     private secureChatsService: SecureChatsService,
     private enc: E2EencryptionService,
     private connectionManager: SignalrConnection,
-    private api: ApiRequestsBuilder,
+    private api: Api,
     private device: DeviceService) {
     this.connectionManager.setDHServerKeyExchangeService(this);
   }

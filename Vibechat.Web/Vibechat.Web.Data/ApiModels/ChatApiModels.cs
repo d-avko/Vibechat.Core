@@ -5,8 +5,6 @@ namespace Vibechat.Web.ApiModels
 {
     public class UpdateAuthKeyRequest
     {
-        public int chatId { get; set; }
-
         public string AuthKeyId { get; set; }
 
         public string deviceId { get; set; }
@@ -15,8 +13,6 @@ namespace Vibechat.Web.ApiModels
     public class FindUsersInChatRequest
     {
         public string UsernameToFind { get; set; }
-
-        public int ChatId { get; set; }
     }
 
     public class SetLastMessageRequest
@@ -40,8 +36,6 @@ namespace Vibechat.Web.ApiModels
     public class BanRequest
     {
         public string userId { get; set; }
-
-        public int conversationId { get; set; }
     }
 
     public class ChangeConversationPublicStateRequest

@@ -55,7 +55,7 @@ export class InputComponent {
       let res = await this.chats.UploadFile((<HTMLInputElement>event.target).files[0], this.ProgressCallback.bind(this), this.Conversation);
 
       if(!res){
-        this.messages.DisplayMessage("Failed to upload files. Try again later.");
+        this.messages.FileFailedToUpload();
       }
     } finally {
       this.ResetInput(<HTMLInputElement>event.target);

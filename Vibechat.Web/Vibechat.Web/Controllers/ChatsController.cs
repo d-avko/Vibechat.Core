@@ -61,15 +61,15 @@ namespace VibeChat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost]
-        [Route("[action]")]
-        public async Task<ResponseApiModel<bool>> UpdateAuthKey([FromBody] UpdateAuthKeyRequest request)
+        [HttpPatch]
+        [Route("{chatId:int}/[action]")]
+        public async Task<ResponseApiModel<bool>> UpdateAuthKey([FromBody] UpdateAuthKeyRequest request, int chatId)
         {
             try
             {
                 var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
-                await mChatsService.UpdateAuthKey(request.chatId, request.AuthKeyId, request.deviceId,
+                await mChatsService.UpdateAuthKey(chatId, request.AuthKeyId, request.deviceId,
                     thisUserId);
 
                 return new ResponseApiModel<bool>
@@ -91,16 +91,16 @@ namespace VibeChat.Web.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
-        [Route("[action]")]
-        public async Task<ResponseApiModel<UsersByNickNameResultApiModel>> FindUsersInChat(
-            [FromBody] FindUsersInChatRequest credentials)
+        [Route("{chatId:int}/[action]")]
+        public async Task<ResponseApiModel<UsersByNickNameResultApiModel>> FindUsers(
+            [FromBody] FindUsersInChatRequest credentials, int chatId)
         {
             try
             {
                 var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
                 var result =
-                    await mChatsService.FindUsersInChat(credentials.ChatId, credentials.UsernameToFind,
+                    await mChatsService.FindUsersInChat(chatId, credentials.UsernameToFind,
                         thisUserId);
 
                 return new ResponseApiModel<UsersByNickNameResultApiModel>
@@ -182,7 +182,7 @@ namespace VibeChat.Web.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet]
-        [Route("Participants/{chatId:int}")]
+        [Route("{chatId:int}/Participants")]
         public async Task<ResponseApiModel<List<UserInfo>>> GetParticipants(int chatId)
         {
             try
@@ -209,16 +209,16 @@ namespace VibeChat.Web.Controllers
 
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost]
-        [Route("[action]")]
+        [HttpPatch]
+        [Route("{chatId:int}/[action]")]
         public async Task<ResponseApiModel<UpdateThumbnailResponse>> UpdateThumbnail(
-            [FromForm] UpdateThumbnailRequest updateThumbnail)
+            [FromForm] UpdateThumbnailRequest updateThumbnail, int chatId)
         {
             try
             {
                 var thisUserID = JwtHelper.GetNamedClaimValue(User.Claims);
 
-                var result = await mChatsService.UpdateThumbnail(updateThumbnail.conversationId,
+                var result = await mChatsService.UpdateThumbnail(chatId,
                     updateThumbnail.thumbnail, thisUserID);
                 return new ResponseApiModel<UpdateThumbnailResponse>
                 {
@@ -237,13 +237,14 @@ namespace VibeChat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost]
-        [Route("[action]")]
-        public async Task<ResponseApiModel<bool>> ChangeName([FromBody] ChangeConversationNameRequest request)
+        [HttpPatch]
+        [Route("{chatId:int}/[action]")]
+        public async Task<ResponseApiModel<bool>> ChangeName([FromBody] ChangeConversationNameRequest request,
+            int chatId)
         {
             try
             {
-                await mChatsService.ChangeName(request.ConversationId, request.Name);
+                await mChatsService.ChangeName(chatId, request.Name);
 
                 return new ResponseApiModel<bool>
                 {
@@ -288,14 +289,14 @@ namespace VibeChat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost]
-        [Route("[action]")]
+        [HttpPatch]
+        [Route("{chatId:int}/[action]")]
         public async Task<ResponseApiModel<bool>> ChangePublicState(
-            [FromBody] ChangeConversationPublicStateRequest request)
+            int chatId)
         {
             try
             {
-                await mChatsService.ChangePublicState(request.conversationId,
+                await mChatsService.ChangePublicState(chatId,
                     JwtHelper.GetNamedClaimValue(User.Claims));
 
                 return new ResponseApiModel<bool>
@@ -316,13 +317,13 @@ namespace VibeChat.Web.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
-        [Route("[action]")]
-        public async Task<ResponseApiModel<bool>> BanFrom([FromBody] BanRequest request)
+        [Route("{chatId:int}/[action]")]
+        public async Task<ResponseApiModel<bool>> BanFrom([FromBody] BanRequest request, int chatId)
         {
             try
             {
                 await BansService.BanUserFromConversation(
-                    request.conversationId,
+                    chatId,
                     request.userId,
                     JwtHelper.GetNamedClaimValue(User.Claims));
 
@@ -344,13 +345,13 @@ namespace VibeChat.Web.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
-        [Route("[action]")]
-        public async Task<ResponseApiModel<bool>> UnbanFrom([FromBody] BanRequest request)
+        [Route("{chatId:int}/[action]")]
+        public async Task<ResponseApiModel<bool>> UnbanFrom([FromBody] BanRequest request, int chatId)
         {
             try
             {
                 await BansService.UnbanUserFromConversation(
-                    request.conversationId,
+                    chatId,
                     request.userId,
                     JwtHelper.GetNamedClaimValue(User.Claims));
 

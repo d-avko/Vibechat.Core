@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Inject, ViewContainerRef} from "@angular/core";
+import {Component, EventEmitter, Inject, ViewChild, ViewContainerRef} from "@angular/core";
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from "@angular/material";
 import {ChatComponent} from "../UiComponents/Chat/chat.component";
 import {Chat} from "../Data/Chat";
@@ -31,12 +31,13 @@ export class GroupInfoDialogComponent {
 
   public OnJoinGroup = new EventEmitter<Chat>();
 
+  @ViewChild(ConversationsFormatter, {static: true}) formatter;
+
   constructor(
     public dialogRef: MatDialogRef<ChatComponent>,
     public dialog: MatDialog,
     public anotherDialog: MatDialog,
     @Inject(MAT_DIALOG_DATA) public data: GroupInfoData,
-    public formatter: ConversationsFormatter,
     public chats: ChatsService,
     public users: UsersService,
     public ChangeNameDialog: MatDialog,

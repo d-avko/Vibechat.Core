@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -57,7 +56,7 @@ namespace VibeChat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost]
+        [HttpPatch]
         [Route("[action]")]
         public async Task<ResponseApiModel<bool>> ChangeName([FromBody] ChangeNameRequest request)
         {
@@ -83,7 +82,7 @@ namespace VibeChat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost]
+        [HttpPatch]
         [Route("[action]")]
         public async Task<ResponseApiModel<bool>> ChangeUsername([FromBody] ChangeNameRequest request)
         {
@@ -109,7 +108,7 @@ namespace VibeChat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost]
+        [HttpPut]
         [Route("[action]")]
         public async Task<ResponseApiModel<bool>> ChangeInfo([FromBody] UpdateUserInfoRequest request)
         {
@@ -135,7 +134,7 @@ namespace VibeChat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost]
+        [HttpPatch]
         [Route("[action]")]
         public async Task<ResponseApiModel<bool>> ChangeLastName([FromBody] ChangeNameRequest request)
         {
@@ -190,7 +189,7 @@ namespace VibeChat.Web.Controllers
 
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost]
+        [HttpPatch]
         [Route("[action]")]
         public async Task<ResponseApiModel<bool>> ChangePublicState(
             [FromBody] ChangeUserIsPublicStateRequest request)
@@ -249,7 +248,7 @@ namespace VibeChat.Web.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost]
+        [HttpPatch]
         [Route("[action]")]
         public async Task<ResponseApiModel<UpdateProfilePictureResponse>> UpdateProfilePicture(
             [FromForm] UpdateProfilePictureRequest request)
@@ -268,81 +267,6 @@ namespace VibeChat.Web.Controllers
             catch (Exception ex)
             {
                 return new ResponseApiModel<UpdateProfilePictureResponse>
-                {
-                    ErrorMessage = ex.Message,
-                    IsSuccessfull = false
-                };
-            }
-        }
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost]
-        [Route("[action]")]
-        public async Task<ResponseApiModel<List<UserInfo>>> GetContacts()
-        {
-            try
-            {
-                var result = await mUsersService.GetContacts(JwtHelper.GetNamedClaimValue(User.Claims));
-
-                return new ResponseApiModel<List<UserInfo>>
-                {
-                    IsSuccessfull = true,
-                    Response = result
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ResponseApiModel<List<UserInfo>>
-                {
-                    ErrorMessage = ex.Message,
-                    IsSuccessfull = false
-                };
-            }
-        }
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost]
-        [Route("[action]")]
-        public async Task<ResponseApiModel<bool>> AddToContacts([FromBody] UserInfoRequest request)
-        {
-            try
-            {
-                await mUsersService.AddToContacts(request.userId, JwtHelper.GetNamedClaimValue(User.Claims));
-
-                return new ResponseApiModel<bool>
-                {
-                    IsSuccessfull = true,
-                    Response = true
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ResponseApiModel<bool>
-                {
-                    ErrorMessage = ex.Message,
-                    IsSuccessfull = false
-                };
-            }
-        }
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost]
-        [Route("[action]")]
-        public async Task<ResponseApiModel<bool>> RemoveFromContacts([FromBody] UserInfoRequest request)
-        {
-            try
-            {
-                await mUsersService.RemoveFromContacts(request.userId, JwtHelper.GetNamedClaimValue(User.Claims));
-
-                return new ResponseApiModel<bool>
-                {
-                    IsSuccessfull = true,
-                    Response = true
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ResponseApiModel<bool>
                 {
                     ErrorMessage = ex.Message,
                     IsSuccessfull = false

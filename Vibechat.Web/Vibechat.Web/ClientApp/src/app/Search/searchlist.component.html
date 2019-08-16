@@ -27,7 +27,7 @@
 
 
   <mat-action-list class="searchlist_conversations">
-    <h3 mat-subheader>Global search</h3>
+    <h3 mat-subheader i18n>Global search</h3>
 
     <mat-progress-spinner *ngIf="IsSearchingForGroups"
                           class="load-spinner"
@@ -36,7 +36,7 @@
                           mode="indeterminate">
     </mat-progress-spinner>
 
-    <h3 mat-subheader>Conversations</h3>
+    <h3 mat-subheader i18n>Conversations</h3>
 
     <mat-list-item *ngFor="let conversation of GlobalConversations"
                    (click)="ViewConversation(conversation)">
@@ -51,7 +51,7 @@
   </mat-action-list>
 
   <mat-action-list class="searchlist_users">
-    <h3 mat-subheader>Users</h3>
+    <h3 mat-subheader i18n>Users</h3>
 
     <mat-progress-spinner *ngIf="IsSearchingForUsers"
                           class="load-spinner"
@@ -79,7 +79,7 @@
 
   <cdk-virtual-scroll-viewport class="found-messages" (scrolledIndexChange)="OnMessagesScrolled($event)" itemSize="72">
     <mat-action-list>
-      <h3 mat-subheader>Messages</h3>
+      <h3 mat-subheader i18n>Messages</h3>
       <div *cdkVirtualFor="let msg of FoundMessages" (click)="ViewMessage(msg)">
         <mat-list-item>
           <img matListAvatar *ngIf="msg.chat.isGroup; else dialogue" src="{{msg.chat.thumbnailUrl}}" alt="Conversation logo">
@@ -122,7 +122,7 @@
   </cdk-virtual-scroll-viewport>
 
 </div>
-
+<formatter></formatter>
 <style>
   .searchlist{
     display:flex;

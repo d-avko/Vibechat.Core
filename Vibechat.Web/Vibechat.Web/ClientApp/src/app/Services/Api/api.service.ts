@@ -1,40 +1,24 @@
-import {from, Observable, of} from "rxjs";
-import {ServerResponse} from "../ApiModels/ServerResponse";
-import {LoginResponse} from "../ApiModels/LoginResponse";
-import {LoginRequest} from "../ApiModels/LoginRequest";
-import {HttpClient, HttpHeaders, HttpResponse} from "@angular/common/http";
-import {ChangeUserInfoRequest} from "../ApiModels/RegisterRequest";
+import {Observable} from "rxjs";
+import {ServerResponse} from "../../ApiModels/ServerResponse";
+import {LoginResponse} from "../../ApiModels/LoginResponse";
+import {LoginRequest} from "../../ApiModels/LoginRequest";
+import {HttpClient, HttpHeaders, HttpRequest} from "@angular/common/http";
+import {ChangeUserInfoRequest} from "../../ApiModels/RegisterRequest";
 import {Inject, Injectable} from "@angular/core";
-import {Message} from "../Data/Message";
-import {Chat} from "../Data/Chat";
-import {FoundUsersResponse} from "../Data/FoundUsersResponse";
-import {UpdateThumbnailResponse} from "../ApiModels/UpdateThumbnailResponse";
-import {AppUser} from "../Data/AppUser";
-import {UploaderService} from "../uploads/upload.service";
-import {SnackBarHelper} from "../Snackbar/SnackbarHelper";
-import {Attachment} from "../Data/Attachment";
-import {AttachmentKind} from "../Data/AttachmentKinds";
-import {ChatState} from "./ChatState";
-import {switchMap} from "rxjs/operators";
+import {Message} from "../../Data/Message";
+import {Chat} from "../../Data/Chat";
+import {FoundUsersResponse} from "../../Data/FoundUsersResponse";
+import {AppUser} from "../../Data/AppUser";
+import {AttachmentKind} from "../../Data/AttachmentKinds";
 
 @Injectable({
   providedIn: 'root'
 })
-export class ApiRequestsBuilder {
+export class Api {
 
-  private baseUrl: string;
 
-  private httpClient: HttpClient;
-
-  private uploader: UploaderService;
-
-  private logger: SnackBarHelper;
-
-  constructor(httpClient: HttpClient, @Inject('BASE_URL') baseUrl: string, uploader: UploaderService, logger: SnackBarHelper) {
-    this.baseUrl = baseUrl;
-    this.httpClient = httpClient;
-    this.uploader = uploader;
-    this.logger = logger;
+  constructor(private httpClient: HttpClient, @Inject('BASE_URL')
+              private baseUrl: string) {
   }
 
   public LoginRequest(credentials: LoginRequest): Promise<ServerResponse<LoginResponse>>{
@@ -45,13 +29,13 @@ export class ApiRequestsBuilder {
   }
 
   public ChangeUserInfo(credentials: ChangeUserInfoRequest): Promise<ServerResponse<boolean>> {
-    return this.MakePostCall<boolean>(
+    return this.MakePutCall<boolean>(
       credentials,
       'api/v1/Users/ChangeInfo'
     ).toPromise();
   }
 
-  public GetChats(deviceId: string, localState: Array<ChatState> = null): Promise<ServerResponse<Array<Chat>>> {
+  public GetChats(deviceId: string): Promise<ServerResponse<Array<Chat>>> {
 
     return this.MakeGetCall<Array<Chat>>(
       'api/v1/Chats/GetAll/' + deviceId
@@ -81,7 +65,7 @@ export class ApiRequestsBuilder {
   }
 
   public SetLastMessageId(msgId: number, chatId: number){
-    return this.MakePostCall<boolean>(
+    return this.MakePutCall<boolean>(
       { chatId: chatId, messageId: msgId },
       'api/v1/Messages/SetLast'
     ).toPromise();
@@ -111,22 +95,6 @@ export class ApiRequestsBuilder {
     ).toPromise();
   }
 
-  public UploadImages(files: FileList, progress: (value: number) => void, chatId: number): Promise<ServerResponse<any>> {
-    return this.uploader.uploadImagesToChat(files, progress, chatId.toString()).toPromise();
-  }
-
-  public UploadConversationThumbnail(thumbnail: File, progress: (value: number) => void, conversationId: number): Promise<ServerResponse<UpdateThumbnailResponse>> {
-    return this.uploader.uploadChatPicture(thumbnail, progress, conversationId).toPromise();
-  }
-
-  public UploadUserProfilePicture(picture: File, progress: (value: number) => void): Promise<ServerResponse<UpdateThumbnailResponse>> {
-    return this.uploader.uploadUserPicture(picture, progress).toPromise();
-  }
-
-  public UploadFile(file: File, progress: (value: number) => void, chatId: number) : Promise<ServerResponse<Attachment>> {
-    return this.uploader.uploadFile(file, progress, chatId.toString()).toPromise();
-  }
-
   public GetUserById(userId: string): Promise<ServerResponse<AppUser>> {
     return this.MakeGetCall<AppUser>(
       'api/v1/Users/' + userId
@@ -140,21 +108,61 @@ export class ApiRequestsBuilder {
   }
 
   public ChangeCurrentUserName(newName: string): Promise<ServerResponse<boolean>> {
-    return this.MakePostCall<boolean>(
+    return this.MakePatchCall<boolean>(
       { newName: newName },
       'api/v1/Users/ChangeName'
     ).toPromise();
   }
 
   public ChangeCurrentUserLastName(newName: string): Promise<ServerResponse<boolean>> {
-    return this.MakePostCall<boolean>(
+    return this.MakePatchCall<boolean>(
       { newName: newName },
       'api/v1/Users/ChangeLastName'
     ).toPromise();
   }
 
+  public UploadImagesRequest(data: any){
+    let headers = new HttpHeaders();
+    headers = headers.append("ngsw-bypass", "");
+
+    return new HttpRequest('POST', '/api/v1/Files/UploadImages', data, {
+      reportProgress: true,
+      headers: headers
+    });
+  }
+
+  public UpdateChatThumbnail(chatId: number, data: any){
+    let headers = new HttpHeaders();
+    headers = headers.append("ngsw-bypass", "");
+
+    return new HttpRequest('PATCH', `api/v1/Chats/${chatId}/UpdateThumbnail`, data, {
+      reportProgress: true,
+      headers: headers
+    });
+  }
+
+  public UploadUserProfilePicture(data: any){
+    let headers = new HttpHeaders();
+    headers = headers.append("ngsw-bypass", "");
+
+    return new HttpRequest('PATCH', 'api/v1/Users/UpdateProfilePicture', data, {
+      reportProgress: true,
+      headers: headers
+    });
+  }
+
+  public UploadFile(data: any){
+    let headers = new HttpHeaders();
+    headers = headers.append("ngsw-bypass", "");
+
+    return new HttpRequest('POST', '/api/v1/Files/UploadFile', data, {
+      reportProgress: true,
+      headers: headers
+    });
+  }
+
   public ChangeUsername(newName: string): Promise<ServerResponse<boolean>> {
-    return this.MakePostCall<boolean>(
+    return this.MakePatchCall<boolean>(
       { newName: newName },
       'api/v1/Users/ChangeUsername'
     ).toPromise();
@@ -169,8 +177,8 @@ export class ApiRequestsBuilder {
 
   public FindUsersInChat(username: string, chatId: number): Promise<ServerResponse<FoundUsersResponse>> {
     return this.MakePostCall<FoundUsersResponse>(
-      { UsernameToFind: username, ChatId: chatId },
-      'api/v1/Chats/FindUsersInChat'
+      { UsernameToFind: username },
+      `api/v1/Chats/${chatId}/FindUsers`
     ).toPromise();
   }
 
@@ -211,37 +219,36 @@ export class ApiRequestsBuilder {
 
   public AddToContacts(userId: string) : Promise<ServerResponse<boolean>> {
     return this.MakePostCall<boolean>(
-      { userId: userId },
-      'api/v1/Users/AddToContacts'
+      null,
+      `api/v1/Contacts/${userId}/Add`
     ).toPromise();
   }
 
   public RemoveFromContacts(userId: string): Promise<ServerResponse<boolean>> {
-    return this.MakePostCall<boolean>(
-      { userId: userId },
-      'api/v1/Users/RemoveFromContacts'
+    return this.MakeDeleteCall<boolean>(
+      `api/v1/Contacts/${userId}/Remove`,
     ).toPromise();
   }
 
   public GetContacts(): Promise<ServerResponse<Array<AppUser>>> {
     return this.MakePostCall<Array<AppUser>>(
       null,
-      'api/v1/Users/GetContacts'
+      'api/v1/Contacts/Get'
     ).toPromise();
   }
 
   public UpdateAuthKeyId(authKeyId: string, chatId: number, deviceId: string) {
-    return this.MakePostCall<boolean>(
-      { chatId: chatId, AuthKeyId: authKeyId, deviceId: deviceId },
-      'api/v1/Chats/UpdateAuthKey'
+    return this.MakePatchCall<boolean>(
+      { AuthKeyId: authKeyId, deviceId: deviceId },
+      `api/v1/Chats/${chatId}/UpdateAuthKey`
     ).toPromise();
   }
 
   public ChangeConversationName(newName: string, conversationId: number): Promise<ServerResponse<boolean>> {
 
-    return this.MakePostCall<boolean>(
-      { ConversationId: conversationId, Name: newName },
-      'api/v1/Chats/ChangeName'
+    return this.MakePatchCall<boolean>(
+      { Name: newName },
+      `api/v1/Chats/${conversationId}/ChangeName`
     ).toPromise();
 
   }
@@ -251,7 +258,7 @@ export class ApiRequestsBuilder {
     headers = headers.append('refreshtoken', '1');
 
     return this.httpClient.post<ServerResponse<string>>(
-      this.baseUrl + 'api/Tokens/Refresh',
+      this.baseUrl + 'api/v1/Tokens/Refresh',
       { RefreshToken: refreshToken, userId: userId },
       { headers: headers}).toPromise();
   }
@@ -263,36 +270,6 @@ export class ApiRequestsBuilder {
       'api/v1/Chats/Search'
     ).toPromise();
 
-  }
-
-  public UnbanUser(userId: string): Promise<ServerResponse<boolean>> {
-
-    return this.MakePostCall<boolean>(
-      { userId: userId },
-      'api/v1/Users/Unban'
-    ).toPromise();
-
-  }
-
-  public BanUser(userId: string): Promise<ServerResponse<boolean>> {
-    return this.MakePostCall<boolean>(
-      { userId: userId},
-      'api/v1/Users/Block'
-    ).toPromise();
-  }
-
-  public BanFromConversation(userId: string, conversationId: number): Promise<ServerResponse<boolean>> {
-    return this.MakePostCall<boolean>(
-      { userId: userId, conversationId: conversationId },
-      'api/v1/Chats/BanFrom'
-    ).toPromise();
-  }
-
-  public UnBanFromConversation(userId: string, conversationId: number): Promise<ServerResponse<boolean>> {
-    return this.MakePostCall<boolean>(
-      { userId: userId, conversationId: conversationId },
-      'api/v1/Chats/UnbanFrom'
-    ).toPromise();
   }
 
   private MakePostCall<T>(data: any, url: string): Observable<ServerResponse<T>> {
@@ -309,18 +286,25 @@ export class ApiRequestsBuilder {
       this.baseUrl + url);
   }
 
-  private MakeDeleteCall<T>(data: any, url: string): Observable<ServerResponse<T>> {
-    return from(this.httpClient.delete<ServerResponse<T>>(
-      this.baseUrl + url,
-      data)).pipe(
-        switchMap(
-          response => {
-            if(response instanceof HttpResponse){
-              return of(response.body);
-            }
-          }
-        )
-    );
+  private MakePatchCall<T>(data: any, url: string): Observable<ServerResponse<T>> {
+    console.log(`patch api call : ${url}, data: ${JSON.stringify(data)}`);
+
+    return this.httpClient.patch<ServerResponse<T>>(
+      this.baseUrl + url, data);
+  }
+
+  private MakePutCall<T>(data: any, url: string): Observable<ServerResponse<T>> {
+    console.log(`put api call : ${url}, data: ${JSON.stringify(data)}`);
+
+    return this.httpClient.put<ServerResponse<T>>(
+      this.baseUrl + url, data);
+  }
+
+  private MakeDeleteCall<T>(url: string): Observable<ServerResponse<T>> {
+    console.log(`delete api call : ${url}`);
+
+    return this.httpClient.delete<ServerResponse<T>>(
+      this.baseUrl + url);
   }
 
   private MakeUnauthorizedCall<T>(data: any, url: string): Observable<ServerResponse<T>> {

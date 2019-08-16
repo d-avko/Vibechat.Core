@@ -2,8 +2,7 @@ import {Component} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ChangeUserInfoRequest} from '../ApiModels/RegisterRequest';
 import {Router} from '@angular/router';
-import {ApiRequestsBuilder} from '../Requests/ApiRequestsBuilder';
-import {SnackBarHelper} from '../Snackbar/SnackbarHelper';
+import {Api} from '../Services/Api/api.service';
 import {MessageReportingService} from "../Services/MessageReportingService";
 
 @Component({
@@ -21,11 +20,14 @@ export class ChangeUserInfoComponent {
 
   public static minUsernameLength: number = 5;
 
-  constructor(private requestsBuilder: ApiRequestsBuilder, private messagesService: MessageReportingService, private router: Router) {
+  constructor(private requestsBuilder: Api, private messagesService: MessageReportingService, private router: Router) {
 
     this.registerGroup = new FormGroup(
       {
-        username: new FormControl('', Validators.required),
+        username: new FormControl('',Validators.compose([
+          Validators.minLength(5), Validators.maxLength(120),
+          Validators.required
+        ])),
         firstName: new FormControl(''),
         lastName: new FormControl('')
       }
@@ -45,7 +47,7 @@ export class ChangeUserInfoComponent {
       || credentials.LastName.length > ChangeUserInfoComponent.maxNameLength
       || credentials.UserName.length > ChangeUserInfoComponent.maxNameLength
       || credentials.UserName.length < ChangeUserInfoComponent.minUsernameLength) {
-      this.messagesService.DisplayMessage("Either username or first name or last name was too long / too short.");
+      this.messagesService.WrongUserDataLength();
       return;
     }
 
@@ -55,8 +57,6 @@ export class ChangeUserInfoComponent {
 
     if (response.isSuccessfull) {
       this.router.navigateByUrl('/chat');
-    } else {
-      this.messagesService.DisplayMessage(response.errorMessage);
     }
 
     this.canRegister = true;

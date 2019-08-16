@@ -69,6 +69,7 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddSingleton<UsersSubsriptionService, UsersSubsriptionService>();
             services.AddScoped<UnitOfWork, UnitOfWork>();
             services.AddScoped<IComparer<Chat>, ChatComparer>();
+            services.AddSingleton<UserCultureService, UserCultureService>();
         }
     }
 }

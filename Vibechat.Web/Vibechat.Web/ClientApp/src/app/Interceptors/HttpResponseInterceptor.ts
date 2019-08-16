@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {Inject, Injectable} from '@angular/core';
 import {
   HttpErrorResponse,
   HttpEvent,
@@ -12,9 +12,11 @@ import {from, Observable, throwError} from 'rxjs';
 import {catchError, map, switchMap} from 'rxjs/operators';
 import {SnackBarHelper} from '../Snackbar/SnackbarHelper';
 import {Router} from '@angular/router';
-import {ApiRequestsBuilder} from '../Requests/ApiRequestsBuilder';
+import {Api} from '../Services/Api/api.service';
 import {ServerResponse} from '../ApiModels/ServerResponse';
 import {AuthService} from '../Services/AuthService';
+import {MessageReportingService} from "../Services/MessageReportingService";
+import {LocalesService} from "../Services/LocalesService";
 
 @Injectable()
 export class HttpResponseInterceptor implements HttpInterceptor {
@@ -22,11 +24,15 @@ export class HttpResponseInterceptor implements HttpInterceptor {
   constructor(
     public errorsLogger: SnackBarHelper,
     public router: Router,
-    public requestsBuilder: ApiRequestsBuilder,
-    public authService: AuthService)
+    public requestsBuilder: Api,
+    public authService: AuthService,
+    public messages: MessageReportingService,
+    @Inject('BASE_URL') private baseUrl,
+    private locales: LocalesService)
   {
 
   }
+
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     let token: string = localStorage.getItem('token');
@@ -78,7 +84,7 @@ export class HttpResponseInterceptor implements HttpInterceptor {
         if (event instanceof HttpResponse) {
           //all requests contain failed / not failed payload
           if (!event.body.isSuccessfull) {
-            this.errorsLogger.openSnackBar('Error: ' + event.body.errorMessage);
+            this.messages.ApiError(event.body.errorMessage);
           }
 
         }
@@ -99,11 +105,11 @@ export class HttpResponseInterceptor implements HttpInterceptor {
           //Gateway timeout
           case 504:
           case 0: {
-            this.errorsLogger.openSnackBar('Server is down or there is no internet connection at the moment.');
+            this.messages.NoInternet();
             break;
           }
           default: {
-            this.errorsLogger.openSnackBar('Server sent an error with code: ' + error.status);
+            this.messages.ServerReturnedError(error.status, error.error);
           }
         }
 

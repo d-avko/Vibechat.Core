@@ -512,14 +512,15 @@ namespace Vibechat.Web.Services
                 throw defaultError;
             }
 
-            var user = await usersRepository.GetById(whoAccessedId).ConfigureAwait(false);
+            var user = await usersRepository.GetById(whoAccessedId);
 
             if (user == null)
             {
                 throw defaultError;
             }
 
-            var chats = usersConversationsRepository.GetUserConversations(deviceId, whoAccessedId);
+            var chats = usersConversationsRepository.GetUserConversations(deviceId, whoAccessedId)
+                .ToList();
 
             var returnData = new List<Chat>();
 

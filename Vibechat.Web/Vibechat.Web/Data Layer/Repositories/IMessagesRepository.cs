@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Microsoft.EntityFrameworkCore.Query;
 using VibeChat.Web;
-using VibeChat.Web.ChatData;
-using VibeChat.Web.Data.DataModels;
 using Vibechat.Web.Data.Messages;
 
 namespace Vibechat.Web.Data.Repositories
@@ -26,7 +23,7 @@ namespace Vibechat.Web.Data.Repositories
 
         IQueryable<MessageDataModel> GetAttachments(string userId, int conversationId,
             AttachmentKind attachmentKind, int offset, int count);
-        IQueryable<MessageDataModel> Search
+        List<MessageDataModel> Search
             (int offset, int count, string searchString, string userId);
 
         void Remove(List<int> messagesIds, string whoRemovedId);
