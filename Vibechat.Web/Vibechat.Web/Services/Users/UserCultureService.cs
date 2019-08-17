@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
+using System;
+using System.Linq;
 
 namespace Vibechat.Web.Services.Users
 {
@@ -13,18 +15,21 @@ namespace Vibechat.Web.Services.Users
     {
         public UserCulture GetUserCulture(HttpContext context)
         {
-            var langName = context.Features.Get<IRequestCultureFeature>()?.RequestCulture?.Culture?
-                .TwoLetterISOLanguageName;
+            var priorityLanguage = (context.Request.GetTypedHeaders()
+            .AcceptLanguage?
+            .OrderByDescending(x => x.Quality ?? 1)
+            .Select(x => x.Value.ToString())
+            .ToArray() ?? Array.Empty<string>()).FirstOrDefault();
 
-            if (langName == null)
+            if (priorityLanguage == null)
             {
                 return UserCulture.English;
             }
             
-            switch (langName)
+            switch (priorityLanguage)
             {
-                case "ru":
-                case "be":
+                case string lang when lang.StartsWith("ru"):
+                case string byLang when byLang.StartsWith("be"):
                 {
                     return UserCulture.Russian;
                 }
