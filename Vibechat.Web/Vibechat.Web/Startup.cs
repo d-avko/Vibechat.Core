@@ -21,14 +21,12 @@ using Microsoft.OpenApi.Models;
 using VibeChat.Web;
 using Vibechat.Web.Middleware;
 using Vibechat.Web.Services.Extension_methods;
-using Vibechat.Web.Services.Users;
 
 namespace Vibechat.Web
 {
     public class Startup
     {
         private readonly IWebHostEnvironment environment;
-        private readonly UserCultureService cultureService;
 
         public Startup(IConfiguration configuration, 
             IWebHostEnvironment environment)
@@ -145,6 +143,11 @@ namespace Vibechat.Web
             services.AddDefaultMiddleware();
             
             services.AddSpaStaticFiles(opts => opts.RootPath = "ClientApp/dist");
+
+            services.AddResponseCompression(options =>
+            {
+                options.EnableForHttps = true;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -234,7 +237,9 @@ namespace Vibechat.Web
                     });
                 });
             });
-            
+
+            app.UseResponseCompression();
+
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
