@@ -176,13 +176,13 @@ namespace Vibechat.Web.Services
             {
                 if (!credentials.IsGroup)
                 {
-                    usersConversationsRepository.Add(credentials.DialogUserId, createdChat.Id);
-                    rolesRepository.Add(createdChat.Id, credentials.DialogUserId, ChatRole.NoRole);
+                    usersConversationsRepository.Add(credentials.DialogUserId, createdChat);
+                    rolesRepository.Add(createdChat, credentials.DialogUserId, ChatRole.NoRole);
                 }
 
-                usersConversationsRepository.Add(credentials.CreatorId, createdChat.Id, credentials.DeviceId);
+                usersConversationsRepository.Add(credentials.CreatorId, createdChat, credentials.DeviceId);
 
-                rolesRepository.Add(createdChat.Id, credentials.CreatorId, ChatRole.Creator);
+                rolesRepository.Add(createdChat, credentials.CreatorId, ChatRole.Creator);
 
                 await unitOfWork.Commit();
             }

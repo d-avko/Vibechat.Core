@@ -100,9 +100,9 @@ namespace Vibechat.Web.Extensions
             };
         }
 
-        private static ChatEventDto ToChatEvent(this ChatEventDataModel value)
+        public static ChatEvent ToChatEvent(this ChatEventDataModel value)
         {
-            return new ChatEventDto()
+            return new ChatEvent()
             {
                 Actor = value.ActorId,
                 Type = value.EventType,

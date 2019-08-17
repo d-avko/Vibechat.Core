@@ -134,7 +134,7 @@ namespace Vibechat.Web
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Vibechat API", Version = "v1" });
             });
 
-            services.AddSignalR();
+            services.AddSignalR().AddNewtonsoftJsonProtocol();
 
             services.AddDefaultServices();
 
@@ -165,6 +165,23 @@ namespace Vibechat.Web
 
             app.UseRewriter(new RewriteOptions().AddRewrite(".*/api(.*)", "/api$1", 
                 false));
+
+            app.UseStaticFiles();
+
+            app.UseAuthentication();
+
+            app.UseMiddleware<UserStatusMiddleware>();
+            
+            app.UseRouting();
+            
+            app.UseEndpoints(builder =>
+            {
+                builder.MapHub<ChatsHub>("/hubs/chat");
+            });
+
+            app.UseCors("AllowAllOrigins");
+            
+            app.UseMvc();
             
             app.MapWhen(context => context.IsSpaPath(), builder =>
             {
@@ -217,23 +234,6 @@ namespace Vibechat.Web
                     });
                 });
             });
-
-            app.UseStaticFiles();
-
-            app.UseAuthentication();
-
-            app.UseMiddleware<UserStatusMiddleware>();
-            
-            app.UseRouting();
-            
-            app.UseEndpoints(builder =>
-            {
-                builder.MapHub<ChatsHub>("/hubs/chat");
-            });
-
-            app.UseCors("AllowAllOrigins");
-            
-            app.UseMvc();
             
             app.UseSwagger();
             app.UseSwaggerUI(c =>

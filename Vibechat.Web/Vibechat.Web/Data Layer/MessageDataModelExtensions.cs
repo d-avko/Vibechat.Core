@@ -11,7 +11,7 @@ namespace VibeChat.Web
         {
             value.User = user;
             value.ConversationID = chatId;
-            value.TimeReceived = DateTime.Now;
+            value.TimeReceived = DateTime.UtcNow;
             value.State = MessageState.Delivered;
             return value;
         }

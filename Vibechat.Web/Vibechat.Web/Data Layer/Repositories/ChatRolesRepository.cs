@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VibeChat.Web;
@@ -29,6 +28,18 @@ namespace Vibechat.Web.Data.Repositories
             dbContext.ChatRoles.Add(newRecord);
         }
 
+        public void Add(ConversationDataModel chat, string userId, ChatRole role)
+        {
+            var newRecord = new ChatRoleDataModel
+            {
+                Chat = chat,
+                UserId = userId,
+                RoleId = role
+            };
+
+            dbContext.ChatRoles.Add(newRecord);
+        }
+        
         public Task<ChatRoleDataModel> GetAsync(int chatId, string userId)
         {
             return dbContext.ChatRoles.FirstOrDefaultAsync(x => x.UserId == userId && x.ChatId == chatId);

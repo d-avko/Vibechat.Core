@@ -1,6 +1,7 @@
 import {AfterContentChecked, AfterContentInit, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {ChatEvent} from "../../../Data/ChatEvent";
 import {ChatEventType} from "../../../Data/ChatEventType";
+import {TranslateComponent, Translation} from "../../../translate/translate.component";
 
 @Component({
   selector: 'chat-event',
@@ -27,13 +28,13 @@ export class ChatEventComponent implements AfterContentInit, AfterContentChecked
       case ChatEventType.Joined: {
         this.firstUsername = this.event.actorName;
         this.firstUserid = this.event.actor;
-        this.action = 'joined the chat.';
+        this.action =  TranslateComponent.GetTranslationStatic(Translation.ChatEventJoined);
         return;
       }
       case ChatEventType.Banned:{
         this.firstUsername = this.event.userInvolvedName;
         this.firstUserid = this.event.userInvolved;
-        this.action = ' was banned by ';
+        this.action = ` ${TranslateComponent.GetTranslationStatic(Translation.ChatEventBanned)} `;
         this.secondUsername = this.event.actorName;
         this.secondUserId = this.event.actor;
         return;
@@ -41,7 +42,7 @@ export class ChatEventComponent implements AfterContentInit, AfterContentChecked
       case ChatEventType.Invited:{
         this.firstUsername = this.event.userInvolvedName;
         this.firstUserid = this.event.userInvolved;
-        this.action = ' was invited by ';
+        this.action = ` ${TranslateComponent.GetTranslationStatic(Translation.ChatEventInvited)} `;
         this.secondUsername = this.event.actorName;
         this.secondUserId = this.event.actor;
         return;
@@ -49,13 +50,13 @@ export class ChatEventComponent implements AfterContentInit, AfterContentChecked
       case ChatEventType.Left:{
         this.firstUsername = this.event.actorName;
         this.firstUserid = this.event.actor;
-        this.action = 'has left the chat.';
+        this.action = ` ${TranslateComponent.GetTranslationStatic(Translation.ChatEventLeft)}`;
         return;
       }
       case ChatEventType.Kicked:{
         this.firstUsername = this.event.userInvolvedName;
         this.firstUserid = this.event.userInvolved;
-        this.action = ' was kicked by ';
+        this.action = ` ${TranslateComponent.GetTranslationStatic(Translation.ChatEventKicked)} `;
         this.secondUsername = this.event.actorName;
         this.secondUserId = this.event.actor;
         return;
