@@ -9,7 +9,7 @@ Messaging             |  User profiles
 Side drawer             |  Group profiles
 ![3](https://i.imgur.com/MldmHIO.png)  |  ![4](https://i.imgur.com/MHthF61.png)
 Search             |  Start view
-![5](https://i.imgur.com/5Zkt7XU.png)  |  ![6](https://i.imgur.com/3Z8HM0D.png)
+![5](https://i.imgur.com/lT9ad16.png)  |  ![6](https://i.imgur.com/3Z8HM0D.png)
 
 ## Plan:
 <code> <strong>Back-end overview:</strong> </code>
