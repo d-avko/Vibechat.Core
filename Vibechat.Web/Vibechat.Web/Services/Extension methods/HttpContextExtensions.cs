@@ -27,6 +27,11 @@ namespace Vibechat.Web.Services.Extension_methods
         {
             var requestPath = context.Request.Path;
 
+            if (requestPath.StartsWithSegments("/sockjs-node"))
+            {
+                return true;
+            }
+            
             if (requestPath.StartsWithSegments(Api))
             {
                 return false;

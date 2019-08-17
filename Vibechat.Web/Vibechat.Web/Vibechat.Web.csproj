@@ -14,6 +14,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.0.0-preview6.19307.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.0.0-preview6.19307.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0-preview6.19307.2" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="3.0.0-preview6.19307.2" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.0.0-preview6.19307.2" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.0.0-preview6.19307.2" />
     <PackageReference Include="Microsoft.IdentityModel.Logging" Version="5.5.0" />
@@ -106,12 +107,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="ClientApp\dist\favicon.ico">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
     <TypeScriptCompile Include="ClientApp\src\app\ApiModels\ConversationMessagesResponse.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\ApiModels\ConversationRequest.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\ApiModels\ConversationResponse.ts" />
@@ -183,6 +178,10 @@
     <None Update="certificate_combined.pfx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="ClientApp\dist\en\ngsw.json" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

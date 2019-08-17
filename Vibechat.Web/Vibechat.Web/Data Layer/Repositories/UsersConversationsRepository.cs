@@ -17,10 +17,9 @@ namespace Vibechat.Web.Data.Repositories
 
         public AppUser GetUserInDialog(int convId, string FirstUserInDialogueId)
         {
-            return mContext.UsersConversations
-                .Where(x => x.ChatID == convId && x.UserID != FirstUserInDialogueId)
-                .Include(x => x.User)
-                .First()?
+            return Queryable.First(mContext.UsersConversations
+                    .Where(x => x.ChatID == convId && x.UserID != FirstUserInDialogueId)
+                    .Include(x => x.User))?
                 .User;
         }
 
@@ -85,6 +84,16 @@ namespace Vibechat.Web.Data.Repositories
             })?.Entity;
         }
 
+        public UsersConversationDataModel Add(string userId, ConversationDataModel chat, string deviceId = null)
+        {
+            return mContext.UsersConversations.Add(new UsersConversationDataModel
+            {
+                Conversation = chat,
+                UserID = userId,
+                DeviceId = deviceId
+            })?.Entity;
+        }
+        
         public void UpdateDeviceId(string deviceId, string userId, int chatId)
         {
             var chat = mContext

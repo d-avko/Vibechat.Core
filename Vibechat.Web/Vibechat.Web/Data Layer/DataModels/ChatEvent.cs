@@ -1,9 +1,6 @@
-using System.Collections.Generic;
-using VibeChat.Web.ChatData;
-
 namespace VibeChat.Web
 {
-    public class ChatEventDto
+    public class ChatEvent
     {
         //Why or 'because of who' this event occured
         public string Actor;

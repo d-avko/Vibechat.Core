@@ -15,7 +15,7 @@ namespace VibeChat.Web.ChatData
         
         public MessageType Type { get; set; }
         
-        public ChatEventDto Event { get; set; }
+        public ChatEvent Event { get; set; }
 
         public MessageAttachment AttachmentInfo { get; set; }
 

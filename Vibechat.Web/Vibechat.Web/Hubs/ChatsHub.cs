@@ -128,8 +128,16 @@ namespace VibeChat.Web
                         userToRemoveId, conversationId);
                 }
 
+                var removedUser = await userService.GetUserById(userToRemoveId);
+
+               
                 await RemovedFromGroup(userToRemoveId, conversationId);
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, conversationId.ToString());
+                
+                if (removedUser.IsOnline && removedUser.ConnectionId != null)
+                {
+                    await Groups.RemoveFromGroupAsync(removedUser.ConnectionId, conversationId.ToString());
+                }
+                
                 await SendMessageToGroup(conversationId, whoSentId, chatEvent.ToMessage());
             }
             catch (Exception ex)
@@ -309,6 +317,7 @@ namespace VibeChat.Web
                 }
 
                 await AddedToGroup(addedUser, chatId, Context.ConnectionId, true);
+                
                 await SendMessageToGroup(chatId, whoSent.Id, chatEvent.ToMessage());
                 return true;
             }
