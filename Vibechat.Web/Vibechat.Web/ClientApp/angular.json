@@ -45,6 +45,7 @@
               "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
+              "i18nLocale": "en",
               "buildOptimizer": true,
               "serviceWorker": true,
               "ngswConfigPath": "src/ngsw-config.json",

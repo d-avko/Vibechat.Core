@@ -11,7 +11,10 @@
           "/*.css",
           "/*.js"
         ]
-      }
+      },
+      "navigationUrls":[
+        "/**"
+      ]
     }, {
       "name": "assets",
       "installMode": "lazy",

@@ -162,8 +162,10 @@ namespace Vibechat.Web
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            app.UseResponseCompression();
             
+            app.UseHttpsRedirection();
+
             app.UseRequestLocalization();
 
             app.UseRewriter(new RewriteOptions().AddRewrite(".*/api(.*)", "/api$1", 
@@ -183,7 +185,7 @@ namespace Vibechat.Web
             });
 
             app.UseCors("AllowAllOrigins");
-            
+
             app.UseMvc();
             
             app.MapWhen(context => context.IsSpaPath(), builder =>
@@ -237,8 +239,6 @@ namespace Vibechat.Web
                     });
                 });
             });
-
-            app.UseResponseCompression();
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>

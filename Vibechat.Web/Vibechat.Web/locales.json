@@ -1,0 +1,4 @@
+{
+  "ru": "ClientApp/dist/ru/manifest.webmanifest",
+  "en": "ClientApp/dist/en/manifest.webmanifest"
+}
