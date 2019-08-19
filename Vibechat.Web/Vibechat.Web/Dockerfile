@@ -56,4 +56,8 @@ RUN apt-get update && \
     apt-get install -y --allow-unauthenticated libx11-dev
 
 COPY --from=nodebuilder /usr/src/app/dist/. /app/ClientApp/dist/
+
+RUN apt-get install -y --allow-unauthenticated python3
+RUN python3 fixpwa.py
+
 ENTRYPOINT ["dotnet", "Vibechat.Web.dll"]

@@ -27,7 +27,8 @@ namespace Vibechat.Web.Services.Extension_methods
         {
             var requestPath = context.Request.Path;
 
-            if (requestPath.StartsWithSegments("/sockjs-node"))
+            if (requestPath.StartsWithSegments("/sockjs-node") 
+                || requestPath.Value.StartsWith("/assets/icons"))
             {
                 return true;
             }

@@ -1,4 +1,4 @@
-import {NgModule} from '@angular/core';
+import {Inject, NgModule} from '@angular/core';
 import {AppRoutersModule} from './app.routes';
 
 import {AppComponent} from './app.component';
@@ -10,6 +10,7 @@ import {ServiceWorkerModule} from '@angular/service-worker';
 import {environment} from '../environments/environment';
 import {MaterialModule} from './material.module';
 import {BrowserModule} from '@angular/platform-browser';
+import { LOCALE_ID } from '@angular/core';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,10 @@ import {BrowserModule} from '@angular/platform-browser';
     ChatModule,
     LoginModule,
     MaterialModule,
-    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
+    ServiceWorkerModule.register('ngsw-worker.js',
+      {
+        enabled: environment.production
+      })
   ],
   providers: [Api, AuthService],
   bootstrap: [AppComponent]
