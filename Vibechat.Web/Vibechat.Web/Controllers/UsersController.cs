@@ -163,11 +163,11 @@ namespace VibeChat.Web.Controllers
         [HttpPost]
         [Route("[action]")]
         public async Task<ResponseApiModel<UsersByNickNameResultApiModel>> FindByNickName(
-            [FromBody] UsersByNickNameApiModel credentials)
+            [FromBody] SearchUsersRequest credentials)
         {
             try
             {
-                var result = await mUsersService.FindUsersByNickName(credentials);
+                var result = await mUsersService.FindUsersByNickName(credentials.UsernameToFind);
 
                 return new ResponseApiModel<UsersByNickNameResultApiModel>
                 {

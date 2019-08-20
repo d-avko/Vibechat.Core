@@ -3,7 +3,7 @@
     /// <summary>
     ///     Api request for receiving messages
     /// </summary>
-    public class GetMessagesApiModel
+    public class GetMessagesRequest
     {
         public int ConversationID { get; set; }
 

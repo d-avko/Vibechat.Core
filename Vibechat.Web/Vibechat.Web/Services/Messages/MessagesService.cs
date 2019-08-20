@@ -12,6 +12,7 @@ using Vibechat.Web.Data_Layer.DataModels;
 using Vibechat.Web.Data_Layer.Repositories;
 using Vibechat.Web.DTO.Messages;
 using Vibechat.Web.Extensions;
+using VibeChat.Web.Data.DataModels;
 
 namespace Vibechat.Web.Services.Messages
 {
@@ -24,7 +25,7 @@ namespace Vibechat.Web.Services.Messages
         private readonly UnitOfWork unitOfWork;
         private readonly IUsersRepository usersRepository;
         private readonly IAttachmentKindsRepository attachmentKindsRepository;
-        private readonly IAttachmentRepository attachmentRepository;
+        private readonly IAttachmentsRepository attachmentRepository;
         private readonly IChatEventsRepository chatEventsRepository;
 
         public MessagesService(IConversationRepository conversationRepository,
@@ -34,7 +35,7 @@ namespace Vibechat.Web.Services.Messages
             UnitOfWork unitOfWork,
             IUsersRepository usersRepository,
             IAttachmentKindsRepository attachmentKindsRepository,
-            IAttachmentRepository attachmentRepository,
+            IAttachmentsRepository attachmentRepository,
             IChatEventsRepository chatEventsRepository
         )
         {
@@ -61,7 +62,7 @@ namespace Vibechat.Web.Services.Messages
                 return null;
             }
 
-            var conversation = conversationRepository.GetById(conversationId);
+            var conversation = await conversationRepository.GetByIdAsync(conversationId);
 
             if (conversation == null)
             {
@@ -139,7 +140,7 @@ namespace Vibechat.Web.Services.Messages
                 return null;
             }
 
-            var conversation = conversationRepository.GetById(chatId);
+            var conversation = await conversationRepository.GetByIdAsync(chatId);
 
             if (conversation == null)
             {
@@ -302,7 +303,7 @@ namespace Vibechat.Web.Services.Messages
                 forwardedMessage = foundMessage[0];
             }
 
-            MessageDataModel model = new MessageDataModel().Create(whoSent, chatId);
+            MessageDataModel model = MessageDataModel.Create(whoSent, chatId);
 
             if (forwardedMessage != null)
             {
@@ -329,7 +330,7 @@ namespace Vibechat.Web.Services.Messages
                     $"Failed to retrieve user with id {senderId} from database: no such user exists");
             }
 
-            var model = new MessageDataModel()
+            var model = MessageDataModel
                 .Create(whoSent, groupId)
                 .AsSecure(message);
             var result = messagesRepository.Add(model);
@@ -350,10 +351,13 @@ namespace Vibechat.Web.Services.Messages
 
             var attachmentKind = await attachmentKindsRepository.GetById(message.AttachmentInfo.AttachmentKind);
 
-            var attachment = attachmentRepository.Add(attachmentKind, message);
-            var model = new MessageDataModel()
+            var attachment = await attachmentRepository.AddAsync(
+                MessageAttachmentDataModel.Create(attachmentKind, message));
+
+            var model = MessageDataModel
                 .Create(whoSent, groupId)
                 .AsAttachment(attachment);
+
             var result = messagesRepository.Add(model);
             await unitOfWork.Commit();
             await SetLastMessage(senderId, groupId, result.MessageID);
@@ -365,10 +369,12 @@ namespace Vibechat.Web.Services.Messages
         {
             try
             {
-                var newEvent = chatEventsRepository.Add(new ChatEventDataModel().Create(actorId, userInvolvedId, type));
-                var model = new MessageDataModel()
+                var newEvent = await chatEventsRepository.AddAsync(ChatEventDataModel.Create(actorId, userInvolvedId, type));
+
+                var model = MessageDataModel
                     .Create(null, chatId)
                     .AsEvent(newEvent);
+
                 var result = messagesRepository.Add(model);
                 await unitOfWork.Commit();
                 return result;

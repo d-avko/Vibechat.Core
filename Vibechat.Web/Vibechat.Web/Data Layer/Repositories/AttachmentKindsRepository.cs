@@ -2,21 +2,20 @@
 using VibeChat.Web;
 using VibeChat.Web.Data.DataModels;
 using Vibechat.Web.Data.Messages;
+using Vibechat.Web.Data_Layer.Repositories;
 
 namespace Vibechat.Web.Data.Repositories
 {
-    public class AttachmentKindsRepository : IAttachmentKindsRepository
+    public class AttachmentKindsRepository : BaseRepository<AttachmentKindDataModel>, IAttachmentKindsRepository
     {
-        public AttachmentKindsRepository(ApplicationDbContext dbContext)
+        public AttachmentKindsRepository(ApplicationDbContext dbContext) : base(dbContext)
         {
-            mContext = dbContext;
+            
         }
-
-        private ApplicationDbContext mContext { get; }
 
         public ValueTask<AttachmentKindDataModel> GetById(AttachmentKind kind)
         {
-            return mContext.AttachmentKinds.FindAsync(kind);
+            return _dbContext.AttachmentKinds.FindAsync(kind);
         }
     }
 }

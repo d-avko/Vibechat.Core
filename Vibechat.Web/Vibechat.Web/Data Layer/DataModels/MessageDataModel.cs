@@ -48,5 +48,16 @@ namespace VibeChat.Web
         ///     if this message is from private chat, store payload there.
         /// </summary>
         public string EncryptedPayload { get; set; }
+
+        public static MessageDataModel Create(AppUser user, int chatId)
+        {
+            return new MessageDataModel()
+            {
+                User = user,
+                ConversationID = chatId,
+                TimeReceived = DateTime.UtcNow,
+                State = MessageState.Delivered
+            };
+        }
     }
 }

@@ -33,14 +33,14 @@ namespace VibeChat.Web.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         [Route("[action]")]
-        public async Task<ResponseApiModel<Chat>> Create([FromBody] CreateConversationCredentialsApiModel convInfo)
+        public async Task<ResponseApiModel<Chat>> Create([FromBody] CreateChatRequest request)
         {
             try
             {
                 var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
-                convInfo.CreatorId = thisUserId;
+                request.CreatorId = thisUserId;
 
-                var result = await mChatsService.CreateConversation(convInfo);
+                var result = await mChatsService.CreateConversation(request);
 
                 return new ResponseApiModel<Chat>
                 {
@@ -130,7 +130,7 @@ namespace VibeChat.Web.Controllers
             {
                 var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
-                var result = await mChatsService.GetConversations(deviceId, thisUserId);
+                var result = await mChatsService.GetChats(deviceId, thisUserId);
 
                 return new ResponseApiModel<List<Chat>>
                 {
@@ -239,7 +239,7 @@ namespace VibeChat.Web.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPatch]
         [Route("{chatId:int}/[action]")]
-        public async Task<ResponseApiModel<bool>> ChangeName([FromBody] ChangeConversationNameRequest request,
+        public async Task<ResponseApiModel<bool>> ChangeName([FromBody] ChangeChatNameRequest request,
             int chatId)
         {
             try

@@ -10,8 +10,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\ChatApiModels.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\ChangeConversationNameRequest.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\CreateConversationCredentialsApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\ChangeChatNameRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\CreateChatRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\SearchRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\UpdateThumbnailRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Conversation\UpdateThumbnailResponse.cs" />
@@ -19,11 +19,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Login\LoginCredentialsApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Login\LoginResultApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Messages\DeleteMessagesRequest.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Messages\GetMessagesApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Messages\GetMessagesRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Messages\SearchMessagesRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Register\RegisterModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\ResponseApiModel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Users Info\UsersByNickNameApiModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Users Info\SearchUsersRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Users Info\UsersByNickNameResultApiModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\UsersApiModels.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DTO\Conversations\Chat.cs" />

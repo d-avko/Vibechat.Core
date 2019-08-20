@@ -17,5 +17,25 @@ namespace Vibechat.Web.Data.DataModels
         public ChatRole RoleId { get; set; }
 
         [ForeignKey("RoleId")] public RoleDataModel Role { get; set; }
+
+        public static ChatRoleDataModel Create(int chatId, string userId, ChatRole role)
+        {
+            return new ChatRoleDataModel
+            {
+                ChatId = chatId,
+                UserId = userId,
+                RoleId = role
+            };
+        }
+
+        public static ChatRoleDataModel Create(ConversationDataModel chat, string userId, ChatRole role)
+        {
+            return new ChatRoleDataModel
+            {
+                Chat = chat,
+                UserId = userId,
+                RoleId = role
+            };
+        }
     }
 }

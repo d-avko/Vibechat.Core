@@ -3,19 +3,12 @@ using System.Threading.Tasks;
 using VibeChat.Web;
 using Vibechat.Web.Data.Conversations;
 using Vibechat.Web.Data.DataModels;
+using Vibechat.Web.Data_Layer.Repositories;
 
 namespace Vibechat.Web.Data.Repositories
 {
-    public interface IChatRolesRepository
+    public interface IChatRolesRepository : IAsyncRepository<ChatRoleDataModel>
     {
-        void Add(int chatId, string userId, ChatRole role);
-
-        void Add(ConversationDataModel chat, string userId, ChatRole role);
-        Task<ChatRoleDataModel> GetAsync(int chatId, string userId);
-
-        Task<List<ChatRoleDataModel>> GetAsync(string userId);
-
-        void Remove(ChatRoleDataModel chatRole);
-        void Update(ChatRole role, ChatRoleDataModel chatRole);
+        ValueTask<ChatRoleDataModel> GetByIdAsync(int chatId, string userId);
     }
 }

@@ -297,7 +297,7 @@ namespace VibeChat.Web
                     return false;
                 }
 
-                var addedUser = await chatsService.AddUserToConversation(chatId, userId);
+                var addedUser = await chatsService.AddUserToChat(chatId, userId);
 
                 if (addedUser.IsOnline && addedUser.ConnectionId != null)
                 {
@@ -374,7 +374,7 @@ namespace VibeChat.Web
                     await RemovedFromDialog(whoSent.Id, Context.ConnectionId, chat.Id);
                 }
 
-                await chatsService.RemoveConversation(chat, whoSent.Id);
+                await chatsService.RemoveChat(chat, whoSent.Id);
             }
             catch (Exception ex)
             {
@@ -398,7 +398,7 @@ namespace VibeChat.Web
                 }
 
                 var created = await chatsService
-                    .CreateConversation(new CreateConversationCredentialsApiModel
+                    .CreateConversation(new CreateChatRequest
                     {
                         IsGroup = false,
                         DialogUserId = user.Id,

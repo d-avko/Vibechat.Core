@@ -6,16 +6,7 @@ using Vibechat.Web.DTO.Messages;
 namespace VibeChat.Web
 {
     public static class MessageDataModelExtensions
-    {
-        public static MessageDataModel Create(this MessageDataModel value, AppUser user, int chatId)
-        {
-            value.User = user;
-            value.ConversationID = chatId;
-            value.TimeReceived = DateTime.UtcNow;
-            value.State = MessageState.Delivered;
-            return value;
-        }
-        
+    {       
         public static MessageDataModel AsSecure(this MessageDataModel value, string payload)
         {
             value.Type = MessageType.Reserved;

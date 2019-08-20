@@ -17,5 +17,15 @@ namespace Vibechat.Web.Data_Layer.DataModels
         [ForeignKey("UserInvolvedId")] public virtual AppUser UserInvolved { get; set; }
         
         public ChatEventType EventType { get; set; }
+
+        public static ChatEventDataModel Create(string actor, string userInvolvedId, ChatEventType eventType)
+        {
+            return new ChatEventDataModel()
+            {
+                ActorId = actor,
+                UserInvolvedId = userInvolvedId,
+                EventType = eventType
+            };
+        }
     }
 }

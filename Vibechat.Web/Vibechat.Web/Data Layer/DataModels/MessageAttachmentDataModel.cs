@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using VibeChat.Web.ChatData;
 
 namespace VibeChat.Web.Data.DataModels
 {
@@ -22,5 +23,18 @@ namespace VibeChat.Web.Data.DataModels
         [ForeignKey("MessageId")] public int? MessageId { get; set; }
 
         public long FileSize { get; set; }
+
+        public static MessageAttachmentDataModel Create(AttachmentKindDataModel attachmentKind, Message message)
+        {
+            return new MessageAttachmentDataModel
+            {
+                AttachmentKind = attachmentKind,
+                ContentUrl = message.AttachmentInfo.ContentUrl,
+                ImageHeight = message.AttachmentInfo.ImageHeight,
+                ImageWidth = message.AttachmentInfo.ImageWidth,
+                AttachmentName = message.AttachmentInfo.AttachmentName,
+                FileSize = message.AttachmentInfo.FileSize
+            };
+        }
     }
 }
