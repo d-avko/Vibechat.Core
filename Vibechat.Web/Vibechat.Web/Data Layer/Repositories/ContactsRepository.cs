@@ -1,33 +1,20 @@
 ﻿using System.Linq;
 using VibeChat.Web;
 using Vibechat.Web.Data.DataModels;
+using Vibechat.Web.Data_Layer.Repositories;
+using System.Threading.Tasks;
 
 namespace Vibechat.Web.Data.Repositories
 {
-    public class ContactsRepository : IContactsRepository
+    public class ContactsRepository : BaseRepository<ContactsDataModel>, IContactsRepository
     {
-        public ContactsRepository(ApplicationDbContext dbContext)
+        public ContactsRepository(ApplicationDbContext dbContext) : base(dbContext)
         {
-            mContext = dbContext;
         }
 
-        private ApplicationDbContext mContext { get; }
-
-        public IQueryable<ContactsDataModel> GetContactsOf(string id)
+        public ValueTask<ContactsDataModel> GetByIdAsync(string userId, string contactId)
         {
-            return mContext.Contacts.Where(x => x.FirstUserID == id);
-        }
-
-        public void RemoveContact(string whoRemovesId, string contactId)
-        {
-            var contact =
-                mContext.Contacts.FirstOrDefault(x => x.FirstUserID == whoRemovesId && x.SecondUserID == contactId);
-            mContext.Contacts.Remove(contact);
-        }
-
-        public void AddContact(string whoAdds, string contact)
-        {
-            mContext.Contacts.Add(new ContactsDataModel {FirstUserID = whoAdds, SecondUserID = contact});
+            return _dbContext.Contacts.FindAsync(userId, contactId);
         }
     }
 }

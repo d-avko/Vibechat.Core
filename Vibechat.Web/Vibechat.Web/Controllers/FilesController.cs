@@ -83,7 +83,7 @@ namespace Vibechat.Web.Controllers
                     lock (errorLock)
                     {
                         error = "Some of the files failed to upload. Exception type for last file was: " +
-                                ex.GetType().ToString();
+                                ex.GetType();
                     }
                 }
             });

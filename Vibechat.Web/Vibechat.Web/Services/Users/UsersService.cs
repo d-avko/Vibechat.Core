@@ -11,6 +11,8 @@ using Vibechat.Web.Data.Repositories;
 using Vibechat.Web.Extensions;
 using Vibechat.Web.Services.Bans;
 using Vibechat.Web.Services.FileSystem;
+using Vibechat.Web.Data_Layer.Repositories.Specifications.Contacts;
+using Vibechat.Web.Data.DataModels;
 
 namespace Vibechat.Web.Services.Users
 {
@@ -131,7 +133,7 @@ namespace Vibechat.Web.Services.Users
                 throw new ArgumentException("caller id was wrong.");
             }
 
-            return contactsRepository.GetContactsOf(callerId)
+            return (await contactsRepository.ListAsync(new GetContactsOfSpec(callerId)))
                 .Select(x => x.Contact.ToUserInfo())
                 ?.ToList();
         }
@@ -145,7 +147,7 @@ namespace Vibechat.Web.Services.Users
 
             try
             {
-                contactsRepository.AddContact(callerId, userId);
+                await contactsRepository.AddAsync(ContactsDataModel.Create(callerId, userId));
                 await unitOfWork.Commit();
             }
             catch (Exception ex)
@@ -158,7 +160,8 @@ namespace Vibechat.Web.Services.Users
         {
             try
             {
-                contactsRepository.RemoveContact(caller, userId);
+                var entry = await contactsRepository.GetByIdAsync(caller, userId);
+                await contactsRepository.DeleteAsync(entry);
                 await unitOfWork.Commit();
             }
             catch (Exception ex)
@@ -215,16 +218,16 @@ namespace Vibechat.Web.Services.Users
             }
         }
 
-        public async Task<UsersByNickNameResultApiModel> FindUsersByNickName(UsersByNickNameApiModel credentials)
+        public async Task<UsersByNickNameResultApiModel> FindUsersByNickName(string name)
         {
-            if (credentials.UsernameToFind == null)
+            if (name == null)
             {
                 throw new FormatException("Nickname was null");
             }
 
-            var result = (await usersRepository.FindByUsername(credentials.UsernameToFind)).ToList();
+            var result = (await usersRepository.FindByUsername(name)).ToList();
 
-            if (result.Count() == 0)
+            if (!result.Any())
             {
                 return new UsersByNickNameResultApiModel
                 {
@@ -234,8 +237,8 @@ namespace Vibechat.Web.Services.Users
 
             return new UsersByNickNameResultApiModel
             {
-                UsersFound = result.Select(FoundUser =>
-                    FoundUser.ToUserInfo()
+                UsersFound = result.Select(foundUser =>
+                    foundUser.ToUserInfo()
                 ).ToList()
             };
         }

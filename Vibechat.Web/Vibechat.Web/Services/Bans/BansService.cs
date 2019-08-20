@@ -42,10 +42,10 @@ namespace Vibechat.Web.Services.Bans
                 throw new FormatException("Can't ban yourself.");
             }
 
-            var conversation = ConversationRepository.GetById(conversationId);
+            var conversation = await ConversationRepository.GetByIdAsync(conversationId);
             var banned = await UsersRepository.GetById(userToBanId);
 
-            var userRole = await rolesRepository.GetAsync(conversationId, whoAccessedId);
+            var userRole = await rolesRepository.GetByIdAsync(conversationId, whoAccessedId);
 
             if (userRole.RoleId != ChatRole.Moderator && userRole.RoleId != ChatRole.Creator)
             {
@@ -153,10 +153,11 @@ namespace Vibechat.Web.Services.Bans
                 throw new FormatException("Can't unban yourself.");
             }
 
-            var conversation = ConversationRepository.GetById(conversationId);
+            var conversation = await ConversationRepository.GetByIdAsync(conversationId);
+
             var banned = await UsersRepository.GetById(userToUnbanId);
 
-            var userRole = await rolesRepository.GetAsync(conversationId, whoAccessedId);
+            var userRole = await rolesRepository.GetByIdAsync(conversationId, whoAccessedId);
 
             if (userRole.RoleId != ChatRole.Moderator && userRole.RoleId != ChatRole.Creator)
             {

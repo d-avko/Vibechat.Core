@@ -30,24 +30,19 @@ namespace Vibechat.Web.Services.Login
             this.unitOfWork = unitOfWork;
         }
 
-        public async Task<LoginResultApiModel> LogInAsync(LoginCredentialsApiModel loginCredentials)
+        public async Task<LoginResultApiModel> LogInAsync(string firebaseToken, string phoneNumber)
         {
             var auth = FirebaseAuth.GetAuth(FirebaseApp.DefaultInstance);
 
             //this can throw detailed error message.
-            var verified = await auth.VerifyIdTokenAsync(loginCredentials.UidToken);
+            var verified = await auth.VerifyIdTokenAsync(firebaseToken);
 
             var identityUser = await usersRepository.GetById(verified.Uid);
-            
-            if(identityUser.PhoneNumber != loginCredentials.PhoneNumber)
-            {
-                throw new UnauthorizedAccessException("Please provide a phone number that correlates to firebase JWT token.");
-            }
 
             //user confirmed his phone number, but has not registered yet; 
             //Register him now in that case 
 
-            var IsNewUser = false;
+            var isNewUser = false;
 
             if (identityUser == null)
             {
@@ -57,7 +52,7 @@ namespace Vibechat.Web.Services.Login
 
                     var token = await RegisterNewUserAsync(new RegisterModel
                     {
-                        PhoneNumber = loginCredentials.PhoneNumber,
+                        PhoneNumber = phoneNumber,
                         UserName = username,
                         Id = verified.Uid
                     });
@@ -66,11 +61,18 @@ namespace Vibechat.Web.Services.Login
 
                     //prevent reading null
                     identityUser.RefreshToken = token;
-                    IsNewUser = true;
+                    isNewUser = true;
                 }
                 catch (Exception ex)
                 {
                     throw new FormatException("Couldn't register this user.", ex);
+                }
+            }
+            else
+            {
+                if(identityUser.PhoneNumber != phoneNumber)
+                {
+                    throw new UnauthorizedAccessException("Please provide a phone number that correlates to firebase JWT token.");
                 }
             }
 
@@ -79,7 +81,7 @@ namespace Vibechat.Web.Services.Login
                 Info = identityUser.ToUserInfo(),
                 Token = identityUser.GenerateToken(),
                 RefreshToken = identityUser.RefreshToken,
-                IsNewUser = IsNewUser
+                IsNewUser = isNewUser
             };
         }
 

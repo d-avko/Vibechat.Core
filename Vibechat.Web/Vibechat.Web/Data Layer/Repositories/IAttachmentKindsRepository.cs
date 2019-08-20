@@ -1,10 +1,11 @@
 ﻿using System.Threading.Tasks;
 using VibeChat.Web.Data.DataModels;
 using Vibechat.Web.Data.Messages;
+using Vibechat.Web.Data_Layer.Repositories;
 
 namespace Vibechat.Web.Data.Repositories
 {
-    public interface IAttachmentKindsRepository
+    public interface IAttachmentKindsRepository : IAsyncRepository<AttachmentKindDataModel>
     {
         ValueTask<AttachmentKindDataModel> GetById(AttachmentKind id);
     }

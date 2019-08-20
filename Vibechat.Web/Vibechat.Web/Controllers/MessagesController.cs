@@ -62,7 +62,7 @@ namespace Vibechat.Web.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         [Route("[action]")]
-        public async Task<ResponseApiModel<List<Message>>> Get([FromBody] GetMessagesApiModel credentials)
+        public async Task<ResponseApiModel<List<Message>>> Get([FromBody] GetMessagesRequest credentials)
         { 
             try
             {

@@ -7,6 +7,7 @@ using Vibechat.Web.Data.DataModels;
 using VibeChat.Web.Data.DataModels;
 using Vibechat.Web.Data_Layer.DataModels;
 using Vibechat.Web.Extensions;
+using Vibechat.Web.Services.Extension_methods;
 
 namespace VibeChat.Web
 {

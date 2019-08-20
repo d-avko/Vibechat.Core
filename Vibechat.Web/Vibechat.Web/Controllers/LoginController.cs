@@ -30,7 +30,8 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                var result = await loginService.LogInAsync(loginCredentials);
+                var result = await loginService.LogInAsync(loginCredentials.UidToken, 
+                    loginCredentials.PhoneNumber);
 
                 return new ResponseApiModel<LoginResultApiModel>
                 {

@@ -1,6 +1,6 @@
 ﻿namespace VibeChat.Web.ApiModels
 {
-    public class CreateConversationCredentialsApiModel
+    public class CreateChatRequest
     {
         public string ConversationName { get; set; }
 

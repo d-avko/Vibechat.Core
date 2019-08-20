@@ -18,6 +18,8 @@ using Vibechat.Web.Services.Messages;
 using Vibechat.Web.Services.Paths;
 using Vibechat.Web.Services.Users;
 using VibeChat.Web.UserProviders;
+using VibeChat.Web.Data.DataModels;
+using Vibechat.Web.Data.DataModels;
 
 namespace Vibechat.Web.Services.Extension_methods
 {
@@ -42,7 +44,6 @@ namespace Vibechat.Web.Services.Extension_methods
         {
             services.AddScoped<IUsersRepository, UsersRepository>();
             services.AddScoped<IMessagesRepository, MessagesRepository>();
-            services.AddScoped<IAttachmentRepository, AttachmentRepository>();
             services.AddScoped<IAttachmentKindsRepository, AttachmentKindsRepository>();
             services.AddScoped<IUsersConversationsRepository, UsersConversationsRepository>();
             services.AddScoped<IConversationRepository, ConversationsRepository>();
@@ -53,6 +54,8 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddScoped<IChatRolesRepository, ChatRolesRepository>();
             services.AddScoped<ILastMessagesRepository, LastMessagesRepository>();
             services.AddScoped<IChatEventsRepository, ChatEventsRepository>();
+            services.AddScoped<IAttachmentsRepository ,AttachmentsRepository>();
+            services.AddScoped<IRolesRepository, RolesRepository>();
         }
 
         public static void AddBusinessLogic(this IServiceCollection services)

@@ -1,6 +1,6 @@
 ﻿namespace Vibechat.Web.Data.ApiModels.Conversation
 {
-    public class ChangeConversationNameRequest
+    public class ChangeChatNameRequest
     {
         public string Name { get; set; }
     }
