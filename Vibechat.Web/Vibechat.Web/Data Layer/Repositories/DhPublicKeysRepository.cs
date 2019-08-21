@@ -15,11 +15,6 @@ namespace Vibechat.Web.Data.Repositories
 
         private ApplicationDbContext mContext { get; }
 
-        [Obsolete("Keys are now seeded via DbContext")]
-        public async Task Add(DhPublicKeyDataModel value)
-        {
-            mContext.PublicKeys.Add(value);
-        }
 
         public async Task<DhPublicKeyDataModel> GetRandomKey()
         {

@@ -63,7 +63,7 @@ namespace Vibechat.Web.Services.Users
             user.IsBlocked =
                 bansService.IsBannedFromMessagingWith(userId, callerId);
 
-            return foundUser.ToUserInfo();
+            return user;
         }
         
         public async Task<AppUser> GetUserById(string userId)
@@ -133,7 +133,7 @@ namespace Vibechat.Web.Services.Users
                 throw new ArgumentException("caller id was wrong.");
             }
 
-            return (await contactsRepository.ListAsync(new GetContactsOfSpec(callerId)))
+            return (await contactsRepository.ListAsync(new GetContactsOfSpec(callerId)))?
                 .Select(x => x.Contact.ToUserInfo())
                 ?.ToList();
         }

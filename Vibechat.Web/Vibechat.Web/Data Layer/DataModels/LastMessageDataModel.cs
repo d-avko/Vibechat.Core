@@ -16,5 +16,15 @@ namespace Vibechat.Web.Data_Layer.DataModels
         [ForeignKey("ChatID")] public virtual ConversationDataModel Conversation { get; set; }
 
         [ForeignKey("MessageID")] public virtual MessageDataModel Message { get; set; }
+
+        public static LastMessageDataModel Create(string userId, int chatId, int msgId)
+        {
+            return new LastMessageDataModel
+            {
+                ChatID = chatId,
+                UserID = userId,
+                MessageID = msgId
+            };
+        }
     }
 }

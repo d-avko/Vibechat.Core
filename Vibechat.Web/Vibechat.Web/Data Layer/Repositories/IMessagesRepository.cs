@@ -2,32 +2,13 @@
 using System.Linq;
 using VibeChat.Web;
 using Vibechat.Web.Data.Messages;
+using Vibechat.Web.Data_Layer.Repositories;
 
 namespace Vibechat.Web.Data.Repositories
 {
-    public interface IMessagesRepository
-    {
-        MessageDataModel Add(MessageDataModel message);
-        bool Empty();
-        IQueryable<MessageDataModel> GetByIds(List<int> ids);
-
-        MessageDataModel GetById(int id);
-
-        int GetUnreadAmount(int conversationId, string userId, int lastMessageId);
-
-        void MarkAsRead(MessageDataModel message);
-
-        IQueryable<MessageDataModel> Get(string userId, int conversationId, int maxMessageId,
-            bool history = false,
-            int offset = 0, int count = 0);
-
-        IQueryable<MessageDataModel> GetAttachments(string userId, int conversationId,
-            AttachmentKind attachmentKind, int offset, int count);
+    public interface IMessagesRepository : IAsyncRepository<MessageDataModel>
+    {       
         List<MessageDataModel> Search
             (int offset, int count, string searchString, string userId);
-
-        void Remove(List<int> messagesIds, string whoRemovedId);
-
-        void RemovePermanent(List<MessageDataModel> messages);
     }
 }

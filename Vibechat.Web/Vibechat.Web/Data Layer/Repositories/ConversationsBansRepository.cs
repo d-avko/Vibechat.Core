@@ -1,36 +1,21 @@
 ﻿using System.Linq;
 using VibeChat.Web;
 using Vibechat.Web.Data.DataModels;
+using Vibechat.Web.Data_Layer.Repositories;
+using System.Threading.Tasks;
 
 namespace Vibechat.Web.Data.Repositories
 {
-    public class ConversationsBansRepository : IConversationsBansRepository
+    public class ConversationsBansRepository : BaseRepository<ConversationsBansDataModel>, IConversationsBansRepository
     {
-        public ConversationsBansRepository(ApplicationDbContext dbContext)
+        public ConversationsBansRepository(ApplicationDbContext dbContext) : base(dbContext)
         {
-            mContext = dbContext;
+            
         }
 
-        private ApplicationDbContext mContext { get; }
-
-        public void BanUserInGroup(AppUser banned, ConversationDataModel where)
+        public ValueTask<ConversationsBansDataModel> GetByIdAsync(string userId, int chatId)
         {
-            mContext.ConversationsBans.Add(new ConversationsBansDataModel {BannedUser = banned, Conversation = where});
-        }
-
-        public void UnbanUserInGroup(string userId, int conversationId)
-        {
-            mContext.ConversationsBans.Remove(Get(userId, conversationId));
-        }
-
-        public bool IsBanned(AppUser who, int whereId)
-        {
-            return mContext.ConversationsBans.Any(x => x.ChatID == whereId && x.UserID == who.Id);
-        }
-
-        public ConversationsBansDataModel Get(string userId, int conversationId)
-        {
-            return mContext.ConversationsBans.FirstOrDefault(x => x.UserID == userId && x.ChatID == conversationId);
+            return _dbContext.ConversationsBans.FindAsync(chatId, userId);
         }
     }
 }

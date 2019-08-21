@@ -12,6 +12,8 @@ namespace Vibechat.Web.Data_Layer.Repositories.Specifications.Contacts
         public GetContactsOfSpec(string userId) 
             : base(contact => contact.FirstUserID == userId)
         {
+            AddInclude(x => x.Contact);
         }
     }
+
 }

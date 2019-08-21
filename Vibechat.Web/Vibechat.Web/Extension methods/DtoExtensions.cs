@@ -12,7 +12,7 @@ using Vibechat.Web.Services.Extension_methods;
 
 namespace Vibechat.Web.Extensions
 {
-    public static class Extensions
+    public static class DtoExtensions
     {
         public static UserInfo ToUserInfo(this AppUser user)
         {

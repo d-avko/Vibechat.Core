@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Vibechat.Web.Extension_methods;
 
 namespace Vibechat.Web.Data_Layer.Repositories.Specifications
 {
@@ -19,14 +20,25 @@ namespace Vibechat.Web.Data_Layer.Repositories.Specifications
         public Expression<Func<T, object>> OrderByDescending { get; private set; }
         public Expression<Func<T, object>> GroupBy { get; private set; }
 
+        //public Expression<Func<T, object>> Union { get; private set; }
+
         public int Take { get; private set; }
         public int Skip { get; private set; }
         public bool IsPagingEnabled { get; private set; } = false;
+
+        public bool IsAsNoTracking { get; private set; } = false;
 
         protected virtual void AddInclude(Expression<Func<T, object>> includeExpression)
         {
             Includes.Add(includeExpression);
         }
+        
+        protected virtual void AddNestedInclude(Expression<Func<T, object>> expression)
+        {
+            AddInclude(expression.Body.GetNestedMemberAccessString());
+        }
+
+
         protected virtual void AddInclude(string includeString)
         {
             IncludeStrings.Add(includeString);
@@ -45,6 +57,16 @@ namespace Vibechat.Web.Data_Layer.Repositories.Specifications
         {
             OrderByDescending = orderByDescendingExpression;
         }
+
+        protected virtual void AsNoTracking()
+        {
+            IsAsNoTracking = true;
+        }
+
+        //protected virtual void ApplyUnion(Expression<Func<T, object>> unionExpression)
+        //{
+        //    Union = unionExpression;
+        //}
 
         //Not used anywhere at the moment, but someone requested an example of setting this up.
         protected virtual void ApplyGroupBy(Expression<Func<T, object>> groupByExpression)

@@ -16,5 +16,25 @@ namespace VibeChat.Web
         ///     Secure chat deviceId
         /// </summary>
         public string DeviceId { get; set; }
+
+        public static UsersConversationDataModel Create(string userId, ConversationDataModel chat, string deviceId = null)
+        {
+            return new UsersConversationDataModel
+            {
+                Conversation = chat,
+                UserID = userId,
+                DeviceId = deviceId
+            };
+        }
+
+        public static UsersConversationDataModel Create(string userId, int chatId, string deviceId = null)
+        {
+            return new UsersConversationDataModel
+            {
+                ChatID = chatId,
+                UserID = userId,
+                DeviceId = deviceId
+            };
+        }
     }
 }

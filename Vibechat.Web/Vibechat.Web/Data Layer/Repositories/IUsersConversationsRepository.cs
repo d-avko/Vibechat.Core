@@ -1,29 +1,24 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Vibechat.Web.Data_Layer.Repositories;
 using VibeChat.Web;
 
 namespace Vibechat.Web.Data.Repositories
 {
-    public interface IUsersConversationsRepository
+    public interface IUsersConversationsRepository : IAsyncRepository<UsersConversationDataModel>
     {
-        UsersConversationDataModel Add(string userId, int chatId, string deviceId = null);
-        UsersConversationDataModel Add(string userId, ConversationDataModel chat, string deviceId = null);
-        Task<UsersConversationDataModel> Get(string userId, int conversationId);
-        IQueryable<AppUser> GetConversationParticipants(int conversationId);
-        IQueryable<ConversationDataModel> GetUserConversations(string deviceId, string userId);
-        AppUser GetUserInDialog(int convId, string FirstUserInDialogueId);
-
-        int GetParticipantsCount(int chatId);
+        ValueTask<UsersConversationDataModel> GetByIdAsync(string userId, int conversationId);
+        Task<AppUser> GetUserInDialog(int convId, string FirstUserInDialogueId);
 
         Task<bool> Exists(string userId, int conversationId);
 
-        void UpdateDeviceId(string deviceId, string userId, int chatId);
-
-        void Remove(UsersConversationDataModel entity);
-
         Task<UsersConversationDataModel> GetDialog(string firstUserId, string secondUserId);
 
-        Task<List<AppUser>> FindUsersInChat(string username, int chatId);
+        Task<IEnumerable<ConversationDataModel>> GetUserChats(string deviceId, string userId);
+
+        Task<IEnumerable<AppUser>> GetChatParticipants(int chatId);
+
+        Task<IEnumerable<AppUser>> FindUsersInChat(int chatId, string username);
     }
 }

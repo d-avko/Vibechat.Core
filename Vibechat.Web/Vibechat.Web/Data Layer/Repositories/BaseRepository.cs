@@ -26,6 +26,11 @@ namespace Vibechat.Web.Data_Layer.Repositories
             return await _dbContext.Set<T>().ToListAsync();
         }
 
+        public async Task<IQueryable<T>> AsQuerableAsync(ISpecification<T> spec)
+        {
+            return ApplySpecification(spec).AsQueryable();
+        }
+
         public async Task<IReadOnlyList<T>> ListAsync(ISpecification<T> spec)
         {
             return await ApplySpecification(spec).ToListAsync();
