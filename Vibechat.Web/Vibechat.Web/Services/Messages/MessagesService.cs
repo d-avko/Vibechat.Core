@@ -13,6 +13,9 @@ using Vibechat.Web.Data_Layer.Repositories;
 using Vibechat.Web.DTO.Messages;
 using Vibechat.Web.Extensions;
 using VibeChat.Web.Data.DataModels;
+using Vibechat.Web.Data_Layer.Repositories.Specifications.Messages;
+using Vibechat.Web.Data_Layer.Repositories.Specifications.DeletedMessages;
+using Vibechat.Web.Data_Layer.Repositories.Specifications.UsersChats;
 
 namespace Vibechat.Web.Services.Messages
 {
@@ -27,6 +30,7 @@ namespace Vibechat.Web.Services.Messages
         private readonly IAttachmentKindsRepository attachmentKindsRepository;
         private readonly IAttachmentsRepository attachmentRepository;
         private readonly IChatEventsRepository chatEventsRepository;
+        private readonly IDeletedMessagesRepository deletedMessages;
 
         public MessagesService(IConversationRepository conversationRepository,
             IMessagesRepository messagesRepository,
@@ -36,7 +40,8 @@ namespace Vibechat.Web.Services.Messages
             IUsersRepository usersRepository,
             IAttachmentKindsRepository attachmentKindsRepository,
             IAttachmentsRepository attachmentRepository,
-            IChatEventsRepository chatEventsRepository
+            IChatEventsRepository chatEventsRepository,
+            IDeletedMessagesRepository deletedMessages
         )
         {
             this.conversationRepository = conversationRepository;
@@ -48,6 +53,7 @@ namespace Vibechat.Web.Services.Messages
             this.attachmentKindsRepository = attachmentKindsRepository;
             this.attachmentRepository = attachmentRepository;
             this.chatEventsRepository = chatEventsRepository;
+            this.deletedMessages = deletedMessages;
         }
 
         public const int MinSymbolsInMessagesSearch = 5;
@@ -57,11 +63,6 @@ namespace Vibechat.Web.Services.Messages
         {
             var unAuthorizedError = new UnauthorizedAccessException("You are unauthorized to do such an action.");
 
-            if (messagesRepository.Empty())
-            {
-                return null;
-            }
-
             var conversation = await conversationRepository.GetByIdAsync(conversationId);
 
             if (conversation == null)
@@ -69,7 +70,9 @@ namespace Vibechat.Web.Services.Messages
                 throw new FormatException("Wrong conversation to get attachments from.");
             }
 
-            var members = usersConversationsRepository.GetConversationParticipants(conversationId);
+            var members = 
+                (await usersConversationsRepository.ListAsync(new GetParticipantsSpec(conversationId)))
+                .Select(x => x.User);
 
             //only member of conversation could request messages of non-public conversation.
 
@@ -78,16 +81,29 @@ namespace Vibechat.Web.Services.Messages
                 throw new UnauthorizedAccessException("You are unauthorized to do such an action.");
             }
 
-            var messages = messagesRepository.GetAttachments(
-                whoAccessedId,
-                conversationId,
-                kind,
-                offset,
-                count);
+            var deleted = await deletedMessages.AsQuerableAsync(
+                new GetDeletedMessagesOfUserSpec(whoAccessedId));
+
+            var messages = await messagesRepository.ListAsync(
+                new GetAttachmentsSpec
+                (deleted,
+                 conversationId,
+                 kind,
+                 offset,
+                 count));
 
 
             return (from msg in messages
                 select msg.ToMessage()).ToList();
+        }
+
+        public async Task<int> GetUnreadMessagesAmount(Chat chat, string userId)
+        {
+            var lastMessage = await lastMessagesRepository.GetByIdAsync(userId, chat.Id);
+            IQueryable<DeletedMessagesDataModel> deleted = await deletedMessages
+                .AsQuerableAsync(new GetDeletedMessagesSpec(chat.Id, userId));
+
+            return await messagesRepository.CountAsync(new UnreadMessagesCountSpec(deleted, chat.Id, lastMessage?.MessageID ?? 0));
         }
 
         /// <summary>
@@ -135,11 +151,6 @@ namespace Vibechat.Web.Services.Messages
 
             var unAuthorizedError = new UnauthorizedAccessException("You are unauthorized to do such an action.");
 
-            if (messagesRepository.Empty())
-            {
-                return null;
-            }
-
             var conversation = await conversationRepository.GetByIdAsync(chatId);
 
             if (conversation == null)
@@ -147,7 +158,8 @@ namespace Vibechat.Web.Services.Messages
                 throw defaultErrorMessage;
             }
 
-            var members = usersConversationsRepository.GetConversationParticipants(chatId);
+            var members = (await usersConversationsRepository.ListAsync(new GetParticipantsSpec(chatId)))
+                .Select(x => x.User);
 
             //only member of conversation could request messages of non-public conversation.
 
@@ -156,13 +168,35 @@ namespace Vibechat.Web.Services.Messages
                 throw unAuthorizedError;
             }
 
-            var messages = messagesRepository.Get(
-                whoAccessedId,
-                chatId,
-                maxMessageId,
-                history,
-                offset,
-                count);
+            if(maxMessageId == -1)
+            {
+                throw new InvalidDataException("Wrong maxMessageId was provided.");
+            }
+
+            var deleted = await deletedMessages.AsQuerableAsync(new GetDeletedMessagesOfUserSpec(whoAccessedId));
+
+            ISpecification<MessageDataModel> spec;
+
+            if (history)
+            {
+                spec = new GetMessagesHistorySpec(
+                    deleted,
+                    chatId,
+                    maxMessageId,
+                    offset,
+                    count);
+            }
+            else
+            {
+                spec = new GetRecentMessagesSpec(
+                    deleted,
+                    chatId,
+                    maxMessageId,
+                    offset,
+                    count);
+            }
+
+            var messages = await messagesRepository.ListAsync(spec);
 
             //automatically set last message in group.
 
@@ -178,17 +212,26 @@ namespace Vibechat.Web.Services.Messages
                 select msg.ToMessage()).ToList();
         }
 
-        public async Task DeleteMessages(DeleteMessagesRequest messagesInfo, string whoAccessedId)
+        public async Task<Message> GetLastRecentMessage(int chatId, string userId)
         {
-            var messagesToDelete = messagesRepository.GetByIds(messagesInfo.MessagesId);
+            var deleted = await deletedMessages.AsQuerableAsync(new GetDeletedMessagesOfUserSpec(userId));
 
-            if (!messagesToDelete.All(x => x.ConversationID == messagesInfo.ConversationId))
+            return (await messagesRepository.ListAsync(
+                new GetLatestMessagesSpec(deleted, chatId, 0, 1))).FirstOrDefault()?.ToMessage();
+        }
+
+        public async Task DeleteMessages(List<int> messagesIds,int chatId, string whoAccessedId)
+        {
+            IReadOnlyList<MessageDataModel> messagesToDelete = await messagesRepository
+                .ListAsync(new MessagesByIdsSpec(messagesIds));
+
+            if (!messagesToDelete.All(x => x.ConversationID == chatId))
             {
                 throw new ArgumentException(
                     "All messages must be from same conversation passed as ConversationId parameter.");
             }
 
-            var conversation = await usersConversationsRepository.Get(whoAccessedId, messagesInfo.ConversationId);
+            var conversation = await usersConversationsRepository.GetByIdAsync(whoAccessedId, chatId);
 
             if (conversation == null)
             {
@@ -197,7 +240,11 @@ namespace Vibechat.Web.Services.Messages
 
             try
             {
-                messagesRepository.Remove(messagesInfo.MessagesId, whoAccessedId);
+                foreach (MessageDataModel msg in messagesToDelete)
+                {
+                    await deletedMessages.AddAsync(DeletedMessagesDataModel.Create(whoAccessedId, msg));
+                }
+
                 await unitOfWork.Commit();
             }
             catch (Exception ex)
@@ -217,11 +264,11 @@ namespace Vibechat.Web.Services.Messages
         /// <returns></returns>
         public async Task SetLastMessage(string userId, int chatId, int msgId)
         {
-            var lastMessage = lastMessagesRepository.Get(userId, chatId);
+            var lastMessage = await lastMessagesRepository.GetByIdAsync(userId, chatId);
 
             if (lastMessage == null)
             {
-                lastMessagesRepository.Add(userId, chatId, msgId);
+                await lastMessagesRepository.AddAsync(LastMessageDataModel.Create(userId, chatId, msgId));
             }
             else
             {
@@ -231,7 +278,7 @@ namespace Vibechat.Web.Services.Messages
                 }
 
                 lastMessage.MessageID = msgId;
-                lastMessagesRepository.Update(lastMessage);
+                await lastMessagesRepository.UpdateAsync(lastMessage);
             }
 
             await unitOfWork.Commit();
@@ -248,20 +295,15 @@ namespace Vibechat.Web.Services.Messages
         /// <exception cref="UnauthorizedAccessException"></exception>
         public async Task MarkMessageAsRead(int msgId, int conversationId, string whoAccessedId)
         {
-            var message = messagesRepository.GetById(msgId);
-
-            if (message.User.Id == whoAccessedId)
-            {
-                throw new UnauthorizedAccessException("Couldn't mark this message as read because it was sent by you.");
-            }
+            var message = await messagesRepository.GetByIdAsync(msgId);
 
             if (!await usersConversationsRepository.Exists(whoAccessedId, conversationId))
             {
                 throw new UnauthorizedAccessException(
                     "User was not present in conversation. Couldn't mark the message as read.");
             }
-
-            messagesRepository.MarkAsRead(message);
+            message.State = MessageState.Read;
+            await messagesRepository.UpdateAsync(message);
             await SetLastMessage(whoAccessedId, conversationId, msgId);
             await unitOfWork.Commit();
         }
@@ -293,14 +335,9 @@ namespace Vibechat.Web.Services.Messages
                     throw new UnauthorizedAccessException("Forwarded message id is incorrect.");
                 }
 
-                var foundMessage = messagesRepository.GetByIds(new List<int> {message.ForwardedMessage.Id}).ToList();
+                var foundMessage = await messagesRepository.GetByIdAsync(message.ForwardedMessage.Id);
 
-                if (!foundMessage.Count().Equals(1))
-                {
-                    throw new FormatException("Forwarded message was not found.");
-                }
-
-                forwardedMessage = foundMessage[0];
+                forwardedMessage = foundMessage ?? throw new FormatException("Forwarded message was not found.");
             }
 
             MessageDataModel model = MessageDataModel.Create(whoSent, chatId);
@@ -314,7 +351,7 @@ namespace Vibechat.Web.Services.Messages
                 model.AsText(message.MessageContent);
             }
 
-            var result = messagesRepository.Add(model);
+            var result = await messagesRepository.AddAsync(model);
             await unitOfWork.Commit();
             await SetLastMessage(senderId, chatId, result.MessageID);
             return result;
@@ -333,7 +370,7 @@ namespace Vibechat.Web.Services.Messages
             var model = MessageDataModel
                 .Create(whoSent, groupId)
                 .AsSecure(message);
-            var result = messagesRepository.Add(model);
+            var result = await messagesRepository.AddAsync(model);
             await unitOfWork.Commit();
             await SetLastMessage(senderId, groupId, result.MessageID);
             return result;
@@ -358,7 +395,7 @@ namespace Vibechat.Web.Services.Messages
                 .Create(whoSent, groupId)
                 .AsAttachment(attachment);
 
-            var result = messagesRepository.Add(model);
+            var result = await messagesRepository.AddAsync(model);
             await unitOfWork.Commit();
             await SetLastMessage(senderId, groupId, result.MessageID);
             return result;
@@ -375,7 +412,7 @@ namespace Vibechat.Web.Services.Messages
                     .Create(null, chatId)
                     .AsEvent(newEvent);
 
-                var result = messagesRepository.Add(model);
+                var result = await messagesRepository.AddAsync(model);
                 await unitOfWork.Commit();
                 return result;
             }

@@ -1,12 +1,13 @@
-﻿using VibeChat.Web;
+﻿using System.Threading.Tasks;
+using Vibechat.Web.Data.DataModels;
+using Vibechat.Web.Data_Layer.Repositories;
+using VibeChat.Web;
 
 namespace Vibechat.Web.Data.Repositories
 {
-    public interface IUsersBansRepository
+    public interface IUsersBansRepository : IAsyncRepository<UsersBansDatamodel>
     {
-        void BanUser(AppUser banned, AppUser bannedBy);
-        bool IsBanned(string whoId, string byWhomId);
-
-        void UnbanUser(string userId, string whoUnbansId);
+        Task<UsersBansDatamodel> GetByIdAsync(string userId, string whoUnbansId);
+        Task<bool> IsBanned(string whoId, string byWhomId);
     }
 }

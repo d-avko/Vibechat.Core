@@ -595,7 +595,7 @@ namespace VibeChat.Web
 
             try
             {
-                await chatsService.ValidateDialog(whoSent.Id, userId, conversationId);
+                await chatsService.ValidateDialog(whoSent.Id, userId);
                 var user = await userService.GetUserById(userId);
                 var created = await messagesService.AddEncryptedMessage(encryptedMessage, conversationId, whoSent.Id);
 

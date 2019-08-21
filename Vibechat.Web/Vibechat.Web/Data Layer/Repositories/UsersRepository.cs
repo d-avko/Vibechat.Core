@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Vibechat.Web.Data_Layer.Repositories;
 using VibeChat.Web;
 
 namespace Vibechat.Web.Data.Repositories

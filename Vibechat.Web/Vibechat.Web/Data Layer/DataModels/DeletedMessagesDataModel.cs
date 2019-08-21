@@ -16,5 +16,14 @@ namespace VibeChat.Web
 
         //user that deleted that message
         public string UserId { get; set; }
+
+        public static DeletedMessagesDataModel Create(string userId, MessageDataModel message)
+        {
+            return new DeletedMessagesDataModel
+            {
+                UserId = userId,
+                Message = message
+            };
+        }
     }
 }

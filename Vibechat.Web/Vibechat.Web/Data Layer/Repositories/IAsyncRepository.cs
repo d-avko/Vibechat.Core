@@ -14,5 +14,7 @@ namespace Vibechat.Web.Data_Layer.Repositories
         Task UpdateAsync(T entity);
         Task DeleteAsync(T entity);
         Task<int> CountAsync(ISpecification<T> spec);
+
+        Task<IQueryable<T>> AsQuerableAsync(ISpecification<T> spec);
     }
 }

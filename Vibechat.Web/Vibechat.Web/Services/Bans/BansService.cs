@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using VibeChat.Web;
 using Vibechat.Web.Data.Conversations;
 using Vibechat.Web.Data.Repositories;
+using Vibechat.Web.Data.DataModels;
 
 namespace Vibechat.Web.Services.Bans
 {
@@ -64,7 +65,7 @@ namespace Vibechat.Web.Services.Bans
 
             try
             {
-                ConversationsBansRepository.BanUserInGroup(banned, conversation);
+                await ConversationsBansRepository.AddAsync(ConversationsBansDataModel.Create(banned, conversation));
                 await unitOfWork.Commit();
             }
             catch
@@ -90,7 +91,7 @@ namespace Vibechat.Web.Services.Bans
 
             try
             {
-                UsersBansRepository.BanUser(banned, bannedBy);
+                await UsersBansRepository.AddAsync(UsersBansDatamodel.Create(banned, bannedBy));
             }
             catch
             {
@@ -101,7 +102,7 @@ namespace Vibechat.Web.Services.Bans
 
             if ((dialog = await usersConversationsRepository.GetDialog(UserToBanId, whoAccessedId)) != null)
             {
-                ConversationsBansRepository.BanUserInGroup(banned, dialog.Conversation);
+                await ConversationsBansRepository.AddAsync(ConversationsBansDataModel.Create(banned, dialog.Conversation));
             }
 
             await unitOfWork.Commit();
@@ -116,20 +117,20 @@ namespace Vibechat.Web.Services.Bans
                 throw new FormatException("Wrong id of a person to check.");
             }
 
-            return ConversationsBansRepository.IsBanned(who, conversationId);
+            return (await ConversationsBansRepository.GetByIdAsync(Who, conversationId)) != null;
         }
 
         public bool IsBannedFromMessagingWith(string who, string byWho)
         {
             // check if allowed
-            return UsersBansRepository.IsBanned(who, byWho);
+            return UsersBansRepository.IsBanned(who, byWho).GetAwaiter().GetResult();
         }
 
         public async Task UnbanDialog(string userId, string whoUnbans)
         {
             try
             {
-                UsersBansRepository.UnbanUser(userId, whoUnbans);
+                await UsersBansRepository.DeleteAsync(await UsersBansRepository.GetByIdAsync(userId, whoUnbans));
             }
             catch
             {
@@ -140,7 +141,9 @@ namespace Vibechat.Web.Services.Bans
 
             if ((dialog = await usersConversationsRepository.GetDialog(userId, whoUnbans)) != null)
             {
-                ConversationsBansRepository.UnbanUserInGroup(userId, dialog.Conversation.Id);
+                var entry = await ConversationsBansRepository.GetByIdAsync(userId, dialog.Conversation.Id);
+
+                await ConversationsBansRepository.DeleteAsync(entry);
             }
 
             await unitOfWork.Commit();
@@ -176,7 +179,8 @@ namespace Vibechat.Web.Services.Bans
 
             try
             {
-                ConversationsBansRepository.UnbanUserInGroup(userToUnbanId, conversationId);
+                var entry = await ConversationsBansRepository.GetByIdAsync(userToUnbanId, conversationId);
+                await ConversationsBansRepository.DeleteAsync(entry);
                 await unitOfWork.Commit();
             }
             catch

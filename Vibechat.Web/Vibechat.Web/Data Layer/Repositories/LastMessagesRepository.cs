@@ -1,42 +1,20 @@
 ﻿using System.Linq;
 using VibeChat.Web;
 using Vibechat.Web.Data_Layer.DataModels;
+using System.Threading.Tasks;
 
 namespace Vibechat.Web.Data_Layer.Repositories
 {
-    public class LastMessagesRepository : ILastMessagesRepository
+    public class LastMessagesRepository : BaseRepository<LastMessageDataModel>, ILastMessagesRepository
     {
-        public LastMessagesRepository(ApplicationDbContext dbContext)
+        public LastMessagesRepository(ApplicationDbContext dbContext) : base(dbContext)
         {
-            mContext = dbContext;
+            
         }
 
-        private ApplicationDbContext mContext { get; }
-
-        public void Update(LastMessageDataModel entry)
+        public ValueTask<LastMessageDataModel> GetByIdAsync(string userId, int chatId)
         {
-            mContext.LastViewedMessages.Update(entry);
-        }
-
-        public void Add(string userId, int chatId, int msgId)
-        {
-            mContext.LastViewedMessages.Add(new LastMessageDataModel
-            {
-                ChatID = chatId,
-                UserID = userId,
-                MessageID = msgId
-            });
-        }
-
-        public LastMessageDataModel Get(string userId, int chatId)
-        {
-            return mContext.LastViewedMessages.SingleOrDefault(
-                entry => entry.ChatID == chatId && entry.UserID == userId);
-        }
-
-        public void Remove(LastMessageDataModel entry)
-        {
-            mContext.LastViewedMessages.Remove(entry);
+            return _dbContext.LastViewedMessages.FindAsync(chatId,userId);
         }
     }
 }

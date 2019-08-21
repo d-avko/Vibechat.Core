@@ -1,36 +1,27 @@
 ﻿using System.Linq;
 using VibeChat.Web;
 using Vibechat.Web.Data.DataModels;
+using Vibechat.Web.Data_Layer.Repositories;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace Vibechat.Web.Data.Repositories
 {
-    public class UsersBansRepository : IUsersBansRepository
+    public class UsersBansRepository : BaseRepository<UsersBansDatamodel>, IUsersBansRepository
     {
-        public UsersBansRepository(ApplicationDbContext dbContext)
+        public UsersBansRepository(ApplicationDbContext dbContext) : base(dbContext)
         {
-            mContext = dbContext;
+            
         }
 
-        private ApplicationDbContext mContext { get; }
-
-        public void BanUser(AppUser banned, AppUser bannedBy)
+        public async Task<bool> IsBanned(string whoId, string byWhomId)
         {
-            mContext.UsersBans.Add(new UsersBansDatamodel {BannedBy = bannedBy, BannedUser = banned});
+            return (await GetByIdAsync(whoId, byWhomId)) != default;
         }
 
-        public void UnbanUser(string userId, string whoUnbansId)
+        public Task<UsersBansDatamodel> GetByIdAsync(string userId, string bannedById)
         {
-            mContext.UsersBans.Remove(Get(userId, whoUnbansId));
-        }
-
-        public bool IsBanned(string whoId, string byWhomId)
-        {
-            return mContext.UsersBans.Any(x => x.BannedID == whoId && x.BannedByID == byWhomId);
-        }
-
-        public UsersBansDatamodel Get(string userId, string whoUnbansId)
-        {
-            return mContext.UsersBans.FirstOrDefault(x => x.BannedByID == whoUnbansId && x.BannedID == userId);
+            return _dbContext.UsersBans.FirstOrDefaultAsync(x => x.BannedByID == bannedById && x.BannedID == userId);
         }
     }
 }

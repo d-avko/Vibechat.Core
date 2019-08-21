@@ -47,6 +47,12 @@ namespace Vibechat.Web.Data_Layer.Repositories
                 query = query.Skip(specification.Skip)
                              .Take(specification.Take);
             }
+
+            if (specification.IsAsNoTracking)
+            {
+                query = query.AsNoTracking();
+            }
+
             return query;
         }
     }

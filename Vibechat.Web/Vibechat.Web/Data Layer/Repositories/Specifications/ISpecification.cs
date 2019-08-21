@@ -15,8 +15,12 @@ namespace Vibechat.Web.Data_Layer.Repositories
         Expression<Func<T, object>> OrderByDescending { get; }
         Expression<Func<T, object>> GroupBy { get; }
 
+        //Expression<Func<T, object>> Union { get; }
+
         int Take { get; }
         int Skip { get; }
         bool IsPagingEnabled { get; }
+
+        bool IsAsNoTracking { get; }
     }
 }

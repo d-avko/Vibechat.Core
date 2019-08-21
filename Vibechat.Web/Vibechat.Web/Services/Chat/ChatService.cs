@@ -18,6 +18,7 @@ using Vibechat.Web.Services.ChatDataProviders;
 using Vibechat.Web.Services.FileSystem;
 using Vibechat.Web.Services.Messages;
 using Vibechat.Web.Data_Layer.Repositories.Specifications.Chats;
+using Vibechat.Web.Data_Layer.Repositories.Specifications.UsersChats;
 
 namespace Vibechat.Web.Services
 {
@@ -105,7 +106,9 @@ namespace Vibechat.Web.Services
             chat.AuthKeyId = authKeyId;
             await conversationRepository.UpdateAsync(chat);
 
-            usersConversationsRepository.UpdateDeviceId(deviceId, thisUserId, chatId);
+            var userChatEntry = await usersConversationsRepository.GetByIdAsync(thisUserId, chatId);
+            userChatEntry.DeviceId = deviceId;
+            await usersConversationsRepository.UpdateAsync(userChatEntry);
 
             await unitOfWork.Commit();
         }
@@ -181,11 +184,14 @@ namespace Vibechat.Web.Services
             {
                 if (!credentials.IsGroup)
                 {
-                    usersConversationsRepository.Add(credentials.DialogUserId, createdChat);
+                    await usersConversationsRepository.AddAsync(UsersConversationDataModel.Create(credentials.DialogUserId, createdChat));
                     await rolesRepository.AddAsync(ChatRoleDataModel.Create(createdChat, credentials.DialogUserId, ChatRole.NoRole));
                 }
 
-                usersConversationsRepository.Add(credentials.CreatorId, createdChat, credentials.DeviceId);
+                await usersConversationsRepository.AddAsync(UsersConversationDataModel.Create(
+                    credentials.CreatorId, 
+                    createdChat, 
+                    credentials.DeviceId));
 
                 await rolesRepository.AddAsync(ChatRoleDataModel.Create(createdChat, credentials.CreatorId, ChatRole.Creator));
 
@@ -221,7 +227,7 @@ namespace Vibechat.Web.Services
                 throw new UnauthorizedAccessException("Caller of this method must be the part of conversation.");
             }
 
-            var result = (await usersConversationsRepository.FindUsersInChat(username, chatId))
+            var result = (await usersConversationsRepository.FindUsersInChat(chatId, username))
                 .Select(x => x.ToUserInfo())
                 .ToList();
             
@@ -235,17 +241,6 @@ namespace Vibechat.Web.Services
             return result;
         }
 
-        private async Task<int> GetUnreadMessagesAmount(Chat chat, string userId)
-        {
-            if (messagesRepository.Empty())
-            {
-                return 0;
-            }
-
-            var lastMessage = lastMessagesRepository.Get(userId, chat.Id);
-
-            return messagesRepository.GetUnreadAmount(chat.Id, userId, lastMessage?.MessageID ?? 0);
-        }
 
         public async Task<UpdateThumbnailResponse> UpdateThumbnail(int conversationId, IFormFile image, string userId)
         {
@@ -369,7 +364,7 @@ namespace Vibechat.Web.Services
                 throw new FormatException("Wrong conversation.");
             }
 
-            var userConversation = await usersConversationsRepository.Get(userId, chatId);
+            var userConversation = await usersConversationsRepository.GetByIdAsync(userId, chatId);
 
             if (userConversation == null)
             {
@@ -386,9 +381,10 @@ namespace Vibechat.Web.Services
                 }
             }
 
-            usersConversationsRepository.Remove(userConversation);
+            await usersConversationsRepository.DeleteAsync(userConversation);
 
-            if (usersConversationsRepository.GetParticipantsCount(conversation.Id).Equals(0))
+            if ((await usersConversationsRepository.CountAsync(new GetParticipantsSpec(conversation.Id)))
+                .Equals(0))
             {
                 await conversationRepository.DeleteAsync(conversation);
             }
@@ -481,7 +477,7 @@ namespace Vibechat.Web.Services
                 throw new FormatException("User already exists in converation.");
             }
 
-            var addedUser = usersConversationsRepository.Add(userId, chatId).User;
+            var addedUser = (await usersConversationsRepository.AddAsync(UsersConversationDataModel.Create(userId, chatId))).User;
 
             await rolesRepository.AddAsync(ChatRoleDataModel.Create(chatId, userId, ChatRole.NoRole));
 
@@ -489,11 +485,9 @@ namespace Vibechat.Web.Services
             return addedUser.ToUserInfo();
         }
 
-        public async Task ValidateDialog(string firstUserId, string secondUserId, int conversationId)
+        public async Task ValidateDialog(string firstUserId, string secondUserId)
         {
-            var dialog = await usersConversationsRepository.GetDialog(firstUserId, secondUserId);
-
-            if (dialog == null)
+            if ((await usersConversationsRepository.GetDialog(firstUserId, secondUserId)) == null)
             {
                 throw new InvalidDataException("Wrong id of a user in dialog.");
             }
@@ -527,38 +521,30 @@ namespace Vibechat.Web.Services
                 throw defaultError;
             }
 
-            var chats = usersConversationsRepository.GetUserConversations(deviceId, whoAccessedId)
-                .ToList();
+            var chats = await usersConversationsRepository.GetUserChats(deviceId, whoAccessedId);
 
             var returnData = new List<Chat>();
 
             foreach (var chat in chats)
             {
-                var lastMessage = (await messagesService.GetMessages(
-                        chat.Id, 
-                        0, 
-                        1, 
-                        -1, 
-                        false, 
-                        false, 
-                        whoAccessedId))
-                    .FirstOrDefault();
+                var lastMessage = await messagesService.GetLastRecentMessage(chat.Id, whoAccessedId);
 
                 var dtoChat = chat.ToChatDto(
                     chat.IsGroup ? await GetParticipants(chat.Id, MaxParticipantsToReturn) : null,
                     chat.IsGroup
                         ? null
-                        : usersConversationsRepository.GetUserInDialog(chat.Id, whoAccessedId),
+                        :await usersConversationsRepository.GetUserInDialog(chat.Id, whoAccessedId),
                     chat.PublicKey,
                     await rolesRepository.GetByIdAsync(chat.Id, whoAccessedId),
                     chat.IsSecure ? await GetDeviceId(chat.Id, whoAccessedId) : null,
-                    lastMessagesRepository.Get(whoAccessedId, chat.Id)?.MessageID ?? 0,
+                    (await lastMessagesRepository.GetByIdAsync(whoAccessedId, chat.Id))?.MessageID ?? 0,
                     lastMessage
                 );
 
                 dtoChat.IsMessagingRestricted =
                     await bansService.IsBannedFromConversation(chat.Id, whoAccessedId);
-                dtoChat.MessagesUnread = await GetUnreadMessagesAmount(dtoChat, whoAccessedId);
+
+                dtoChat.MessagesUnread = await messagesService.GetUnreadMessagesAmount(dtoChat, whoAccessedId);
                 dtoChat.ChatRole = await GetChatRole(whoAccessedId, chat.Id);
 
                 if (chat.IsGroup)
@@ -581,7 +567,7 @@ namespace Vibechat.Web.Services
 
         private async Task<string> GetDeviceId(int chatId, string userId)
         {
-            var chat = await usersConversationsRepository.Get(userId, chatId);
+            var chat = await usersConversationsRepository.GetByIdAsync(userId, chatId);
             return chat.DeviceId;
         }
 
@@ -596,11 +582,11 @@ namespace Vibechat.Web.Services
                 throw defaultErrorMessage;
             }
 
-            var participants = usersConversationsRepository.GetConversationParticipants(chatId);
+            var participants = await usersConversationsRepository.GetChatParticipants(chatId);
 
             var users = (from participant in participants
-                    select participant.ToUserInfo()
-                ).ToList();
+                         select participant.ToUserInfo()
+                        ).ToList();
 
             if (maximum.Equals(0))
             {
@@ -636,7 +622,7 @@ namespace Vibechat.Web.Services
 
             if (conversation.IsGroup)
             {
-                members = usersConversationsRepository.GetConversationParticipants(conversationId)
+                members = (await usersConversationsRepository.GetChatParticipants(conversationId))
                     .Select(x => x.ToUserInfo())
                     .ToList();
 
@@ -647,7 +633,7 @@ namespace Vibechat.Web.Services
             }
             else
             {
-                dialogUser = usersConversationsRepository.GetUserInDialog(conversationId, whoAccessedId);
+                dialogUser = await usersConversationsRepository.GetUserInDialog(conversationId, whoAccessedId);
 
                 if (dialogUser == null)
                 {
@@ -666,7 +652,7 @@ namespace Vibechat.Web.Services
                 null);
 
             dtoChat.IsMessagingRestricted = await bansService.IsBannedFromConversation(dtoChat.Id, whoAccessedId);
-            dtoChat.ClientLastMessageId = lastMessagesRepository.Get(whoAccessedId, conversationId)?.MessageID ?? 0;
+            dtoChat.ClientLastMessageId = (await lastMessagesRepository.GetByIdAsync(whoAccessedId, conversationId))?.MessageID ?? 0;
             
             if (conversation.IsGroup)
             {
@@ -693,7 +679,7 @@ namespace Vibechat.Web.Services
 
             if (!conversation.IsGroup)
             {
-                dialogUser = usersConversationsRepository.GetUserInDialog(conversationId, whoAccessedId);
+                dialogUser = await usersConversationsRepository.GetUserInDialog(conversationId, whoAccessedId);
 
                 if (dialogUser == null)
                 {

@@ -107,7 +107,8 @@ namespace Vibechat.Web.Controllers
             try
             {
                 await messagesService.DeleteMessages(
-                    messagesInfo,
+                    messagesInfo.MessagesId,
+                    messagesInfo.ConversationId,
                     JwtHelper.GetNamedClaimValue(User.Claims));
 
                 return new ResponseApiModel<string>
