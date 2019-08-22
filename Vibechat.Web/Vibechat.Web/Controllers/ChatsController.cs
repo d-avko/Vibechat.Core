@@ -216,10 +216,10 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                var thisUserID = JwtHelper.GetNamedClaimValue(User.Claims);
+                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
 
                 var result = await mChatsService.UpdateThumbnail(chatId,
-                    updateThumbnail.thumbnail, thisUserID);
+                    updateThumbnail.thumbnail, thisUserId);
                 return new ResponseApiModel<UpdateThumbnailResponse>
                 {
                     IsSuccessfull = true,

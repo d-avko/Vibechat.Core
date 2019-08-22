@@ -52,23 +52,11 @@ namespace Vibechat.Web.Data.Repositories
 
         public async Task<UsersConversationDataModel> GetDialog(string firstUserId, string secondUserId)
         {
-            var firstUserConversations = 
-                _dbContext
-                .UsersConversations
-                .Where(x => x.UserID == firstUserId
-                     && !x.Conversation.IsGroup);
-
-            foreach (var conversation in firstUserConversations)
-            {
-                if (await _dbContext
-                    .UsersConversations
-                    .AnyAsync(x => x.ChatID == conversation.ChatID && x.UserID == secondUserId))
-                {
-                    return conversation;
-                }
-            }
-
-            return null;
+            var result = await ListAsync(new GetDialogsSpec(firstUserId));
+            return result?.GroupBy(entry => entry.ChatID)
+                .FirstOrDefault(group => group.Any(entry => entry.UserID == firstUserId) 
+                                         && group.Any(entry => entry.UserID == secondUserId))
+                ?.First();
         }
     }
 }
