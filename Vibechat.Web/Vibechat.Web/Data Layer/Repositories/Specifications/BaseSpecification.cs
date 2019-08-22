@@ -62,11 +62,7 @@ namespace Vibechat.Web.Data_Layer.Repositories.Specifications
         {
             IsAsNoTracking = true;
         }
-
-        //protected virtual void ApplyUnion(Expression<Func<T, object>> unionExpression)
-        //{
-        //    Union = unionExpression;
-        //}
+        
 
         //Not used anywhere at the moment, but someone requested an example of setting this up.
         protected virtual void ApplyGroupBy(Expression<Func<T, object>> groupByExpression)

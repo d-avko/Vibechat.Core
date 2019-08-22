@@ -3,6 +3,11 @@ version: '3.4'
 services:
   vibechat.web:
     image: vibechatweb_vibechat.web:latest
+    ports:
+     - "5000:5000"
+     - "5001:5001"
+    environment:
+     - ASPNETCORE_URLS=http://*:5000;https://*:5001
     depends_on:
      - "vibechat.db"
     networks:
