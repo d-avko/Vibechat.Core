@@ -46,7 +46,7 @@ For storage, Kestrel with ```PhysicalFileProvider``` was used.
 ##### Deployment of fileserver
 1. ```docker build -t vibechat.fileserver .```
 2. ```docker save -o <Output path> vibechat.fileserver```
-3. On linux VM: ``` docker load --input <filename>; sudo docker run -d -p 443:443 --mount source=fileserver_volume,target=/app vibechat.fileserver ```.
+3. On linux VM: ``` docker load --input <filename>; docker run -p 5000:5000 -e ASPNETCORE_URLS=http://*:5000 vibechat.fileserver --mount source=fileserver_volume,target=/app vibechat.fileserver```.
 
 ##### Deployment of database, front-end and back-end:
 1. ``` docker-compose build ```
