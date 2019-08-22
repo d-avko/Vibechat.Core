@@ -1,7 +1,7 @@
 # Vibechat - Simple ASP.NET Core messenger
 ASP.NET Core Messenger: PWA Asp.Net core & Angular messenger that features Groups, dialogs, end-to-end encrypted chats. 
 Uses mobile phone login system (firebase is used as SMS provider) and tokens based authorization.
-Running at https://denisavko.me
+Running at https://denisavko.me, UI Api: https://denisavko.me/swagger/ui/index.html
 
 Messaging             |  User profiles
 :-------------------------:|:-------------------------:
@@ -46,15 +46,14 @@ For storage, Kestrel with ```PhysicalFileProvider``` was used.
 ##### Deployment of fileserver
 1. ```docker build -t vibechat.fileserver .```
 2. ```docker save -o <Output path> vibechat.fileserver```
-3. On linux VM: ``` docker load --input <filename>; sudo docker run -d -p 443:443 --mount source=fileserver_volume,target=/app vibechat.fileserver ```.
+3. On linux VM: ``` docker load --input <filename>; docker run -p 5000:5000 -e ASPNETCORE_URLS=http://*:5000 vibechat.fileserver --mount source=fileserver_volume,target=/app vibechat.fileserver```.
 
 ##### Deployment of database, front-end and back-end:
 1. ``` docker-compose build ```
 2. Save database image and back-end image, and load them onto your VM, as shown above.
 3. ``` docker-compose up ```
+4. Install nginx, copy config file, run nginx.
 
 ### Front-end
 
-**Framework**: Angular 7
-
-**UI Components**: Angular material.
+**Framework and UI**: Angular 8: internationalization (i18n), UI components(Angular material).
