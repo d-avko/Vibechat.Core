@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,12 +37,12 @@ namespace Vibechat.FileServer
 
         public void Configure(IApplicationBuilder app)
         {
-            app.UseCors(OriginsPolicyName);
-
-            app.UseStaticFiles(new StaticFileOptions
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
-                FileProvider = new PhysicalFileProvider(Configuration["ContentPath"], ExclusionFilters.None)
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
+            
+            app.UseCors(OriginsPolicyName);
 
             app.UseMiddleware<AdminSafeListMiddleware>();
 
