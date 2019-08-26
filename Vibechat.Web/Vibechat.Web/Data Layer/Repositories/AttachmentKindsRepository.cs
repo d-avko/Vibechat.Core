@@ -13,7 +13,7 @@ namespace Vibechat.Web.Data.Repositories
             
         }
 
-        public ValueTask<AttachmentKindDataModel> GetById(AttachmentKind kind)
+        public Task<AttachmentKindDataModel> GetById(AttachmentKind kind)
         {
             return _dbContext.AttachmentKinds.FindAsync(kind);
         }

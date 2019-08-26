@@ -32,6 +32,6 @@ namespace VibeChat.Web
 
         public string RefreshToken { get; set; }
 
-        public bool IsAdmin { get; set; } = false;
+        public bool IsAdmin { get; set; }
     }
 }

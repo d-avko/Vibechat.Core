@@ -7,6 +7,6 @@ namespace Vibechat.Web.Data.Repositories
 {
     public interface IConversationsBansRepository : IAsyncRepository<ConversationsBansDataModel>
     {
-        ValueTask<ConversationsBansDataModel> GetByIdAsync(string userId, int chatId);
+        Task<ConversationsBansDataModel> GetByIdAsync(string userId, int chatId);
     }
 }

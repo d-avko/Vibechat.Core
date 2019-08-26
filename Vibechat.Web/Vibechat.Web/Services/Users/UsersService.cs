@@ -114,6 +114,11 @@ namespace Vibechat.Web.Services.Users
                 throw new FormatException("Name was too long or too short.");
             }
 
+            if(newName.ToLower() == "admin")
+            {
+                throw new InvalidDataException("Forbidden username.");
+            }
+
             var foundUser = await usersRepository.GetByUsername(newName);
 
             if (foundUser != null)

@@ -9,6 +9,6 @@ namespace Vibechat.Web.Data.Repositories
 {
     public interface IChatRolesRepository : IAsyncRepository<ChatRoleDataModel>
     {
-        ValueTask<ChatRoleDataModel> GetByIdAsync(int chatId, string userId);
+        Task<ChatRoleDataModel> GetByIdAsync(int chatId, string userId);
     }
 }
