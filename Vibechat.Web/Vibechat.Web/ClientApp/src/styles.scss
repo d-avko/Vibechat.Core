@@ -28,11 +28,25 @@ $dark-theme: mat-dark-theme($dark-primary, $dark-accent, $dark-warn);
 .profile-dialog .mat-dialog-container{
   padding: 0;
   overflow-x: hidden;
+  overflow-y: hidden;
 }
 .profile-dialog_header-text{
   color: white;
   padding: 20px;
   background: cadetblue;
+}
+
+.padding20px{
+  padding: 20px !important;
+}
+
+.paddingLeftRight40px{
+  padding: 0 40px !important;
+}
+//must use important to override mat-dialog styles.
+.paddingLeft40Bottom20{
+  padding-left: 40px !important;
+  padding-bottom: 20px !important;
 }
 
 ::-webkit-scrollbar {

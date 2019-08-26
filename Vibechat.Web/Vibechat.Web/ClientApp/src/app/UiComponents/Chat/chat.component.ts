@@ -127,6 +127,7 @@ export class ChatComponent implements OnInit {
 
   public CreateSecureChat() {
     const chooseContactRef = this.dialog.open(ChooseContactDialogComponent, {
+      panelClass: "profile-dialog",
       width: '450px'
     });
 
@@ -209,6 +210,7 @@ export class ChatComponent implements OnInit {
     this.sideDrawer.close();
 
     const dialogRef = this.dialog.open(AddGroupDialogComponent, {
+      panelClass: "profile-dialog",
       width: '250px'
     });
 

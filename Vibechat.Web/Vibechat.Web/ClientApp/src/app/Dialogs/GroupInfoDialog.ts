@@ -51,6 +51,7 @@ export class GroupInfoDialogComponent {
 
   public ChooseUser() {
     const chatUsersDialogRef = this.dialog.open(ChatUsersDialogComponent, {
+      panelClass: "profile-dialog",
       width: '450px',
       data: {
         conversationId: this.data.Conversation.id
@@ -63,6 +64,7 @@ export class GroupInfoDialogComponent {
 
       //show admin panel, pass user
       const adminPanelRef = this.anotherDialog.open(AdminPanelDialog, {
+        panelClass: "profile-dialog",
         width: '450px',
         data: {
           user: user,
@@ -157,6 +159,7 @@ export class GroupInfoDialogComponent {
 
   public ViewAttachments() {
     const attachmentsDialogRef = this.dialog.open(ViewAttachmentsDialogComponent, {
+      panelClass: "profile-dialog",
       width: '450px',
       data: {
         conversation: this.data.Conversation
@@ -190,6 +193,7 @@ export class GroupInfoDialogComponent {
   public ChangeName() {
 
     const groupInfoRef = this.ChangeNameDialog.open(ChangeNameDialogComponent, {
+      panelClass: "profile-dialog",
       width: '450px'
     });
 
@@ -206,6 +210,7 @@ export class GroupInfoDialogComponent {
 
   public InviteUsers() {
     const dialogRef = this.dialog.open(FindUsersDialogComponent, {
+      panelClass: "profile-dialog",
       width: '350px',
       data: {
         conversationId: this.data.Conversation.id,
