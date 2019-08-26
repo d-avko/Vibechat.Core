@@ -12,7 +12,7 @@ namespace Vibechat.Web.Data_Layer.Repositories
             
         }
 
-        public ValueTask<LastMessageDataModel> GetByIdAsync(string userId, int chatId)
+        public Task<LastMessageDataModel> GetByIdAsync(string userId, int chatId)
         {
             return _dbContext.LastViewedMessages.FindAsync(chatId,userId);
         }

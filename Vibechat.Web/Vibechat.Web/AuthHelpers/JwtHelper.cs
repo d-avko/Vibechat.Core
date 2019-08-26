@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using JwtRegisteredClaimNames = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames;
 
@@ -29,7 +30,7 @@ namespace VibeChat.Web
             };
 
             var credentials = new SigningCredentials(
-                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(DI.Configuration["Jwt:SecretKey"])),
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(DI.Configuration["Jwt:SecretKey"] as string)),
                 SecurityAlgorithms.HmacSha256
             );
 
@@ -55,7 +56,7 @@ namespace VibeChat.Web
             };
 
             var credentials = new SigningCredentials(
-                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(DI.Configuration["Jwt:SecretKey"])),
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(DI.Configuration["Jwt:SecretKey"] as string)),
                 SecurityAlgorithms.HmacSha256
             );
 

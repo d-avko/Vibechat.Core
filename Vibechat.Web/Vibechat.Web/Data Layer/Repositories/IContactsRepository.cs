@@ -7,6 +7,6 @@ namespace Vibechat.Web.Data.Repositories
 {
     public interface IContactsRepository : IAsyncRepository<ContactsDataModel>
     {
-        ValueTask<ContactsDataModel> GetByIdAsync(string user, string contactId);
+        Task<ContactsDataModel> GetByIdAsync(string user, string contactId);
     }
 }

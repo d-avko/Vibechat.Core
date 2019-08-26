@@ -17,7 +17,7 @@ namespace Vibechat.Web.Data.Repositories
             
         }
         
-        public ValueTask<ChatRoleDataModel> GetByIdAsync(int chatId, string userId)
+        public Task<ChatRoleDataModel> GetByIdAsync(int chatId, string userId)
         {
             return _dbContext.ChatRoles.FindAsync(chatId, userId);
         }

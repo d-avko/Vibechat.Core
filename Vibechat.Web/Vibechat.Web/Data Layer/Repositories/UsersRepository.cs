@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyModel;
-using Vibechat.Web.Data_Layer.Repositories;
 using VibeChat.Web;
 
 namespace Vibechat.Web.Data.Repositories

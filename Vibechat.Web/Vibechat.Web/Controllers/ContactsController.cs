@@ -73,7 +73,7 @@ namespace Vibechat.Web.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Policy = "PublicApi")]
+        [Authorize(Policy = "PublicApi")]
         [HttpDelete]
         [Route("{userId}/[action]")]
         public async Task<ResponseApiModel<bool>> Remove(string userId)

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -12,6 +11,7 @@ using Vibechat.Web.ChatData.Messages;
 using Vibechat.Web.Data.Messages;
 using Vibechat.Web.Services.Images;
 using Vibechat.Web.Services.Paths;
+using System.Net.Http;
 
 namespace Vibechat.Web.Services.FileSystem
 {
@@ -32,6 +32,7 @@ namespace Vibechat.Web.Services.FileSystem
         private static readonly int MaxFileNameLength = 120;
 
         private readonly ILogger<FilesService> logger;
+
         private readonly IHttpClientFactory httpClientFactory;
 
         public FilesService(

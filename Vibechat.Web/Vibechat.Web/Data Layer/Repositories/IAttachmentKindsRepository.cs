@@ -7,6 +7,6 @@ namespace Vibechat.Web.Data.Repositories
 {
     public interface IAttachmentKindsRepository : IAsyncRepository<AttachmentKindDataModel>
     {
-        ValueTask<AttachmentKindDataModel> GetById(AttachmentKind id);
+        Task<AttachmentKindDataModel> GetById(AttachmentKind id);
     }
 }

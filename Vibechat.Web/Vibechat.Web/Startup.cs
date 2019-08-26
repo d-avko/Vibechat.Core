@@ -24,15 +24,16 @@ using VibeChat.Web;
 using Vibechat.Web.Auth;
 using Vibechat.Web.Middleware;
 using Vibechat.Web.Services.Extension_methods;
+using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
 namespace Vibechat.Web
 {
     public class Startup
     {
-        private readonly IWebHostEnvironment environment;
+        private readonly IHostingEnvironment environment;
 
         public Startup(IConfiguration configuration, 
-            IWebHostEnvironment environment)
+            IHostingEnvironment environment)
         { 
             Configuration = configuration;
             this.environment = environment;
@@ -123,8 +124,8 @@ namespace Vibechat.Web
                 });
             
             services.AddMvc(x => x.EnableEndpointRouting = false)
-                .AddNewtonsoftJson()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+                /*.AddNewtonsoftJson()* net core 3*/
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             
             
             services.AddSwaggerGen(c =>
@@ -132,7 +133,7 @@ namespace Vibechat.Web
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Vibechat API", Version = "v1" });
             });
 
-            services.AddSignalR().AddNewtonsoftJsonProtocol();
+            services.AddSignalR();//.AddNewtonsoftJsonProtocol();
             
             services.AddHttpClient();
 
@@ -155,16 +156,9 @@ namespace Vibechat.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseHsts();
-            }
+            app.UseHsts();
 
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
@@ -173,8 +167,6 @@ namespace Vibechat.Web
             
             app.UseResponseCompression();
             
-            app.UseHttpsRedirection();
-
             app.UseRequestLocalization();
 
             app.UseRewriter(new RewriteOptions().AddRewrite(".*/api(.*)", "/api$1", 
@@ -186,13 +178,18 @@ namespace Vibechat.Web
             
             app.UseMiddleware<UserStatusMiddleware>();
 
+            /*
             app.UseRouting();
             
             app.UseEndpoints(builder =>
             {
                 builder.MapHub<ChatsHub>("/hubs/chat");
             });
+            net core 3
+            */
 
+            app.UseSignalR(builder => builder.MapHub<ChatsHub>("/hubs/chat"));
+            
             app.UseCors("AllowAllOrigins");
 
             app.UseMvc();

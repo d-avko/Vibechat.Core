@@ -12,7 +12,7 @@ namespace Vibechat.Web.Data.Repositories
         {
         }
 
-        public ValueTask<ContactsDataModel> GetByIdAsync(string userId, string contactId)
+        public Task<ContactsDataModel> GetByIdAsync(string userId, string contactId)
         {
             return _dbContext.Contacts.FindAsync(userId, contactId);
         }

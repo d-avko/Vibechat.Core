@@ -15,7 +15,7 @@ namespace Vibechat.Web.Data.Repositories
             
         }
 
-        public ValueTask<UsersConversationDataModel> GetByIdAsync(string userId, int conversationId)
+        public Task<UsersConversationDataModel> GetByIdAsync(string userId, int conversationId)
         {
             return _dbContext
                 .UsersConversations
