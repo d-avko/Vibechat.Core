@@ -86,6 +86,7 @@ export class UserInfoDialogComponent {
   public ViewAttachments() {
     if (this.data.conversation) {
       const attachmentsDialogRef = this.dialog.open(ViewAttachmentsDialogComponent, {
+        panelClass: "profile-dialog",
         width: '450px',
         data: {
           conversation: this.data.conversation
@@ -127,6 +128,7 @@ export class UserInfoDialogComponent {
 
   public ChangeName(): void {
     const groupInfoRef = this.dialog.open(ChangeNameDialogComponent, {
+      panelClass: "profile-dialog",
       width: '450px'
     });
 
@@ -143,6 +145,7 @@ export class UserInfoDialogComponent {
 
   public ChangeUsername(): void {
     const groupInfoRef = this.dialog.open(ChangeNameDialogComponent, {
+      panelClass: "profile-dialog",
       width: '450px'
     });
 
@@ -159,6 +162,7 @@ export class UserInfoDialogComponent {
 
   public ChangeLastname(): void {
     const groupInfoRef = this.dialog.open(ChangeNameDialogComponent, {
+      panelClass: "profile-dialog",
       width: '450px'
     });
 

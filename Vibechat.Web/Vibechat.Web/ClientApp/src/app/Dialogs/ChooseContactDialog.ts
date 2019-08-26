@@ -4,10 +4,6 @@ import {ChatComponent} from "../UiComponents/Chat/chat.component";
 import {AppUser} from "../Data/AppUser";
 import {AuthService} from "../Services/AuthService";
 
-export interface InviteUsersData {
-  conversationId: number;
-}
-
 @Component({
   selector: 'choose-contact-dialog',
   templateUrl: 'choose-contact-dialog.html',

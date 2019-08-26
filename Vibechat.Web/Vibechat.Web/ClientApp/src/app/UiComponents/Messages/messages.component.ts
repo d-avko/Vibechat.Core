@@ -498,6 +498,7 @@ export class MessagesComponent implements OnDestroy, AfterContentInit, AfterView
     let forwardMessagesDialog = this.dialog.open(
       ForwardMessagesDialogComponent,
       {
+        panelClass: "profile-dialog",
         width: '350px',
         data: {
           conversations: this.chatsService.Chats.filter(chat => !chat.isSecure)

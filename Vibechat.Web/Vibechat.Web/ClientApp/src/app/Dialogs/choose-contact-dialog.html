@@ -1,4 +1,4 @@
-<h1 mat-dialog-title i18n>Choose a contact.</h1>
+<h1 class="profile-dialog_header-text" mat-dialog-title i18n>Choose a contact.</h1>
 <div mat-dialog-content style="overflow: unset !important">
 
   <mat-action-list style="height: 200px; overflow-y: scroll;">
@@ -19,7 +19,7 @@
 
   </mat-action-list>
 
-  <div mat-dialog-actions>
+  <div style="margin-left: 30%;padding: 20px;" mat-dialog-actions>
     <button mat-button [mat-dialog-close]="SelectedUser" cdkFocusInitial i18n>Select</button>
     <button mat-button (click)="onCancelClick()" i18n>Cancel</button>
   </div>
