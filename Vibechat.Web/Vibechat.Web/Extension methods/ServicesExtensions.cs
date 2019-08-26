@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using VibeChat.Web;
+using Vibechat.Web.Auth;
 using Vibechat.Web.AuthHelpers;
 using VibeChat.Web.ChatData;
 using Vibechat.Web.Data.Repositories;
@@ -74,6 +77,27 @@ namespace Vibechat.Web.Services.Extension_methods
             services.AddScoped<UnitOfWork, UnitOfWork>();
             services.AddScoped<IComparer<Chat>, ChatComparer>();
             services.AddSingleton<UserCultureService, UserCultureService>();
+        }
+
+        public static void AddAuthServices(this IServiceCollection services)
+        {
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("PublicApi", policy =>
+                {
+                    policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
+                    policy.Requirements.Add(new PublicApiRequirement());
+                });
+
+                options.AddPolicy("PrivateApi", policy =>
+                {
+                    policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
+                    policy.Requirements.Add(new PrivateApiRequirement());
+                });
+            });
+
+            services.AddScoped<IAuthorizationHandler, PublicApiAuthHandler>();
+            services.AddScoped<IAuthorizationHandler, PrivateApiAuthHandler>();
         }
     }
 }

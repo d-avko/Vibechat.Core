@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -30,20 +32,23 @@ namespace Vibechat.Web.Services.FileSystem
         private static readonly int MaxFileNameLength = 120;
 
         private readonly ILogger<FilesService> logger;
+        private readonly IHttpClientFactory httpClientFactory;
 
         public FilesService(
             IImageScalingService imageScaling,
             UniquePathsProvider pathsProvider,
             IImageCompressionService imageCompression,
-            ILogger<FilesService> logger) : base(pathsProvider)
+            ILogger<FilesService> logger,
+            IHttpClientFactory httpClientFactory) : base(pathsProvider)
         {
             ImageScaling = imageScaling;
             ImageCompression = imageCompression;
             this.logger = logger;
+            this.httpClientFactory = httpClientFactory;
         }
 
-        public IImageScalingService ImageScaling { get; }
-        public IImageCompressionService ImageCompression { get; }
+        private IImageScalingService ImageScaling { get; }
+        private IImageCompressionService ImageCompression { get; }
 
         /// <summary>
         ///     Takes stream containing image and returns <see cref="Attachment" /> object.
@@ -187,39 +192,68 @@ namespace Vibechat.Web.Services.FileSystem
             }
         }
 
-        public override async Task SaveToStorage(IFormFile formFile, MemoryStream file, string path)
+        public void DeleteFiles(List<string> paths)
         {
-            using (var client = new HttpClient())
+            Parallel.ForEach(paths, path =>
             {
-                client.BaseAddress = new Uri(DI.Configuration["FileServer:Url"]);
-
-                var fileName = ContentDispositionHeaderValue.Parse(formFile.ContentDisposition).FileName.Trim('"');
-
-                var content = new MultipartFormDataContent
+                try
                 {
-                    {
-                        new StreamContent(file)
-                        {
-                            Headers =
-                            {
-                                ContentLength = file.Length,
-                                ContentType = new MediaTypeHeaderValue(formFile.ContentType)
-                            }
-                        },
-                        "file",
-                        fileName
-                    },
-
-                    {new StringContent(path), "path"}
-                };
-
-                //server responds with either true or false.
-                var response = await client.PostAsync(DI.Configuration["FileServer:UploadFileUrl"], content);
-
-                if (!bool.Parse(await response.Content.ReadAsStringAsync()))
-                {
-                    throw new InvalidDataException("Failed to upload this file.");
+                    DeleteFile(path).GetAwaiter().GetResult();
                 }
+                catch 
+                {
+                    //exception is already logged, do nothing.
+                }
+            });
+        }
+
+        protected override async Task DeleteFile(string path)
+        {
+            try
+            {
+                var client = httpClientFactory.CreateClient();
+                client.BaseAddress = new Uri(DI.Configuration["FileServer:Url"]);
+                await client.DeleteAsync(DI.Configuration["FileServer:DeleteFileUrl"] + path);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Failed to delete file!");
+                throw new HttpRequestException("Failed to delete the file.", e);
+            }
+        }
+        
+        protected override async Task SaveToStorage(IFormFile formFile, MemoryStream file, string path)
+        {
+            var client = httpClientFactory.CreateClient();
+            
+            client.BaseAddress = new Uri(DI.Configuration["FileServer:Url"]);
+
+            var fileName = ContentDispositionHeaderValue.Parse(formFile.ContentDisposition).FileName.Trim('"');
+
+            var content = new MultipartFormDataContent
+            {
+                {
+                    new StreamContent(file)
+                    {
+                        Headers =
+                        {
+                            ContentLength = file.Length,
+                            ContentType = new MediaTypeHeaderValue(formFile.ContentType)
+                        }
+                    },
+                    "file",
+                    fileName
+                },
+
+                {new StringContent(path), "path"}
+            };
+
+            //server responds with either true or false.
+            var response = await client.PostAsync(DI.Configuration["FileServer:UploadFileUrl"], content);
+
+            if (!bool.Parse(await response.Content.ReadAsStringAsync()))
+            {
+                throw new InvalidDataException("Failed to upload this file.");
             }
         }
     }

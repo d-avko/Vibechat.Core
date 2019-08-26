@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyModel;
 using Vibechat.Web.Data_Layer.Repositories;
 using VibeChat.Web;
 
@@ -14,7 +16,7 @@ namespace Vibechat.Web.Data.Repositories
         {
             this.mUserManager = mUserManager;
         }
-
+ 
         private readonly UserManager<AppUser> mUserManager;
 
         public async Task MakeUserOnline(string userId, bool updateConnectionId = false, string signalRConnectionId = null)
@@ -38,14 +40,20 @@ namespace Vibechat.Web.Data.Repositories
             user.ConnectionId = null;
         }
 
-        public Task<AppUser> GetById(string id)
+        public async Task<AppUser> GetById(string id)
         {
-            return mUserManager.FindByIdAsync(id);
+            return await mUserManager.Users
+                .FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public Task<AppUser> GetByEmail(string email)
+        public Task LockoutUser(AppUser user, DateTimeOffset until)
         {
-            return mUserManager.FindByEmailAsync(email);
+            return mUserManager.SetLockoutEndDateAsync(user, until);
+        }
+
+        public Task DisableUserLockout(AppUser user)
+        {
+            return mUserManager.SetLockoutEndDateAsync(user, DateTimeOffset.MinValue);
         }
 
         public Task<AppUser> GetByUsername(string username)
@@ -53,24 +61,9 @@ namespace Vibechat.Web.Data.Repositories
             return mUserManager.FindByNameAsync(username);
         }
 
-        public Task<bool> CheckPassword(string password, AppUser user)
-        {
-            return mUserManager.CheckPasswordAsync(user, password);
-        }
-
-        public Task<IdentityResult> CreateUser(AppUser user, string password)
-        {
-            return mUserManager.CreateAsync(user, password);
-        }
-
         public Task<IdentityResult> CreateUser(AppUser user)
         {
             return mUserManager.CreateAsync(user);
-        }
-
-        public Task<IdentityResult> DeleteUser(AppUser user)
-        {
-            return mUserManager.DeleteAsync(user);
         }
 
         public async Task<IQueryable<AppUser>> FindByUsername(string username)

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Vibechat.Web.Data_Layer.Repositories;
@@ -8,17 +9,14 @@ namespace Vibechat.Web.Data.Repositories
 {
     public interface IUsersRepository
     {
-        Task<bool> CheckPassword(string password, AppUser user);
-
-        Task<IdentityResult> CreateUser(AppUser user, string password);
-
         Task<IdentityResult> CreateUser(AppUser user);
 
-        Task<IdentityResult> DeleteUser(AppUser user);
+        Task DisableUserLockout(AppUser user);
+
+        Task LockoutUser(AppUser user, DateTimeOffset until);
 
         Task<IQueryable<AppUser>> FindByUsername(string username);
         Task<AppUser> GetByUsername(string username);
-        Task<AppUser> GetByEmail(string email);
         Task<AppUser> GetById(string id);
         Task MakeUserOffline(string userId);
         Task MakeUserOnline(string userId, bool updateConnectionId = false, string signalRConnectionId = null);

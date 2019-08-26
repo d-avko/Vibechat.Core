@@ -85,7 +85,7 @@ namespace Vibechat.Web.Services.Messages
                 new GetDeletedMessagesOfUserSpec(whoAccessedId));
 
             var messages = await messagesRepository.ListAsync(
-                new GetAttachmentsSpec
+                new GetSpecificAttachmentsSpec
                 (deleted,
                  conversationId,
                  kind,
@@ -220,12 +220,20 @@ namespace Vibechat.Web.Services.Messages
                 new GetLatestMessagesSpec(deleted, chatId, 0, 1))).FirstOrDefault()?.ToMessage();
         }
 
+        public async Task<IEnumerable<Message>> GetAllAttachments(int chatId, string userId)
+        {
+            var deleted = await deletedMessages.AsQuerableAsync(new GetDeletedMessagesOfUserSpec(userId));
+
+            return (await messagesRepository.ListAsync(
+                new GetAttachmentsSpec(deleted, chatId, 0, Int32.MaxValue))).Select(x => x.ToMessage());
+        }
+
         public async Task DeleteMessages(List<int> messagesIds,int chatId, string whoAccessedId)
         {
             IReadOnlyList<MessageDataModel> messagesToDelete = await messagesRepository
                 .ListAsync(new MessagesByIdsSpec(messagesIds));
 
-            if (!messagesToDelete.All(x => x.ConversationID == chatId))
+            if (messagesToDelete.Any(x => x.ConversationID != chatId))
             {
                 throw new ArgumentException(
                     "All messages must be from same conversation passed as ConversationId parameter.");

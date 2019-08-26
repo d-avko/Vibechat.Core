@@ -27,7 +27,7 @@ namespace Vibechat.Web.Controllers
             this.messagesService = messagesService;
         }
         
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPost]
         [Route("[action]")]
         public async Task<ResponseApiModel<List<Message>>> GetAttachments([FromBody] GetAttachmentsRequest request)
@@ -59,7 +59,7 @@ namespace Vibechat.Web.Controllers
             }
         }
         
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPost]
         [Route("[action]")]
         public async Task<ResponseApiModel<List<Message>>> Get([FromBody] GetMessagesRequest credentials)
@@ -98,7 +98,7 @@ namespace Vibechat.Web.Controllers
         /// </summary>
         /// <param name="messagesInfo"></param>
         /// <returns></returns>
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPost]
         [Route("[action]")]
         public async Task<ResponseApiModel<string>> Delete(
@@ -129,7 +129,7 @@ namespace Vibechat.Web.Controllers
             }
         }
         
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPut]
         [Route("[action]")]
         public async Task<ResponseApiModel<bool>> SetLast([FromBody] SetLastMessageRequest request)
@@ -158,7 +158,7 @@ namespace Vibechat.Web.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPost]
         [Route("[action]")]
         public async Task<ResponseApiModel<List<Message>>> Search([FromBody] SearchMessagesRequest request)

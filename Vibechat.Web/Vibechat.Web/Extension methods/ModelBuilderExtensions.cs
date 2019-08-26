@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
+using VibeChat.Web;
 using Vibechat.Web.Data.Conversations;
 using Vibechat.Web.Data.DataModels;
 using Vibechat.Web.Data.Messages;
@@ -64,6 +66,19 @@ namespace Vibechat.Web.Services.Extension_methods
                 Modulus =
                     "20850965393100772630721381827467472846769974337484934948485962234352705295662792015939788728305700806819038412100331548613067641292812785261491147385725382284428429766310618521703081552913546975030866816165893472445277829294748965421857329404134415647286470036472641032781856997861782897278603448824696922997054565547655636184219624327030090189311608152965483673354384130916454486847897115874140265827339554177255203771867546072260275858144383592611464594638476890150964299365002135998606866470198012882210416522022871618334038010682652038038493600763843805286318397247480947350931175656728334601366362069270360295443"
             });
+        }
+
+        public static void SeedAdminAccount(this UserManager<AppUser> value)
+        {
+            var admin = new AppUser()
+            {
+                IsAdmin = true,
+                UserName = "admin"
+            };
+            
+            admin.RefreshToken = admin.GenerateRefreshToken();
+            //if account is created, usermanager won't do anything.
+            value.CreateAsync(admin).GetAwaiter().GetResult();
         }
     }
 }

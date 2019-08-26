@@ -59,7 +59,7 @@ namespace VibeChat.Web
         
         public DbSet<ChatEventDataModel> ChatEvents { get; set; }
 
-        protected override async void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -20,6 +21,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using VibeChat.Web;
+using Vibechat.Web.Auth;
 using Vibechat.Web.Middleware;
 using Vibechat.Web.Services.Extension_methods;
 
@@ -59,10 +61,6 @@ namespace Vibechat.Web
 
             services.AddEntityFrameworkNpgsql();
 
-            //set usermanager explicitly, to prevent SignalR hub methods from not being executed correctly.
-
-            services.AddScoped<UserManager<AppUser>>();
-            
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAllOrigins",
@@ -90,13 +88,13 @@ namespace Vibechat.Web
                         new TokenValidationParameters
                         {
                             LifetimeValidator =
-                                (before, expires, token, param) => { return expires > DateTime.UtcNow; },
+                                (before, expires, token, param) => expires > DateTime.UtcNow,
                             ValidateAudience = false,
                             ValidateIssuer = false,
-                            ValidateActor = false,
                             ValidateLifetime = true,
                             IssuerSigningKey =
-                                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:SecretKey"]))
+                                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:SecretKey"])),
+                            ValidateIssuerSigningKey = true,
                         };
 
 
@@ -128,20 +126,25 @@ namespace Vibechat.Web
                 .AddNewtonsoftJson()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
             
+            
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Vibechat API", Version = "v1" });
             });
 
             services.AddSignalR().AddNewtonsoftJsonProtocol();
+            
+            services.AddHttpClient();
 
             services.AddDefaultServices();
 
             services.AddDefaultRepositories();
 
             services.AddBusinessLogic();
-
+            
             services.AddDefaultMiddleware();
+            
+            services.AddAuthServices();
             
             services.AddSpaStaticFiles(opts => opts.RootPath = "ClientApp/dist");
 
@@ -180,9 +183,9 @@ namespace Vibechat.Web
             app.UseStaticFiles();
 
             app.UseAuthentication();
-
-            app.UseMiddleware<UserStatusMiddleware>();
             
+            app.UseMiddleware<UserStatusMiddleware>();
+
             app.UseRouting();
             
             app.UseEndpoints(builder =>
@@ -193,7 +196,7 @@ namespace Vibechat.Web
             app.UseCors("AllowAllOrigins");
 
             app.UseMvc();
-            
+
             app.MapWhen(context => context.IsSpaPath(), builder =>
             {
                 builder.MapWhen(context => context.IsEnglishRequest(builder.ApplicationServices.GetService<IServiceProvider>()),
@@ -269,6 +272,7 @@ namespace Vibechat.Web
                 user.IsOnline = false;
             }
 
+            users.SeedAdminAccount();
         }
     }
 }

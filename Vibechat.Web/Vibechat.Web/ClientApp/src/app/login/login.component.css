@@ -39,6 +39,6 @@
 }
 
 .login_card--logo {
-  background-image: url('/Assets/MainLogo.png');
+  background-image: url('~assets/MainLogo.png');
   background-size:cover;
 }

@@ -41,11 +41,9 @@ namespace Vibechat.Web.Services
 
         private readonly IConversationRepository conversationRepository;
 
-        private readonly FilesService imagesService;
+        private readonly FilesService filesService;
 
         private readonly ILastMessagesRepository lastMessagesRepository;
-
-        private readonly IMessagesRepository messagesRepository;
 
         private readonly IDhPublicKeysRepository publicKeys;
 
@@ -60,13 +58,12 @@ namespace Vibechat.Web.Services
         public ChatService(
             IChatDataProvider chatDataProvider,
             IUsersRepository usersRepository,
-            IMessagesRepository messagesRepository,
             IUsersConversationsRepository usersConversationsRepository,
             IConversationRepository conversationRepository,
             ILastMessagesRepository lastMessagesRepository,
             IDhPublicKeysRepository dh,
             IChatRolesRepository rolesRepository,
-            FilesService imagesService,
+            FilesService filesService,
             UnitOfWork unitOfWork,
             BansService bansService,
             MessagesService messagesService,
@@ -75,13 +72,12 @@ namespace Vibechat.Web.Services
         { 
             this.chatDataProvider = chatDataProvider;
             this.usersRepository = usersRepository;
-            this.messagesRepository = messagesRepository;
             this.usersConversationsRepository = usersConversationsRepository;
             this.conversationRepository = conversationRepository;
             this.lastMessagesRepository = lastMessagesRepository;
             publicKeys = dh;
             this.rolesRepository = rolesRepository;
-            this.imagesService = imagesService;
+            this.filesService = filesService;
             this.unitOfWork = unitOfWork;
             this.bansService = bansService;
             this.messagesService = messagesService;
@@ -258,7 +254,7 @@ namespace Vibechat.Web.Services
 
             try
             {
-                var (thumbnail, fullsized) = await imagesService.SaveProfileOrChatPicture(image, image.FileName,
+                var (thumbnail, fullsized) = await filesService.SaveProfileOrChatPicture(image, image.FileName,
                     conversationId.ToString(), userId);
 
                 conversation.ThumbnailUrl = thumbnail;
@@ -418,9 +414,17 @@ namespace Vibechat.Web.Services
                 }
             }
 
+            var attachmentsToDelete = await messagesService.GetAllAttachments(conversation.Id, whoRemoves);
+
+            if (attachmentsToDelete != null && attachmentsToDelete.Any())
+            {
+                filesService.DeleteFiles(attachmentsToDelete
+                    .Select(x => x.AttachmentInfo.ContentUrl)
+                    .ToList());
+            }
+            
             //this removes all messages and users-chats links
             await conversationRepository.DeleteAsync(conversation);
-
             await unitOfWork.Commit();
         }
 

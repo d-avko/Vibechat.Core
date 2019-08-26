@@ -23,7 +23,7 @@ namespace Vibechat.Web.Controllers
             this.mUsersService = mUsersService;
         }
         
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPost]
         [Route("[action]")]
         public async Task<ResponseApiModel<List<UserInfo>>> Get()
@@ -48,7 +48,7 @@ namespace Vibechat.Web.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPost]
         [Route("{userId}/[action]")]
         public async Task<ResponseApiModel<bool>> Add(string userId)
@@ -73,7 +73,7 @@ namespace Vibechat.Web.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Policy = "PublicApi")]
         [HttpDelete]
         [Route("{userId}/[action]")]
         public async Task<ResponseApiModel<bool>> Remove(string userId)

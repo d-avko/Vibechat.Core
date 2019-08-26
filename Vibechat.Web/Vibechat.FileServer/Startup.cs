@@ -46,8 +46,6 @@ namespace Vibechat.FileServer
 
             app.UseMiddleware<AdminSafeListMiddleware>();
 
-            app.UseHttpsRedirection();
-
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
