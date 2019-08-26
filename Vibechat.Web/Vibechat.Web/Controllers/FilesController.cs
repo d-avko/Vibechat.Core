@@ -30,7 +30,7 @@ namespace Vibechat.Web.Controllers
 
         public FilesService filesService { get; }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [Route("[action]")]
         [HttpPost]
         public async Task<ResponseApiModel<FilesUploadResponse>> UploadImages([FromForm] UploadImagesRequest request)
@@ -96,7 +96,7 @@ namespace Vibechat.Web.Controllers
             };
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [Route("[action]")]
         [HttpPost]
         public async Task<ResponseApiModel<MessageAttachment>> UploadFile([FromForm] UploadFileRequest request)

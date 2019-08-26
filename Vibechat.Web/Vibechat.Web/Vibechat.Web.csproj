@@ -17,6 +17,7 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="3.0.0-preview8.19405.7" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.0.0-preview8.19405.7" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.0.0-preview8.19405.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.0.0-preview8.19405.11" />
     <PackageReference Include="Microsoft.IdentityModel.Logging" Version="5.5.0" />
     <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="5.5.0" />
     <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="5.5.0" />
@@ -35,11 +36,26 @@
     <Content Remove="$(SpaRoot)**" />
     <Content Remove="ClientApp\src\app\messaging\**" />
     <Content Remove="ClientApp\src\app\uploads\**" />
-    <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
-    <Content Update="wwwroot\Assets\MainLogo.png">
+    <Content Include="ClientApp\src\assets\Groups\pic1.png" />
+    <Content Include="ClientApp\src\assets\Groups\pic2.png" />
+    <Content Include="ClientApp\src\assets\Groups\pic3.png" />
+    <Content Include="ClientApp\src\assets\Groups\pic4.png" />
+    <Content Include="ClientApp\src\assets\Groups\pic5.png" />
+    <Content Include="ClientApp\src\assets\MainLogo.png">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="ClientApp\src\assets\Users\pic1.png" />
+    <Content Include="ClientApp\src\assets\Users\pic2.png" />
+    <Content Include="ClientApp\src\assets\Users\pic3.png" />
+    <Content Include="ClientApp\src\assets\Users\pic4.png" />
+    <Content Include="ClientApp\src\assets\Users\pic5.png" />
+    <Content Include="ClientApp\src\favicon.ico">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
     <None Update="fixpwa.py">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -190,6 +206,23 @@
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="ClientApp\dist\en\ngsw.json" />
+    <_ContentIncludedByDefault Remove="wwwroot\Groups\pic1.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\Groups\pic2.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\Groups\pic3.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\Groups\pic4.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\Groups\pic5.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\Users\pic1.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\Users\pic2.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\Users\pic3.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\Users\pic4.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\Users\pic5.png" />
+    <_ContentIncludedByDefault Remove="ClientApp\dist\public\en\ngsw.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Data.SqlClient, Version=4.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath>..\..\..\..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\system.data.sqlclient\4.6.0\ref\netcoreapp2.1\System.Data.SqlClient.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

@@ -8,14 +8,14 @@ namespace Vibechat.Web.Services.FileSystem
 {
     public abstract class AbstractFilesService
     {
-        protected static string FilesLocationRelative = "Uploads/";
+        private const string FilesLocationRelative = "Uploads/";
 
-        public AbstractFilesService(UniquePathsProvider pathsProvider)
+        protected AbstractFilesService(UniquePathsProvider pathsProvider)
         {
             PathsProvider = pathsProvider;
         }
 
-        public UniquePathsProvider PathsProvider { get; }
+        private UniquePathsProvider PathsProvider { get; }
 
         /// <summary>
         ///     Saves file to specified / generated location
@@ -27,7 +27,7 @@ namespace Vibechat.Web.Services.FileSystem
         /// <param name="additionalPathString">string to insert between filename and extension</param>
         /// <param name="folder">folder to save to. Assumes it's created</param>
         /// <returns></returns>
-        public async Task<string> SaveFile(IFormFile formFile, MemoryStream file, string filename, string chatOrUserId,
+        protected async Task<string> SaveFile(IFormFile formFile, MemoryStream file, string filename, string chatOrUserId,
             string sender, string additionalPathString = null, string folder = null)
         {
             var builder = new StringBuilder();
@@ -72,7 +72,13 @@ namespace Vibechat.Web.Services.FileSystem
             return resultPath;
         }
 
-        public virtual async Task SaveToStorage(IFormFile formFile, MemoryStream file, string path)
+        protected  virtual Task DeleteFile(string path)
+        {
+            File.Delete(path);
+            return Task.CompletedTask;
+        }
+
+        protected virtual async Task SaveToStorage(IFormFile formFile, MemoryStream file, string path)
         {
             using (var fStream = new FileStream(path, FileMode.Create))
             {
@@ -80,7 +86,7 @@ namespace Vibechat.Web.Services.FileSystem
             }
         }
 
-        public string GetUniquePath(string sender, string chatOrUserId, string name)
+        private string GetUniquePath(string sender, string chatOrUserId, string name)
         {
             var first = PathsProvider.GetUniquePath(sender);
             first = first.Substring(first.Length / 2);

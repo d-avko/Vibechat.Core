@@ -26,7 +26,7 @@ namespace VibeChat.Web.Controllers
         public BansService BansService { get; }
 
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpGet]
         [Route("{id}")]
         public async Task<ResponseApiModel<UserInfo>> GetById(string id)
@@ -55,7 +55,7 @@ namespace VibeChat.Web.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPatch]
         [Route("[action]")]
         public async Task<ResponseApiModel<bool>> ChangeName([FromBody] ChangeNameRequest request)
@@ -81,7 +81,7 @@ namespace VibeChat.Web.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPatch]
         [Route("[action]")]
         public async Task<ResponseApiModel<bool>> ChangeUsername([FromBody] ChangeNameRequest request)
@@ -107,7 +107,7 @@ namespace VibeChat.Web.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPut]
         [Route("[action]")]
         public async Task<ResponseApiModel<bool>> ChangeInfo([FromBody] UpdateUserInfoRequest request)
@@ -133,7 +133,7 @@ namespace VibeChat.Web.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPatch]
         [Route("[action]")]
         public async Task<ResponseApiModel<bool>> ChangeLastName([FromBody] ChangeNameRequest request)
@@ -159,7 +159,7 @@ namespace VibeChat.Web.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPost]
         [Route("[action]")]
         public async Task<ResponseApiModel<UsersByNickNameResultApiModel>> FindByNickName(
@@ -188,7 +188,7 @@ namespace VibeChat.Web.Controllers
         }
 
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPatch]
         [Route("[action]")]
         public async Task<ResponseApiModel<bool>> ChangePublicState(
@@ -218,7 +218,7 @@ namespace VibeChat.Web.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPost]
         [Route("[action]")]
         public async Task<ResponseApiModel<bool>> Block([FromBody] BlockRequest request)
@@ -247,7 +247,7 @@ namespace VibeChat.Web.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPatch]
         [Route("[action]")]
         public async Task<ResponseApiModel<UpdateProfilePictureResponse>> UpdateProfilePicture(
@@ -274,7 +274,7 @@ namespace VibeChat.Web.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPost]
         [Route("[action]")]
         public async Task<ResponseApiModel<bool>> Unban([FromBody] UnbanRequest request)
@@ -298,6 +298,38 @@ namespace VibeChat.Web.Controllers
                     ErrorMessage = ex.Message,
                     IsSuccessfull = false
                 };
+            }
+        }
+
+        [Authorize(Policy = "PrivateApi")]
+        [HttpPatch]
+        [Route("{userId}/[action]")]
+        public async Task<string> Lockout(string userId)
+        {
+            try
+            {
+                await BansService.LockoutUser(userId);
+                return "";
+            }
+            catch (Exception e)
+            {
+                return $"Failed because of : {e.Message}";
+            }
+        }
+        
+        [Authorize(Policy = "PrivateApi")]
+        [HttpPatch]
+        [Route("{userId}/[action]")]
+        public async Task<string> DisableLockout(string userId)
+        {
+            try
+            {
+                await BansService.DisableLockout(userId);
+                return "";
+            }
+            catch (Exception e)
+            {
+                return $"Failed because of : {e.Message}";
             }
         }
     }

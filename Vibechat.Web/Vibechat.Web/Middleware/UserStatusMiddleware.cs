@@ -20,7 +20,7 @@ namespace Vibechat.Web.Middleware
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
             //update online status for each authorized request.
-            if (!context.User.Claims.Count().Equals(0))
+            if (context.User.Identity.IsAuthenticated)
             {
                 await repository.MakeUserOnline(JwtHelper.GetNamedClaimValue(context.User.Claims));
                 await unitOfWork.Commit();

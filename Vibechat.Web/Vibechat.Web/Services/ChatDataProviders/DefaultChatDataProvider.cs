@@ -6,21 +6,21 @@ namespace Vibechat.Web.Services.ChatDataProviders
     {
         protected static string[] ProfilePicturesUrls =
         {
-            "/Users/pic1.png",
-            "/Users/pic2.png",
-            "/Users/pic3.png",
-            "/Users/pic4.png",
-            "/Users/pic5.png"
+            "assets/Users/pic1.png",
+            "assets/Users/pic2.png",
+            "assets/Users/pic3.png",
+            "assets/Users/pic4.png",
+            "assets/Users/pic5.png"
         };
 
 
         protected static string[] GroupPicturesUrls =
         {
-            "/Groups/pic1.png",
-            "/Groups/pic2.png",
-            "/Groups/pic3.png",
-            "/Groups/pic4.png",
-            "/Groups/pic5.png"
+            "assets/Groups/pic1.png",
+            "assets/Groups/pic2.png",
+            "assets/Groups/pic3.png",
+            "assets/Groups/pic4.png",
+            "assets/Groups/pic5.png"
         };
 
         public string GetGroupPictureUrl()

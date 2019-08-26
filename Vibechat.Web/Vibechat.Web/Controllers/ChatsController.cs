@@ -30,7 +30,7 @@ namespace VibeChat.Web.Controllers
 
         public BansService BansService { get; }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPost]
         [Route("[action]")]
         public async Task<ResponseApiModel<Chat>> Create([FromBody] CreateChatRequest request)
@@ -60,7 +60,7 @@ namespace VibeChat.Web.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPatch]
         [Route("{chatId:int}/[action]")]
         public async Task<ResponseApiModel<bool>> UpdateAuthKey([FromBody] UpdateAuthKeyRequest request, int chatId)
@@ -89,7 +89,7 @@ namespace VibeChat.Web.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPost]
         [Route("{chatId:int}/[action]")]
         public async Task<ResponseApiModel<UsersByNickNameResultApiModel>> FindUsers(
@@ -120,8 +120,8 @@ namespace VibeChat.Web.Controllers
                 };
             }
         }
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        
+        [Authorize(Policy = "PublicApi")]
         [HttpGet]
         [Route("[action]/{deviceId}")]
         public async Task<ResponseApiModel<List<Chat>>> GetAll(string deviceId)
@@ -150,7 +150,7 @@ namespace VibeChat.Web.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpGet]
         [Route("{chatId:int}")] // Chats/12
         public async Task<ResponseApiModel<Chat>> GetById(int chatId)
@@ -180,7 +180,7 @@ namespace VibeChat.Web.Controllers
         }
         
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpGet]
         [Route("{chatId:int}/Participants")]
         public async Task<ResponseApiModel<List<UserInfo>>> GetParticipants(int chatId)
@@ -208,7 +208,7 @@ namespace VibeChat.Web.Controllers
         }
 
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPatch]
         [Route("{chatId:int}/[action]")]
         public async Task<ResponseApiModel<UpdateThumbnailResponse>> UpdateThumbnail(
@@ -236,7 +236,7 @@ namespace VibeChat.Web.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPatch]
         [Route("{chatId:int}/[action]")]
         public async Task<ResponseApiModel<bool>> ChangeName([FromBody] ChangeChatNameRequest request,
@@ -262,7 +262,7 @@ namespace VibeChat.Web.Controllers
         }
 
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPost]
         [Route("[action]")]
         public async Task<ResponseApiModel<List<Chat>>> Search([FromBody] SearchRequest request)
@@ -288,7 +288,7 @@ namespace VibeChat.Web.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPatch]
         [Route("{chatId:int}/[action]")]
         public async Task<ResponseApiModel<bool>> ChangePublicState(
@@ -315,7 +315,7 @@ namespace VibeChat.Web.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPost]
         [Route("{chatId:int}/[action]")]
         public async Task<ResponseApiModel<bool>> BanFrom([FromBody] BanRequest request, int chatId)
@@ -343,7 +343,7 @@ namespace VibeChat.Web.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Policy = "PublicApi")]
         [HttpPost]
         [Route("{chatId:int}/[action]")]
         public async Task<ResponseApiModel<bool>> UnbanFrom([FromBody] BanRequest request, int chatId)

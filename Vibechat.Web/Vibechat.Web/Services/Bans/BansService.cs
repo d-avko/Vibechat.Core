@@ -24,7 +24,7 @@ namespace Vibechat.Web.Services.Bans
         {
             UsersBansRepository = usersBansRepository;
             ConversationsBansRepository = conversationsBansRepository;
-            UsersRepository = usersRepository;
+            this.usersRepository = usersRepository;
             ConversationRepository = conversationRepository;
             this.usersConversationsRepository = usersConversationsRepository;
             this.unitOfWork = unitOfWork;
@@ -33,7 +33,7 @@ namespace Vibechat.Web.Services.Bans
 
         public IUsersBansRepository UsersBansRepository { get; }
         public IConversationsBansRepository ConversationsBansRepository { get; }
-        public IUsersRepository UsersRepository { get; }
+        public IUsersRepository usersRepository { get; }
         public IConversationRepository ConversationRepository { get; }
 
         public async Task BanUserFromConversation(int conversationId, string userToBanId, string whoAccessedId)
@@ -44,7 +44,7 @@ namespace Vibechat.Web.Services.Bans
             }
 
             var conversation = await ConversationRepository.GetByIdAsync(conversationId);
-            var banned = await UsersRepository.GetById(userToBanId);
+            var banned = await usersRepository.GetById(userToBanId);
 
             var userRole = await rolesRepository.GetByIdAsync(conversationId, whoAccessedId);
 
@@ -81,8 +81,8 @@ namespace Vibechat.Web.Services.Bans
                 throw new FormatException("Can't ban yourself.");
             }
 
-            var bannedBy = await UsersRepository.GetById(whoAccessedId);
-            var banned = await UsersRepository.GetById(UserToBanId);
+            var bannedBy = await usersRepository.GetById(whoAccessedId);
+            var banned = await usersRepository.GetById(UserToBanId);
 
             if (banned == null || bannedBy == null)
             {
@@ -110,7 +110,7 @@ namespace Vibechat.Web.Services.Bans
 
         public async Task<bool> IsBannedFromConversation(int conversationId, string Who)
         {
-            var who = await UsersRepository.GetById(Who);
+            var who = await usersRepository.GetById(Who);
 
             if (who == null)
             {
@@ -158,7 +158,7 @@ namespace Vibechat.Web.Services.Bans
 
             var conversation = await ConversationRepository.GetByIdAsync(conversationId);
 
-            var banned = await UsersRepository.GetById(userToUnbanId);
+            var banned = await usersRepository.GetById(userToUnbanId);
 
             var userRole = await rolesRepository.GetByIdAsync(conversationId, whoAccessedId);
 
@@ -187,6 +187,18 @@ namespace Vibechat.Web.Services.Bans
             {
                 throw new FormatException("Wrong conversation id was provided.");
             }
+        }
+
+        public async Task LockoutUser(string userId)
+        {
+            var user = await usersRepository.GetById(userId);
+            await usersRepository.LockoutUser(user, DateTimeOffset.UtcNow.AddYears(5));
+        }
+
+        public async Task DisableLockout(string userId)
+        {
+            var user = await usersRepository.GetById(userId);
+            await usersRepository.DisableUserLockout(user);
         }
     }
 }
