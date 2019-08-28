@@ -272,6 +272,20 @@ export class Api {
 
   }
 
+  public ChangeChatPublicVisibility(chatId: number) {
+    return this.MakePatchCall<boolean>(
+      null,
+      `api/v1/Chats/${chatId}/ChangePublicState`
+    ).toPromise();
+  }
+
+  public ChangeUserPublicVisibility() {
+    return this.MakePatchCall<boolean>(
+      null,
+      `api/v1/Users/ChangePublicState`
+    ).toPromise();
+  }
+
   private MakePostCall<T>(data: any, url: string): Observable<ServerResponse<T>> {
     console.log(`post api call : ${url}, data: ${JSON.stringify(data)}`);
 

@@ -27,8 +27,7 @@ export class HttpResponseInterceptor implements HttpInterceptor {
     public requestsBuilder: Api,
     public authService: AuthService,
     public messages: MessageReportingService,
-    @Inject('BASE_URL') private baseUrl,
-    private locales: LocalesService)
+    @Inject('BASE_URL') private baseUrl)
   {
 
   }
@@ -70,6 +69,7 @@ export class HttpResponseInterceptor implements HttpInterceptor {
 
   public handleRefreshTokenResponse(response: ServerResponse<string>) : string {
     if (!response.isSuccessfull) {
+      this.authService.LogOut();
       this.router.navigateByUrl('/login');
       return;
     }

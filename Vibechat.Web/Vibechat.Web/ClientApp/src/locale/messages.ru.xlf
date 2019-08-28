@@ -1168,6 +1168,30 @@
             <context context-type="linenumber">31</context>
           </context-group>
         </trans-unit>
+      <trans-unit id="a2c7185ce22d473fd81ce55e5381c9cf65de252f" datatype="html">
+        <source>Non-public profile </source>
+        <target state="translated">Закрытый профиль</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/user-info-dialog.html</context>
+          <context context-type="linenumber">72</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/group-info-dialog.html</context>
+          <context context-type="linenumber">86</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="0eb89e00e619d01e65e2da195cba5852f3477611" datatype="html">
+        <source>Public profile </source>
+        <target state="translated">Открытый профиль</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/user-info-dialog.html</context>
+          <context context-type="linenumber">73</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/group-info-dialog.html</context>
+          <context context-type="linenumber">87</context>
+        </context-group>
+      </trans-unit>
     </body>
   </file>
 </xliff>

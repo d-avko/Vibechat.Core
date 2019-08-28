@@ -198,7 +198,7 @@ namespace Vibechat.Web.Services
                 throw new InvalidDataException("Couldn't create group/dialog. Probably there exists one already.", ex);
             }
 
-            var creator = user.ToUserInfo();
+            var creator = user.ToAppUserDto();
             creator.ChatRole = new ChatRoleDto
             {
                 ChatId = createdChat.Id,
@@ -206,7 +206,7 @@ namespace Vibechat.Web.Services
             };
 
             return createdChat.ToChatDto(
-                credentials.IsGroup ? new List<UserInfo> {creator} : null,
+                credentials.IsGroup ? new List<AppUserDto> {creator} : null,
                 secondDialogueUser,
                 dhPublicKey,
                 await rolesRepository.GetByIdAsync(createdChat.Id, credentials.CreatorId),
@@ -216,7 +216,7 @@ namespace Vibechat.Web.Services
             );
         }
 
-        public async Task<List<UserInfo>> FindUsersInChat(int chatId, string username, string caller)
+        public async Task<List<AppUserDto>> FindUsersInChat(int chatId, string username, string caller)
         {
             if (!await usersConversationsRepository.Exists(caller, chatId))
             {
@@ -224,7 +224,7 @@ namespace Vibechat.Web.Services
             }
 
             var result = (await usersConversationsRepository.FindUsersInChat(chatId, username))
-                .Select(x => x.ToUserInfo())
+                .Select(x => x.ToAppUserDto())
                 .ToList();
             
             foreach (var user in result)
@@ -324,7 +324,7 @@ namespace Vibechat.Web.Services
                         null
                     ));
             }
-
+    
             return result;
         }
 
@@ -464,7 +464,7 @@ namespace Vibechat.Web.Services
             await unitOfWork.Commit();
         }
 
-        public async Task<UserInfo> AddUserToChat(int chatId, string userId)
+        public async Task<AppUserDto> AddUserToChat(int chatId, string userId)
         {
             var defaultError = new InvalidDataException("Invalid credentials were provided.");
 
@@ -492,7 +492,7 @@ namespace Vibechat.Web.Services
             await rolesRepository.AddAsync(ChatRoleDataModel.Create(chatId, userId, ChatRole.NoRole));
 
             await unitOfWork.Commit();
-            return addedUser.ToUserInfo();
+            return addedUser.ToAppUserDto();
         }
 
         public async Task ValidateDialog(string firstUserId, string secondUserId)
@@ -574,7 +574,7 @@ namespace Vibechat.Web.Services
             return chat.DeviceId;
         }
 
-        public async Task<List<UserInfo>> GetParticipants(int chatId, int maximum = 0)
+        public async Task<List<AppUserDto>> GetParticipants(int chatId, int maximum = 0)
         {
             var defaultErrorMessage = new InvalidDataException("Wrong conversation was provided.");
 
@@ -588,7 +588,7 @@ namespace Vibechat.Web.Services
             var participants = await usersConversationsRepository.GetChatParticipants(chatId);
 
             var users = (from participant in participants
-                         select participant.ToUserInfo()
+                         select participant.ToAppUserDto()
                         ).ToList();
 
             if (maximum.Equals(0))
@@ -621,12 +621,12 @@ namespace Vibechat.Web.Services
             }
 
             var dialogUser = new AppUser();
-            var members = new List<UserInfo>();
+            var members = new List<AppUserDto>();
 
             if (conversation.IsGroup)
             {
                 members = (await usersConversationsRepository.GetChatParticipants(conversationId))
-                    .Select(x => x.ToUserInfo())
+                    .Select(x => x.ToAppUserDto())
                     .ToList();
 
                 if (!conversation.IsPublic && members.All(usr => usr.Id != whoAccessedId))
@@ -692,7 +692,7 @@ namespace Vibechat.Web.Services
 
             return new Chat
             {
-                DialogueUser = dialogUser?.ToUserInfo(),
+                DialogueUser = dialogUser?.ToAppUserDto(),
                 IsGroup = conversation.IsGroup
             };
         }

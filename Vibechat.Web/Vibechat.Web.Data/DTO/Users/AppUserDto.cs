@@ -5,7 +5,7 @@ namespace VibeChat.Web.ChatData
     /// <summary>
     ///     Typical user in conversation
     /// </summary>
-    public class UserInfo
+    public class AppUserDto
     {
         public string Id { get; set; }
 

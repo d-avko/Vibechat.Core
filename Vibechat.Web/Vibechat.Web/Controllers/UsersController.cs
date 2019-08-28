@@ -40,7 +40,7 @@ namespace VibeChat.Web.Controllers
 
                 var user = await mUsersService.GetUserById(id, thisUserId);
 
-                return Ok(new ResponseApiModel<UserInfo>
+                return Ok(new ResponseApiModel<AppUserDto>
                 {
                     IsSuccessfull = true,
                     Response = user
@@ -48,7 +48,7 @@ namespace VibeChat.Web.Controllers
             }
             catch (InvalidDataException ex)
             {
-                return BadRequest(new ResponseApiModel<UserInfo>
+                return BadRequest(new ResponseApiModel<AppUserDto>
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
@@ -57,7 +57,7 @@ namespace VibeChat.Web.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(new ResponseApiModel<UserInfo>
+                return NotFound(new ResponseApiModel<AppUserDto>
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message,
@@ -66,7 +66,7 @@ namespace VibeChat.Web.Controllers
             }
             catch (Exception)
             {
-                return StatusCode((int)HttpStatusCode.InternalServerError, new ResponseApiModel<UserInfo>
+                return StatusCode((int)HttpStatusCode.InternalServerError, new ResponseApiModel<AppUserDto>
                 {
                     IsSuccessfull = false
                 });
@@ -283,14 +283,11 @@ namespace VibeChat.Web.Controllers
         [Authorize(Policy = "PublicApi")]
         [HttpPatch]
         [Route("[action]")]
-        public async Task<IActionResult> ChangePublicState(
-            [FromBody] ChangeUserIsPublicStateRequest request)
+        public async Task<IActionResult> ChangePublicState()
         {
             try
             {
-                await mUsersService.ChangeUserIsPublicState(
-                    request.userId,
-                    JwtHelper.GetNamedClaimValue(User.Claims));
+                await mUsersService.ChangeUserIsPublicState(JwtHelper.GetNamedClaimValue(User.Claims));
 
                 return Ok(new ResponseApiModel<bool>
                 {

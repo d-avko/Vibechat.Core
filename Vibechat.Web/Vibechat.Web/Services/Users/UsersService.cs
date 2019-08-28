@@ -41,7 +41,7 @@ namespace Vibechat.Web.Services.Users
             this.bansService = bansService;
         }
 
-        public async Task<UserInfo> GetUserById(string userId, string callerId)
+        public async Task<AppUserDto> GetUserById(string userId, string callerId)
         {
             if (userId == null)
             {
@@ -55,7 +55,7 @@ namespace Vibechat.Web.Services.Users
                 throw new KeyNotFoundException("User was not found");
             }
 
-            var user = foundUser.ToUserInfo();
+            var user = foundUser.ToAppUserDto();
             
             user.IsMessagingRestricted =
                 bansService.IsBannedFromMessagingWith(callerId, userId);
@@ -181,7 +181,7 @@ namespace Vibechat.Web.Services.Users
             await unitOfWork.Commit();
         }
 
-        public async Task<List<UserInfo>> GetContacts(string callerId)
+        public async Task<List<AppUserDto>> GetContacts(string callerId)
         {
             var caller = await usersRepository.GetByIdAsync(callerId);
 
@@ -191,7 +191,7 @@ namespace Vibechat.Web.Services.Users
             }
 
             return (await contactsRepository.ListAsync(new GetContactsOfSpec(callerId)))?
-                .Select(x => x.Contact.ToUserInfo())
+                .Select(x => x.Contact.ToAppUserDto())
                 ?.ToList();
         }
 
@@ -280,18 +280,13 @@ namespace Vibechat.Web.Services.Users
             return new UsersByNickNameResultApiModel
             {
                 UsersFound = result.Select(foundUser =>
-                    foundUser.ToUserInfo()
+                    foundUser.ToAppUserDto()
                 ).ToList()
             };
         }
 
-        public async Task ChangeUserIsPublicState(string userId, string whoAccessedId)
+        public async Task ChangeUserIsPublicState(string userId)
         {
-            if (whoAccessedId != userId)
-            {
-                throw new InvalidDataException("Can only call this method for yourself.");
-            }
-
             var user = await usersRepository.GetByIdAsync(userId);
 
             if (user == null)

@@ -208,6 +208,14 @@ export class GroupInfoDialogComponent {
     )
   }
 
+  IsChatPublic() {
+    return this.data.Conversation.isPublic;
+  }
+
+  async OnChatVisibilityChanged() {
+    await this.chats.ChangeChatPublicVisibility(this.data.Conversation);
+  }
+
   public InviteUsers() {
     const dialogRef = this.dialog.open(FindUsersDialogComponent, {
       panelClass: "profile-dialog",

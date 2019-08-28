@@ -39,7 +39,7 @@ export class Chat {
 
   public deviceId: string;
 
-  public canReceiveMessages: boolean;
+  public isPublic: boolean;
 
   public clientLastMessageId: number;
 

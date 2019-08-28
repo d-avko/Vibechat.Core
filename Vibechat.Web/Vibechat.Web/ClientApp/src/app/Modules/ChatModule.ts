@@ -44,6 +44,7 @@ import {ChatEventComponent} from "../UiComponents/Messages/ChatEvent/chat-event.
 import {UploadsApi} from "../Services/Api/UploadsApi";
 import {LocalesService} from "../Services/LocalesService";
 import {TranslationModule} from "./translation/translation.module";
+import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 
 @NgModule({
   declarations: [
@@ -77,7 +78,8 @@ import {TranslationModule} from "./translation/translation.module";
     BrowserAnimationsModule,
     FormsModule,
     UiScrollModule,
-    TranslationModule
+    TranslationModule,
+    MatSlideToggleModule
   ],
   exports: [AddGroupDialogComponent],
   entryComponents: [

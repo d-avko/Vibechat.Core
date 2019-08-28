@@ -23,7 +23,7 @@ namespace Vibechat.Web.Data_Layer.Repositories.Specifications.Messages
                 msg.ConversationID == conversationId
                 && msg.Type == MessageType.Attachment
                 && msg.AttachmentInfo.AttachmentKind.Kind == attachmentKind
-                && !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID)
+                && !deletedMessages.Any(x => x.MessageID == msg.MessageID)
                 )
         {
             ApplyOrderByDescending(x => x.TimeReceived);

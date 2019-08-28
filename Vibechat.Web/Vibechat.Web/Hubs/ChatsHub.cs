@@ -384,7 +384,7 @@ namespace VibeChat.Web
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task CreateDialog(UserInfo user, bool secure, string deviceId)
+        public async Task CreateDialog(AppUserDto user, bool secure, string deviceId)
         {
             var whoSent = await userService.GetUserById(userProvider.GetUserId(Context));
             await userService.MakeUserOnline(whoSent.Id, Context.ConnectionId);
@@ -411,12 +411,12 @@ namespace VibeChat.Web
 
                 if (whoSent.IsOnline && whoSent.ConnectionId != null)
                 {
-                    await AddedToDialog(new UserInfo {Id = whoSent.Id}, Context.ConnectionId, created.Id);
+                    await AddedToDialog(new AppUserDto {Id = whoSent.Id}, Context.ConnectionId, created.Id);
                 }
 
                 if (userToSend.IsOnline && userToSend.ConnectionId != null)
                 {
-                    await AddedToDialog(new UserInfo {Id = userToSend.Id}, userToSend.ConnectionId, created.Id);
+                    await AddedToDialog(new AppUserDto {Id = userToSend.Id}, userToSend.ConnectionId, created.Id);
                 }
             }
             catch (Exception ex)
@@ -500,7 +500,7 @@ namespace VibeChat.Web
 
                 //we can't trust user on what's in user field
 
-                message.User = whoSent.ToUserInfo();
+                message.User = whoSent.ToAppUserDto();
 
                 MessageDataModel created;
 
@@ -545,7 +545,7 @@ namespace VibeChat.Web
 
                 //we can't trust user on what's in user field
 
-                message.User = whoSent.ToUserInfo();
+                message.User = whoSent.ToAppUserDto();
 
                 MessageDataModel created;
 
@@ -606,7 +606,7 @@ namespace VibeChat.Web
                     TimeReceived = created.TimeReceived.ToUTCString(),
                     State = MessageState.Delivered,
                     //this is really needed, because if name/lastname of sender will change, it won't be reflected in encrypted payload.
-                    User = whoSent.ToUserInfo()
+                    User = whoSent.ToAppUserDto()
                 };
 
                 if (user.IsOnline && user.ConnectionId != null)
@@ -701,12 +701,12 @@ namespace VibeChat.Web
             return Clients.Group(conversationId.ToString()).SendAsync("RemovedFromGroup", userId, conversationId);
         }
 
-        private Task AddedToGroup(UserInfo user, int chatId, string callerConnectionId, bool x)
+        private Task AddedToGroup(AppUserDto user, int chatId, string callerConnectionId, bool x)
         {
             return Clients.GroupExcept(chatId.ToString(), callerConnectionId).SendAsync("AddedToGroup", chatId, user);
         }
 
-        private Task AddedToDialog(UserInfo user, string connectionId, int conversationId)
+        private Task AddedToDialog(AppUserDto user, string connectionId, int conversationId)
         {
             return Clients.Client(connectionId).SendAsync("AddedToGroup", conversationId, user);
         }

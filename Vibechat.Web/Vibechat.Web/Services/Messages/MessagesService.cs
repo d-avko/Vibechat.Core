@@ -68,13 +68,9 @@ namespace Vibechat.Web.Services.Messages
                 throw new KeyNotFoundException("Wrong conversation to get attachments from.");
             }
 
-            var members = 
-                (await usersConversationsRepository.ListAsync(new GetParticipantsSpec(conversationId)))
-                .Select(x => x.User);
-
             //only member of conversation could request messages of non-public conversation.
 
-            if (members.FirstOrDefault(x => x.Id == whoAccessedId) == null && !conversation.IsPublic)
+            if (!await usersConversationsRepository.Exists(whoAccessedId, conversationId) && !conversation.IsPublic)
             {
                 throw new UnauthorizedAccessException("You are unauthorized to do such an action.");
             }
