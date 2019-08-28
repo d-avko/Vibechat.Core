@@ -1,7 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using VibeChat.Web;
 using Vibechat.Web.Data.Repositories;
 
@@ -11,11 +14,14 @@ namespace Vibechat.Web.Middleware
     {
         private readonly IUsersRepository repository;
         private readonly UnitOfWork unitOfWork;
+        private readonly ILogger<UserStatusMiddleware> logger;
 
-        public UserStatusMiddleware(IUsersRepository repository, UnitOfWork unitOfWork)
+        public UserStatusMiddleware(IUsersRepository repository, UnitOfWork unitOfWork, 
+            ILogger<UserStatusMiddleware> logger)
         {
             this.repository = repository;
             this.unitOfWork = unitOfWork;
+            this.logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
@@ -30,10 +36,18 @@ namespace Vibechat.Web.Middleware
                     context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                     return;
                 }
-                
-                await repository.MakeUserOnline(user);
-                await repository.UpdateAsync(user);
-                await unitOfWork.Commit();
+
+                try
+                {
+                    await repository.MakeUserOnline(user);
+                    await repository.UpdateAsync(user);
+                    await unitOfWork.Commit();
+                }
+                catch (DbUpdateConcurrencyException e)
+                {
+                    //could happen if signalR event and api call came in at the same time.
+                    logger.LogWarning("Error while updating user 'online' state, exception:" + e.Message);
+                }
             }
 
             await next(context);

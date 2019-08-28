@@ -164,6 +164,7 @@ export class ViewAttachmentsDialogComponent {
           .reverse();
 
       this.AddFiles(attachments);
+      this.IsFilesInitialized = true;
     }
   }
 

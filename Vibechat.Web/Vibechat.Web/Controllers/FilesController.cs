@@ -134,16 +134,16 @@ namespace Vibechat.Web.Controllers
 
         public class UploadImagesRequest
         {
-            [FromForm(Name = "images")] public List<IFormFile> images { get; set; }
+            public List<IFormFile> images { get; set; }
 
-            [FromForm(Name = "ChatId")] public string ChatId { get; set; }
+            public string ChatId { get; set; }
         }
 
         public class UploadFileRequest
         {
-            [FromForm(Name = "file")] public IFormFile file { get; set; }
+            public IFormFile file { get; set; }
 
-            [FromForm(Name = "ChatId")] public string ChatId { get; set; }
+            public string ChatId { get; set; }
         }
     }
 }

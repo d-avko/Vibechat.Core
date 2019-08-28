@@ -34,7 +34,7 @@ namespace Vibechat.Web.Controllers
             {
                 var result = await mUsersService.GetContacts(JwtHelper.GetNamedClaimValue(User.Claims));
 
-                return Ok(new ResponseApiModel<List<UserInfo>>
+                return Ok(new ResponseApiModel<List<AppUserDto>>
                 {
                     IsSuccessfull = true,
                     Response = result

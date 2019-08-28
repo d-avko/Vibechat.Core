@@ -9,13 +9,13 @@ import {UploadsApi} from "./Api/UploadsApi";
   providedIn: 'root'
 })
 export class UsersService {
-  constructor(private requestsBuilder: Api,
+  constructor(private api: Api,
               private connectionManager: SignalrConnection,
               private auth: AuthService,
               private uploads: UploadsApi) { }
 
   public async GetById(userId: string){
-    let result = await this.requestsBuilder.GetUserById(userId);
+    let result = await this.api.GetUserById(userId);
 
     if(!result.isSuccessfull){
       return null;
@@ -27,7 +27,7 @@ export class UsersService {
   //Fetches user info of specified user. If current user id specified,
   //updates user entry in AuthService.
   public async UpdateUserInfo(userId: string) : Promise<AppUser> {
-    let result = await this.requestsBuilder.GetUserById(userId);
+    let result = await this.api.GetUserById(userId);
 
     if (!result.isSuccessfull) {
       return null;
@@ -41,7 +41,7 @@ export class UsersService {
   }
 
   public async FindUsersByUsername(name: string): Promise<Array<AppUser>>{
-    let result = await this.requestsBuilder.FindUsersByUsername(name);
+    let result = await this.api.FindUsersByUsername(name);
 
     if (!result.isSuccessfull) {
       return null;
@@ -55,8 +55,16 @@ export class UsersService {
     }
   }
 
+  public async ChangeProfileVisibility(){
+    let res = await this.api.ChangeUserPublicVisibility();
+
+    if(res.isSuccessfull){
+      this.auth.User.isPublic = !this.auth.User.isPublic;
+    }
+  }
+
   public async UpdateContacts() {
-    let contacts = await this.requestsBuilder.GetContacts();
+    let contacts = await this.api.GetContacts();
 
     if (!contacts.isSuccessfull) {
       return;
@@ -74,7 +82,7 @@ export class UsersService {
   }
 
   public async AddToContacts(user: AppUser) {
-    let result = await this.requestsBuilder.AddToContacts(user.id);
+    let result = await this.api.AddToContacts(user.id);
 
     if (!result.isSuccessfull) {
       return;
@@ -84,7 +92,7 @@ export class UsersService {
   }
 
   public async RemoveFromContacts(user: AppUser) {
-    let result = await this.requestsBuilder.RemoveFromContacts(user.id);
+    let result = await this.api.RemoveFromContacts(user.id);
 
     if (!result.isSuccessfull) {
       return;
@@ -120,7 +128,7 @@ export class UsersService {
   }
 
   public async ChangeLastname(name: string) {
-    let result = await this.requestsBuilder.ChangeCurrentUserLastName(name);
+    let result = await this.api.ChangeCurrentUserLastName(name);
 
     if (!result.isSuccessfull) {
       return;
@@ -130,7 +138,7 @@ export class UsersService {
   }
 
   public async ChangeName(name: string) {
-    let result = await this.requestsBuilder.ChangeCurrentUserName(name);
+    let result = await this.api.ChangeCurrentUserName(name);
 
     if (!result.isSuccessfull) {
       return;
@@ -140,7 +148,7 @@ export class UsersService {
   }
 
   public async ChangeUsername(name: string) {
-    let result = await this.requestsBuilder.ChangeUsername(name);
+    let result = await this.api.ChangeUsername(name);
 
     if (!result.isSuccessfull) {
       return;

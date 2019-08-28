@@ -71,6 +71,7 @@ export class SearchListComponent implements OnChanges{
       this.messages.EnterAtLeast(this.MinSearchChars);
       return;
     }
+
     this.SearchLocalGroups();
     await this.SearchUsers();
     await this.SearchGlobalGroups();
@@ -141,7 +142,10 @@ export class SearchListComponent implements OnChanges{
 
 
   private async SearchMessages(){
-    if (this.IsSearchingForMessages || this.IsMessagesEnd) {
+    if (this.IsSearchingForMessages
+      || this.IsMessagesEnd
+      || !this.SearchString
+      || (this.SearchString.length < this.MinSearchChars)) {
       return;
     }
 

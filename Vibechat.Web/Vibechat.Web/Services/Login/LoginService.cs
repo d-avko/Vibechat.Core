@@ -79,7 +79,7 @@ namespace Vibechat.Web.Services.Login
 
             return new LoginResultApiModel
             {
-                Info = identityUser.ToUserInfo(),
+                Info = identityUser.ToAppUserDto(),
                 Token = identityUser.GenerateToken(),
                 RefreshToken = identityUser.RefreshToken,
                 IsNewUser = isNewUser

@@ -1274,4 +1274,12 @@ export class ChatsService {
     }
     old.dialogueUser = New.dialogueUser;
   }
+
+  async ChangeChatPublicVisibility(chat: Chat) {
+    let res = await this.api.ChangeChatPublicVisibility(chat.id);
+
+    if(res.isSuccessfull){
+      chat.isPublic = !chat.isPublic;
+    }
+  }
 }

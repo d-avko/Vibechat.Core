@@ -78,6 +78,15 @@
       <input *ngIf="!data.Conversation.isMessagingRestricted" type="file" (change)="UpdateThumbnail($event)" accept="image/*" class="thumbnail-input" name="thumbnail" />
     </mat-list-item>
 
+    <mat-list-item *ngIf="IsJoined()">
+      <mat-slide-toggle
+        (toggleChange)="OnChatVisibilityChanged()"
+        [checked]="IsChatPublic()">
+      </mat-slide-toggle>
+      <h3 matLine i18n *ngIf="!IsChatPublic()">Non-public profile </h3>
+      <h3 matLine i18n *ngIf="IsChatPublic()">Public profile </h3>
+    </mat-list-item>
+
     <mat-list-item *ngIf="IsJoined() && IsModeratorOrCreator()" (click)="ChooseUser()">
 
       <mat-icon class="cadetBlue">

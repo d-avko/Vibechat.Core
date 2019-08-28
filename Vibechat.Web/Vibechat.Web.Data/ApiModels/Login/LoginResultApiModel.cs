@@ -15,7 +15,7 @@ namespace Vibechat.Web.ApiModels
 
         public string RefreshToken { get; set; }
 
-        public UserInfo Info { get; set; }
+        public AppUserDto Info { get; set; }
 
         /// <summary>
         ///     Flag indicating if this user

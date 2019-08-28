@@ -14,9 +14,9 @@ namespace Vibechat.Web.Extensions
 {
     public static class DtoExtensions
     {
-        public static UserInfo ToUserInfo(this AppUser user)
+        public static AppUserDto ToAppUserDto(this AppUser user)
         {
-            return new UserInfo
+            return new AppUserDto
             {
                 Id = user.Id,
                 Name = user.FirstName,
@@ -55,7 +55,7 @@ namespace Vibechat.Web.Extensions
 
         public static Chat ToChatDto(
             this ConversationDataModel value,
-            List<UserInfo> participants,
+            List<AppUserDto> participants,
             AppUser dialogUser,
             DhPublicKeyDataModel key,
             ChatRoleDataModel chatRole,
@@ -67,7 +67,7 @@ namespace Vibechat.Web.Extensions
             {
                 Name = value.Name,
                 Id = value.Id,
-                DialogueUser = dialogUser?.ToUserInfo(),
+                DialogueUser = dialogUser?.ToAppUserDto(),
                 IsGroup = value.IsGroup,
                 ThumbnailUrl = value.ThumbnailUrl,
                 FullImageUrl = value.FullImageUrl,
@@ -76,9 +76,10 @@ namespace Vibechat.Web.Extensions
                 IsSecure = value.IsSecure,
                 PublicKey = key?.ToDhPublicKey(),
                 DeviceId = deviceId,
-                ChatRole = chatRole.ToChatRole(),
+                ChatRole = chatRole?.ToChatRole(),
                 ClientLastMessageId = lastMessageId,
-                LastMessage = lastMessage
+                LastMessage = lastMessage,
+                IsPublic = value.IsPublic
             };
         }
 
@@ -90,7 +91,7 @@ namespace Vibechat.Web.Extensions
                 ConversationID = value.ConversationID,
                 MessageContent = value.MessageContent,
                 TimeReceived = value.TimeReceived.ToUTCString(),
-                User = value.User?.ToUserInfo(),
+                User = value.User?.ToAppUserDto(),
                 AttachmentInfo = value.AttachmentInfo?.ToMessageAttachment(),
                 Type = value.Type,
                 ForwardedMessage = value.ForwardedMessage?.ToMessage(),

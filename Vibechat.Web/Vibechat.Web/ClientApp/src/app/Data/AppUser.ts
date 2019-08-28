@@ -22,6 +22,8 @@ export class AppUser {
 
   public isMessagingRestricted: boolean;
 
+  public isPublic: boolean;
+
   public isBlocked: boolean;
 
   public isBlockedInConversation: boolean;

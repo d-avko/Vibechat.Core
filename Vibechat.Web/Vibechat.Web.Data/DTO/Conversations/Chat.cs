@@ -11,7 +11,7 @@ namespace VibeChat.Web.ChatData
         /// <summary>
         ///     If this conversation is dialog, then this field points to dialog user
         /// </summary>
-        public UserInfo DialogueUser { get; set; }
+        public AppUserDto DialogueUser { get; set; }
 
         /// <summary>
         ///     Conversation name
@@ -38,7 +38,7 @@ namespace VibeChat.Web.ChatData
         /// <summary>
         ///     List of conversation participants
         /// </summary>
-        public List<UserInfo> Participants { get; set; }
+        public List<AppUserDto> Participants { get; set; }
 
         public bool IsSecure { get; set; }
 
@@ -70,7 +70,7 @@ namespace VibeChat.Web.ChatData
         public int MessagesUnread { get; set; }
 
         //Client field, to simplify data retrieval.
-        public bool CanReceiveMessages { get; set; }
+        public bool IsPublic { get; set; }
 
         public int ClientLastMessageId { get; set; }
 

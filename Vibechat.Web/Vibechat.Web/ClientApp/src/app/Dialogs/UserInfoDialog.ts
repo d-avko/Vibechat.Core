@@ -181,4 +181,12 @@ export class UserInfoDialogComponent {
     await this.chats.RemoveAllMessages(this.data.conversation);
     this.dialogRef.close();
   }
+
+  IsPublicProfile() {
+    return this.auth.User.isPublic;
+  }
+
+  async OnProfileVisibilityChanged() {
+    await this.usersService.ChangeProfileVisibility();
+  }
 }
