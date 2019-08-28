@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -30,7 +32,7 @@ namespace Vibechat.Web.Controllers
         [Authorize(Policy = "PublicApi")]
         [HttpPost]
         [Route("[action]")]
-        public async Task<ResponseApiModel<List<Message>>> GetAttachments([FromBody] GetAttachmentsRequest request)
+        public async Task<IActionResult> GetAttachments([FromBody] GetAttachmentsRequest request)
         {
             try
             {
@@ -41,28 +43,50 @@ namespace Vibechat.Web.Controllers
                     request.offset,
                     request.count);
 
-                return new ResponseApiModel<List<Message>>
+                return Ok(new ResponseApiModel<List<Message>>
                 {
                     IsSuccessfull = true,
                     ErrorMessage = null,
                     Response = result
-                };
+                });
             }
-            catch (Exception ex)
+            catch (InvalidDataException ex)
             {
-                return new ResponseApiModel<List<Message>>
+                return BadRequest(new ResponseApiModel<bool>
                 {
                     IsSuccessfull = false,
-                    ErrorMessage = ex.Message,
-                    Response = null
-                };
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode((int)HttpStatusCode.Forbidden, new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (Exception)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false
+                });
             }
         }
         
         [Authorize(Policy = "PublicApi")]
         [HttpPost]
         [Route("[action]")]
-        public async Task<ResponseApiModel<List<Message>>> Get([FromBody] GetMessagesRequest credentials)
+        public async Task<IActionResult> Get([FromBody] GetMessagesRequest credentials)
         { 
             try
             {
@@ -75,21 +99,42 @@ namespace Vibechat.Web.Controllers
                     credentials.SetLastMessage,
                     JwtHelper.GetNamedClaimValue(User.Claims));
 
-                return new ResponseApiModel<List<Message>>
+                return Ok(new ResponseApiModel<List<Message>>
                 {
                     IsSuccessfull = true,
-                    ErrorMessage = null,
                     Response = result
-                };
+                });
             }
-            catch (Exception ex)
+            catch (InvalidDataException ex)
             {
-                return new ResponseApiModel<List<Message>>
+                return BadRequest(new ResponseApiModel<bool>
                 {
                     IsSuccessfull = false,
-                    ErrorMessage = ex.Message,
-                    Response = null
-                };
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode((int)HttpStatusCode.Forbidden, new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (Exception)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false
+                });
             }
         }
         
@@ -101,7 +146,7 @@ namespace Vibechat.Web.Controllers
         [Authorize(Policy = "PublicApi")]
         [HttpPost]
         [Route("[action]")]
-        public async Task<ResponseApiModel<string>> Delete(
+        public async Task<IActionResult> Delete(
             [FromBody] DeleteMessagesRequest messagesInfo)
         { 
             try
@@ -111,28 +156,48 @@ namespace Vibechat.Web.Controllers
                     messagesInfo.ConversationId,
                     JwtHelper.GetNamedClaimValue(User.Claims));
 
-                return new ResponseApiModel<string>
+                return Ok(new ResponseApiModel<string>
                 {
-                    IsSuccessfull = true,
-                    ErrorMessage = null,
-                    Response = null
-                };
+                    IsSuccessfull = true
+                });
             }
-            catch (Exception ex)
+            catch (InvalidDataException ex)
             {
-                return new ResponseApiModel<string>
+                return BadRequest(new ResponseApiModel<bool>
                 {
                     IsSuccessfull = false,
-                    ErrorMessage = ex.Message,
-                    Response = null
-                };
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode((int)HttpStatusCode.Forbidden, new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (Exception)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false
+                });
             }
         }
         
         [Authorize(Policy = "PublicApi")]
         [HttpPut]
         [Route("[action]")]
-        public async Task<ResponseApiModel<bool>> SetLast([FromBody] SetLastMessageRequest request)
+        public async Task<IActionResult> SetLast([FromBody] SetLastMessageRequest request)
         { 
             try
             {
@@ -140,28 +205,49 @@ namespace Vibechat.Web.Controllers
 
                 await messagesService.SetLastMessage(thisUserId, request.chatId, request.messageId);
 
-                return new ResponseApiModel<bool>
+                return Ok(new ResponseApiModel<bool>
                 {
                     IsSuccessfull = true,
-                    ErrorMessage = null,
                     Response = true
-                };
+                });
             }
-            catch (Exception ex)
+            catch (InvalidDataException ex)
             {
-                return new ResponseApiModel<bool>
+                return BadRequest(new ResponseApiModel<bool>
                 {
                     IsSuccessfull = false,
-                    ErrorMessage = ex.Message,
-                    Response = false
-                };
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode((int)HttpStatusCode.Forbidden, new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (Exception)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false
+                });
             }
         }
 
         [Authorize(Policy = "PublicApi")]
         [HttpPost]
         [Route("[action]")]
-        public async Task<ResponseApiModel<List<Message>>> Search([FromBody] SearchMessagesRequest request)
+        public async Task<IActionResult> Search([FromBody] SearchMessagesRequest request)
         {
             try
             {
@@ -174,21 +260,42 @@ namespace Vibechat.Web.Controllers
                     request.count,
                     thisUserId);
             
-                return new ResponseApiModel<List<Message>>
+                return Ok(new ResponseApiModel<List<Message>>
                 {
                     IsSuccessfull = true,
-                    ErrorMessage = null,
                     Response = messages
-                };
+                });
             }
-            catch (Exception e)
+            catch (InvalidDataException ex)
             {
-                return new ResponseApiModel<List<Message>>
+                return BadRequest(new ResponseApiModel<bool>
                 {
-                    IsSuccessfull = true,
-                    ErrorMessage = e.Message,
-                    Response = null
-                };
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode((int)HttpStatusCode.Forbidden, new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (Exception)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false
+                });
             }
         }
     }

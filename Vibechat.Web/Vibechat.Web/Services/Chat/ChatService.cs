@@ -89,14 +89,14 @@ namespace Vibechat.Web.Services
         {
             if (!await ExistsInConversation(chatId, thisUserId))
             {
-                throw new InvalidDataException("Wrong conversation id was provided.");
+                throw new UnauthorizedAccessException("Wrong conversation id was provided.");
             }
 
             var chat = await conversationRepository.GetByIdAsync(chatId);
 
             if (chat == null)
             {
-                throw new InvalidDataException("Wrong conversation id was provided.");
+                throw new KeyNotFoundException("Wrong conversation id was provided.");
             }
 
             chat.AuthKeyId = authKeyId;
@@ -111,30 +111,30 @@ namespace Vibechat.Web.Services
 
         public async Task<Chat> CreateConversation(CreateChatRequest credentials)
         {
-            var defaultError = new FormatException("Error while creating the conversation..");
+            var defaultError = new InvalidDataException("Error while creating the conversation..");
 
             //if there was no group info or creator info
 
             if (string.IsNullOrWhiteSpace(credentials.CreatorId))
             {
-                throw defaultError;
+                throw new KeyNotFoundException("Wrong creatorId.");
             }
 
-            var user = await usersRepository.GetById(credentials.CreatorId);
+            var user = await usersRepository.GetByIdAsync(credentials.CreatorId);
 
             if (user == null)
             {
-                throw defaultError;
+                throw new KeyNotFoundException("Wrong creatorId.");
             }
 
             if (!credentials.IsGroup && credentials.DialogUserId == null)
             {
-                throw new FormatException("No dialogue user was provided...");
+                throw new InvalidDataException("No dialog user was provided.");
             }
 
             if (credentials.IsGroup && credentials.ConversationName.Length > MaxNameLength)
             {
-                throw new FormatException("Chat name was too long...");
+                throw new InvalidDataException("Chat name was too long.");
             }
 
             AppUser secondDialogueUser = null;
@@ -145,7 +145,7 @@ namespace Vibechat.Web.Services
             if (!credentials.IsGroup)
             {
                 //if this is a dialogue , find a user with whom to create conversation
-                secondDialogueUser = await usersRepository.GetById(credentials.DialogUserId);
+                secondDialogueUser = await usersRepository.GetByIdAsync(credentials.DialogUserId);
 
                 if (secondDialogueUser == null)
                 {
@@ -272,7 +272,7 @@ namespace Vibechat.Web.Services
             }
             catch (Exception ex)
             {
-                throw new Exception("Failed to update chat image. Try different one.", ex);
+                throw new InvalidDataException("Failed to update chat image. Try different one.", ex);
             }
         }
 
@@ -332,12 +332,18 @@ namespace Vibechat.Web.Services
         {
             var conversation = await conversationRepository.GetByIdAsync(conversationId);
 
+            if (conversation == null)
+            {
+                throw new InvalidDataException("Wrong chatId.");
+            }
+            
             var userRole = await rolesRepository.GetByIdAsync(conversationId, whoAccessedId);
 
             if (userRole.RoleId != ChatRole.Moderator && userRole.RoleId != ChatRole.Creator)
             {
-                throw new FormatException("This method is only allowed to group creator / moderator.");
+                throw new UnauthorizedAccessException("This method is only allowed to group creator / moderator.");
             }
+            
             conversation.IsPublic = !conversation.IsPublic;
             await conversationRepository.UpdateAsync(conversation);
             await unitOfWork.Commit();
@@ -357,14 +363,14 @@ namespace Vibechat.Web.Services
 
             if (conversation == null)
             {
-                throw new FormatException("Wrong conversation.");
+                throw new InvalidDataException("Wrong conversation.");
             }
 
             var userConversation = await usersConversationsRepository.GetByIdAsync(userId, chatId);
 
             if (userConversation == null)
             {
-                throw new FormatException("User is not a part of this conversation.");
+                throw new InvalidDataException("User is not a part of this conversation.");
             }
 
             var userRole = await rolesRepository.GetByIdAsync(chatId, whoRemovedId);
@@ -373,7 +379,7 @@ namespace Vibechat.Web.Services
             {
                 if (userRole.RoleId != ChatRole.Moderator && userRole.RoleId != ChatRole.Creator)
                 {
-                    throw new FormatException("Only creator / moderator can remove users in group.");
+                    throw new InvalidDataException("Only creator / moderator can remove users in group.");
                 }
             }
 
@@ -396,7 +402,7 @@ namespace Vibechat.Web.Services
 
             if (conversation == null)
             {
-                throw new FormatException("Wrong conversation to remove.");
+                throw new InvalidDataException("Wrong conversation to remove.");
             }
 
             //secure chats may be removed by any of participants.
@@ -409,7 +415,7 @@ namespace Vibechat.Web.Services
                 {
                     if (userRole.RoleId != ChatRole.Creator)
                     {
-                        throw new FormatException("Only creator can remove group.");
+                        throw new InvalidDataException("Only creator can remove group.");
                     }
                 }
             }
@@ -460,7 +466,7 @@ namespace Vibechat.Web.Services
 
         public async Task<UserInfo> AddUserToChat(int chatId, string userId)
         {
-            var defaultError = new FormatException("Invalid credentials were provided.");
+            var defaultError = new InvalidDataException("Invalid credentials were provided.");
 
             var FoundConversation = await conversationRepository.GetByIdAsync(chatId);
 
@@ -469,7 +475,7 @@ namespace Vibechat.Web.Services
                 throw defaultError;
             }
 
-            var FoundUser = await usersRepository.GetById(userId);
+            var FoundUser = await usersRepository.GetByIdAsync(userId);
 
             if (FoundUser == null)
             {
@@ -478,7 +484,7 @@ namespace Vibechat.Web.Services
 
             if (await usersConversationsRepository.Exists(FoundUser.Id, FoundConversation.Id))
             {
-                throw new FormatException("User already exists in converation.");
+                throw new InvalidDataException("User already exists in converation.");
             }
 
             var addedUser = (await usersConversationsRepository.AddAsync(UsersConversationDataModel.Create(userId, chatId))).User;
@@ -508,21 +514,14 @@ namespace Vibechat.Web.Services
         /// <param name="deviceId"></param>
         /// <param name="whoAccessedId"></param>
         /// <returns></returns>
-        /// <exception cref="FormatException"></exception>
+        /// <exception cref="InvalidDataException"></exception>
         public async Task<List<Chat>> GetChats(string deviceId, string whoAccessedId)
         {
-            var defaultError = new FormatException("User info provided was not correct.");
-
-            if (whoAccessedId == null)
-            {
-                throw defaultError;
-            }
-
-            var user = await usersRepository.GetById(whoAccessedId);
+            var user = await usersRepository.GetByIdAsync(whoAccessedId);
 
             if (user == null)
             {
-                throw defaultError;
+                throw new KeyNotFoundException("Can't get chats for this user.");
             }
 
             var chats = await usersConversationsRepository.GetUserChats(deviceId, whoAccessedId);
@@ -577,7 +576,7 @@ namespace Vibechat.Web.Services
 
         public async Task<List<UserInfo>> GetParticipants(int chatId, int maximum = 0)
         {
-            var defaultErrorMessage = new FormatException("Wrong conversation was provided.");
+            var defaultErrorMessage = new InvalidDataException("Wrong conversation was provided.");
 
             var conversation = await conversationRepository.GetByIdAsync(chatId);
 
@@ -618,7 +617,7 @@ namespace Vibechat.Web.Services
 
             if (conversation == null)
             {
-                throw new FormatException("No such conversation was found.");
+                throw new KeyNotFoundException("No such conversation was found.");
             }
 
             var dialogUser = new AppUser();
@@ -630,7 +629,7 @@ namespace Vibechat.Web.Services
                     .Select(x => x.ToUserInfo())
                     .ToList();
 
-                if (!conversation.IsPublic && !members.Any(usr => usr.Id == whoAccessedId))
+                if (!conversation.IsPublic && members.All(usr => usr.Id != whoAccessedId))
                 {
                     throw new UnauthorizedAccessException("You are not allowed to view this chat.");
                 }
@@ -641,7 +640,7 @@ namespace Vibechat.Web.Services
 
                 if (dialogUser == null)
                 {
-                    throw new FormatException("Unexpected error: no corresponding user in dialogue.");
+                    throw new InvalidDataException("Unexpected error: no corresponding user in dialogue.");
                 }
             }
             
@@ -676,7 +675,7 @@ namespace Vibechat.Web.Services
 
             if (conversation == null)
             {
-                throw new FormatException("No such conversation was found.");
+                throw new InvalidDataException("No such conversation was found.");
             }
 
             var dialogUser = new AppUser();
@@ -687,7 +686,7 @@ namespace Vibechat.Web.Services
 
                 if (dialogUser == null)
                 {
-                    throw new FormatException("Unexpected error: no corresponding user in dialogue.");
+                    throw new InvalidDataException("Unexpected error: no corresponding user in dialogue.");
                 }
             }
 

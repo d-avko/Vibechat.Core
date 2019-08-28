@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -26,75 +28,144 @@ namespace Vibechat.Web.Controllers
         [Authorize(Policy = "PublicApi")]
         [HttpPost]
         [Route("[action]")]
-        public async Task<ResponseApiModel<List<UserInfo>>> Get()
+        public async Task<IActionResult> Get()
         {
             try
             {
                 var result = await mUsersService.GetContacts(JwtHelper.GetNamedClaimValue(User.Claims));
 
-                return new ResponseApiModel<List<UserInfo>>
+                return Ok(new ResponseApiModel<List<UserInfo>>
                 {
                     IsSuccessfull = true,
                     Response = result
-                };
+                });
             }
-            catch (Exception ex)
+            catch (InvalidDataException ex)
             {
-                return new ResponseApiModel<List<UserInfo>>
+                return BadRequest(new ResponseApiModel<bool>
                 {
-                    ErrorMessage = ex.Message,
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode((int)HttpStatusCode.Forbidden, new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (Exception)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, new ResponseApiModel<bool>
+                {
                     IsSuccessfull = false
-                };
+                });
             }
         }
 
         [Authorize(Policy = "PublicApi")]
         [HttpPost]
         [Route("{userId}/[action]")]
-        public async Task<ResponseApiModel<bool>> Add(string userId)
+        public async Task<IActionResult> Add(string userId)
         {
             try
             {
                 await mUsersService.AddToContacts(userId, JwtHelper.GetNamedClaimValue(User.Claims));
 
-                return new ResponseApiModel<bool>
+                return Ok(new ResponseApiModel<bool>
                 {
                     IsSuccessfull = true,
                     Response = true
-                };
+                });
             }
-            catch (Exception ex)
+            catch (InvalidDataException ex)
             {
-                return new ResponseApiModel<bool>
+                return BadRequest(new ResponseApiModel<bool>
                 {
-                    ErrorMessage = ex.Message,
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode((int)HttpStatusCode.Forbidden, new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (Exception)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, new ResponseApiModel<bool>
+                {
                     IsSuccessfull = false
-                };
+                });
             }
         }
 
         [Authorize(Policy = "PublicApi")]
         [HttpDelete]
         [Route("{userId}/[action]")]
-        public async Task<ResponseApiModel<bool>> Remove(string userId)
+        public async Task<IActionResult> Remove(string userId)
         {
             try
             {
                 await mUsersService.RemoveFromContacts(userId, JwtHelper.GetNamedClaimValue(User.Claims));
 
-                return new ResponseApiModel<bool>
+                return Ok(new ResponseApiModel<bool>
                 {
                     IsSuccessfull = true,
                     Response = true
-                };
+                });
             }
-            catch (Exception ex)
+            catch (InvalidDataException ex)
             {
-                return new ResponseApiModel<bool>
+                return BadRequest(new ResponseApiModel<bool>
                 {
-                    ErrorMessage = ex.Message,
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode((int)HttpStatusCode.Forbidden, new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (Exception)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, new ResponseApiModel<bool>
+                {
                     IsSuccessfull = false
-                };
+                });
             }
         }
     }

@@ -11,28 +11,28 @@ namespace Vibechat.Web.Data.Repositories
     {
         Task<IdentityResult> CreateUser(AppUser user);
 
+        Task UpdateAsync(AppUser user);
+
         Task DisableUserLockout(AppUser user);
 
         Task LockoutUser(AppUser user, DateTimeOffset until);
 
         Task<IQueryable<AppUser>> FindByUsername(string username);
         Task<AppUser> GetByUsername(string username);
-        Task<AppUser> GetById(string id);
-        Task MakeUserOffline(string userId);
-        Task MakeUserOnline(string userId, bool updateConnectionId = false, string signalRConnectionId = null);
+        Task<AppUser> GetByIdAsync(string id);
+        Task MakeUserOffline(AppUser user); 
+        Task MakeUserOnline(AppUser user, bool updateConnectionId = false, string signalRConnectionId = null);
 
-        Task ChangeUserPublicState(string userId);
+        Task ChangeUserPublicState(AppUser user);
 
-        Task UpdateAvatar(string thumbnail, string fullSized, string userId);
+        Task UpdateAvatar(string thumbnail, string fullSized, AppUser user);
 
-        Task ChangeLastName(string newName, string userId);
+        Task ChangeLastName(string newName, AppUser user);
 
-        Task ChangeName(string newName, string userId);
+        Task ChangeName(string newName, AppUser user);
 
-        Task ChangeUsername(string newName, string userId);
+        Task ChangeUsername(string newName, AppUser user);
 
-        Task<string> GetRefreshToken(string userId);
-
-        Task UpdateRefreshToken(string userId, string token);
+        Task UpdateRefreshToken(AppUser user, string token);
     }
 }

@@ -8,15 +8,15 @@ namespace Vibechat.Web.Migrations
         {
             migrationBuilder.DropForeignKey(
                 "FK_Conversations_AspNetUsers_CreatorId",
-                "Chats");
+                "Conversations");
 
             migrationBuilder.DropIndex(
                 "IX_Conversations_CreatorId",
-                "Chats");
+                "Conversations");
 
             migrationBuilder.DropColumn(
                 "CreatorId",
-                "Chats");
+                "Conversations");
 
             migrationBuilder.CreateTable(
                 "Roles",
@@ -40,7 +40,7 @@ namespace Vibechat.Web.Migrations
                     table.ForeignKey(
                         "FK_ChatRoles_Conversations_ChatId",
                         x => x.ChatId,
-                        "Chats",
+                        "Conversations",
                         "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -88,17 +88,17 @@ namespace Vibechat.Web.Migrations
 
             migrationBuilder.AddColumn<string>(
                 "CreatorId",
-                "Chats",
+                "Conversations",
                 nullable: true);
 
             migrationBuilder.CreateIndex(
                 "IX_Conversations_CreatorId",
-                "Chats",
+                "Conversations",
                 "CreatorId");
 
             migrationBuilder.AddForeignKey(
                 "FK_Conversations_AspNetUsers_CreatorId",
-                "Chats",
+                "Conversations",
                 "CreatorId",
                 "AspNetUsers",
                 principalColumn: "Id",

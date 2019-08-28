@@ -16,9 +16,8 @@ namespace Vibechat.Web.Data.Repositories
  
         private readonly UserManager<AppUser> mUserManager;
 
-        public async Task MakeUserOnline(string userId, bool updateConnectionId = false, string signalRConnectionId = null)
+        public async Task MakeUserOnline(AppUser user, bool updateConnectionId = false, string signalRConnectionId = null)
         {
-            var user = await GetById(userId);
             user.IsOnline = true;
             user.LastSeen = DateTime.UtcNow;
             
@@ -28,16 +27,14 @@ namespace Vibechat.Web.Data.Repositories
             }
         }
 
-        public async Task MakeUserOffline(string userId)
+        public async Task MakeUserOffline(AppUser user)
         {
-            var user = await GetById(userId);
-
             user.IsOnline = false;
 
             user.ConnectionId = null;
         }
 
-        public async Task<AppUser> GetById(string id)
+        public async Task<AppUser> GetByIdAsync(string id)
         {
             return await mUserManager.Users
                 .FirstOrDefaultAsync(x => x.Id == id);
@@ -71,46 +68,38 @@ namespace Vibechat.Web.Data.Repositories
                 .Where(user => EF.Functions.Like(user.UserName.ToLower(), username.ToLower() + "%"));
         }
 
-        public async Task ChangeUserPublicState(string userId)
+        public Task UpdateAsync(AppUser user)
         {
-            var user = await GetById(userId);
+            return mUserManager.UpdateAsync(user);
+        }
+
+        public async Task ChangeUserPublicState(AppUser user)
+        {
             user.IsPublic = !user.IsPublic;
         }
 
-        public async Task ChangeName(string newName, string userId)
+        public async Task ChangeName(string newName, AppUser user)
         {
-            var user = await GetById(userId);
             user.FirstName = newName;
         }
 
-        public async Task ChangeLastName(string newName, string userId)
+        public async Task ChangeLastName(string newName, AppUser user)
         {
-            var user = await GetById(userId);
             user.LastName = newName;
         }
 
-        public async Task ChangeUsername(string newName, string userId)
+        public async Task ChangeUsername(string newName, AppUser user)
         {
-            var user = await GetById(userId);
             user.UserName = newName;
-            await mUserManager.UpdateAsync(user);
         }
 
-        public async Task<string> GetRefreshToken(string userId)
+        public async Task UpdateRefreshToken(AppUser user, string token)
         {
-            var user = await GetById(userId);
-            return user.RefreshToken;
-        }
-
-        public async Task UpdateRefreshToken(string userId, string token)
-        {
-            var user = await GetById(userId);
             user.RefreshToken = token;
         }
 
-        public async Task UpdateAvatar(string thumbnail, string fullSized, string userId)
+        public async Task UpdateAvatar(string thumbnail, string fullSized, AppUser user)
         {
-            var user = await GetById(userId);
             user.ProfilePicImageURL = thumbnail;
             user.FullImageUrl = fullSized;
         }

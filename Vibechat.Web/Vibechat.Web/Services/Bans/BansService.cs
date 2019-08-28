@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using VibeChat.Web;
 using Vibechat.Web.Data.Conversations;
@@ -40,27 +42,27 @@ namespace Vibechat.Web.Services.Bans
         {
             if (userToBanId == whoAccessedId)
             {
-                throw new FormatException("Can't ban yourself.");
+                throw new InvalidDataException("Can't ban yourself.");
             }
 
             var conversation = await ConversationRepository.GetByIdAsync(conversationId);
-            var banned = await usersRepository.GetById(userToBanId);
+            var banned = await usersRepository.GetByIdAsync(userToBanId);
 
             var userRole = await rolesRepository.GetByIdAsync(conversationId, whoAccessedId);
 
             if (userRole.RoleId != ChatRole.Moderator && userRole.RoleId != ChatRole.Creator)
             {
-                throw new FormatException("Only creator / moderator can ban users.");
+                throw new InvalidDataException("Only creator / moderator can ban users.");
             }
 
             if (banned == null)
             {
-                throw new FormatException("Wrong user to ban id was provided.");
+                throw new InvalidDataException("Wrong user to ban id was provided.");
             }
 
             if (conversation == null)
             {
-                throw new FormatException("Wrong conversation id was provided.");
+                throw new InvalidDataException("Wrong conversation id was provided.");
             }
 
             try
@@ -70,7 +72,7 @@ namespace Vibechat.Web.Services.Bans
             }
             catch
             {
-                throw new FormatException("Wrong conversation id was provided.");
+                throw new InvalidDataException("Wrong conversation id was provided.");
             }
         }
 
@@ -78,15 +80,15 @@ namespace Vibechat.Web.Services.Bans
         {
             if (UserToBanId == whoAccessedId)
             {
-                throw new FormatException("Can't ban yourself.");
+                throw new InvalidDataException("Can't ban yourself.");
             }
 
-            var bannedBy = await usersRepository.GetById(whoAccessedId);
-            var banned = await usersRepository.GetById(UserToBanId);
+            var bannedBy = await usersRepository.GetByIdAsync(whoAccessedId);
+            var banned = await usersRepository.GetByIdAsync(UserToBanId);
 
             if (banned == null || bannedBy == null)
             {
-                throw new FormatException("Wrong id of person to ban.");
+                throw new KeyNotFoundException("Wrong id of person to ban.");
             }
 
             try
@@ -95,7 +97,7 @@ namespace Vibechat.Web.Services.Bans
             }
             catch
             {
-                throw new FormatException("User is already banned.");
+                throw new InvalidDataException("User is already banned.");
             }
 
             UsersConversationDataModel dialog;
@@ -110,11 +112,11 @@ namespace Vibechat.Web.Services.Bans
 
         public async Task<bool> IsBannedFromConversation(int conversationId, string Who)
         {
-            var who = await usersRepository.GetById(Who);
+            var who = await usersRepository.GetByIdAsync(Who);
 
             if (who == null)
             {
-                throw new FormatException("Wrong id of a person to check.");
+                throw new InvalidDataException("Wrong id of a person to check.");
             }
 
             return (await ConversationsBansRepository.GetByIdAsync(Who, conversationId)) != null;
@@ -134,7 +136,7 @@ namespace Vibechat.Web.Services.Bans
             }
             catch
             {
-                throw new FormatException("Wrong id of a person to unban.");
+                throw new InvalidDataException("Wrong id of a person to unban.");
             }
 
             UsersConversationDataModel dialog;
@@ -153,28 +155,28 @@ namespace Vibechat.Web.Services.Bans
         {
             if (userToUnbanId == whoAccessedId)
             {
-                throw new FormatException("Can't unban yourself.");
+                throw new InvalidDataException("Can't unban yourself.");
             }
 
             var conversation = await ConversationRepository.GetByIdAsync(conversationId);
 
-            var banned = await usersRepository.GetById(userToUnbanId);
+            var banned = await usersRepository.GetByIdAsync(userToUnbanId);
 
             var userRole = await rolesRepository.GetByIdAsync(conversationId, whoAccessedId);
 
             if (userRole.RoleId != ChatRole.Moderator && userRole.RoleId != ChatRole.Creator)
             {
-                throw new FormatException("Only creator / moderator can unban users.");
+                throw new InvalidDataException("Only creator / moderator can unban users.");
             }
 
             if (banned == null)
             {
-                throw new FormatException("Wrong user to unban id was provided.");
+                throw new InvalidDataException("Wrong user to unban id was provided.");
             }
 
             if (conversation == null)
             {
-                throw new FormatException("Wrong conversation id was provided.");
+                throw new InvalidDataException("Wrong conversation id was provided.");
             }
 
             try
@@ -185,19 +187,19 @@ namespace Vibechat.Web.Services.Bans
             }
             catch
             {
-                throw new FormatException("Wrong conversation id was provided.");
+                throw new InvalidDataException("Wrong conversation id was provided.");
             }
         }
 
         public async Task LockoutUser(string userId)
         {
-            var user = await usersRepository.GetById(userId);
+            var user = await usersRepository.GetByIdAsync(userId);
             await usersRepository.LockoutUser(user, DateTimeOffset.UtcNow.AddYears(5));
         }
 
         public async Task DisableLockout(string userId)
         {
-            var user = await usersRepository.GetById(userId);
+            var user = await usersRepository.GetByIdAsync(userId);
             await usersRepository.DisableUserLockout(user);
         }
     }

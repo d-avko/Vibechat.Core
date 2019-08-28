@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FirebaseAdmin;
@@ -37,7 +38,7 @@ namespace Vibechat.Web.Services.Login
             //this can throw detailed error message.
             var verified = await auth.VerifyIdTokenAsync(firebaseToken);
 
-            var identityUser = await usersRepository.GetById(verified.Uid);
+            var identityUser = await usersRepository.GetByIdAsync(verified.Uid);
 
             //user confirmed his phone number, but has not registered yet; 
             //Register him now in that case 
@@ -65,7 +66,7 @@ namespace Vibechat.Web.Services.Login
                 }
                 catch (Exception ex)
                 {
-                    throw new FormatException("Couldn't register this user.", ex);
+                    throw new InvalidDataException("Couldn't register this user.", ex);
                 }
             }
             else
@@ -92,7 +93,7 @@ namespace Vibechat.Web.Services.Login
         /// <returns></returns>
         private async Task<string> RegisterNewUserAsync(RegisterModel userToRegister)
         {
-            var defaultError = new FormatException("Check the fields and try again.");
+            var defaultError = new InvalidDataException("Check the fields and try again.");
 
             if (userToRegister == null)
             {
@@ -108,7 +109,7 @@ namespace Vibechat.Web.Services.Login
 
             if (await usersRepository.GetByUsername(userToRegister.UserName) != null)
             {
-                throw new FormatException("The username is not unique.");
+                throw new InvalidDataException("The username is not unique.");
             }
 
             var imageUrl = chatDataProvider.GetProfilePictureUrl();
@@ -129,13 +130,14 @@ namespace Vibechat.Web.Services.Login
 
             if (!result.Succeeded)
             {
-                throw new FormatException(result.Errors?.ToList()[0].Description ??
+                throw new Exception(result.Errors?.ToList()[0].Description ??
                                           "Couldn't create user because of unexpected error.");
             }
 
             var token = userToCreate.GenerateRefreshToken();
 
-            await usersRepository.UpdateRefreshToken(userToCreate.Id, token);
+            await usersRepository.UpdateRefreshToken(userToCreate, token);
+            await usersRepository.UpdateAsync(userToCreate);
             await unitOfWork.Commit();
             return token;
         }
