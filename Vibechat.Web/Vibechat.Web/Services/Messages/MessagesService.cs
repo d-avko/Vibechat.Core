@@ -61,13 +61,11 @@ namespace Vibechat.Web.Services.Messages
         public async Task<List<Message>> GetAttachments(AttachmentKind kind, int conversationId, string whoAccessedId,
             int offset, int count)
         {
-            var unAuthorizedError = new UnauthorizedAccessException("You are unauthorized to do such an action.");
-
             var conversation = await conversationRepository.GetByIdAsync(conversationId);
 
             if (conversation == null)
             {
-                throw new FormatException("Wrong conversation to get attachments from.");
+                throw new KeyNotFoundException("Wrong conversation to get attachments from.");
             }
 
             var members = 
@@ -91,8 +89,7 @@ namespace Vibechat.Web.Services.Messages
                  kind,
                  offset,
                  count));
-
-
+            
             return (from msg in messages
                 select msg.ToMessage()).ToList();
         }
@@ -147,15 +144,11 @@ namespace Vibechat.Web.Services.Messages
             bool setLastMessage,
             string whoAccessedId)
         {
-            var defaultErrorMessage = new FormatException("Wrong conversation was provided.");
-
-            var unAuthorizedError = new UnauthorizedAccessException("You are unauthorized to do such an action.");
-
             var conversation = await conversationRepository.GetByIdAsync(chatId);
 
             if (conversation == null)
             {
-                throw defaultErrorMessage;
+                throw new KeyNotFoundException("Wrong conversation.");
             }
 
             var members = (await usersConversationsRepository.ListAsync(new GetParticipantsSpec(chatId)))
@@ -165,7 +158,7 @@ namespace Vibechat.Web.Services.Messages
 
             if (members.FirstOrDefault(x => x.Id == whoAccessedId) == null && !conversation.IsPublic)
             {
-                throw unAuthorizedError;
+                throw new UnauthorizedAccessException("You are unauthorized to do such an action.");
             }
 
             if(maxMessageId == -1)
@@ -235,7 +228,7 @@ namespace Vibechat.Web.Services.Messages
 
             if (messagesToDelete.Any(x => x.ConversationID != chatId))
             {
-                throw new ArgumentException(
+                throw new InvalidDataException(
                     "All messages must be from same conversation passed as ConversationId parameter.");
             }
 
@@ -257,7 +250,7 @@ namespace Vibechat.Web.Services.Messages
             }
             catch (Exception ex)
             {
-                throw new MemberAccessException("Failed to delete this message. Probably it was already deleted.", ex);
+                throw new InvalidDataException("Failed to delete this message. Probably it was already deleted.", ex);
             }
         }
 
@@ -323,14 +316,14 @@ namespace Vibechat.Web.Services.Messages
         /// <param name="chatId"></param>
         /// <param name="senderId"></param>
         /// <returns></returns>
-        /// <exception cref="FormatException"></exception>
+        /// <exception cref="InvalidDataException"></exception>
         public async Task<MessageDataModel> AddMessage(Message message, int chatId, string senderId)
         {
-            var whoSent = await usersRepository.GetById(senderId);
+            var whoSent = await usersRepository.GetByIdAsync(senderId);
 
             if (whoSent == null)
             {
-                throw new FormatException(
+                throw new InvalidDataException(
                     $"Failed to retrieve user with id {senderId} from database: no such user exists");
             }
 
@@ -345,7 +338,7 @@ namespace Vibechat.Web.Services.Messages
 
                 var foundMessage = await messagesRepository.GetByIdAsync(message.ForwardedMessage.Id);
 
-                forwardedMessage = foundMessage ?? throw new FormatException("Forwarded message was not found.");
+                forwardedMessage = foundMessage ?? throw new InvalidDataException("Forwarded message was not found.");
             }
 
             MessageDataModel model = MessageDataModel.Create(whoSent, chatId);
@@ -367,11 +360,11 @@ namespace Vibechat.Web.Services.Messages
 
         public async Task<MessageDataModel> AddEncryptedMessage(string message, int groupId, string senderId)
         {
-            var whoSent = await usersRepository.GetById(senderId);
+            var whoSent = await usersRepository.GetByIdAsync(senderId);
 
             if (whoSent == null)
             {
-                throw new FormatException(
+                throw new InvalidDataException(
                     $"Failed to retrieve user with id {senderId} from database: no such user exists");
             }
 
@@ -386,11 +379,11 @@ namespace Vibechat.Web.Services.Messages
 
         public async Task<MessageDataModel> AddAttachmentMessage(Message message, int groupId, string senderId)
         {
-            var whoSent = await usersRepository.GetById(senderId);
+            var whoSent = await usersRepository.GetByIdAsync(senderId);
 
             if (whoSent == null)
             {
-                throw new FormatException(
+                throw new InvalidDataException(
                     $"Failed to retrieve user with id {senderId} from database: no such user exists");
             }
 

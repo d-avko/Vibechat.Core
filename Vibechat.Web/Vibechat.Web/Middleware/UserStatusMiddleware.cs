@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using VibeChat.Web;
@@ -22,7 +23,16 @@ namespace Vibechat.Web.Middleware
             //update online status for each authorized request.
             if (context.User.Identity.IsAuthenticated)
             {
-                await repository.MakeUserOnline(JwtHelper.GetNamedClaimValue(context.User.Claims));
+                var user = await repository.GetByIdAsync(JwtHelper.GetNamedClaimValue(context.User.Claims));
+
+                if (user == null)
+                {
+                    context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                    return;
+                }
+                
+                await repository.MakeUserOnline(user);
+                await repository.UpdateAsync(user);
                 await unitOfWork.Commit();
             }
 

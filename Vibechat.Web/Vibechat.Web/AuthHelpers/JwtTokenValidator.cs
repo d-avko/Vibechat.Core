@@ -18,16 +18,14 @@ namespace Vibechat.Web.AuthHelpers
 
         public async Task<bool> Validate(string userId, string refreshToken)
         {
-            var user = await UsersRepository.GetById(userId);
+            var user = await UsersRepository.GetByIdAsync(userId);
 
             if (user == null)
             {
                 return false;
             }
-
-            var token = await UsersRepository.GetRefreshToken(userId);
-
-            if (token != refreshToken)
+            
+            if (user.RefreshToken != refreshToken)
             {
                 return false;
             }

@@ -23,7 +23,7 @@ namespace Vibechat.Web.Auth
                 return;
             }
 
-            var user = await usersRepository.GetById(userIdClaim);
+            var user = await usersRepository.GetByIdAsync(userIdClaim);
 
             if (user == null)
             {

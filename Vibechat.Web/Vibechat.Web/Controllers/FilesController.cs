@@ -32,29 +32,29 @@ namespace Vibechat.Web.Controllers
         [Authorize(Policy = "PublicApi")]
         [Route("[action]")]
         [HttpPost]
-        public async Task<ResponseApiModel<FilesUploadResponse>> UploadImages([FromForm] UploadImagesRequest request)
+        public async Task<IActionResult> UploadImages([FromForm] UploadImagesRequest request)
         {
             var result = new FilesUploadResponse {UploadedFiles = new List<MessageAttachment>()};
 
             if (!request.images.Any())
             {
-                return new ResponseApiModel<FilesUploadResponse>
+                return BadRequest(new ResponseApiModel<FilesUploadResponse>
                 {
                     ErrorMessage = "No files were provided.",
                     IsSuccessfull = false,
                     Response = null
-                };
+                });
             }
 
             foreach (var image in request.images)
             {
                 if (image.Length > 1024 * 1024 * MaxImageLengthMB)
                 {
-                    return new ResponseApiModel<FilesUploadResponse>
+                    return BadRequest(new ResponseApiModel<FilesUploadResponse>
                     {
                         ErrorMessage = $"Some of the files were larger than {MaxImageLengthMB} Mb",
                         IsSuccessfull = false
-                    };
+                    });
                 }
             }
 
@@ -87,26 +87,26 @@ namespace Vibechat.Web.Controllers
                 }
             });
 
-            return new ResponseApiModel<FilesUploadResponse>
+            return Ok(new ResponseApiModel<FilesUploadResponse>
             {
                 ErrorMessage = error == string.Empty ? null : error,
                 IsSuccessfull = error == string.Empty,
                 Response = result
-            };
+            });
         }
 
         [Authorize(Policy = "PublicApi")]
         [Route("[action]")]
         [HttpPost]
-        public async Task<ResponseApiModel<MessageAttachment>> UploadFile([FromForm] UploadFileRequest request)
+        public async Task<IActionResult> UploadFile([FromForm] UploadFileRequest request)
         {
             if (request.file.Length > 1024 * 1024 * MaxFileLengthMB)
             {
-                return new ResponseApiModel<MessageAttachment>
+                return BadRequest(new ResponseApiModel<MessageAttachment>
                 {
                     ErrorMessage = $"File was larger than {MaxFileLengthMB} Mb",
                     IsSuccessfull = false
-                };
+                });
             }
 
             var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
@@ -116,19 +116,19 @@ namespace Vibechat.Web.Controllers
                 var savedFile = await filesService.SaveMessageFile(request.file, request.file.FileName,
                     request.ChatId, thisUserId);
 
-                return new ResponseApiModel<MessageAttachment>
+                return Ok(new ResponseApiModel<MessageAttachment>
                 {
                     IsSuccessfull = true,
                     Response = savedFile
-                };
+                });
             }
             catch (Exception ex)
             {
-                return new ResponseApiModel<MessageAttachment>
+                return BadRequest(new ResponseApiModel<MessageAttachment>
                 {
                     IsSuccessfull = false,
                     ErrorMessage = "Failed to upload. Exception type: " + ex.GetType().Name
-                };
+                });
             }
         }
 

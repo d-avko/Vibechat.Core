@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Vibechat.Web.ApiModels;
@@ -25,7 +28,7 @@ namespace VibeChat.Web.Controllers
         /// <returns></returns>
         [Route("")]
         [HttpPost]
-        public async Task<ResponseApiModel<LoginResultApiModel>> Login(
+        public async Task<IActionResult> Login(
             [FromBody] LoginCredentialsApiModel loginCredentials)
         {
             try
@@ -33,19 +36,42 @@ namespace VibeChat.Web.Controllers
                 var result = await loginService.LogInAsync(loginCredentials.UidToken, 
                     loginCredentials.PhoneNumber);
 
-                return new ResponseApiModel<LoginResultApiModel>
+                return Ok(new ResponseApiModel<LoginResultApiModel>
                 {
                     IsSuccessfull = true,
                     Response = result
-                };
+                });
             }
-            catch (Exception ex)
+            catch (InvalidDataException ex)
             {
-                return new ResponseApiModel<LoginResultApiModel>
+                return BadRequest(new ResponseApiModel<bool>
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message
-                };
+                });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode((int)HttpStatusCode.Forbidden, new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = ex.Message
+                });
+            }
+            catch (Exception)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false
+                });
             }
         }
     }

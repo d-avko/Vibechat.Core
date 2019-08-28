@@ -109,7 +109,9 @@ export class HttpResponseInterceptor implements HttpInterceptor {
             break;
           }
           default: {
-            this.messages.ServerReturnedError(error.status, error.error);
+            if(error.message){
+              this.messages.ServerReturnedError(error.status, error.message);
+            }
           }
         }
 

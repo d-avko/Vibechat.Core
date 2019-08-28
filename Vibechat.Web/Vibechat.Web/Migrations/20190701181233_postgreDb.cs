@@ -234,7 +234,7 @@ namespace Vibechat.Web.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                "Chats",
+                "Conversations",
                 table => new
                 {
                     Id = table.Column<int>()
@@ -279,7 +279,7 @@ namespace Vibechat.Web.Migrations
                     table.ForeignKey(
                         "FK_ConversationsBans_Conversations_ChatID",
                         x => x.ChatID,
-                        "Chats",
+                        "Conversations",
                         "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -311,7 +311,7 @@ namespace Vibechat.Web.Migrations
                     table.ForeignKey(
                         "FK_Messages_Conversations_ConversationID",
                         x => x.ConversationID,
-                        "Chats",
+                        "Conversations",
                         "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -341,7 +341,7 @@ namespace Vibechat.Web.Migrations
                     table.ForeignKey(
                         "FK_UsersConversations_Conversations_ChatID",
                         x => x.ChatID,
-                        "Chats",
+                        "Conversations",
                         "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -487,12 +487,12 @@ namespace Vibechat.Web.Migrations
 
             migrationBuilder.CreateIndex(
                 "IX_Conversations_CreatorId",
-                "Chats",
+                "Conversations",
                 "CreatorId");
 
             migrationBuilder.CreateIndex(
                 "IX_Conversations_PublicKeyId",
-                "Chats",
+                "Conversations",
                 "PublicKeyId");
 
             migrationBuilder.CreateIndex(
@@ -579,7 +579,7 @@ namespace Vibechat.Web.Migrations
                 "Messages");
 
             migrationBuilder.DropTable(
-                "Chats");
+                "Conversations");
 
             migrationBuilder.DropTable(
                 "AspNetUsers");

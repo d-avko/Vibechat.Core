@@ -45,14 +45,14 @@ namespace Vibechat.Web.Services.Users
         {
             if (userId == null)
             {
-                throw new FormatException("Provided user was null");
+                throw new InvalidDataException("Provided user was null");
             }
 
-            var foundUser = await usersRepository.GetById(userId);
+            var foundUser = await usersRepository.GetByIdAsync(userId);
  
             if (foundUser == null)
             {
-                throw new FormatException("User was not found");
+                throw new KeyNotFoundException("User was not found");
             }
 
             var user = foundUser.ToUserInfo();
@@ -70,14 +70,14 @@ namespace Vibechat.Web.Services.Users
         {
             if (userId == null)
             {
-                throw new FormatException("Provided user was null");
+                throw new InvalidDataException("Provided user was null");
             }
 
-            var foundUser = await usersRepository.GetById(userId);
+            var foundUser = await usersRepository.GetByIdAsync(userId);
  
             if (foundUser == null)
             {
-                throw new FormatException("User was not found");
+                throw new InvalidDataException("User was not found");
             }
 
             return foundUser;
@@ -93,25 +93,68 @@ namespace Vibechat.Web.Services.Users
 
         public async Task ChangeName(string newName, string whoCalled)
         {
+            if (newName == null)
+            {
+                throw new InvalidDataException("New name cannot be null");
+            }
+            
             newName = newName.Replace(" ", "");
 
             if (newName.Length > MaxNameLength)
             {
-                throw new FormatException("Name was too long.");
+                throw new InvalidDataException("Name was too long.");
+            }
+            
+            var user = await usersRepository.GetByIdAsync(whoCalled);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException("");
+            }
+            
+            await usersRepository.ChangeName(newName, user);
+            await usersRepository.UpdateAsync(user);
+            await unitOfWork.Commit();
+        }
+        
+        public async Task ChangeLastName(string newName, string whoCalled)
+        {
+            if (newName == null)
+            {
+                throw new InvalidDataException("New name cannot be null");
+            }
+            
+            newName = newName.Replace(" ", "");
+
+            if (newName.Length > MaxNameLength)
+            {
+                throw new InvalidDataException("Name was too long.");
+            }
+            
+            var user = await usersRepository.GetByIdAsync(whoCalled);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException("");
             }
 
-            await usersRepository.ChangeName(newName, whoCalled);
-
+            await usersRepository.ChangeLastName(newName, user);
+            await usersRepository.UpdateAsync(user);
             await unitOfWork.Commit();
         }
 
         public async Task ChangeUsername(string newName, string whoCalled)
         {
+            if (newName == null)
+            {
+                throw new InvalidDataException("New name cannot be null");
+            }
+            
             newName = newName.Replace(" ", "");
 
             if (newName.Length > MaxNameLength || newName.Length < MinNameLength)
             {
-                throw new FormatException("Name was too long or too short.");
+                throw new InvalidDataException("Name was too long or too short.");
             }
 
             if(newName.ToLower() == "admin")
@@ -126,16 +169,25 @@ namespace Vibechat.Web.Services.Users
                 throw new InvalidDataException("New username was not unique.");
             }
 
-            await usersRepository.ChangeUsername(newName, whoCalled);
+            var user = await usersRepository.GetByIdAsync(whoCalled);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException("");
+            }
+            
+            await usersRepository.ChangeUsername(newName, user);
+            await usersRepository.UpdateAsync(user);
+            await unitOfWork.Commit();
         }
 
         public async Task<List<UserInfo>> GetContacts(string callerId)
         {
-            var caller = await usersRepository.GetById(callerId);
+            var caller = await usersRepository.GetByIdAsync(callerId);
 
             if (caller == null)
             {
-                throw new ArgumentException("caller id was wrong.");
+                throw new InvalidDataException("caller id was wrong.");
             }
 
             return (await contactsRepository.ListAsync(new GetContactsOfSpec(callerId)))?
@@ -175,40 +227,25 @@ namespace Vibechat.Web.Services.Users
             }
         }
 
-        public async Task ChangeLastName(string newName, string whoCalled)
-        {
-            newName = newName.Replace(" ", "");
-
-            if (newName.Length > MaxNameLength)
-            {
-                throw new FormatException("Name was too long.");
-            }
-
-            await usersRepository.ChangeLastName(newName, whoCalled);
-
-            await unitOfWork.Commit();
-        }
-
         public async Task<UpdateProfilePictureResponse> UpdateThumbnail(IFormFile image, string userId)
         {
             if (image.Length / (1024 * 1024) > MaxThumbnailLengthMB)
             {
                 throw new InvalidDataException($"Thumbnail was larger than {MaxThumbnailLengthMB}");
             }
-
-            var user = usersRepository.GetById(userId);
+            var user = await usersRepository.GetByIdAsync(userId);
 
             if (user == null)
             {
-                throw new FormatException("User was not found");
+                throw new KeyNotFoundException("User was not found");
             }
 
             try
             {
                 var (thumbnail, fullsized) = await imagesService.SaveProfileOrChatPicture(image, image.FileName, userId, userId);
 
-                await usersRepository.UpdateAvatar(thumbnail, fullsized, userId);
-
+                await usersRepository.UpdateAvatar(thumbnail, fullsized, user);
+                await usersRepository.UpdateAsync(user);
                 await unitOfWork.Commit();
 
                 return new UpdateProfilePictureResponse
@@ -227,7 +264,7 @@ namespace Vibechat.Web.Services.Users
         {
             if (name == null)
             {
-                throw new FormatException("Nickname was null");
+                throw new InvalidDataException("Nickname was null");
             }
 
             var result = (await usersRepository.FindByUsername(name)).ToList();
@@ -252,10 +289,18 @@ namespace Vibechat.Web.Services.Users
         {
             if (whoAccessedId != userId)
             {
-                throw new FormatException("Can only call this method for yourself.");
+                throw new InvalidDataException("Can only call this method for yourself.");
             }
 
-            await usersRepository.ChangeUserPublicState(userId);
+            var user = await usersRepository.GetByIdAsync(userId);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException();
+            }
+            
+            await usersRepository.ChangeUserPublicState(user);
+            await usersRepository.UpdateAsync(user);
             await unitOfWork.Commit();
         }
 
@@ -267,23 +312,26 @@ namespace Vibechat.Web.Services.Users
         /// <returns></returns>
         public async Task MakeUserOnline(string userId, string signalRConnectionId)
         {
-            var user = await usersRepository.GetById(userId);
+            var user = await usersRepository.GetByIdAsync(userId);
 
             if (user.ConnectionId != null)
             {
-                await usersRepository.MakeUserOnline(userId);   
+                await usersRepository.MakeUserOnline(user);   
             }
             else
             {
-                await usersRepository.MakeUserOnline(userId, true, signalRConnectionId);   
+                await usersRepository.MakeUserOnline(user, true, signalRConnectionId);   
             }
-            
+
+            await usersRepository.UpdateAsync(user);
             await unitOfWork.Commit();
         }
 
         public async Task MakeUserOffline(string userId)
         {
-            await usersRepository.MakeUserOffline(userId);
+            var user = await usersRepository.GetByIdAsync(userId);
+            await usersRepository.MakeUserOffline(user);
+            await usersRepository.UpdateAsync(user);
             await unitOfWork.Commit();
         }
     }

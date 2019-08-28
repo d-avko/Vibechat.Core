@@ -25,29 +25,28 @@ namespace Vibechat.Web.Controllers
 
         [HttpPost]
         [Route("[action]")]
-        public async Task<ResponseApiModel<string>> Refresh([FromBody] RefreshTokenRequest tokenInfo)
+        public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest tokenInfo)
         {
-            var defaultError = new ResponseApiModel<string>
+            if (tokenInfo == null)
             {
-                IsSuccessfull = false,
-                ErrorMessage = "Either refresh token expired or wrong credentials were provided."
-            };
+                return BadRequest();
+            }
 
             if (tokenInfo.RefreshToken == null || tokenInfo.userId == null)
             {
-                return defaultError;
+                return BadRequest();
             }
 
             if (!await tokensValidator.Validate(tokenInfo.userId, tokenInfo.RefreshToken))
             {
-                return defaultError;
+                return BadRequest("Wrong refresh token.");
             }
 
-            return new ResponseApiModel<string>
+            return Ok(new ResponseApiModel<string>
             {
                 IsSuccessfull = true,
                 Response = (await userService.GetUserById(tokenInfo.userId)).GenerateToken()
-            };
+            });
         }
 
         public class RefreshTokenRequest
