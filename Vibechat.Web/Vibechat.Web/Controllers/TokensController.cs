@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using VibeChat.Web;
-using Vibechat.Web.ApiModels;
-using Vibechat.Web.AuthHelpers;
-using Vibechat.Web.Services.Users;
+using Vibechat.BusinessLogic.AuthHelpers;
+using Vibechat.BusinessLogic.Services.Users;
+using Vibechat.Shared.ApiModels;
 
 namespace Vibechat.Web.Controllers
 {
