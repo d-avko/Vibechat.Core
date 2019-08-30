@@ -4,10 +4,11 @@ using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Vibechat.Web.ApiModels;
-using Vibechat.Web.Services.Login;
+using Vibechat.BusinessLogic.Services.Login;
+using Vibechat.Shared.ApiModels;
+using Vibechat.Shared.ApiModels.Login;
 
-namespace VibeChat.Web.Controllers
+namespace Vibechat.Web.Controllers
 {
     [Route("api/v1/[controller]")]
     [Produces("application/json")]
@@ -33,13 +34,21 @@ namespace VibeChat.Web.Controllers
         {
             try
             {
-                var result = await loginService.LogInAsync(loginCredentials.UidToken, 
+                var result = await loginService.LogInAsync(loginCredentials.UidToken,
                     loginCredentials.PhoneNumber);
 
                 return Ok(new ResponseApiModel<LoginResultApiModel>
                 {
                     IsSuccessfull = true,
                     Response = result
+                });
+            }
+            catch (FirebaseAdmin.FirebaseException)
+            {
+                return BadRequest(new ResponseApiModel<bool>
+                {
+                    IsSuccessfull = false,
+                    ErrorMessage = "Wrong firebase user token."
                 });
             }
             catch (InvalidDataException ex)

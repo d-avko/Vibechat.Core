@@ -5,9 +5,15 @@ VisualStudioVersion = 16.0.28803.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vibechat.Web", "Vibechat.Web\Vibechat.Web.csproj", "{67F783F8-99F9-47EC-8414-80B9E6709543}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Vibechat.Web.Data", "Vibechat.Web.Data\Vibechat.Web.Data.shproj", "{3F7C5F2D-0E46-4D20-8E94-55F1F2DED94A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vibechat.FileServer", "Vibechat.FileServer\Vibechat.FileServer.csproj", "{60CC8C98-4987-4C85-A438-531A21FB842F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vibechat.BusinessLogic", "Vibechat.BusinessLogic\Vibechat.BusinessLogic.csproj", "{AFEEFDF6-E25D-40FA-BCC5-4D67FD672932}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vibechat.SignalR", "Vibechat.SignalR\Vibechat.SignalR.csproj", "{EA8209B1-2876-47E5-8BA3-9FF459F352B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vibechat.DataLayer", "Vibechat.DataLayer\Vibechat.DataLayer.csproj", "{E53CCEEC-6289-4F54-9E48-307C865F3B0F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vibechat.Shared", "Vibechat.Shared\Vibechat.Shared.csproj", "{3EBC9257-CB9E-44AC-8006-4135D89C8408}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -26,6 +32,22 @@ Global
 		{60CC8C98-4987-4C85-A438-531A21FB842F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60CC8C98-4987-4C85-A438-531A21FB842F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60CC8C98-4987-4C85-A438-531A21FB842F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFEEFDF6-E25D-40FA-BCC5-4D67FD672932}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFEEFDF6-E25D-40FA-BCC5-4D67FD672932}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFEEFDF6-E25D-40FA-BCC5-4D67FD672932}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFEEFDF6-E25D-40FA-BCC5-4D67FD672932}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA8209B1-2876-47E5-8BA3-9FF459F352B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA8209B1-2876-47E5-8BA3-9FF459F352B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA8209B1-2876-47E5-8BA3-9FF459F352B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA8209B1-2876-47E5-8BA3-9FF459F352B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E53CCEEC-6289-4F54-9E48-307C865F3B0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E53CCEEC-6289-4F54-9E48-307C865F3B0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E53CCEEC-6289-4F54-9E48-307C865F3B0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E53CCEEC-6289-4F54-9E48-307C865F3B0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EBC9257-CB9E-44AC-8006-4135D89C8408}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EBC9257-CB9E-44AC-8006-4135D89C8408}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EBC9257-CB9E-44AC-8006-4135D89C8408}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EBC9257-CB9E-44AC-8006-4135D89C8408}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

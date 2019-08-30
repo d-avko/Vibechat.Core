@@ -4,12 +4,13 @@ ENV GOOGLE_APPLICATION_CREDENTIALS="/app/vibechat-ng-firebase-adminsdk-te5qc-a9c
 
 FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build
 WORKDIR /src
-COPY ["Vibechat.Web/Vibechat.Web.csproj", "Vibechat.Web/"]
+#COPY ["Vibechat.Web/Vibechat.Web.csproj", "Vibechat.Web/"]
 COPY . .
-WORKDIR "/src/Vibechat.Web"
-RUN dotnet build "Vibechat.Web.csproj" -c Release -o /app
+#WORKDIR "/src/Vibechat.Web"
+RUN dotnet build "Vibechat.Web.sln" -c Release -o /app
 
 FROM build AS publish
+WORKDIR /src/Vibechat.Web
 RUN dotnet publish "Vibechat.Web.csproj" -c Release -o /app
 
 FROM base AS published

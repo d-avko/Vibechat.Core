@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Vibechat.Web.ApiModels;
-using VibeChat.Web.ChatData;
-using Vibechat.Web.Services.Bans;
-using Vibechat.Web.Services.Users;
+using Vibechat.BusinessLogic.AuthHelpers;
+using Vibechat.BusinessLogic.Services.Bans;
+using Vibechat.BusinessLogic.Services.Users;
+using Vibechat.Shared.ApiModels;
+using Vibechat.Shared.ApiModels.Users_Info;
+using Vibechat.Shared.DTO.Users;
 
-namespace VibeChat.Web.Controllers
+namespace Vibechat.Web.Controllers
 {
     [Route("api/v1/[controller]")]
     [Produces("application/json")]

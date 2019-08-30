@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using VibeChat.Web;
-using Vibechat.Web.ApiModels;
-using Vibechat.Web.ChatData.Messages;
-using Vibechat.Web.Data.ApiModels.Files;
-using Vibechat.Web.Services.FileSystem;
+using Vibechat.BusinessLogic.AuthHelpers;
+using Vibechat.BusinessLogic.Services.FileSystem;
+using Vibechat.Shared.ApiModels;
+using Vibechat.Shared.ApiModels.Files;
+using Vibechat.Shared.DTO.Messages;
 
 namespace Vibechat.Web.Controllers
 {

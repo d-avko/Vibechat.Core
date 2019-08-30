@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -17,14 +16,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using VibeChat.Web;
-using Vibechat.Web.Auth;
-using Vibechat.Web.Middleware;
-using Vibechat.Web.Services.Extension_methods;
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+using Vibechat.BusinessLogic;
+using Vibechat.BusinessLogic.Extensions;
+using Vibechat.BusinessLogic.Middleware;
+using Vibechat.DataLayer;
+using Vibechat.SignalR.Hubs;
 
 namespace Vibechat.Web
 {
@@ -158,8 +156,6 @@ namespace Vibechat.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
         {
-            app.UseHsts();
-
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto

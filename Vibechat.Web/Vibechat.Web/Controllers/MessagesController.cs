@@ -3,16 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VibeChat.Web;
-using Vibechat.Web.ApiModels;
-using VibeChat.Web.ApiModels;
-using Vibechat.Web.ApiModels.Messages;
-using VibeChat.Web.ChatData;
-using Vibechat.Web.Data.ApiModels.Messages;
-using Vibechat.Web.Services.Messages;
+using Vibechat.BusinessLogic.AuthHelpers;
+using Vibechat.BusinessLogic.Services.Messages;
+using Vibechat.Shared.ApiModels;
+using Vibechat.Shared.ApiModels.Messages;
+using Vibechat.Shared.DTO.Messages;
 
 namespace Vibechat.Web.Controllers
 {
