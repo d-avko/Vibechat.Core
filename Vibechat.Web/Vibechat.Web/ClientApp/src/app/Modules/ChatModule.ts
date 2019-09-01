@@ -9,7 +9,7 @@ import {MaterialModule} from "../material.module";
 import {CommonModule} from "@angular/common";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {BrowserModule} from "@angular/platform-browser";
-import {AppRoutersModule} from "../app.routes";
+import {AppRoutesModule} from "../app.routes";
 import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {ConversationsListComponent} from "../UiComponents/ConversationsList/conversationslist.component";
@@ -73,13 +73,13 @@ import {MatSlideToggleModule} from "@angular/material/slide-toggle";
     CommonModule,
     ReactiveFormsModule,
     BrowserModule,
-    AppRoutersModule,
     HttpClientModule,
     BrowserAnimationsModule,
     FormsModule,
     UiScrollModule,
     TranslationModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    AppRoutesModule
   ],
   exports: [AddGroupDialogComponent],
   entryComponents: [

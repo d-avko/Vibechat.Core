@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using FirebaseAdmin;
@@ -19,6 +20,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Vibechat.BusinessLogic;
+using Vibechat.BusinessLogic.AuthHelpers;
 using Vibechat.BusinessLogic.Extensions;
 using Vibechat.BusinessLogic.Middleware;
 using Vibechat.DataLayer;
@@ -91,8 +93,7 @@ namespace Vibechat.Web
                             ValidateAudience = false,
                             ValidateIssuer = false,
                             ValidateLifetime = true,
-                            IssuerSigningKey =
-                                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:SecretKey"])),
+                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:SecretKey"])),
                             ValidateIssuerSigningKey = true,
                         };
 
@@ -133,7 +134,10 @@ namespace Vibechat.Web
 
             services.AddSignalR();//.AddNewtonsoftJsonProtocol();
             
-            services.AddHttpClient();
+            services.AddHttpClient<HttpClient>(options =>
+            {
+                options.BaseAddress = new Uri(Configuration["FileServer:Url"]);
+            });
 
             services.AddDefaultServices();
 
@@ -264,8 +268,8 @@ namespace Vibechat.Web
                 user.ConnectionId = null;
                 user.IsOnline = false;
             }
-
-            users.SeedAdminAccount();
+            
+            users.SeedAdminAccount(serviceProvider.GetService<IJwtTokenGenerator>());
         }
     }
 }

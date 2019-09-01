@@ -37,7 +37,7 @@ namespace Vibechat.Web.Controllers
         {
             try
             {
-                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+                var thisUserId = ClaimsExtractor.GetUserIdClaim(User.Claims);
 
                 var user = await mUsersService.GetUserById(id, thisUserId);
 
@@ -81,7 +81,7 @@ namespace Vibechat.Web.Controllers
         {
             try
             {
-                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+                var thisUserId = ClaimsExtractor.GetUserIdClaim(User.Claims);
 
                 await mUsersService.ChangeName(request.newName, thisUserId);
 
@@ -122,7 +122,7 @@ namespace Vibechat.Web.Controllers
         {
             try
             {
-                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+                var thisUserId = ClaimsExtractor.GetUserIdClaim(User.Claims);
 
                 await mUsersService.ChangeUsername(request.newName, thisUserId);
   
@@ -163,7 +163,7 @@ namespace Vibechat.Web.Controllers
         {
             try
             {
-                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+                var thisUserId = ClaimsExtractor.GetUserIdClaim(User.Claims);
 
                 await mUsersService.UpdateUserInfo(request.UserName, request.FirstName, request.LastName, thisUserId);
 
@@ -204,7 +204,7 @@ namespace Vibechat.Web.Controllers
         {
             try
             {
-                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+                var thisUserId = ClaimsExtractor.GetUserIdClaim(User.Claims);
 
                 await mUsersService.ChangeLastName(request.newName, thisUserId);
 
@@ -288,7 +288,7 @@ namespace Vibechat.Web.Controllers
         {
             try
             {
-                await mUsersService.ChangeUserIsPublicState(JwtHelper.GetNamedClaimValue(User.Claims));
+                await mUsersService.ChangeUserIsPublicState(ClaimsExtractor.GetUserIdClaim(User.Claims));
 
                 return Ok(new ResponseApiModel<bool>
                 {
@@ -331,7 +331,7 @@ namespace Vibechat.Web.Controllers
             try
             {
                 var result =
-                    await mUsersService.UpdateThumbnail(request.picture, JwtHelper.GetNamedClaimValue(User.Claims));
+                    await mUsersService.UpdateThumbnail(request.picture, ClaimsExtractor.GetUserIdClaim(User.Claims));
 
                 return Ok(new ResponseApiModel<UpdateProfilePictureResponse>
                 {

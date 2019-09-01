@@ -1,5 +1,5 @@
-import {Inject, NgModule} from '@angular/core';
-import {AppRoutersModule} from './app.routes';
+import {NgModule} from '@angular/core';
+import {AppRoutesModule} from './app.routes';
 
 import {AppComponent} from './app.component';
 import {Api} from './Services/Api/api.service';
@@ -10,14 +10,12 @@ import {ServiceWorkerModule} from '@angular/service-worker';
 import {environment} from '../environments/environment';
 import {MaterialModule} from './material.module';
 import {BrowserModule} from '@angular/platform-browser';
-import { LOCALE_ID } from '@angular/core';
 
 @NgModule({
   declarations: [
     AppComponent
   ],
   imports: [
-    AppRoutersModule,
     BrowserModule,
     ChatModule,
     LoginModule,
@@ -25,7 +23,8 @@ import { LOCALE_ID } from '@angular/core';
     ServiceWorkerModule.register('ngsw-worker.js',
       {
         enabled: environment.production
-      })
+      }),
+    AppRoutesModule
   ],
   providers: [Api, AuthService],
   bootstrap: [AppComponent]

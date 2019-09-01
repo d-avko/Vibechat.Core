@@ -6,6 +6,7 @@ import {Api} from '../Services/Api/api.service';
 import {AuthService} from "../Services/AuthService";
 import * as firebase from "firebase/app";
 import {MessageReportingService} from "../Services/MessageReportingService";
+import {Meta} from "@angular/platform-browser";
 
 @Component({
   selector: 'login-view',
@@ -17,7 +18,8 @@ export class LoginComponent {
   constructor(private requestsBuilder: Api,
               private snackbar: SnackBarHelper,
               private router: Router, private auth: AuthService,
-              private messages: MessageReportingService) {
+              private messages: MessageReportingService,
+              public meta: Meta) {
     this.phoneNumber = new FormControl('',
       Validators.compose(
         [
@@ -26,6 +28,13 @@ export class LoginComponent {
       ));
     this.smsCode = new FormControl('', Validators.maxLength(AuthService.SMSCODE_LENGTH));
     this.phoneNumber.valueChanges.subscribe(() => this.OnNumberChanged());
+    meta.addTags([
+      {name: 'description', content: 'Telegram-like messenger created with ASP.NET Core and Angular 8.'},
+      {name: 'viewport', content: 'width=device-width, initial-scale=1'},
+      {name: 'keywords', content: 'ASP.NET Core,TypeScript, Angular'},
+      {httpEquiv: 'Content-Type', content: 'text/html'},
+      {charset: 'UTF-8'}
+    ], true);
   }
 
   public phoneNumber: FormControl;

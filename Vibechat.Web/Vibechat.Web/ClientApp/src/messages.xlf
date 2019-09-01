@@ -381,21 +381,28 @@
         <source>New name:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">app/Dialogs/change-name-dialog.html</context>
-          <context context-type="linenumber">4</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7f73a8b88bc27cb033793773c804b1052b976dd1" datatype="html">
+        <source>Please provide a correct name.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/change-name-dialog.html</context>
+          <context context-type="linenumber">10</context>
         </context-group>
       </trans-unit>
       <trans-unit id="024cdb2814b0cb3f4ced148f1a0b9854447cb214" datatype="html">
         <source>Change</source>
         <context-group purpose="location">
           <context context-type="sourcefile">app/Dialogs/change-name-dialog.html</context>
-          <context context-type="linenumber">12</context>
+          <context context-type="linenumber">17</context>
         </context-group>
       </trans-unit>
       <trans-unit id="d7b35c384aecd25a516200d6921836374613dfe7" datatype="html">
         <source>Cancel</source>
         <context-group purpose="location">
           <context context-type="sourcefile">app/Dialogs/change-name-dialog.html</context>
-          <context context-type="linenumber">13</context>
+          <context context-type="linenumber">18</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">app/Dialogs/forward-messages-dialog.html</context>
@@ -935,6 +942,27 @@
           <context context-type="linenumber">16</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="ad035ffadf71716f9aec93282b7e845e6bf4dcb3" datatype="html">
+        <source>Type in your message...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/UiComponents/Input/input.component.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1682297a2fb8a171fefd0fdb6147026c0a38253b" datatype="html">
+        <source>You were banned from writing in this conversation.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/UiComponents/Input/input.component.html</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8b3d7a79e170fa463c92bd79e87f8637b7a10b5d" datatype="html">
+        <source>Secure chat will be activated after <x id="INTERPOLATION" equiv-text="{{Conversation.dialogueUser.userName}}"/> is online.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/UiComponents/Input/input.component.html</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="6765b4c916060f6bc42d9bb69e80377dbcb5e4e9" datatype="html">
         <source>Login</source>
         <context-group purpose="location">
@@ -1021,27 +1049,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">app/registration/register.component.html</context>
           <context context-type="linenumber">37</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="ad035ffadf71716f9aec93282b7e845e6bf4dcb3" datatype="html">
-        <source>Type in your message...</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">app/UiComponents/Input/input.component.html</context>
-          <context context-type="linenumber">23</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="1682297a2fb8a171fefd0fdb6147026c0a38253b" datatype="html">
-        <source>You were banned from writing in this conversation.</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">app/UiComponents/Input/input.component.html</context>
-          <context context-type="linenumber">34</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="8b3d7a79e170fa463c92bd79e87f8637b7a10b5d" datatype="html">
-        <source>Secure chat will be activated after <x id="INTERPOLATION" equiv-text="{{Conversation.dialogueUser.userName}}"/> is online.</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">app/UiComponents/Input/input.component.html</context>
-          <context context-type="linenumber">40</context>
         </context-group>
       </trans-unit>
     </body>

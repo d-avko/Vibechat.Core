@@ -34,6 +34,14 @@
           <context context-type="linenumber">5</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="7f73a8b88bc27cb033793773c804b1052b976dd1" datatype="html">
+        <source>Please provide a correct name.</source>
+        <target state="translated">Пожалуйста предоставьте корректное имя.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/Dialogs/change-name-dialog.html</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="44fa8f46a4b2c70093d072dd340017a7ce0dce01" datatype="html">
         <source>was banned by</source>
         <target state="translated">был заблокирован</target>

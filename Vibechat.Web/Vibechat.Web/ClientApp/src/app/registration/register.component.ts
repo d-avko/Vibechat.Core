@@ -4,6 +4,7 @@ import {ChangeUserInfoRequest} from '../ApiModels/RegisterRequest';
 import {Router} from '@angular/router';
 import {Api} from '../Services/Api/api.service';
 import {MessageReportingService} from "../Services/MessageReportingService";
+import {Meta} from "@angular/platform-browser";
 
 @Component({
   selector: 'register-view',
@@ -20,7 +21,10 @@ export class ChangeUserInfoComponent {
 
   public static minUsernameLength: number = 5;
 
-  constructor(private requestsBuilder: Api, private messagesService: MessageReportingService, private router: Router) {
+  constructor(private requestsBuilder: Api,
+              private messagesService: MessageReportingService,
+              private router: Router,
+              public meta: Meta) {
 
     this.registerGroup = new FormGroup(
       {
@@ -31,7 +35,14 @@ export class ChangeUserInfoComponent {
         firstName: new FormControl(''),
         lastName: new FormControl('')
       }
-    )
+    );
+    meta.addTags([
+      {name: 'description', content: 'Telegram-like messenger created with ASP.NET Core and Angular 8.'},
+      {name: 'viewport', content: 'width=device-width, initial-scale=1'},
+      {name: 'keywords', content: 'ASP.NET Core,TypeScript, Angular'},
+      {httpEquiv: 'Content-Type', content: 'text/html'},
+      {charset: 'UTF-8'}
+    ], true);
   }
 
   public async Register() {

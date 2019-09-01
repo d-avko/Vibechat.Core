@@ -59,7 +59,7 @@ namespace Vibechat.Web.Controllers
             }
 
             var error = string.Empty;
-            var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+            var thisUserId = ClaimsExtractor.GetUserIdClaim(User.Claims);
 
             var errorLock = new object();
             var resultLock = new object();
@@ -109,7 +109,7 @@ namespace Vibechat.Web.Controllers
                 });
             }
 
-            var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+            var thisUserId = ClaimsExtractor.GetUserIdClaim(User.Claims);
 
             try
             {

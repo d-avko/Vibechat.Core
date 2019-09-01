@@ -74,6 +74,7 @@ namespace Vibechat.BusinessLogic.Extensions
             services.AddScoped<UnitOfWork, UnitOfWork>();
             services.AddScoped<IComparer<Chat>, ChatComparer>();
             services.AddSingleton<UserCultureService, UserCultureService>();
+            services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
         }
 
         public static void AddAuthServices(this IServiceCollection services)
