@@ -17,6 +17,7 @@ namespace Vibechat.BusinessLogic.Services.Login
     public class LoginService
     {
         private readonly UnitOfWork unitOfWork;
+        private readonly IJwtTokenGenerator tokenGenerator;
 
         private readonly IChatDataProvider chatDataProvider;
 
@@ -25,17 +26,19 @@ namespace Vibechat.BusinessLogic.Services.Login
         public LoginService(
             IUsersRepository usersRepository,
             IChatDataProvider chatDataProvider,
-            UnitOfWork unitOfWork)
+            UnitOfWork unitOfWork,
+            IJwtTokenGenerator tokenGenerator)
         {
             this.usersRepository = usersRepository;
             this.chatDataProvider = chatDataProvider;
             this.unitOfWork = unitOfWork;
+            this.tokenGenerator = tokenGenerator;
         }
 
         public async Task<LoginResultApiModel> LogInAsync(string firebaseToken, string phoneNumber)
         {
             var auth = FirebaseAuth.GetAuth(FirebaseApp.DefaultInstance);
-
+            
             //this can throw detailed error message.
             var verified = await auth.VerifyIdTokenAsync(firebaseToken);
 
@@ -81,7 +84,7 @@ namespace Vibechat.BusinessLogic.Services.Login
             return new LoginResultApiModel
             {
                 Info = identityUser.ToAppUserDto(),
-                Token = identityUser.GenerateToken(),
+                Token = tokenGenerator.GenerateToken(identityUser),
                 RefreshToken = identityUser.RefreshToken,
                 IsNewUser = isNewUser
             };
@@ -135,7 +138,7 @@ namespace Vibechat.BusinessLogic.Services.Login
                                           "Couldn't create user because of unexpected error.");
             }
 
-            var token = userToCreate.GenerateRefreshToken();
+            var token = tokenGenerator.GenerateToken(userToCreate);
 
             await usersRepository.UpdateRefreshToken(userToCreate, token);
             await usersRepository.UpdateAsync(userToCreate);

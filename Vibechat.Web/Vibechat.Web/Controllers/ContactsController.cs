@@ -31,7 +31,7 @@ namespace Vibechat.Web.Controllers
         {
             try
             {
-                var result = await mUsersService.GetContacts(JwtHelper.GetNamedClaimValue(User.Claims));
+                var result = await mUsersService.GetContacts(ClaimsExtractor.GetUserIdClaim(User.Claims));
 
                 return Ok(new ResponseApiModel<List<AppUserDto>>
                 {
@@ -79,7 +79,7 @@ namespace Vibechat.Web.Controllers
         {
             try
             {
-                await mUsersService.AddToContacts(userId, JwtHelper.GetNamedClaimValue(User.Claims));
+                await mUsersService.AddToContacts(userId, ClaimsExtractor.GetUserIdClaim(User.Claims));
 
                 return Ok(new ResponseApiModel<bool>
                 {
@@ -127,7 +127,7 @@ namespace Vibechat.Web.Controllers
         {
             try
             {
-                await mUsersService.RemoveFromContacts(userId, JwtHelper.GetNamedClaimValue(User.Claims));
+                await mUsersService.RemoveFromContacts(userId, ClaimsExtractor.GetUserIdClaim(User.Claims));
 
                 return Ok(new ResponseApiModel<bool>
                 {

@@ -44,10 +44,13 @@ namespace Vibechat.BusinessLogic.Services.FileSystem
             ImageCompression = imageCompression;
             this.logger = logger;
             this.httpClientFactory = httpClientFactory;
+            HttpClient = httpClientFactory.CreateClient();
         }
 
         private IImageScalingService ImageScaling { get; }
         private IImageCompressionService ImageCompression { get; }
+        
+        private HttpClient HttpClient { get; set; }
 
         /// <summary>
         ///     Takes stream containing image and returns <see cref="Attachment" /> object.
@@ -193,11 +196,11 @@ namespace Vibechat.BusinessLogic.Services.FileSystem
 
         public void DeleteFiles(List<string> paths)
         {
-            Parallel.ForEach(paths, path =>
+            Parallel.ForEach(paths, async path =>
             {
                 try
                 {
-                    DeleteFile(path).GetAwaiter().GetResult();
+                    await DeleteFile(path);
                 }
                 catch 
                 {
@@ -210,9 +213,7 @@ namespace Vibechat.BusinessLogic.Services.FileSystem
         {
             try
             {
-                var client = httpClientFactory.CreateClient();
-                client.BaseAddress = new Uri(DI.Configuration["FileServer:Url"]);
-                await client.DeleteAsync(DI.Configuration["FileServer:DeleteFileUrl"] + path);
+                await HttpClient.DeleteAsync(DI.Configuration["FileServer:DeleteFileUrl"] + path);
             }
             catch (Exception e)
             {
@@ -223,10 +224,6 @@ namespace Vibechat.BusinessLogic.Services.FileSystem
         
         protected override async Task SaveToStorage(IFormFile formFile, MemoryStream file, string path)
         {
-            var client = httpClientFactory.CreateClient();
-            
-            client.BaseAddress = new Uri(DI.Configuration["FileServer:Url"]);
-
             var fileName = ContentDispositionHeaderValue.Parse(formFile.ContentDisposition).FileName.Trim('"');
 
             var content = new MultipartFormDataContent
@@ -248,9 +245,14 @@ namespace Vibechat.BusinessLogic.Services.FileSystem
             };
 
             //server responds with either true or false.
-            var response = await client.PostAsync(DI.Configuration["FileServer:UploadFileUrl"], content);
+            var response = await HttpClient.PostAsync(DI.Configuration["FileServer:UploadFileUrl"], content);
 
-            if (!bool.Parse(await response.Content.ReadAsStringAsync()))
+            if (!bool.TryParse(await response.Content.ReadAsStringAsync(), out var result))
+            {
+                throw new InvalidDataException("Failed to upload this file.");
+            }
+
+            if (!result)
             {
                 throw new InvalidDataException("Failed to upload this file.");
             }

@@ -39,7 +39,7 @@ namespace Vibechat.Web.Controllers
         {
             try
             {
-                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+                var thisUserId = ClaimsExtractor.GetUserIdClaim(User.Claims);
                 request.CreatorId = thisUserId;
 
                 var result = await mChatsService.CreateConversation(request);
@@ -91,7 +91,7 @@ namespace Vibechat.Web.Controllers
         {
             try
             {
-                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+                var thisUserId = ClaimsExtractor.GetUserIdClaim(User.Claims);
 
                 await mChatsService.UpdateAuthKey(chatId, request.AuthKeyId, request.deviceId,
                     thisUserId);
@@ -143,7 +143,7 @@ namespace Vibechat.Web.Controllers
         {
             try
             {
-                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+                var thisUserId = ClaimsExtractor.GetUserIdClaim(User.Claims);
 
                 var result =
                     await mChatsService.FindUsersInChat(chatId, credentials.UsernameToFind,
@@ -196,7 +196,7 @@ namespace Vibechat.Web.Controllers
         {
             try
             {
-                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+                var thisUserId = ClaimsExtractor.GetUserIdClaim(User.Claims);
 
                 var result = await mChatsService.GetChats(deviceId, thisUserId);
 
@@ -247,7 +247,7 @@ namespace Vibechat.Web.Controllers
         {
             try
             {
-                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+                var thisUserId = ClaimsExtractor.GetUserIdClaim(User.Claims);
 
                 var result = await mChatsService.GetById(chatId, thisUserId);
 
@@ -298,7 +298,7 @@ namespace Vibechat.Web.Controllers
         {
             try
             {
-                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+                var thisUserId = ClaimsExtractor.GetUserIdClaim(User.Claims);
 
                 var result = await mChatsService.UpdateThumbnail(chatId,
                     updateThumbnail.thumbnail, thisUserId);
@@ -399,7 +399,7 @@ namespace Vibechat.Web.Controllers
             try 
             {
                 var result = await mChatsService.SearchForGroups(request.SearchString,
-                    JwtHelper.GetNamedClaimValue(User.Claims));
+                    ClaimsExtractor.GetUserIdClaim(User.Claims));
 
                 return Ok(new ResponseApiModel<List<Chat>>
                 {
@@ -449,7 +449,7 @@ namespace Vibechat.Web.Controllers
             try
             {
                 await mChatsService.ChangePublicState(chatId,
-                    JwtHelper.GetNamedClaimValue(User.Claims));
+                    ClaimsExtractor.GetUserIdClaim(User.Claims));
 
                 return Ok(new ResponseApiModel<bool>
                 {

@@ -2,7 +2,7 @@
 <div class="paddingLeftRight40px" mat-dialog-content style="overflow: unset !important">
 
   <div class="find-header">
-    <mat-form-field appearance="standard">
+    <mat-form-field class="header-searchfield" appearance="standard">
       <mat-label>Type in username...</mat-label>
       <input matInput (keydown.enter)="OnFindUsers()" [(ngModel)]="usernameToFind" required>
       <mat-error i18n>Please enter a username</mat-error>
@@ -31,7 +31,7 @@
 
   </mat-action-list>
 
-  <div mat-dialog-actions>
+  <div class="find-users-actions" mat-dialog-actions>
     <button mat-button [mat-dialog-close]="SelectedUsers" cdkFocusInitial i18n>Select</button>
     <button mat-button (click)="onCancelClick()" i18n>Cancel</button>
   </div>
@@ -46,6 +46,15 @@
       display: flex;
       flex-direction: row;
       align-items: baseline;
+      justify-content: center;
+    }
+
+    .find-users-actions{
+      justify-content: center;
+    }
+
+    .find-header .header-searchfield{
+      width: 80%;
     }
   </style>
 

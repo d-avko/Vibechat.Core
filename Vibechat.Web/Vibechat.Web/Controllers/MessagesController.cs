@@ -36,7 +36,7 @@ namespace Vibechat.Web.Controllers
                 var result = await messagesService.GetAttachments(
                     request.kind,
                     request.conversationId,
-                    JwtHelper.GetNamedClaimValue(User.Claims),
+                    ClaimsExtractor.GetUserIdClaim(User.Claims),
                     request.offset,
                     request.count);
 
@@ -94,7 +94,7 @@ namespace Vibechat.Web.Controllers
                     credentials.MaxMessageId,
                     credentials.History,
                     credentials.SetLastMessage,
-                    JwtHelper.GetNamedClaimValue(User.Claims));
+                    ClaimsExtractor.GetUserIdClaim(User.Claims));
 
                 return Ok(new ResponseApiModel<List<Message>>
                 {
@@ -151,7 +151,7 @@ namespace Vibechat.Web.Controllers
                 await messagesService.DeleteMessages(
                     messagesInfo.MessagesId,
                     messagesInfo.ConversationId,
-                    JwtHelper.GetNamedClaimValue(User.Claims));
+                    ClaimsExtractor.GetUserIdClaim(User.Claims));
 
                 return Ok(new ResponseApiModel<string>
                 {
@@ -198,7 +198,7 @@ namespace Vibechat.Web.Controllers
         { 
             try
             {
-                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+                var thisUserId = ClaimsExtractor.GetUserIdClaim(User.Claims);
 
                 await messagesService.SetLastMessage(thisUserId, request.chatId, request.messageId);
 
@@ -248,7 +248,7 @@ namespace Vibechat.Web.Controllers
         {
             try
             {
-                var thisUserId = JwtHelper.GetNamedClaimValue(User.Claims);
+                var thisUserId = ClaimsExtractor.GetUserIdClaim(User.Claims);
             
                 var messages = await messagesService.SearchForMessages(
                     request.deviceId, 

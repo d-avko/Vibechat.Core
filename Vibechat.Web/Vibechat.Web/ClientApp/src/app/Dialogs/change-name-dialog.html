@@ -1,14 +1,36 @@
 <h1 class="profile-dialog_header-text" mat-dialog-title i18n>Change name.</h1>
-<div class="paddingLeftRight40px" mat-dialog-content>
+<div class="dialog-content paddingLeftRight40px" mat-dialog-content>
 
-  <h3 style="font: 400 15px/28px Roboto,'Helvetica Neue',sans-serif" i18n>New name:</h3>
 
-  <mat-form-field>
-    <input matInput [(ngModel)]="groupName">
-  </mat-form-field>
+  <div class="field-wrapper flexaligned">
+
+    <mat-form-field class="field" style="padding: 0 0 20px;">
+      <mat-label i18n>New name:</mat-label>
+      <input matInput [(ngModel)]="groupName">
+      <mat-error i18n>Please provide a correct name.</mat-error>
+    </mat-form-field>
+
+  </div>
 
 </div>
-<div style="padding: 20px;" mat-dialog-actions>
+<div class="dialog-actions" style="padding: 20px;" mat-dialog-actions>
   <button mat-button [mat-dialog-close]="groupName" cdkFocusInitial i18n>Change</button>
   <button mat-button (click)="onCancelClick()" i18n>Cancel</button>
 </div>
+
+<style>
+  .field-wrapper{
+    width: 90%;
+  }
+
+  .field-wrapper .field{
+    width: 100%;
+  }
+  .dialog-content{
+    display: flex;
+    justify-content: center;
+  }
+  .dialog-actions{
+    justify-content: center;
+  }
+</style>

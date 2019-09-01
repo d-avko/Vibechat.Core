@@ -11,9 +11,11 @@ namespace Vibechat.Web.Controllers
     [ApiController]
     public class TokensController : ControllerBase
     {
+        private readonly IJwtTokenGenerator tokenGenerator;
 
-        public TokensController(ITokenValidator tokensValidator, UsersService userService)
+        public TokensController(ITokenValidator tokensValidator, UsersService userService, IJwtTokenGenerator tokenGenerator)
         {
+            this.tokenGenerator = tokenGenerator;
             this.tokensValidator = tokensValidator;
             this.userService = userService;
         }
@@ -41,10 +43,12 @@ namespace Vibechat.Web.Controllers
                 return BadRequest("Wrong refresh token.");
             }
 
+            var user = await userService.GetUserById(tokenInfo.userId);
+
             return Ok(new ResponseApiModel<string>
             {
                 IsSuccessfull = true,
-                Response = (await userService.GetUserById(tokenInfo.userId)).GenerateToken()
+                Response = tokenGenerator.GenerateToken(user)
             });
         }
 

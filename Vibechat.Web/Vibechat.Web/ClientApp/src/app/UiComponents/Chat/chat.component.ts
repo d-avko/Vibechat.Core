@@ -17,6 +17,7 @@ import {ChooseContactDialogComponent} from "../../Dialogs/ChooseContactDialog";
 import {SnackBarHelper} from "../../Snackbar/SnackbarHelper";
 import {MessageViewOption, MessageViewOptions} from "../../Shared/MessageViewOptions";
 import {MessageReportingService} from "../../Services/MessageReportingService";
+import {Meta} from "@angular/platform-browser";
 
 @Component({
   selector: 'chat-root',
@@ -44,7 +45,7 @@ export class ChatComponent implements OnInit {
   @ViewChild(MessagesComponent, { static: false }) messages: MessagesComponent;
   @ViewChild(MatDrawer, { static: true }) sideDrawer: MatDrawer;
   @ViewChild(SearchListComponent, { static: false }) searchList: SearchListComponent;
-  @ViewChild(ConversationsFormatter, {static: true}) formatter;
+  @ViewChild(ConversationsFormatter, {static: true}) formatter: ConversationsFormatter;
   over: any;
 
   constructor(
@@ -55,7 +56,16 @@ export class ChatComponent implements OnInit {
     private themesService: ThemesService,
     private snackBar: SnackBarHelper,
     private viewOptions: MessageViewOptions,
-    private display: MessageReportingService) { }
+    private display: MessageReportingService,
+    public meta: Meta) {
+    meta.addTags([
+      {name: 'description', content: 'Telegram-like messenger created with ASP.NET Core and Angular 8.'},
+      {name: 'viewport', content: 'width=device-width, initial-scale=1'},
+      {name: 'keywords', content: 'ASP.NET Core,TypeScript, Angular'},
+      {httpEquiv: 'Content-Type', content: 'text/html'},
+      {charset: 'UTF-8'}
+    ], true);
+  }
 
   async ngOnInit(): Promise<void> {
     await this.auth.RefreshLocalData();

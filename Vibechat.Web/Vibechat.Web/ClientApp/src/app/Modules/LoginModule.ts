@@ -5,11 +5,11 @@ import {MaterialModule} from "../material.module";
 import {CommonModule} from "@angular/common";
 import {ReactiveFormsModule} from "@angular/forms";
 import {BrowserModule} from "@angular/platform-browser";
-import {AppRoutersModule} from "../app.routes";
 import {HttpClientModule} from "@angular/common/http";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {AuthService} from "../Services/AuthService";
 import {TranslationModule} from "./translation/translation.module";
+import {AppRoutesModule} from "../app.routes";
 
 @NgModule({
   declarations: [
@@ -21,10 +21,10 @@ import {TranslationModule} from "./translation/translation.module";
     CommonModule,
     ReactiveFormsModule,
     BrowserModule,
-    AppRoutersModule,
     HttpClientModule,
     BrowserAnimationsModule,
-    TranslationModule
+    TranslationModule,
+    AppRoutesModule
   ],
   entryComponents:[],
   providers: [AuthService]

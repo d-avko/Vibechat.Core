@@ -689,5 +689,6 @@ namespace Vibechat.SignalR.Hubs
                 logger.LogError(ex.Message);
             }
         }
+
     }
 }

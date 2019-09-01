@@ -19,7 +19,7 @@ namespace Vibechat.BusinessLogic.Auth
         {
             string userIdClaim;
 
-            if ((userIdClaim = JwtHelper.GetNamedClaimValue(context.User.Claims)) == null)
+            if ((userIdClaim = ClaimsExtractor.GetUserIdClaim(context.User.Claims)) == null)
             {
                 context.Fail();
                 return;

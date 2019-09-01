@@ -27,7 +27,7 @@ namespace Vibechat.BusinessLogic.Middleware
             //update online status for each authorized request.
             if (context.User.Identity.IsAuthenticated)
             {
-                var user = await repository.GetByIdAsync(JwtHelper.GetNamedClaimValue(context.User.Claims));
+                var user = await repository.GetByIdAsync(ClaimsExtractor.GetUserIdClaim(context.User.Claims));
 
                 if (user == null)
                 {
