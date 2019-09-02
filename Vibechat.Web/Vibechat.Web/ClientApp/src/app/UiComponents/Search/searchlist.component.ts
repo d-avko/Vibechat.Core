@@ -1,11 +1,11 @@
-import {Chat} from "../Data/Chat";
-import {AppUser} from "../Data/AppUser";
 import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild} from "@angular/core";
-import {ChatsService} from "../Services/ChatsService";
-import {UsersService} from "../Services/UsersService";
-import {MessageReportingService} from "../Services/MessageReportingService";
-import {Message} from "../Data/Message";
-import {ConversationsFormatter} from "../Formatters/ConversationsFormatter";
+import {Chat} from "../../Data/Chat";
+import {Message} from "../../Data/Message";
+import {AppUser} from "../../Data/AppUser";
+import {ConversationsFormatter} from "../../Formatters/ConversationsFormatter";
+import {ChatsService} from "../../Services/ChatsService";
+import {UsersService} from "../../Services/UsersService";
+import {MessageReportingService} from "../../Services/MessageReportingService";
 
 export class FoundMessage{
   public constructor(init?: Partial<FoundMessage>) {

@@ -196,7 +196,6 @@ export class Api {
 
   public CreateConversation(
     name: string,
-    whoCreatedId: string,
     dialogUserId: string,
     thumbnailUrl: string,
     isGroup: boolean,
@@ -206,7 +205,6 @@ export class Api {
     return this.MakePostCall<Chat>(
       {
         ConversationName: name,
-        CreatorId: whoCreatedId,
         DialogUserId: dialogUserId,
         ImageUrl: thumbnailUrl,
         IsGroup: isGroup,

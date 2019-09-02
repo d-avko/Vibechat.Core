@@ -107,113 +107,147 @@ namespace Vibechat.BusinessLogic.Services.Chat
             await unitOfWork.Commit();
         }
 
-        public async Task<Shared.DTO.Conversations.Chat> CreateConversation(CreateChatRequest credentials)
+        public async Task<Shared.DTO.Conversations.Chat> CreateConversation(
+            string chatName,
+            string creatorId,
+            string dialogUserId,
+            string chatImageUrl,
+            bool isGroup,
+            bool isPublic,
+            bool isSecure,
+            string deviceId)
         {
             var defaultError = new InvalidDataException("Error while creating the conversation..");
 
             //if there was no group info or creator info
 
-            if (string.IsNullOrWhiteSpace(credentials.CreatorId))
-            {
-                throw new KeyNotFoundException("Wrong creatorId.");
-            }
-
-            var user = await usersRepository.GetByIdAsync(credentials.CreatorId);
+            var user = await usersRepository.GetByIdAsync(creatorId);
 
             if (user == null)
             {
                 throw new KeyNotFoundException("Wrong creatorId.");
             }
 
-            if (!credentials.IsGroup && credentials.DialogUserId == null)
+            if (!isGroup && dialogUserId == null)
             {
                 throw new InvalidDataException("No dialog user was provided.");
             }
 
-            if (credentials.IsGroup && credentials.ConversationName.Length > MaxNameLength)
+            if (isGroup && chatName.Length > MaxNameLength)
             {
                 throw new InvalidDataException("Chat name was too long.");
             }
 
-            AppUser secondDialogueUser = null;
-            DhPublicKeyDataModel dhPublicKey = null;
-
-            var imageUrl = string.Empty;
-
-            if (!credentials.IsGroup)
+            async Task<ConversationDataModel> CreateDialog()
             {
                 //if this is a dialogue , find a user with whom to create conversation
-                secondDialogueUser = await usersRepository.GetByIdAsync(credentials.DialogUserId);
+                var secondDialogueUser = await usersRepository.GetByIdAsync(dialogUserId);
 
                 if (secondDialogueUser == null)
                 {
                     throw defaultError;
                 }
-
-                if (credentials.IsSecure)
+                
+                DhPublicKeyDataModel dhPublicKey = null;
+                
+                if (isSecure)
                 {
                     dhPublicKey = await publicKeys.GetRandomKey();
                 }
-            }
-            else
-            {
-                imageUrl = credentials.ImageUrl ?? chatDataProvider.GetGroupPictureUrl();
+                
+                var newChat = new ConversationDataModel
+                {
+                    IsGroup = isGroup,
+                    Name = isGroup ? chatName : null,
+                    FullImageUrl = null,
+                    ThumbnailUrl = null,
+                    IsPublic = isPublic,
+                    IsSecure = isSecure,
+                    PublicKeyId = dhPublicKey?.Id,
+                    PublicKey = dhPublicKey
+                };
+                
+                await conversationRepository.AddAsync(newChat);
+                
+                await usersConversationsRepository.AddAsync(
+                    UsersConversationDataModel.Create(dialogUserId, newChat)
+                );
+                
+                await usersConversationsRepository.AddAsync(UsersConversationDataModel.Create(
+                    creatorId, 
+                    newChat, 
+                    deviceId));
+
+                return newChat;
             }
 
-            var createdChat = new ConversationDataModel
+            async Task<ConversationDataModel> CreateGroup()
             {
-                IsGroup = credentials.IsGroup,
-                Name = credentials.IsGroup ? credentials.ConversationName : null,
-                FullImageUrl = imageUrl,
-                ThumbnailUrl = imageUrl,
-                IsPublic = credentials.IsPublic,
-                IsSecure = credentials.IsSecure,
-                PublicKeyId = dhPublicKey?.Id,
-                PublicKey = dhPublicKey
-            };
+                var imageUrl = chatImageUrl ?? chatDataProvider.GetGroupPictureUrl();
+                
+                var newChat = new ConversationDataModel
+                {
+                    IsGroup = isGroup,
+                    Name = isGroup ? chatName : null,
+                    FullImageUrl = imageUrl,
+                    ThumbnailUrl = imageUrl,
+                    IsPublic = isPublic,
+                    IsSecure = isSecure,
+                    PublicKeyId = null,
+                    PublicKey = null
+                };
+                
+                await conversationRepository.AddAsync(newChat);
+                
+                await usersConversationsRepository.AddAsync(UsersConversationDataModel.Create(
+                    creatorId, 
+                    newChat, 
+                    deviceId));
 
-            await conversationRepository.AddAsync(createdChat);
+                await rolesRepository.AddAsync(
+                    ChatRoleDataModel.Create(newChat, creatorId, ChatRole.Creator));
+
+                return newChat;
+            }
 
             try
             {
-                if (!credentials.IsGroup)
+                ConversationDataModel createdChat;
+                
+                if (isGroup)
                 {
-                    await usersConversationsRepository.AddAsync(UsersConversationDataModel.Create(credentials.DialogUserId, createdChat));
-                    await rolesRepository.AddAsync(ChatRoleDataModel.Create(createdChat, credentials.DialogUserId, ChatRole.NoRole));
+                    createdChat = await CreateGroup();
+                }
+                else
+                {
+                    createdChat = await CreateDialog();
                 }
 
-                await usersConversationsRepository.AddAsync(UsersConversationDataModel.Create(
-                    credentials.CreatorId, 
-                    createdChat, 
-                    credentials.DeviceId));
-
-                await rolesRepository.AddAsync(ChatRoleDataModel.Create(createdChat, credentials.CreatorId, ChatRole.Creator));
-
                 await unitOfWork.Commit();
+                
+                var creator = user.ToAppUserDto();
+                creator.ChatRole = new ChatRoleDto
+                {
+                    ChatId = createdChat.Id,
+                    Role = ChatRole.Creator
+                };
+
+                return createdChat.ToChatDto(
+                    isGroup ? new List<AppUserDto> {creator} : null,
+                    await usersConversationsRepository.GetUserInDialog(createdChat.Id, creatorId),
+                    createdChat.PublicKey,
+                    await rolesRepository.GetByIdAsync(createdChat.Id, creatorId),
+                    deviceId,
+                    0,
+                    null
+                );
             }
             catch (Exception ex)
             {
                 throw new InvalidDataException("Couldn't create group/dialog. Probably there exists one already.", ex);
             }
-
-            var creator = user.ToAppUserDto();
-            creator.ChatRole = new ChatRoleDto
-            {
-                ChatId = createdChat.Id,
-                Role = ChatRole.Creator
-            };
-
-            return createdChat.ToChatDto(
-                credentials.IsGroup ? new List<AppUserDto> {creator} : null,
-                secondDialogueUser,
-                dhPublicKey,
-                await rolesRepository.GetByIdAsync(createdChat.Id, credentials.CreatorId),
-                credentials.DeviceId,
-                0,
-                null
-            );
         }
-
+        
         public async Task<List<AppUserDto>> FindUsersInChat(int chatId, string username, string caller)
         {
             if (!await usersConversationsRepository.Exists(caller, chatId))

@@ -142,7 +142,6 @@
     <TypeScriptCompile Include="ClientApp\src\app\Modules\ChatModule.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Modules\LoginModule.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Roles\ChatRoleDto.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\Search\searchlist.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Roles\ChatRole.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Services\ChatsService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Services\DeviceService.ts" />
@@ -160,6 +159,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\Shared\MessageViewOptions.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Shared\RemovedFromGroupModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\Theming\ThemesService.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\UiComponents\Search\searchlist.component.ts" />
   </ItemGroup>
 
   <!--<ItemGroup>
@@ -173,10 +173,6 @@
     <None Include="wwwroot\Groups\pic4.png" />
     <None Include="wwwroot\Groups\pic5.png" />
   </ItemGroup>-->
-
-  <ItemGroup>
-    <Folder Include="ClientApp\src\app\UiComponents" />
-  </ItemGroup>
 
   <ItemGroup>
     <None Update="certificate_combined.pfx">

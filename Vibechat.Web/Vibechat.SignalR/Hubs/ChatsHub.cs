@@ -10,7 +10,6 @@ using Vibechat.BusinessLogic.Services.Messages;
 using Vibechat.BusinessLogic.Services.Users;
 using Vibechat.BusinessLogic.UserProviders;
 using Vibechat.DataLayer.DataModels;
-using Vibechat.Shared.ApiModels.Conversation;
 using Vibechat.Shared.DTO.Conversations;
 using Vibechat.Shared.DTO.Messages;
 using Vibechat.Shared.DTO.Users;
@@ -406,14 +405,15 @@ namespace Vibechat.SignalR.Hubs
                 }
 
                 var created = await chatsService
-                    .CreateConversation(new CreateChatRequest
-                    {
-                        IsGroup = false,
-                        DialogUserId = user.Id,
-                        CreatorId = whoSent.Id,
-                        IsSecure = secure,
-                        DeviceId = deviceId
-                    });
+                    .CreateConversation(
+                        null,
+                        whoSent.Id,
+                        user.Id,
+                        null,
+                        false,
+                        false,
+                        false,
+                        deviceId);
 
                 var userToSend = await userService.GetUserById(user.Id);
 

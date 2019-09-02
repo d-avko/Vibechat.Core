@@ -4,8 +4,6 @@
     {
         public string ConversationName { get; set; }
 
-        public string CreatorId { get; set; }
-
         public string DialogUserId { get; set; }
 
         /// <summary>
