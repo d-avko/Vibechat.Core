@@ -1,10 +1,10 @@
 import {Component} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {ChangeUserInfoRequest} from '../ApiModels/RegisterRequest';
 import {Router} from '@angular/router';
-import {Api} from '../Services/Api/api.service';
-import {MessageReportingService} from "../Services/MessageReportingService";
 import {Meta} from "@angular/platform-browser";
+import {Api} from "../../Services/Api/api.service";
+import {MessageReportingService} from "../../Services/MessageReportingService";
+import {ChangeUserInfoRequest} from "../../ApiModels/RegisterRequest";
 
 @Component({
   selector: 'register-view',

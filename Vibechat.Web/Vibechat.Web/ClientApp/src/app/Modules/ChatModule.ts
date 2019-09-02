@@ -17,7 +17,6 @@ import {AddGroupDialogComponent} from "../Dialogs/AddGroupDialog";
 import {FindUsersDialogComponent} from "../Dialogs/FindUsersDialog";
 import {GroupInfoDialogComponent} from "../Dialogs/GroupInfoDialog";
 import {ChangeNameDialogComponent} from "../Dialogs/ChangeNameDialog";
-import {SearchListComponent} from "../Search/searchlist.component";
 import {UserInfoDialogComponent} from "../Dialogs/UserInfoDialog";
 import {UploaderService} from "../Services/Api/uploads/upload.service";
 import {ViewAttachmentsDialogComponent} from "../Dialogs/ViewAttachmentsDialog";
@@ -45,6 +44,7 @@ import {UploadsApi} from "../Services/Api/UploadsApi";
 import {LocalesService} from "../Services/LocalesService";
 import {TranslationModule} from "./translation/translation.module";
 import {MatSlideToggleModule} from "@angular/material/slide-toggle";
+import {SearchListComponent} from "../UiComponents/Search/searchlist.component";
 
 @NgModule({
   declarations: [

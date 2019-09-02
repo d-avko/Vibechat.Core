@@ -40,9 +40,16 @@ namespace Vibechat.Web.Controllers
             try
             {
                 var thisUserId = ClaimsExtractor.GetUserIdClaim(User.Claims);
-                request.CreatorId = thisUserId;
-
-                var result = await mChatsService.CreateConversation(request);
+                
+                var result = await mChatsService.CreateConversation(
+                    request.ConversationName,
+                    thisUserId,
+                    request.DialogUserId,
+                    request.ImageUrl,
+                    request.IsGroup,
+                    request.IsPublic,
+                    request.IsSecure,
+                    request.DeviceId);
 
                 return Ok(new ResponseApiModel<Chat>
                 {

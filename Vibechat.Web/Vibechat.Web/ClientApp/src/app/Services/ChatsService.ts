@@ -880,7 +880,7 @@ export class ChatsService {
     }
 
     let result = await this.api.CreateConversation(
-      name, this.authService.User.id, null, null, true, isPublic);
+      name, null, null, true, isPublic);
 
     if (!result.isSuccessfull) {
       return;
