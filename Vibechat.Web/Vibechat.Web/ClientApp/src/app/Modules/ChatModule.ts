@@ -45,6 +45,7 @@ import {LocalesService} from "../Services/LocalesService";
 import {TranslationModule} from "./translation/translation.module";
 import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 import {SearchListComponent} from "../UiComponents/Search/searchlist.component";
+import {TextMessageComponent} from "../UiComponents/Messages/TextMessage/text-message.component";
 
 @NgModule({
   declarations: [
@@ -65,7 +66,8 @@ import {SearchListComponent} from "../UiComponents/Search/searchlist.component";
     ChatUsersDialogComponent,
     AdminPanelDialog,
     ViewPhotoComponent,
-    ChatEventComponent
+    ChatEventComponent,
+    TextMessageComponent
   ],
   imports: [
     ScrollingModule,

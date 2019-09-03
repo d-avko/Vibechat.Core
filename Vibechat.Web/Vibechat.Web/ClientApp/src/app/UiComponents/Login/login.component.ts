@@ -1,12 +1,12 @@
 import {Component} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
-import {SnackBarHelper} from '../Snackbar/SnackbarHelper';
 import {Router} from '@angular/router';
-import {Api} from '../Services/Api/api.service';
-import {AuthService} from "../Services/AuthService";
 import * as firebase from "firebase/app";
-import {MessageReportingService} from "../Services/MessageReportingService";
 import {Meta} from "@angular/platform-browser";
+import {SnackBarHelper} from "../../Snackbar/SnackbarHelper";
+import {Api} from "../../Services/Api/api.service";
+import {MessageReportingService} from "../../Services/MessageReportingService";
+import {AuthService} from "../../Services/AuthService";
 
 @Component({
   selector: 'login-view',
