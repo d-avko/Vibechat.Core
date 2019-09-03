@@ -39,7 +39,9 @@
           <div class="content_messageAndName">
             <span *ngIf="IsFirstMessageInSequence(message, index) || IsForwarded(message)" class="message_header">{{message.user.userName}}</span>
 
-            <p *ngIf="IsText(message)" class="message_text">{{message.messageContent}}</p>
+            <text-message *ngIf="IsText(message)" class="message_text" [content]="message.messageContent">
+
+            </text-message>
 
             <!--Attachments-->
 

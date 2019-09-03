@@ -8,7 +8,6 @@ import {MessagesComponent} from "../Messages/messages.component";
 import {AppUser} from "../../Data/AppUser";
 import {AddGroupDialogComponent} from "../../Dialogs/AddGroupDialog";
 import {GroupInfoDialogComponent} from "../../Dialogs/GroupInfoDialog";
-import {FoundMessage, SearchListComponent} from "../../Search/searchlist.component";
 import {UserInfoDialogComponent} from "../../Dialogs/UserInfoDialog";
 import {UsersService} from "../../Services/UsersService";
 import {ChatsService} from "../../Services/ChatsService";
@@ -18,6 +17,7 @@ import {SnackBarHelper} from "../../Snackbar/SnackbarHelper";
 import {MessageViewOption, MessageViewOptions} from "../../Shared/MessageViewOptions";
 import {MessageReportingService} from "../../Services/MessageReportingService";
 import {Meta} from "@angular/platform-browser";
+import {FoundMessage, SearchListComponent} from "../Search/searchlist.component";
 
 @Component({
   selector: 'chat-root',
