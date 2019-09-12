@@ -2,6 +2,7 @@ using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Vibechat.DataLayer;
 
@@ -10,7 +11,13 @@ namespace Vibechat.BusinessLogic.AuthHelpers
     public class JwtTokenGenerator : IJwtTokenGenerator
     {
         public const string JwtUserIdClaimName = "UserId";
-        
+
+        private readonly IConfiguration config;
+
+        public JwtTokenGenerator(IConfiguration config)
+        {
+            this.config = config;
+        }
         
         /// <summary>
         ///     Generates jwt token and returns it as string
@@ -28,13 +35,13 @@ namespace Vibechat.BusinessLogic.AuthHelpers
              };
  
              var credentials = new SigningCredentials(
-                 new SymmetricSecurityKey(Encoding.UTF8.GetBytes(DI.Configuration["Jwt:SecretKey"] as string)),
+                 new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:SecretKey"] as string)),
                  SecurityAlgorithms.HmacSha256
              );
  
              var token = new JwtSecurityToken(
-                 DI.Configuration["Jwt:Issuer"],
-                 DI.Configuration["Jwt:Audience"],
+                 config["Jwt:Issuer"],
+                 config["Jwt:Audience"],
                  claims,
                  signingCredentials: credentials,
                  expires: DateTime.UtcNow.AddYears(1)
@@ -54,13 +61,13 @@ namespace Vibechat.BusinessLogic.AuthHelpers
              };
  
              var credentials = new SigningCredentials(
-                 new SymmetricSecurityKey(Encoding.UTF8.GetBytes(DI.Configuration["Jwt:SecretKey"] as string)),
+                 new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:SecretKey"] as string)),
                  SecurityAlgorithms.HmacSha256
              );
  
              var token = new JwtSecurityToken(
-                 DI.Configuration["Jwt:Issuer"],
-                 DI.Configuration["Jwt:Audience"],
+                 config["Jwt:Issuer"],
+                 config["Jwt:Audience"],
                  claims,
                  signingCredentials: credentials,
                  expires: DateTime.UtcNow.AddMinutes(10)

@@ -32,10 +32,10 @@ namespace Vibechat.BusinessLogic.Services.Bans
             this.rolesRepository = rolesRepository;
         }
 
-        public IUsersBansRepository UsersBansRepository { get; }
-        public IConversationsBansRepository ConversationsBansRepository { get; }
-        public IUsersRepository usersRepository { get; }
-        public IConversationRepository ConversationRepository { get; }
+        private IUsersBansRepository UsersBansRepository { get; }
+        private IConversationsBansRepository ConversationsBansRepository { get; }
+        private IUsersRepository usersRepository { get; }
+        private IConversationRepository ConversationRepository { get; }
 
         public async Task BanUserFromConversation(int conversationId, string userToBanId, string whoAccessedId)
         {
@@ -75,15 +75,15 @@ namespace Vibechat.BusinessLogic.Services.Bans
             }
         }
 
-        public async Task BanDialog(string UserToBanId, string whoAccessedId)
+        public async Task BanDialog(string userToBanId, string whoAccessedId)
         {
-            if (UserToBanId == whoAccessedId)
+            if (userToBanId == whoAccessedId)
             {
                 throw new InvalidDataException("Can't ban yourself.");
             }
 
             var bannedBy = await usersRepository.GetByIdAsync(whoAccessedId);
-            var banned = await usersRepository.GetByIdAsync(UserToBanId);
+            var banned = await usersRepository.GetByIdAsync(userToBanId);
 
             if (banned == null || bannedBy == null)
             {
@@ -101,7 +101,7 @@ namespace Vibechat.BusinessLogic.Services.Bans
 
             UsersConversationDataModel dialog;
 
-            if ((dialog = await usersConversationsRepository.GetDialog(UserToBanId, whoAccessedId)) != null)
+            if ((dialog = await usersConversationsRepository.GetDialog(userToBanId, whoAccessedId)) != null)
             {
                 await ConversationsBansRepository.AddAsync(ConversationsBansDataModel.Create(banned, dialog.Conversation));
             }

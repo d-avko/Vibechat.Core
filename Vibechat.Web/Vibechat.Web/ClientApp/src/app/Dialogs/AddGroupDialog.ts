@@ -1,8 +1,8 @@
-import { Component, ViewChild } from "@angular/core";
-import { MatDialogRef, MatCheckbox } from "@angular/material";
-import { ChatComponent } from "../UiComponents/Chat/chat.component";
-import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {ChatsService} from "../Services/ChatsService";
+import {Component, ViewChild} from '@angular/core';
+import {MatCheckbox, MatDialogRef} from '@angular/material';
+import {ChatComponent} from '../UiComponents/Chat/chat.component';
+import {FormControl, Validators} from '@angular/forms';
+import {ChatsService} from '../Services/ChatsService';
 
 @Component({
   selector: 'add-group-dialog',
@@ -26,10 +26,9 @@ export class AddGroupDialogComponent {
   }
 
   public CreateGroup() {
-    if(!this.GroupName.valid){
+    if (!this.GroupName.valid) {
       return;
     }
-
     this.dialogRef.close({ name: this.GroupName.value, isPublic: this.IsPublic.checked });
   }
 

@@ -20,6 +20,7 @@ namespace Vibechat.BusinessLogic.Services.FileSystem
         /// <summary>
         ///     Saves file to specified / generated location
         /// </summary>
+        /// <param name="formFile"></param>
         /// <param name="file"></param>
         /// <param name="filename"></param>
         /// <param name="chatOrUserId"></param>
@@ -78,13 +79,7 @@ namespace Vibechat.BusinessLogic.Services.FileSystem
             return Task.CompletedTask;
         }
 
-        protected virtual async Task SaveToStorage(IFormFile formFile, MemoryStream file, string path)
-        {
-            using (var fStream = new FileStream(path, FileMode.Create))
-            {
-                file.CopyTo(fStream);
-            }
-        }
+        protected abstract Task SaveToStorage(IFormFile formFile, MemoryStream file, string path);
 
         private string GetUniquePath(string sender, string chatOrUserId, string name)
         {

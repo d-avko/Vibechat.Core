@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Vibechat.BusinessLogic.Services.Images;
 using Vibechat.BusinessLogic.Services.Paths;
@@ -15,35 +16,36 @@ namespace Vibechat.BusinessLogic.Services.FileSystem
 {
     public class FilesService : AbstractFilesService
     {
-        private static readonly int MessageImageMaxWidth = 800;
+        private const int MessageImageMaxWidth = 800;
 
-        private static readonly int MessageImageMaxHeight = 800;
+        private const int MessageImageMaxHeight = 800;
 
-        private static readonly int ThumbnailHeight = 140;
+        private const int ThumbnailHeight = 140;
 
-        private static readonly int ThumbnailWidth = 140;
+        private const int ThumbnailWidth = 140;
 
-        private static readonly string FullSized = "full";
+        private const string FullSized = "full";
 
-        private static readonly string Compressed = "cmpr";
+        private const string Compressed = "cmpr";
 
-        private static readonly int MaxFileNameLength = 120;
+        private const int MaxFileNameLength = 120;
 
         private readonly ILogger<FilesService> logger;
 
-        private readonly IHttpClientFactory httpClientFactory;
+        private readonly IConfiguration config;
 
         public FilesService(
             IImageScalingService imageScaling,
             UniquePathsProvider pathsProvider,
             IImageCompressionService imageCompression,
             ILogger<FilesService> logger,
-            IHttpClientFactory httpClientFactory) : base(pathsProvider)
+            IHttpClientFactory httpClientFactory,
+            IConfiguration config) : base(pathsProvider)
         {
             ImageScaling = imageScaling;
             ImageCompression = imageCompression;
             this.logger = logger;
-            this.httpClientFactory = httpClientFactory;
+            this.config = config;
             HttpClient = httpClientFactory.CreateClient();
         }
 
@@ -93,7 +95,7 @@ namespace Vibechat.BusinessLogic.Services.FileSystem
                     {
                         AttachmentKind = AttachmentKind.Image,
                         AttachmentName = imageName,
-                        ContentUrl = DI.Configuration["FileServer:Url"] + resultPath,
+                        ContentUrl = config["FileServer:Url"] + resultPath,
                         ImageHeight = resultDimensions.Item2,
                         ImageWidth = resultDimensions.Item1
                     };   
@@ -130,7 +132,7 @@ namespace Vibechat.BusinessLogic.Services.FileSystem
                     {
                         AttachmentKind = AttachmentKind.File,
                         AttachmentName = filename,
-                        ContentUrl = DI.Configuration["FileServer:Url"] + resultPath,
+                        ContentUrl = config["FileServer:Url"] + resultPath,
                         FileSize = file.Length
                     };
                 }
@@ -180,8 +182,8 @@ namespace Vibechat.BusinessLogic.Services.FileSystem
                     resized.Dispose();
 
                     return new ValueTuple<string, string>(
-                        DI.Configuration["FileServer:Url"] + compressedFileName,
-                        DI.Configuration["FileServer:Url"] + uncompressedFileName);
+                        config["FileServer:Url"] + compressedFileName,
+                        config["FileServer:Url"] + uncompressedFileName);
                 }
             }
             catch (ArgumentException ex)
@@ -213,7 +215,7 @@ namespace Vibechat.BusinessLogic.Services.FileSystem
         {
             try
             {
-                await HttpClient.DeleteAsync(DI.Configuration["FileServer:DeleteFileUrl"] + path);
+                await HttpClient.DeleteAsync(config["FileServer:DeleteFileUrl"] + path);
             }
             catch (Exception e)
             {
@@ -245,7 +247,7 @@ namespace Vibechat.BusinessLogic.Services.FileSystem
             };
 
             //server responds with either true or false.
-            var response = await HttpClient.PostAsync(DI.Configuration["FileServer:UploadFileUrl"], content);
+            var response = await HttpClient.PostAsync(config["FileServer:UploadFileUrl"], content);
 
             if (!bool.TryParse(await response.Content.ReadAsStringAsync(), out var result))
             {

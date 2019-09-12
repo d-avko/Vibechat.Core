@@ -214,7 +214,7 @@ namespace Vibechat.BusinessLogic.Services.Messages
 
         public async Task DeleteMessages(List<int> messagesIds,int chatId, string whoAccessedId)
         {
-            IReadOnlyList<MessageDataModel> messagesToDelete = await messagesRepository
+            var messagesToDelete = await messagesRepository
                 .ListAsync(new MessagesByIdsSpec(messagesIds));
 
             if (messagesToDelete.Any(x => x.ConversationID != chatId))

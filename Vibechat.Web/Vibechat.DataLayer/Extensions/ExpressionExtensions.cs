@@ -7,27 +7,26 @@ namespace Vibechat.DataLayer.Extensions
     {
         public static string GetNestedMemberAccessString(this Expression expression)
         {
-            if (expression.NodeType == ExpressionType.MemberAccess)
+            if (expression.NodeType != ExpressionType.MemberAccess)
             {
-                var memberExpression = (MemberExpression)expression;
-                string parentValue;
+                throw new ArgumentException("The expression must contain only member access calls.", nameof(expression));
+            }
 
-                //do not include lambda variable.
-                if (memberExpression.Expression is ParameterExpression)
-                {
-                    parentValue = memberExpression.Member.Name;
-                }
-                else
-                {
-                    parentValue = GetNestedMemberAccessString(memberExpression.Expression) + "." + memberExpression.Member.Name;
-                }
+            var memberExpression = (MemberExpression)expression;
+            string parentValue;
 
-                return parentValue;
+            //do not include lambda variable.
+            if (memberExpression.Expression is ParameterExpression)
+            {
+                parentValue = memberExpression.Member.Name;
             }
             else
             {
-                throw new ArgumentException("The expression must contain only member access calls.", "expression");
+                parentValue = GetNestedMemberAccessString(memberExpression.Expression) + "." + memberExpression.Member.Name;
             }
+
+            return parentValue;
+
         }
     }
 }
