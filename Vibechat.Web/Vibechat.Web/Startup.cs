@@ -19,7 +19,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Vibechat.BusinessLogic;
 using Vibechat.BusinessLogic.AuthHelpers;
 using Vibechat.BusinessLogic.Extensions;
 using Vibechat.BusinessLogic.Middleware;
@@ -37,7 +36,6 @@ namespace Vibechat.Web
         { 
             Configuration = configuration;
             this.environment = environment;
-            DI.Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }

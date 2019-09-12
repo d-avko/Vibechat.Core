@@ -6,7 +6,7 @@ import {MessagesComponent} from "../UiComponents/Messages/messages.component";
 import {ScrollingModule} from "@angular/cdk/scrolling";
 import {ConversationsFormatter} from "../Formatters/ConversationsFormatter";
 import {MaterialModule} from "../material.module";
-import {CommonModule} from "@angular/common";
+import {CommonModule} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {BrowserModule} from "@angular/platform-browser";
 import {AppRoutesModule} from "../app.routes";
