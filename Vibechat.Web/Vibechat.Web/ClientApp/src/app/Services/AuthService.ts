@@ -50,6 +50,7 @@ export class AuthService  {
 
     try {
       this.confirmation = await firebase.auth().signInWithPhoneNumber(phoneNumber, recaptcha);
+      this.phoneNumberToConfirm = phoneNumber;
       return true;
     } catch (e) {
       console.log(e);

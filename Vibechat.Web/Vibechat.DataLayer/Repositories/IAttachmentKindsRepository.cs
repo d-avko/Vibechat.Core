@@ -6,6 +6,6 @@ namespace Vibechat.DataLayer.Repositories
 {
     public interface IAttachmentKindsRepository : IAsyncRepository<AttachmentKindDataModel>
     {
-        Task<AttachmentKindDataModel> GetById(AttachmentKind id);
+        ValueTask<AttachmentKindDataModel> GetById(AttachmentKind id);
     }
 }

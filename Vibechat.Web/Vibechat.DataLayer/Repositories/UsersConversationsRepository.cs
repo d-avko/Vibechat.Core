@@ -13,7 +13,7 @@ namespace Vibechat.DataLayer.Repositories
             
         }
 
-        public Task<UsersConversationDataModel> GetByIdAsync(string userId, int conversationId)
+        public ValueTask<UsersConversationDataModel> GetByIdAsync(string userId, int conversationId)
         {
             return _dbContext
                 .UsersConversations
@@ -22,6 +22,7 @@ namespace Vibechat.DataLayer.Repositories
 
         public async Task<IEnumerable<ConversationDataModel>> GetUserChats(string deviceId, string userId)
         {
+           
            return (await ListAsync(new GetUserChatsSpec(deviceId, userId)))
                 .Select(x => x.Conversation);
         }
@@ -43,8 +44,8 @@ namespace Vibechat.DataLayer.Repositories
 
         public async Task<AppUser> GetUserInDialog(int chatId, string firstUserInDialog)
         {
-            return (await base.ListAsync(new GetUserInDialogSpec(chatId, firstUserInDialog)))
-                .First()
+            return (await ListAsync(new GetUserInDialogSpec(chatId, firstUserInDialog)))
+                .FirstOrDefault()?
                 .User;
         }
 

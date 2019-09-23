@@ -234,9 +234,9 @@ namespace Vibechat.BusinessLogic.Services.Chat
 
                 return createdChat.ToChatDto(
                     isGroup ? new List<AppUserDto> {creator} : null,
-                    await usersConversationsRepository.GetUserInDialog(createdChat.Id, creatorId),
+                    isGroup ? null : await usersConversationsRepository.GetUserInDialog(createdChat.Id, creatorId).ConfigureAwait(false),
                     createdChat.PublicKey,
-                    await rolesRepository.GetByIdAsync(createdChat.Id, creatorId),
+                    !isGroup ? null : await rolesRepository.GetByIdAsync(createdChat.Id, creatorId).ConfigureAwait(false),
                     deviceId,
                     0,
                     null

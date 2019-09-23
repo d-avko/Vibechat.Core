@@ -53,19 +53,15 @@ namespace Vibechat.BusinessLogic.Services.Login
             {
                 try
                 {
-                    var username = "Generated_" + Guid.NewGuid();
+                    var username = "user_" + Guid.NewGuid();
 
-                    var token = await RegisterNewUserAsync(new RegisterModel
+                    identityUser = await RegisterNewUserAsync(new RegisterModel
                     {
                         PhoneNumber = phoneNumber,
                         UserName = username,
                         Id = verified.Uid
                     });
 
-                    identityUser = await usersRepository.GetByUsername(username);
-
-                    //prevent reading null
-                    identityUser.RefreshToken = token;
                     isNewUser = true;
                 }
                 catch (Exception ex)
@@ -95,7 +91,7 @@ namespace Vibechat.BusinessLogic.Services.Login
         /// </summary>
         /// <param name="userToRegister"></param>
         /// <returns></returns>
-        private async Task<string> RegisterNewUserAsync(RegisterModel userToRegister)
+        private async Task<AppUser> RegisterNewUserAsync(RegisterModel userToRegister)
         {
             var defaultError = new InvalidDataException("Check the fields and try again.");
 
@@ -143,7 +139,7 @@ namespace Vibechat.BusinessLogic.Services.Login
             await usersRepository.UpdateRefreshToken(userToCreate, token);
             await usersRepository.UpdateAsync(userToCreate);
             await unitOfWork.Commit();
-            return token;
+            return userToCreate;    
         }
     }
 }

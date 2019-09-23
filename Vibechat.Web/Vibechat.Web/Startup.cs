@@ -17,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Vibechat.BusinessLogic.AuthHelpers;
@@ -29,10 +30,10 @@ namespace Vibechat.Web
 {
     public class Startup
     {
-        private readonly IHostingEnvironment environment;
+        private readonly IWebHostEnvironment environment;
 
         public Startup(IConfiguration configuration, 
-            IHostingEnvironment environment)
+            IWebHostEnvironment environment)
         { 
             Configuration = configuration;
             this.environment = environment;
@@ -121,8 +122,8 @@ namespace Vibechat.Web
                 });
             
             services.AddMvc(x => x.EnableEndpointRouting = false)
-                /*.AddNewtonsoftJson()* net core 3*/
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+                .AddNewtonsoftJson()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
             
             
             services.AddSwaggerGen(c =>
@@ -156,7 +157,7 @@ namespace Vibechat.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
@@ -176,18 +177,13 @@ namespace Vibechat.Web
             
             app.UseMiddleware<UserStatusMiddleware>();
 
-            /*
             app.UseRouting();
             
             app.UseEndpoints(builder =>
             {
                 builder.MapHub<ChatsHub>("/hubs/chat");
             });
-            net core 3
-            */
 
-            app.UseSignalR(builder => builder.MapHub<ChatsHub>("/hubs/chat"));
-            
             app.UseCors("AllowAllOrigins");
 
             app.UseMvc();
@@ -251,10 +247,20 @@ namespace Vibechat.Web
                 c.RoutePrefix = string.Empty;
             });
 
-            FirebaseApp.Create(new AppOptions
+            if (environment.IsProduction())
             {
-                Credential = GoogleCredential.GetApplicationDefault()
-            });
+                FirebaseApp.Create(new AppOptions
+                {
+                    Credential = GoogleCredential.FromFile(Configuration["Credentials:Firebase:Path:Prod"])
+                });   
+            }
+            else
+            {
+                FirebaseApp.Create(new AppOptions
+                {
+                    Credential = GoogleCredential.FromFile(Configuration["Credentials:Firebase:Path:Dev"])
+                });  
+            }
 
             var db = serviceProvider.GetService<ApplicationDbContext>();
             db.Database.Migrate();

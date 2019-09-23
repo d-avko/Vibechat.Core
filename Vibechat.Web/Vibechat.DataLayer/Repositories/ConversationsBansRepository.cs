@@ -10,7 +10,7 @@ namespace Vibechat.DataLayer.Repositories
             
         }
 
-        public Task<ConversationsBansDataModel> GetByIdAsync(string userId, int chatId)
+        public ValueTask<ConversationsBansDataModel> GetByIdAsync(string userId, int chatId)
         {
             return _dbContext.ConversationsBans.FindAsync(chatId, userId);
         }

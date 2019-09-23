@@ -5,6 +5,6 @@ namespace Vibechat.DataLayer.Repositories
 {
     public interface ILastMessagesRepository : IAsyncRepository<LastMessageDataModel>
     {
-        Task<LastMessageDataModel> GetByIdAsync(string userId, int chatId);
+        ValueTask<LastMessageDataModel> GetByIdAsync(string userId, int chatId);
     }
 }

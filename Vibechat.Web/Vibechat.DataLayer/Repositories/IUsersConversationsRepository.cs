@@ -6,7 +6,7 @@ namespace Vibechat.DataLayer.Repositories
 {
     public interface IUsersConversationsRepository : IAsyncRepository<UsersConversationDataModel>
     {
-        Task<UsersConversationDataModel> GetByIdAsync(string userId, int conversationId);
+        ValueTask<UsersConversationDataModel> GetByIdAsync(string userId, int conversationId);
         Task<AppUser> GetUserInDialog(int convId, string FirstUserInDialogueId);
 
         Task<bool> Exists(string userId, int conversationId);
