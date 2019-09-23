@@ -61,8 +61,9 @@ export class LoginComponent {
 
   public async SignIn() {
     this.canLogIn = false;
+    let signedIn = await this.auth.SignIn(this.smsCode.value);
 
-    if (!await this.auth.SignIn(this.smsCode.value)) {
+    if (!signedIn) {
       this.messages.WrongSmsCode();
     }
 

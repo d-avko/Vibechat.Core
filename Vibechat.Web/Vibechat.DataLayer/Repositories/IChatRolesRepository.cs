@@ -5,6 +5,6 @@ namespace Vibechat.DataLayer.Repositories
 {
     public interface IChatRolesRepository : IAsyncRepository<ChatRoleDataModel>
     {
-        Task<ChatRoleDataModel> GetByIdAsync(int chatId, string userId);
+        ValueTask<ChatRoleDataModel> GetByIdAsync(int chatId, string userId);
     }
 }

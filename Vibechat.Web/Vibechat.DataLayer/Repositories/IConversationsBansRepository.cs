@@ -5,6 +5,6 @@ namespace Vibechat.DataLayer.Repositories
 {
     public interface IConversationsBansRepository : IAsyncRepository<ConversationsBansDataModel>
     {
-        Task<ConversationsBansDataModel> GetByIdAsync(string userId, int chatId);
+        ValueTask<ConversationsBansDataModel> GetByIdAsync(string userId, int chatId);
     }
 }
