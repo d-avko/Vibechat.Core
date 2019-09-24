@@ -2,6 +2,7 @@ import {AppUser} from "./AppUser";
 import {ChatEventType} from "./ChatEventType";
 
 export class ChatEvent{
+
   public constructor(init?: Partial<ChatEvent>) {
     (<any>Object).assign(this, init);
   }

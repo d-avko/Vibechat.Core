@@ -30,13 +30,6 @@ namespace Vibechat.BusinessLogic.AuthHelpers
                 return false;
             }
 
-            var parsedToken = tokensHandler.ReadJwtToken(refreshToken);
-
-            if (parsedToken.ValidTo < DateTime.Now)
-            {
-                return false;
-            }
-
             return true;
         }
     }

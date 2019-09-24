@@ -56,8 +56,8 @@ namespace Vibechat.SignalR.Hubs
 
         public override async Task OnDisconnectedAsync(Exception ex)
         {
-            await OnUserOffline().ConfigureAwait(false);
-            await base.OnDisconnectedAsync(ex).ConfigureAwait(false);
+            await OnUserOffline();
+            await base.OnDisconnectedAsync(ex);
         }
 
         private async Task OnUserOnline()

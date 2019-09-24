@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Vibechat.BusinessLogic.AuthHelpers;
 using Vibechat.BusinessLogic.Services.Bans;
 using Vibechat.BusinessLogic.Services.Chat;
@@ -224,7 +225,7 @@ namespace Vibechat.Web.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return StatusCode((int)HttpStatusCode.Forbidden, new ResponseApiModel<bool>
+                return StatusCode((int) HttpStatusCode.Forbidden, new ResponseApiModel<bool>
                 {
                     IsSuccessfull = false,
                     ErrorMessage = ex.Message
@@ -240,7 +241,7 @@ namespace Vibechat.Web.Controllers
             }
             catch (Exception)
             {
-                return StatusCode((int)HttpStatusCode.InternalServerError, new ResponseApiModel<bool>
+                return StatusCode((int) HttpStatusCode.InternalServerError, new ResponseApiModel<bool>
                 {
                     IsSuccessfull = false
                 });

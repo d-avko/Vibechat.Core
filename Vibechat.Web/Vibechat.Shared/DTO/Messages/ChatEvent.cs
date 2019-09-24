@@ -1,16 +1,18 @@
+using Newtonsoft.Json;
+
 namespace Vibechat.Shared.DTO.Messages
 {
+    [JsonObject(MemberSerialization.OptOut)]
     public class ChatEvent
     {
-        //Why or 'because of who' this event occured
-        public string Actor;
-        //banned, kicked, joined, invited, left
-        public ChatEventType Type;
+        public string Actor { get; set; }
+        
+        public ChatEventType Type { get; set; }
 
-        public string UserInvolved;
+        public string UserInvolved { get; set; }
 
-        public string ActorName;
+        public string ActorName { get; set; }
 
-        public string UserInvolvedName;
+        public string UserInvolvedName { get; set; }
     }
 }
