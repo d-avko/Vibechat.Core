@@ -15,27 +15,21 @@ namespace Vibechat.DataLayer.Repositories
  
         private readonly UserManager<AppUser> mUserManager;
 
-        public async Task MakeUserOnline(AppUser user, bool updateConnectionId = false, string signalRConnectionId = null)
+        public async Task MakeUserOnline(AppUser user)
         {
             user.IsOnline = true;
             user.LastSeen = DateTime.UtcNow;
-            
-            if (updateConnectionId)
-            {
-                user.ConnectionId = signalRConnectionId;   
-            }
         }
 
         public async Task MakeUserOffline(AppUser user)
         {
             user.IsOnline = false;
-
-            user.ConnectionId = null;
         }
 
         public async Task<AppUser> GetByIdAsync(string id)
         {
             return await mUserManager.Users
+                .Include(x => x.Connections)
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 

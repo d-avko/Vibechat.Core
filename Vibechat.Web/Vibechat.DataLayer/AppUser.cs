@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
+using Vibechat.DataLayer.DataModels;
 
 namespace Vibechat.DataLayer
 {
@@ -19,10 +21,10 @@ namespace Vibechat.DataLayer
         public string FullImageUrl { get; set; }
 
         /// <summary>
-        ///     Connection id needed for signalR
+        /// Connections of this user.
         /// </summary>
-        public string ConnectionId { get; set; }
-
+        public ICollection<UserConnectionDataModel> Connections { get; set; }
+         
         /// <summary>
         ///     Indicates if user is online
         /// </summary>

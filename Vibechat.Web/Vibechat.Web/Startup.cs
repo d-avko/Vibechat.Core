@@ -179,10 +179,7 @@ namespace Vibechat.Web
 
             app.UseRouting();
             
-            app.UseEndpoints(builder =>
-            {
-                builder.MapHub<ChatsHub>("/hubs/chat");
-            });
+            app.UseEndpoints(builder => builder.MapHub<ChatsHub>("/hubs/chat"));
 
             app.UseCors("AllowAllOrigins");
 

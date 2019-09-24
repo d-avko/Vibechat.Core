@@ -54,6 +54,8 @@ namespace Vibechat.DataLayer
         
         public DbSet<ChatEventDataModel> ChatEvents { get; set; }
 
+        public DbSet<UserConnectionDataModel> UserConnections { get; set; }
+         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -82,7 +84,12 @@ namespace Vibechat.DataLayer
 
             modelBuilder.Entity<LastMessageDataModel>()
                 .HasKey(x => new {x.ChatID, x.UserID});
-            
+
+            modelBuilder.Entity<AppUser>()
+                .HasMany(x => x.Connections)
+                .WithOne(x => x.User);
+
+
             modelBuilder.SeedData();
         }
     }

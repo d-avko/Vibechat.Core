@@ -1,8 +1,8 @@
-FROM mcr.microsoft.com/dotnet/core/aspnet:2.2 AS base
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.0-bionic AS base
 WORKDIR /app
 ENV GOOGLE_APPLICATION_CREDENTIALS="/app/vibechat-ng-firebase-adminsdk-te5qc-a9cfc0974d.json"
 
-FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.0-bionic AS build
 WORKDIR /src
 #COPY ["Vibechat.Web/Vibechat.Web.csproj", "Vibechat.Web/"]
 COPY . .

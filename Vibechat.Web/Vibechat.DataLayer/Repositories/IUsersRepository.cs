@@ -18,8 +18,9 @@ namespace Vibechat.DataLayer.Repositories
         Task<IQueryable<AppUser>> FindByUsername(string username);
         Task<AppUser> GetByUsername(string username);
         Task<AppUser> GetByIdAsync(string id);
-        Task MakeUserOffline(AppUser user); 
-        Task MakeUserOnline(AppUser user, bool updateConnectionId = false, string signalRConnectionId = null);
+        Task MakeUserOffline(AppUser user);
+
+        Task MakeUserOnline(AppUser user);
 
         Task ChangeUserPublicState(AppUser user);
 
