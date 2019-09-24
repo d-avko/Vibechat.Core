@@ -81,7 +81,7 @@ namespace Vibechat.SignalR.Hubs
 
                     if (user.IsOnline)
                     {
-                        await SendUserIsOnline(user.ConnectionId, userID);
+                        await SendUserIsOnline(user.Connections.ToConnectionIds(), userID);
                     }
                 }
 
@@ -100,7 +100,7 @@ namespace Vibechat.SignalR.Hubs
         {
             try
             {
-                await userService.MakeUserOffline(userProvider.GetUserId(Context));
+                await userService.MakeUserOffline(userProvider.GetUserId(Context), Context.ConnectionId);
             }
             catch (Exception ex)
             {
@@ -131,13 +131,15 @@ namespace Vibechat.SignalR.Hubs
                 }
 
                 var removedUser = await userService.GetUserById(userToRemoveId);
-
                
                 await RemovedFromGroup(userToRemoveId, conversationId);
                 
-                if (removedUser.IsOnline && removedUser.ConnectionId != null)
+                if (removedUser.IsOnline)
                 {
-                    await RemoveConnectionFromGroup(removedUser.ConnectionId, conversationId);
+                    foreach(var connection in removedUser.Connections)
+                    {
+                        await RemoveConnectionFromGroup(connection.ConnectionId, conversationId);
+                    }
                 }
                 
                 await SendMessageToGroup(conversationId, whoSentId, chatEvent.ToMessage());
@@ -174,9 +176,9 @@ namespace Vibechat.SignalR.Hubs
 
                 var user = await userService.GetUserById(userId);
 
-                if (user.IsOnline && user.ConnectionId != null)
+                if (user.IsOnline)
                 {
-                    await SendUserBlocked(user.ConnectionId, whoSentId, blockType);
+                    await SendUserBlocked(user.Connections.ToConnectionIds(), whoSentId, blockType);
                 }
 
                 return true;
@@ -356,24 +358,19 @@ namespace Vibechat.SignalR.Hubs
 
                     foreach (var user in participants)
                     {
-                        var userToSend = await userService.GetUserById(user.Id);
-
-                        if (userToSend.IsOnline && userToSend.ConnectionId != null)
-                        {
-                            await RemovedFromGroup(user.Id, chat.Id);
-                        }
+                        await RemovedFromGroup(user.Id, chat.Id);
                     }
                 }
                 else
                 {
                     var userToSend = await userService.GetUserById(chat.DialogueUser.Id);
 
-                    if (userToSend.IsOnline && userToSend.ConnectionId != null)
+                    if (userToSend.IsOnline)
                     {
-                        await RemovedFromDialog(userToSend.Id, userToSend.ConnectionId, chat.Id);
+                        await RemovedFromDialog(userToSend.Id, userToSend.Connections.ToConnectionIds(), chat.Id);
                     }
 
-                    await RemovedFromDialog(whoSent.Id, Context.ConnectionId, chat.Id);
+                    await RemovedFromDialog(whoSent.Id, whoSent.Connections.ToConnectionIds(), chat.Id);
                 }
 
                 await chatsService.RemoveChat(chat, whoSent.Id);
@@ -412,14 +409,14 @@ namespace Vibechat.SignalR.Hubs
 
                 var userToSend = await userService.GetUserById(user.Id);
 
-                if (whoSent.IsOnline && whoSent.ConnectionId != null)
+                if (whoSent.IsOnline)
                 {
-                    await AddedToDialog(new AppUserDto {Id = whoSent.Id}, Context.ConnectionId, created.Id);
+                    await AddedToDialog(new AppUserDto {Id = whoSent.Id}, whoSent.Connections.ToConnectionIds(), created.Id);
                 }
 
-                if (userToSend.IsOnline && userToSend.ConnectionId != null)
+                if (userToSend.IsOnline)
                 {
-                    await AddedToDialog(new AppUserDto {Id = userToSend.Id}, userToSend.ConnectionId, created.Id);
+                    await AddedToDialog(new AppUserDto {Id = userToSend.Id}, userToSend.Connections.ToConnectionIds(), created.Id);
                 }
             }
             catch (Exception ex)
@@ -440,7 +437,10 @@ namespace Vibechat.SignalR.Hubs
             {
                 if (await chatsService.ExistsInConversation(groupId, whoSent.Id))
                 {
-                    await AddConnectionToGroup(Context.ConnectionId, groupId);
+                    foreach(var connection in whoSent.Connections.ToConnectionIds())
+                    {
+                        await AddConnectionToGroup(Context.ConnectionId, groupId);
+                    }
                 }
             }
         }
@@ -467,9 +467,14 @@ namespace Vibechat.SignalR.Hubs
 
                 await messagesService.MarkMessageAsRead(msgId, conversationId, whoSent.Id);
 
-                await MessageReadInDialog(
-                    conversation.DialogueUser.IsOnline ? conversation.DialogueUser.ConnectionId : null, msgId,
-                    conversationId);
+                var dialogUser = await userService.GetUserById(conversation.DialogueUser.Id);
+
+                if (dialogUser.IsOnline)
+                {
+                    await MessageReadInDialog(
+                       dialogUser.Connections.ToConnectionIds(), msgId,
+                       conversationId);
+                }
 
                 return true;
             }
@@ -580,9 +585,9 @@ namespace Vibechat.SignalR.Hubs
 
                 var userToSend = await userService.GetUserById(userToSendId);
 
-                if (userToSend.IsOnline && userToSend.ConnectionId != null)
+                if (userToSend.IsOnline)
                 {
-                    await SendMessageToUser(message, whoSent.Id, userToSend.ConnectionId, conversationId);
+                    await SendMessageToUser(message, whoSent.Id, userToSend.Connections.ToConnectionIds(), conversationId);
                 }
 
                 return created.MessageID;
@@ -633,9 +638,9 @@ namespace Vibechat.SignalR.Hubs
                     User = whoSent.ToAppUserDto()
                 };
 
-                if (user.IsOnline && user.ConnectionId != null)
+                if (user.IsOnline)
                 {
-                    await SendMessageToUser(toSend, whoSent.Id, user.ConnectionId, conversationId, true);
+                    await SendMessageToUser(toSend, whoSent.Id, user.Connections.ToConnectionIds(), conversationId, true);
                 }
 
                 return toSend.Id;
@@ -665,9 +670,9 @@ namespace Vibechat.SignalR.Hubs
             {
                 var user = await userService.GetUserById(userId);
 
-                if (user.IsOnline && user.ConnectionId != null)
+                if (user.IsOnline)
                 {
-                    await SendDhParamTo(user.ConnectionId, param, thisUserId, chatId);
+                    await SendDhParamTo(user.Connections.ToConnectionIds()[0], param, thisUserId, chatId);
                 }
             }
             catch (Exception ex)

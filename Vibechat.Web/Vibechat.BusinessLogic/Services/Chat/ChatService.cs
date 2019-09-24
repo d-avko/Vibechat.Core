@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Vibechat.BusinessLogic.Extensions;
 using Vibechat.BusinessLogic.Services.Bans;
 using Vibechat.BusinessLogic.Services.ChatDataProviders;
+using Vibechat.BusinessLogic.Services.Connections;
 using Vibechat.BusinessLogic.Services.FileSystem;
 using Vibechat.BusinessLogic.Services.Messages;
 using Vibechat.DataLayer;
@@ -52,6 +53,7 @@ namespace Vibechat.BusinessLogic.Services.Chat
         private readonly IUsersConversationsRepository usersConversationsRepository;
 
         private readonly IUsersRepository usersRepository;
+        private readonly ConnectionsService _connectionsService;
 
         public ChatService(
             IChatDataProvider chatDataProvider,
@@ -66,7 +68,8 @@ namespace Vibechat.BusinessLogic.Services.Chat
             BansService bansService,
             MessagesService messagesService,
             IComparer<Shared.DTO.Conversations.Chat> chatComparer,
-            IRolesRepository staticRolesRepo)
+            IRolesRepository staticRolesRepo,
+            ConnectionsService connectionsService)
         { 
             this.chatDataProvider = chatDataProvider;
             this.usersRepository = usersRepository;
@@ -81,6 +84,7 @@ namespace Vibechat.BusinessLogic.Services.Chat
             this.messagesService = messagesService;
             this.chatComparer = chatComparer;
             this.staticRolesRepo = staticRolesRepo;
+            _connectionsService = connectionsService;
         }
 
         public async Task UpdateAuthKey(int chatId, string authKeyId, string deviceId, string thisUserId)
@@ -719,7 +723,7 @@ namespace Vibechat.BusinessLogic.Services.Chat
                 if (dialogUser == null)
                 {
                     throw new InvalidDataException("Unexpected error: no corresponding user in dialogue.");
-                }
+                }               
             }
 
             return new Shared.DTO.Conversations.Chat

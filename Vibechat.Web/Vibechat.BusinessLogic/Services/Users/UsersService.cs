@@ -50,7 +50,7 @@ namespace Vibechat.BusinessLogic.Services.Users
         {
             if (userId == null)
             {
-                throw new InvalidDataException("Provided user was null");
+                throw new InvalidDataException("Provided userId was null");
             }
 
             var foundUser = await usersRepository.GetByIdAsync(userId);

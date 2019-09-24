@@ -24,6 +24,7 @@ using Vibechat.BusinessLogic.AuthHelpers;
 using Vibechat.BusinessLogic.Extensions;
 using Vibechat.BusinessLogic.Middleware;
 using Vibechat.DataLayer;
+using Vibechat.DataLayer.Repositories;
 using Vibechat.SignalR.Hubs;
 
 namespace Vibechat.Web
@@ -259,18 +260,33 @@ namespace Vibechat.Web
                 });  
             }
 
+            #region Db Migration on startup
+
             var db = serviceProvider.GetService<ApplicationDbContext>();
+
             db.Database.Migrate();
-            
+
+            #endregion
+
+            #region Set all users status to offline and delete connections
+
             var users = serviceProvider.GetService<UserManager<AppUser>>();
 
             foreach (var user in users.Users)
             {
-                user.ConnectionId = null;
                 user.IsOnline = false;
             }
-            
+
+            var connections = serviceProvider.GetService<IConnectionsRepository>();
+
+            connections.ClearAsync().GetAwaiter().GetResult();
+
+            #endregion
+
+            #region Create admin account, if not created.
+
             users.SeedAdminAccount(serviceProvider.GetService<IJwtTokenGenerator>());
+            #endregion
         }
     }
 }
