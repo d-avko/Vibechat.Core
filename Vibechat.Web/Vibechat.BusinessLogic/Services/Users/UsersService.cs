@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Vibechat.BusinessLogic.Extensions;
 using Vibechat.BusinessLogic.Services.Bans;
+using Vibechat.BusinessLogic.Services.Connections;
 using Vibechat.BusinessLogic.Services.FileSystem;
 using Vibechat.DataLayer;
 using Vibechat.DataLayer.DataModels;
@@ -27,19 +28,22 @@ namespace Vibechat.BusinessLogic.Services.Users
         private readonly UnitOfWork unitOfWork;
         private readonly BansService bansService;
         private readonly IUsersRepository usersRepository;
+        private readonly ConnectionsService _connectionsService;
 
         public UsersService(
             IUsersRepository usersRepository,
             FilesService imagesService,
             IContactsRepository contactsRepository,
             UnitOfWork unitOfWork,
-            BansService bansService)
+            BansService bansService,
+            ConnectionsService connectionsService)
         {
             this.usersRepository = usersRepository;
             this.imagesService = imagesService;
             this.contactsRepository = contactsRepository;
             this.unitOfWork = unitOfWork;
             this.bansService = bansService;
+            _connectionsService = connectionsService;
         }
 
         public async Task<AppUserDto> GetUserById(string userId, string callerId)
@@ -309,24 +313,33 @@ namespace Vibechat.BusinessLogic.Services.Users
         public async Task MakeUserOnline(string userId, string signalRConnectionId)
         {
             var user = await usersRepository.GetByIdAsync(userId);
+            await usersRepository.MakeUserOnline(user);
 
-            if (user.ConnectionId != null)
+            if(user.Connections.FirstOrDefault(c => c.ConnectionId == signalRConnectionId) == default)
             {
-                await usersRepository.MakeUserOnline(user);   
-            }
-            else
-            {
-                await usersRepository.MakeUserOnline(user, true, signalRConnectionId);   
+                await _connectionsService.AddConnection(signalRConnectionId, userId);
             }
 
             await usersRepository.UpdateAsync(user);
             await unitOfWork.Commit();
         }
 
-        public async Task MakeUserOffline(string userId)
+        public async Task MakeUserOffline(string userId, string signalRConnectionId)
         {
             var user = await usersRepository.GetByIdAsync(userId);
-            await usersRepository.MakeUserOffline(user);
+
+            //if connection is not already deleted, delete it.
+            if (user.Connections.FirstOrDefault(c => c.ConnectionId == signalRConnectionId) != default)
+            {
+                await _connectionsService.RemoveConnection(signalRConnectionId, userId);
+            }
+
+            //last connection was deleted, user is offline.
+            if(user.Connections.Count == 1)
+            {
+                await usersRepository.MakeUserOffline(user);
+            }
+
             await usersRepository.UpdateAsync(user);
             await unitOfWork.Commit();
         }

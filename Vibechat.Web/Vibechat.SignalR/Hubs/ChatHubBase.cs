@@ -6,19 +6,26 @@ using Vibechat.Shared.DTO.Users;
 
 namespace Vibechat.SignalR.Hubs
 {
+    public enum BlockEvent
+    {
+        Block = 0,
+        Unblock = 1
+    }
+
     public class ChatHubBase: Hub
     {
+
         protected Task SendUserRoleChanged(int chatId, string userId, ChatRole newRole)
         {
             return Clients.Group(chatId.ToString()).SendAsync("UserRoleChanged", userId, chatId, newRole);
         }
 
-        protected Task SendUserBlocked(string connectionId, string blockedBy, ChatsHub.BlockEvent blockType)
+        protected Task SendUserBlocked(string[] connectionId, string blockedBy, BlockEvent blockType)
         {
-            return Clients.Client(connectionId).SendAsync("Blocked", blockedBy, blockType);
+            return Clients.Clients(connectionId).SendAsync("Blocked", blockedBy, blockType);
         }
 
-        protected Task SendUserBlockedInChat(int chatId, string userId, ChatsHub.BlockEvent blockType)
+        protected Task SendUserBlockedInChat(int chatId, string userId, BlockEvent blockType)
         {
             return Clients.Group(chatId.ToString()).SendAsync("BlockedInChat", chatId, userId, blockType);
         }
@@ -38,19 +45,19 @@ namespace Vibechat.SignalR.Hubs
             return Clients.Group(conversationId.ToString()).SendAsync("RemovedFromGroup", userId, conversationId);
         }
 
-        protected  Task AddedToGroup(AppUserDto user, int chatId, string callerConnectionId, bool x)
+        protected Task AddedToGroup(AppUserDto user, int chatId, string callerConnectionId, bool x)
         {
             return Clients.GroupExcept(chatId.ToString(), callerConnectionId).SendAsync("AddedToGroup", chatId, user);
         }
 
-        protected  Task AddedToDialog(AppUserDto user, string connectionId, int conversationId)
+        protected  Task AddedToDialog(AppUserDto user, string[] connectionId, int conversationId)
         {
-            return Clients.Client(connectionId).SendAsync("AddedToGroup", conversationId, user);
+            return Clients.Clients(connectionId).SendAsync("AddedToGroup", conversationId, user);
         }
 
-        protected  Task RemovedFromDialog(string userId, string connectionId, int conversationId)
+        protected  Task RemovedFromDialog(string userId, string[] connectionId, int conversationId)
         {
-            return Clients.Client(connectionId).SendAsync("RemovedFromGroup", userId, conversationId);
+            return Clients.Clients(connectionId).SendAsync("RemovedFromGroup", userId, conversationId);
         }
 
         protected  Task SendMessageToGroupExcept(int groupId, string exceptConnectionId, string senderId, Message message,
@@ -67,27 +74,27 @@ namespace Vibechat.SignalR.Hubs
                 .SendAsync("ReceiveMessage", senderId, message, groupId, secure);
         }
 
-        protected  Task SendMessageToUser(Message message, string senderId, string userToSendConnectionId,
+        protected  Task SendMessageToUser(Message message, string senderId, string[] userToSendConnectionId,
             int conversationId, bool secure = false)
         {
-            return Clients.Client(userToSendConnectionId)
+            return Clients.Clients(userToSendConnectionId)
                 .SendAsync("ReceiveMessage", senderId, message, conversationId, secure);
         }
 
-        protected  Task MessageReadInDialog(string dialogUserConnectionId, int messageId,
+        protected  Task MessageReadInDialog(string[] dialogUserConnectionId, int messageId,
             int conversationId)
         {
             if (dialogUserConnectionId != null)
             {
-                return Clients.Client(dialogUserConnectionId).SendAsync("MessageRead", messageId, conversationId);
+                return Clients.Clients(dialogUserConnectionId).SendAsync("MessageRead", messageId, conversationId);
             }
 
             return Task.CompletedTask;
         }
         
-        protected Task SendUserIsOnline(string connectionId, string userId)
+        protected Task SendUserIsOnline(string[] connectionId, string userId)
         {
-            return Clients.Client(connectionId).SendAsync("UserOnline", userId);
+            return Clients.Clients(connectionId).SendAsync("UserOnline", userId);
         }
 
         protected Task SendError(string connectionId, string error)

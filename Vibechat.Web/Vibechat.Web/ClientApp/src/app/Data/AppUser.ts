@@ -16,8 +16,6 @@ export class AppUser {
 
   public fullImageUrl: string;
 
-  public connectionId: string;
-
   public isOnline: boolean;
 
   public isMessagingRestricted: boolean;

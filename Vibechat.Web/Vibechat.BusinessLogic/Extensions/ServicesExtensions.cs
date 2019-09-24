@@ -9,6 +9,7 @@ using Vibechat.BusinessLogic.Middleware;
 using Vibechat.BusinessLogic.Services.Bans;
 using Vibechat.BusinessLogic.Services.Chat;
 using Vibechat.BusinessLogic.Services.ChatDataProviders;
+using Vibechat.BusinessLogic.Services.Connections;
 using Vibechat.BusinessLogic.Services.Crypto;
 using Vibechat.BusinessLogic.Services.FileSystem;
 using Vibechat.BusinessLogic.Services.Hashing;
@@ -33,6 +34,7 @@ namespace Vibechat.BusinessLogic.Extensions
             services.AddScoped<FilesService, FilesService>();
             services.AddScoped<BansService, BansService>();
             services.AddScoped<MessagesService, MessagesService>();
+            services.AddScoped<ConnectionsService, ConnectionsService>();
         }
 
         public static void AddDefaultMiddleware(this IServiceCollection services)
@@ -57,6 +59,7 @@ namespace Vibechat.BusinessLogic.Extensions
             services.AddScoped<IAttachmentsRepository ,AttachmentsRepository>();
             services.AddScoped<IRolesRepository, RolesRepository>();
             services.AddScoped<IDeletedMessagesRepository, DeletedMessagesRepository>();
+            services.AddScoped<IConnectionsRepository, ConnectionsRepository>();
         }
 
         public static void AddBusinessLogic(this IServiceCollection services)

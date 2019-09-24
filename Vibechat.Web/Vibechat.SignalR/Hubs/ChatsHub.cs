@@ -18,12 +18,6 @@ namespace Vibechat.SignalR.Hubs
 {
     public class ChatsHub : ChatHubBase
     {
-        public enum BlockEvent
-        {
-            Block = 0,
-            Unblock = 1
-        }
-
         private readonly UsersSubscriptionService subscriptionService;
         private readonly MessagesService messagesService;
 
@@ -56,14 +50,14 @@ namespace Vibechat.SignalR.Hubs
 
         public override async Task OnConnectedAsync()
         {
-            await OnUserOnline();
-            await base.OnConnectedAsync();
+            await OnUserOnline().ConfigureAwait(false);
+            await base.OnConnectedAsync().ConfigureAwait(false);
         }
 
         public override async Task OnDisconnectedAsync(Exception ex)
         {
-            await OnUserOffline();
-            await base.OnDisconnectedAsync(ex);
+            await OnUserOffline().ConfigureAwait(false);
+            await base.OnDisconnectedAsync(ex).ConfigureAwait(false);
         }
 
         private async Task OnUserOnline()
@@ -71,6 +65,7 @@ namespace Vibechat.SignalR.Hubs
             try
             {
                 var userId = userProvider.GetUserId(Context);
+
                 await userService.MakeUserOnline(userId, Context.ConnectionId);
 
                 var subs = subscriptionService.GetSubscribers(userId);
@@ -84,7 +79,7 @@ namespace Vibechat.SignalR.Hubs
                 {
                     var user = await userService.GetUserById(whereTo);
 
-                    if (user.IsOnline && user.ConnectionId != null)
+                    if (user.IsOnline)
                     {
                         await SendUserIsOnline(user.ConnectionId, userID);
                     }

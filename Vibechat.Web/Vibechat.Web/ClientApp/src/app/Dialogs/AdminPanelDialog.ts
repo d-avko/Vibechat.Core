@@ -69,7 +69,7 @@ export class AdminPanelDialog {
   }
 
   public async RemoveModerator() {
-    let result = await this.data.removeModerFunc(this.data.user.id, this.data.chat.id);
+    const result = await this.data.removeModerFunc(this.data.user.id, this.data.chat.id);
 
     if (result) {
       this.data.user.chatRole.role = ChatRole.NoRole;
