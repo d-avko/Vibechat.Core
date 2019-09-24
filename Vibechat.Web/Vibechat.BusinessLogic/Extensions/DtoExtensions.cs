@@ -20,7 +20,6 @@ namespace Vibechat.BusinessLogic.Extensions
                 LastName = user.LastName,
                 LastSeen = user.LastSeen.ToUTCString(),
                 UserName = user.UserName,
-                ConnectionId = user.ConnectionId,
                 IsOnline = user.IsOnline,
                 IsPublic = user.IsPublic
             };

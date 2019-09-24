@@ -40,10 +40,14 @@ namespace Vibechat.DataLayer.Repositories
             return await ApplySpecification(spec).CountAsync();
         }
 
+        public async Task ClearAsync()
+        {
+            _dbContext.Set<T>().RemoveRange(_dbContext.Set<T>());
+        }
+
         public async Task<T> AddAsync(T entity)
         {
             _dbContext.Set<T>().Add(entity);
-
             return entity;
         }
 
