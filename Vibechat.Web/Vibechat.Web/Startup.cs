@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Rewrite;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -20,6 +22,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 using Vibechat.BusinessLogic.AuthHelpers;
 using Vibechat.BusinessLogic.Extensions;
 using Vibechat.BusinessLogic.Middleware;
@@ -122,17 +125,19 @@ namespace Vibechat.Web
                     };
                 });
             
-            services.AddMvc(x => x.EnableEndpointRouting = false)
-                .AddNewtonsoftJson()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
-            
-            
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Vibechat API", Version = "v1" });
             });
+            
+            services.AddMvc(x => x.EnableEndpointRouting = false)
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                })
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
-            services.AddSignalR();//.AddNewtonsoftJsonProtocol();
+            services.AddSignalR().AddNewtonsoftJsonProtocol();
             
             services.AddHttpClient<HttpClient>(options =>
             {

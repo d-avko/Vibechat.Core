@@ -1,10 +1,10 @@
 namespace Vibechat.Shared.DTO.Messages
 {
     public enum ChatEventType {
-        Banned,
-        Kicked,
-        Joined,
-        Invited,
-        Left
+        Banned = 0,
+        Kicked = 1,
+        Joined = 2,
+        Invited = 3,
+        Left = 4
     }
 }

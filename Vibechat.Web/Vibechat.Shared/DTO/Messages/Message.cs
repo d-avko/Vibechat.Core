@@ -1,7 +1,9 @@
-﻿using Vibechat.Shared.DTO.Users;
+﻿using Newtonsoft.Json;
+using Vibechat.Shared.DTO.Users;
 
 namespace Vibechat.Shared.DTO.Messages
 {
+    [JsonObject(MemberSerialization.OptOut)]
     public class Message
     {
         public int Id { get; set; }
@@ -14,12 +16,12 @@ namespace Vibechat.Shared.DTO.Messages
         
         public MessageType Type { get; set; }
         
-        public ChatEvent Event { get; set; }
-
         public MessageAttachment AttachmentInfo { get; set; }
 
         public MessageState State { get; set; }
-
+        
+        public ChatEvent Event { get; set; }
+        
         /// <summary>
         ///     if this message is from private chat, store payload there.
         /// </summary>
