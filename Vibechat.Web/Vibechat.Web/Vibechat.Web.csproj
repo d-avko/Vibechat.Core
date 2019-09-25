@@ -184,26 +184,27 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FirebaseAdmin" Version="1.9.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="3.0.0" />
+<!--    <PackageReference Include="FirebaseAdmin" Version="1.9.0" />-->
+<!--    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.0.0" />-->
+<!--    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.0.0" />-->
+<!--    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="3.0.0" />-->
+<!--    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.0.0" />-->
+<!--    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.0.0" />-->
+<!--    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.0.0" />-->
+<!--    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.0.0" />-->
+<!--    <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="3.0.0" />-->
+<!--    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.0.0" />-->
+<!--    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="3.0.0" />-->
+<!--    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.0.0" />-->
+<!--    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.0.0" />-->
+<!--    <PackageReference Include="Microsoft.Extensions.Http" Version="3.0.0" />-->
+<!--    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.0.0" />-->
+<!--    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.0.0" />-->
+<!--    <PackageReference Include="Microsoft.Extensions.Logging.EventSource" Version="3.0.0" />-->
+<!--    <PackageReference Include="Microsoft.IdentityModel.Logging" Version="5.5.0" />-->
+<!--    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="5.5.0" />-->
+<!--    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="5.5.0" />-->
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="3.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="3.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="3.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.EventSource" Version="3.0.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Logging" Version="5.5.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="5.5.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="5.5.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0-rc2" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="5.0.0-rc2" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="5.0.0-rc2" />

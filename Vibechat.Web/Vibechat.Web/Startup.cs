@@ -181,8 +181,6 @@ namespace Vibechat.Web
 
             app.UseAuthentication();
             
-            app.UseMiddleware<UserStatusMiddleware>();
-
             app.UseRouting();
             
             app.UseEndpoints(builder => builder.MapHub<ChatsHub>("/hubs/chat"));
@@ -272,26 +270,10 @@ namespace Vibechat.Web
             db.Database.Migrate();
 
             #endregion
+            
+            var application = serviceProvider.GetService<BusinessLogic.Vibechat>();
 
-            #region Set all users status to offline and delete connections
-
-            var users = serviceProvider.GetService<UserManager<AppUser>>();
-
-            foreach (var user in users.Users)
-            {
-                user.IsOnline = false;
-            }
-
-            var connections = serviceProvider.GetService<IConnectionsRepository>();
-
-            connections.ClearAsync().GetAwaiter().GetResult();
-
-            #endregion
-
-            #region Create admin account, if not created.
-
-            users.SeedAdminAccount(serviceProvider.GetService<IJwtTokenGenerator>());
-            #endregion
+            application.OnStartup().GetAwaiter().GetResult();
         }
     }
 }
