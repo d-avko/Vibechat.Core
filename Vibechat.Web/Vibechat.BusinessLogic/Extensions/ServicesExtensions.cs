@@ -35,6 +35,7 @@ namespace Vibechat.BusinessLogic.Extensions
             services.AddScoped<BansService, BansService>();
             services.AddScoped<MessagesService, MessagesService>();
             services.AddScoped<ConnectionsService, ConnectionsService>();
+            services.AddScoped<Vibechat, Vibechat>();
         }
 
         public static void AddDefaultMiddleware(this IServiceCollection services)

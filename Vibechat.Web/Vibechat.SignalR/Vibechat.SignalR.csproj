@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-      <PackageReference Include="Microsoft.Extensions.Logging" Version="3.0.0" />
-    </ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="3.0.0" />
+  </ItemGroup>
 
 </Project>
