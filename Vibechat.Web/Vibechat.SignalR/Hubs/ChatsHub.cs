@@ -320,7 +320,10 @@ namespace Vibechat.SignalR.Hubs
                         userId, chatId);
                 }
 
+                //send onJoined event
                 await AddedToGroup(addedUser, chatId, Context.ConnectionId, true);
+                
+                //send event message 
                 
                 await SendMessageToGroup(chatId, whoSent.Id, chatEvent.ToMessage());
                 return true;
@@ -439,7 +442,7 @@ namespace Vibechat.SignalR.Hubs
                 {
                     foreach(var connection in whoSent.Connections.ToConnectionIds())
                     {
-                        await AddConnectionToGroup(Context.ConnectionId, groupId);
+                        await AddConnectionToGroup(connection, groupId);
                     }
                 }
             }

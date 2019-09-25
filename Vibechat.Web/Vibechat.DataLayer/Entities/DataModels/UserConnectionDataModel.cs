@@ -15,6 +15,16 @@ namespace Vibechat.DataLayer.DataModels
 
         [ForeignKey("UserID")] public virtual AppUser User { get; set; }
 
+        public override bool Equals(object obj)
+        {
+            if (obj == null || obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return (obj as UserConnectionDataModel)?.ConnectionId == this.ConnectionId;
+        }
+
         public static UserConnectionDataModel Create(string connectionId, string userId)
         {
             return new UserConnectionDataModel()

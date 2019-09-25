@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore.Internal;
 using Vibechat.BusinessLogic.Extensions;
 using Vibechat.BusinessLogic.Services.Bans;
 using Vibechat.BusinessLogic.Services.Connections;
@@ -317,7 +318,14 @@ namespace Vibechat.BusinessLogic.Services.Users
 
             if(user.Connections.FirstOrDefault(c => c.ConnectionId == signalRConnectionId) == default)
             {
-                await _connectionsService.AddConnection(signalRConnectionId, userId);
+                var newConnection = await _connectionsService.AddConnection(signalRConnectionId, userId);
+
+                if (newConnection == null)
+                {
+                    return;
+                }
+                
+                user.Connections.Add(newConnection);
             }
 
             await usersRepository.UpdateAsync(user);
@@ -331,11 +339,16 @@ namespace Vibechat.BusinessLogic.Services.Users
             //if connection is not already deleted, delete it.
             if (user.Connections.FirstOrDefault(c => c.ConnectionId == signalRConnectionId) != default)
             {
-                await _connectionsService.RemoveConnection(signalRConnectionId, userId);
+                if (!await _connectionsService.RemoveConnection(signalRConnectionId, userId))
+                {
+                    return;
+                }
+                
+                user.Connections.Remove(new UserConnectionDataModel() {ConnectionId = signalRConnectionId});
             }
 
             //last connection was deleted, user is offline.
-            if(user.Connections.Count == 1)
+            if(user.Connections.Count.Equals(0))
             {
                 await usersRepository.MakeUserOffline(user);
             }

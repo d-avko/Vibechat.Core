@@ -41,7 +41,7 @@ namespace Vibechat.BusinessLogic.Services.Connections
         {
             var entry = await _connections.GetByIdAsync(connectionId);
 
-            if(entry != null)
+            if(entry == null)
             {
                 _logger.LogWarning($"Failed to remove connection for {userId} as it was not present.");
                 return false;
@@ -59,19 +59,17 @@ namespace Vibechat.BusinessLogic.Services.Connections
         /// <param name="connectionId"></param>
         /// <param name="userId"></param>
         /// <returns>Is successful?</returns>
-        public async Task<bool> AddConnection(string connectionId, string userId)
+        public async Task<UserConnectionDataModel> AddConnection(string connectionId, string userId)
         {
             var entry = await _connections.GetByIdAsync(connectionId);
 
             if(entry != null)
             {
                 _logger.LogWarning($"Failed to add connection for {userId} as it exists.");
-                return false;
+                return null;
             }
 
-            await _connections.AddAsync(UserConnectionDataModel.Create(connectionId, userId));
-
-            return true;
+            return await _connections.AddAsync(UserConnectionDataModel.Create(connectionId, userId));
         }
     }
 }
