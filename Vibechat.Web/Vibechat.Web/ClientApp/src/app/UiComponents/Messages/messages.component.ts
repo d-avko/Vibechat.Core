@@ -187,9 +187,11 @@ export class MessagesComponent implements OnDestroy, AfterContentInit, AfterView
 
     let currentMessageIndex = this.CalculateCurrentMessageIndex();
 
+    //if we scrolled specific amount of messages
     if (this.CurrentChat.messages.length - currentMessageIndex > MessagesComponent.MessagesToScrollForGoBackButtonToShowUp
+      //if client have messages that he didn't read
       || !this.chatsService.IsUptoDate()
-      && !(this.chatsService.IsCurrentChatDialog() && this.chatsService.IsAnyUnreadMessagesInCurrentChat())) {
+      && (this.chatsService.IsCurrentChatDialog() && this.chatsService.IsAnyUnreadMessagesInCurrentChat())) {
       this.IsScrollingAssistNeeded = true;
     } else {
       this.IsScrollingAssistNeeded = false;

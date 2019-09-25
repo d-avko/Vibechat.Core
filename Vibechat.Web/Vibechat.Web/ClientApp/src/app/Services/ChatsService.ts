@@ -149,7 +149,8 @@ export class ChatsService {
       return true;
     }
 
-    return this.CurrentChat.lastMessage.id == this.CurrentChat.clientLastMessageId;
+    return (this.CurrentChat.lastMessage.id == this.CurrentChat.clientLastMessageId)
+      || (this.CurrentChat.messages.find(x => x.id == this.CurrentChat.lastMessage.id) != null);
   }
 
   public GetConversationsIds() {
@@ -749,6 +750,11 @@ export class ChatsService {
     if(!chat.lastMessage || chat.messages.find(msg => msg.id == chat.lastMessage.id)){
       chat.messages.push(data.message);
       chat.messages = [...chat.messages];
+
+      //auto-read messages in group
+      if(chat.isGroup){
+        await this.api.SetLastMessageId(data.message.id, chat.id);
+      }
 
       //if user was in different chat, increment unread counter.
       //if not, UI should automatically update clientLastMessageId.
