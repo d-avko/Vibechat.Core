@@ -39,6 +39,11 @@ namespace Vibechat.DataLayer.Repositories
         {
             return await ApplySpecification(spec).CountAsync();
         }
+        
+        public async Task<T> SingleOrDefaultAsync(ISpecification<T> spec)
+        { 
+            return await ApplySpecification(spec).SingleOrDefaultAsync();
+        }
 
         public async Task ClearAsync()
         {
