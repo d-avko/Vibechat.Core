@@ -8,7 +8,8 @@ namespace Vibechat.DataLayer.Repositories.Specifications.UsersChats
             base(chat => chat.UserID == userId && //deviceId could be null because key exchange didn't finish
                         (chat.DeviceId == deviceId || chat.DeviceId == null))
         {
-            AddNestedInclude(x => x.Conversation.PublicKey);
+          //  AddInclude(x => x.User);
+          //  AddNestedInclude(x => x.Conversation.PublicKey);
             AsNoTracking();
         }
     }

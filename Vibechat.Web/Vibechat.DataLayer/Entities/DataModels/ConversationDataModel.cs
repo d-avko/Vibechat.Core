@@ -1,5 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace Vibechat.DataLayer.DataModels
 {
@@ -31,5 +34,41 @@ namespace Vibechat.DataLayer.DataModels
         public int? PublicKeyId { get; set; }
 
         [ForeignKey("PublicKeyId")] public virtual DhPublicKeyDataModel PublicKey { get; set; }
+
+        public ICollection<ConversationsBansDataModel> BannedUsers { get; set; }
+
+        public ICollection<ChatRoleDataModel> Roles { get; set; }
+
+        //Field used by ef
+        public ICollection<UsersConversationDataModel> Participants { get; set; }
+
+        public ICollection<LastMessageDataModel> LastMessages { get; set; }
+        
+        [NotMapped]
+        public string DeviceId { get; set; }
+
+        [NotMapped]
+        public MessageDataModel LastMessage { get; set; }
+        
+        [NotMapped]
+        public int ClientLastMessage { get; set; }
+        
+        [NotMapped]
+        public int UnreadCount { get; set; }
+
+        [NotMapped]
+        public ChatRoleDataModel Role { get; set; }
+
+        [NotMapped]
+        public bool IsMessagingRestricted { get; set; }
+
+        //Field used by dto
+        [NotMapped]
+        public IEnumerable<AppUser> participants { get; set; }
+         
+        public AppUser GetDialogUser(string userId)
+        {
+            return Participants?.FirstOrDefault(x => x.UserID != userId)?.User;
+        }
     }
 }

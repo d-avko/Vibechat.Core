@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Vibechat.DataLayer;
 using Vibechat.DataLayer.DataModels;
 using Vibechat.Shared.DTO.Conversations;
@@ -21,7 +22,9 @@ namespace Vibechat.BusinessLogic.Extensions
                 LastSeen = user.LastSeen.ToUTCString(),
                 UserName = user.UserName,
                 IsOnline = user.IsOnline,
-                IsPublic = user.IsPublic
+                IsPublic = user.IsPublic,
+                IsMessagingRestricted = user.IsBlockedInChat,
+                ChatRole = user.ChatRole?.ToChatRole()
             };
         }
 
@@ -49,31 +52,27 @@ namespace Vibechat.BusinessLogic.Extensions
 
         public static Chat ToChatDto(
             this ConversationDataModel value,
-            List<AppUserDto> participants,
-            AppUser dialogUser,
-            DhPublicKeyDataModel key,
-            ChatRoleDataModel chatRole,
-            string deviceId,
-            int lastMessageId,
-            Message lastMessage)
-        {
+            string userId)
+        { 
             return new Chat
             {
                 Name = value.Name,
                 Id = value.Id,
-                DialogueUser = dialogUser?.ToAppUserDto(),
+                DialogueUser = value.IsGroup ? null : value.GetDialogUser(userId)?.ToAppUserDto(),
                 IsGroup = value.IsGroup,
                 ThumbnailUrl = value.ThumbnailUrl,
                 FullImageUrl = value.FullImageUrl,
-                Participants = participants,
+                Participants = value.participants?.Select(x => x.ToAppUserDto()).ToList(),
                 AuthKeyId = value.AuthKeyId,
                 IsSecure = value.IsSecure,
-                PublicKey = key?.ToDhPublicKey(),
-                DeviceId = deviceId,
-                ChatRole = chatRole?.ToChatRole(),
-                ClientLastMessageId = lastMessageId,
-                LastMessage = lastMessage,
-                IsPublic = value.IsPublic
+                PublicKey = value.PublicKey?.ToDhPublicKey(),
+                DeviceId = value.DeviceId,
+                ChatRole = value.Role?.ToChatRole(),
+                ClientLastMessageId = value.LastMessage?.MessageID ?? 0,
+                LastMessage = value.LastMessage?.ToMessage(),
+                IsPublic = value.IsPublic,
+                IsMessagingRestricted = value.IsMessagingRestricted,
+                MessagesUnread = value.UnreadCount
             };
         }
 

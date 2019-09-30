@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
 using Vibechat.DataLayer.DataModels;
 
@@ -35,5 +36,11 @@ namespace Vibechat.DataLayer
         public string RefreshToken { get; set; }
 
         public bool IsAdmin { get; set; }
+        
+        [NotMapped]
+        public bool IsBlockedInChat { get; set; }
+        
+        [NotMapped] 
+        public ChatRoleDataModel ChatRole { get; set; }
     }
 }

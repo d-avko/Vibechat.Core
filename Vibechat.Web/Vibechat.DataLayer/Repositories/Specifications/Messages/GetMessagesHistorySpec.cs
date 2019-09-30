@@ -6,14 +6,14 @@ namespace Vibechat.DataLayer.Repositories.Specifications.Messages
     public class GetMessagesHistorySpec : BaseSpecification<MessageDataModel>
     {
         public GetMessagesHistorySpec(
-            IQueryable<DeletedMessagesDataModel> deletedMessages,
+            string userId,
             int conversationId,
             int maxMessageId,
             int offset,
             int count 
             ) : 
             base(msg => msg.ConversationID == conversationId
-                    && !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID)
+                    && msg.DeletedEntries.All(x => x.UserId != userId)
                     && msg.MessageID < maxMessageId)
         {
             ApplyOrderByDescending(x => x.TimeReceived);

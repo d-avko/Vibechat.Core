@@ -89,6 +89,25 @@ namespace Vibechat.DataLayer
                 .HasMany(x => x.Connections)
                 .WithOne(x => x.User);
 
+            modelBuilder.Entity<ConversationDataModel>()
+                .HasMany(x => x.BannedUsers)
+                .WithOne(x => x.Conversation);
+
+            modelBuilder.Entity<ConversationDataModel>()
+                .HasMany(x => x.Roles)
+                .WithOne(x => x.Chat);
+
+            modelBuilder.Entity<ConversationDataModel>()
+                .HasMany(x => x.Participants)
+                .WithOne(x => x.Conversation);
+
+            modelBuilder.Entity<ConversationDataModel>()
+                .HasMany(x => x.LastMessages)
+                .WithOne(x => x.Conversation);
+            
+            modelBuilder.Entity<MessageDataModel>()
+                .HasMany(x => x.DeletedEntries)
+                .WithOne(x => x.Message);
 
             modelBuilder.SeedData();
         }
