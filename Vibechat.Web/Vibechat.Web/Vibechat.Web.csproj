@@ -204,6 +204,7 @@
 <!--    <PackageReference Include="Microsoft.IdentityModel.Logging" Version="5.5.0" />-->
 <!--    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="5.5.0" />-->
 <!--    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="5.5.0" />-->
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="3.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0-rc2" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="5.0.0-rc2" />
@@ -245,7 +246,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
   </PropertyGroup>
 
 </Project>

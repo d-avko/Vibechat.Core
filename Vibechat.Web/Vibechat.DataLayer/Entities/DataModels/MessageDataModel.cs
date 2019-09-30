@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Vibechat.Shared.DTO.Messages;
@@ -39,6 +40,8 @@ namespace Vibechat.DataLayer.DataModels
         ///     if this message is from private chat, store payload there.
         /// </summary>
         public string EncryptedPayload { get; set; }
+        
+        public ICollection<DeletedMessagesDataModel> DeletedEntries { get; set; }
 
         public static MessageDataModel Create(AppUser user, int chatId)
         {

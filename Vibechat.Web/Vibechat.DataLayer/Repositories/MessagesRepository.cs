@@ -1,16 +1,46 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Vibechat.DataLayer.DataModels;
+using Vibechat.DataLayer.Repositories.Specifications.DeletedMessages;
 using Vibechat.Shared.DTO.Messages;
 
 namespace Vibechat.DataLayer.Repositories
 {
     public class MessagesRepository : BaseRepository<MessageDataModel>, IMessagesRepository
     {
-        public MessagesRepository(ApplicationDbContext dbContext) : base(dbContext)
+        private readonly IDeletedMessagesRepository deletedMessages;
+
+        public MessagesRepository(ApplicationDbContext dbContext, IDeletedMessagesRepository deletedMessages) 
+            : base(dbContext)
         {
-           
+            this.deletedMessages = deletedMessages;
+        }
+        
+        //TODO: Refactor specifications to join deletedMessages table.
+
+        public async Task<MessageDataModel> GetMostRecentMessage(int conversationId)
+        {
+            return _dbContext.Messages
+                .Include(x => x.AttachmentInfo.AttachmentKind)
+                .Include(x => x.User)
+                .Include(x => x.ForwardedMessage.AttachmentInfo.AttachmentKind)
+                .Include(x => x.ForwardedMessage.User)
+                .Include(x => x.Event)
+                .Include(x => x.Event.Actor)
+                .Include(x => x.Event.UserInvolved)
+                .Where(message => message.ConversationID == conversationId)
+                .OrderByDescending(x => x.TimeReceived)
+                .Take(1)
+                .SingleOrDefault();
+        }
+
+        public Task<int> GetUnreadMessagesCount(int chatId, int lastMessageId, string userId)
+        {
+            return _dbContext.Messages
+                .CountAsync(message => (message.ConversationID == chatId) 
+                                       && (message.MessageID > lastMessageId));
         }
 
         public List<MessageDataModel> Search
@@ -29,7 +59,7 @@ namespace Vibechat.DataLayer.Repositories
                 .Where(msg =>
                     EF.Functions.Like(msg.ForwardedMessage.MessageContent.ToLower(), $"%{searchString.ToLower()}%"))
                 .Include(x => x.User)
-                .Include(x => x.ForwardedMessage).ToList();
+                .Include(x => x.ForwardedMessage);
 
             var notForwarded =
                 Base
@@ -37,10 +67,10 @@ namespace Vibechat.DataLayer.Repositories
                 .Where(msg =>
                     EF.Functions.Like(msg.MessageContent.ToLower(), $"%{searchString.ToLower()}%"))
                 .Include(x => x.User)
-                .Include(x => x.ForwardedMessage).ToList();
+                .Include(x => x.ForwardedMessage);
 
             return
-                forwardedMessages.Concat(notForwarded)
+                forwardedMessages.Union(notForwarded)
                     .OrderByDescending(msg => msg.TimeReceived)
                     .Skip(offset)
                     .Take(count).ToList();

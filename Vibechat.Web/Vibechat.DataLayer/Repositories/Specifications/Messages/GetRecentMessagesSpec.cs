@@ -6,16 +6,16 @@ namespace Vibechat.DataLayer.Repositories.Specifications.Messages
     public class GetRecentMessagesSpec : BaseSpecification<MessageDataModel>
     {
         public GetRecentMessagesSpec(
-            IQueryable<DeletedMessagesDataModel> deletedMessages,
+            string userId,
             int conversationId,
             int maxMessageId,
             int offset,
             int count
             ) :
             base(msg => msg.ConversationID == conversationId
-                    && !deletedMessages.Any(x => x.Message.MessageID == msg.MessageID)
+                    && msg.DeletedEntries.All(x => x.UserId != userId)
                     && msg.MessageID >= maxMessageId)
-        {
+        { 
             ApplyOrderBy(x => x.TimeReceived);
             ApplyPaging(offset, count);
             AddNestedInclude(x => x.AttachmentInfo.AttachmentKind);

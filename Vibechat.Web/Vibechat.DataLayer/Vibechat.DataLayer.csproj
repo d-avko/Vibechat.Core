@@ -4,6 +4,10 @@
         <TargetFramework>netcoreapp3.0</TargetFramework>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+      <Optimize>false</Optimize>
+    </PropertyGroup>
+
     <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.0.0" />

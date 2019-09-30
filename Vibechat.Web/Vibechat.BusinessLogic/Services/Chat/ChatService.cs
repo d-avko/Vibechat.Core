@@ -53,7 +53,6 @@ namespace Vibechat.BusinessLogic.Services.Chat
         private readonly IUsersConversationsRepository usersConversationsRepository;
 
         private readonly IUsersRepository usersRepository;
-        private readonly ConnectionsService _connectionsService;
 
         public ChatService(
             IChatDataProvider chatDataProvider,
@@ -68,8 +67,7 @@ namespace Vibechat.BusinessLogic.Services.Chat
             BansService bansService,
             MessagesService messagesService,
             IComparer<Shared.DTO.Conversations.Chat> chatComparer,
-            IRolesRepository staticRolesRepo,
-            ConnectionsService connectionsService)
+            IRolesRepository staticRolesRepo)
         { 
             this.chatDataProvider = chatDataProvider;
             this.usersRepository = usersRepository;
@@ -84,7 +82,6 @@ namespace Vibechat.BusinessLogic.Services.Chat
             this.messagesService = messagesService;
             this.chatComparer = chatComparer;
             this.staticRolesRepo = staticRolesRepo;
-            _connectionsService = connectionsService;
         }
 
         public async Task UpdateAuthKey(int chatId, string authKeyId, string deviceId, string thisUserId)
@@ -121,35 +118,88 @@ namespace Vibechat.BusinessLogic.Services.Chat
             bool isSecure,
             string deviceId)
         {
-            var defaultError = new InvalidDataException("Error while creating the conversation..");
-
-            //if there was no group info or creator info
-
             var user = await usersRepository.GetByIdAsync(creatorId);
-
+ 
             if (user == null)
             {
                 throw new KeyNotFoundException("Wrong creatorId.");
             }
 
-            if (!isGroup && dialogUserId == null)
+            if (isGroup)
             {
-                throw new InvalidDataException("No dialog user was provided.");
+                return await CreateGroup(user, chatImageUrl, chatName, isPublic);
             }
 
-            if (isGroup && chatName.Length > MaxNameLength)
+            return await CreateDialog(user, dialogUserId, isSecure, deviceId);
+        }
+
+        private async Task<Shared.DTO.Conversations.Chat> CreateGroup(
+            AppUser creator,
+            string chatImageUrl,
+            string chatName,
+            bool isPublic)
+        {
+            if (chatName.Length > MaxNameLength)
             {
                 throw new InvalidDataException("Chat name was too long.");
             }
 
-            async Task<ConversationDataModel> CreateDialog()
+            try
             {
-                //if this is a dialogue , find a user with whom to create conversation
+                var imageUrl = chatImageUrl ?? chatDataProvider.GetGroupPictureUrl();
+                
+                var newChat = new ConversationDataModel
+                {
+                    IsGroup = true,
+                    Name = chatName,
+                    FullImageUrl = imageUrl,
+                    ThumbnailUrl = imageUrl,
+                    IsPublic = isPublic
+                };
+                
+                await conversationRepository.AddAsync(newChat);
+                
+                await usersConversationsRepository.AddAsync(UsersConversationDataModel.Create(
+                    creator.Id, 
+                    newChat));
+
+                var role = await rolesRepository.AddAsync(
+                    ChatRoleDataModel.Create(newChat, creator.Id, ChatRole.Creator));
+                
+                newChat.Roles = new List<ChatRoleDataModel>(){ role };
+                newChat.participants = new List<AppUser> {creator};
+                
+                await unitOfWork.Commit();
+                
+                return newChat.ToChatDto(creator.Id);
+            }
+            catch (Exception e)
+            {
+                throw new InvalidDataException("Couldn't create group because of unexpected error.", e);
+            }
+        }
+
+        private async Task<Shared.DTO.Conversations.Chat> CreateDialog(
+            AppUser creator,
+            string dialogUserId,
+            bool isSecure,
+            string deviceId)
+        {
+            var user = await usersRepository.GetByIdAsync(creator.Id);
+ 
+            if (user == null)
+            {
+                throw new KeyNotFoundException("Wrong creatorId.");
+            }
+
+            try
+            {
+                //if this is a dialogue , find a user with whom to create chat
                 var secondDialogueUser = await usersRepository.GetByIdAsync(dialogUserId);
 
                 if (secondDialogueUser == null)
                 {
-                    throw defaultError;
+                    throw new InvalidDataException("Wrong dialog user Id.");
                 }
                 
                 DhPublicKeyDataModel dhPublicKey = null;
@@ -161,14 +211,11 @@ namespace Vibechat.BusinessLogic.Services.Chat
                 
                 var newChat = new ConversationDataModel
                 {
-                    IsGroup = isGroup,
-                    Name = isGroup ? chatName : null,
-                    FullImageUrl = null,
-                    ThumbnailUrl = null,
-                    IsPublic = isPublic,
+                    IsGroup = false,
                     IsSecure = isSecure,
                     PublicKeyId = dhPublicKey?.Id,
-                    PublicKey = dhPublicKey
+                    PublicKey = dhPublicKey,
+                    DeviceId = deviceId
                 };
                 
                 await conversationRepository.AddAsync(newChat);
@@ -178,77 +225,19 @@ namespace Vibechat.BusinessLogic.Services.Chat
                 );
                 
                 await usersConversationsRepository.AddAsync(UsersConversationDataModel.Create(
-                    creatorId, 
+                    creator.Id, 
                     newChat, 
                     deviceId));
 
-                return newChat;
-            }
-
-            async Task<ConversationDataModel> CreateGroup()
-            {
-                var imageUrl = chatImageUrl ?? chatDataProvider.GetGroupPictureUrl();
-                
-                var newChat = new ConversationDataModel
-                {
-                    IsGroup = isGroup,
-                    Name = isGroup ? chatName : null,
-                    FullImageUrl = imageUrl,
-                    ThumbnailUrl = imageUrl,
-                    IsPublic = isPublic,
-                    IsSecure = isSecure,
-                    PublicKeyId = null,
-                    PublicKey = null
-                };
-                
-                await conversationRepository.AddAsync(newChat);
-                
-                await usersConversationsRepository.AddAsync(UsersConversationDataModel.Create(
-                    creatorId, 
-                    newChat, 
-                    deviceId));
-
-                await rolesRepository.AddAsync(
-                    ChatRoleDataModel.Create(newChat, creatorId, ChatRole.Creator));
-
-                return newChat;
-            }
-
-            try
-            {
-                ConversationDataModel createdChat;
-                
-                if (isGroup)
-                {
-                    createdChat = await CreateGroup();
-                }
-                else
-                {
-                    createdChat = await CreateDialog();
-                }
-
+                newChat.participants = new List<AppUser> {user, secondDialogueUser};
+            
                 await unitOfWork.Commit();
                 
-                var creator = user.ToAppUserDto();
-                creator.ChatRole = new ChatRoleDto
-                {
-                    ChatId = createdChat.Id,
-                    Role = ChatRole.Creator
-                };
-
-                return createdChat.ToChatDto(
-                    isGroup ? new List<AppUserDto> {creator} : null,
-                    isGroup ? null : await usersConversationsRepository.GetUserInDialog(createdChat.Id, creatorId).ConfigureAwait(false),
-                    createdChat.PublicKey,
-                    !isGroup ? null : await rolesRepository.GetByIdAsync(createdChat.Id, creatorId).ConfigureAwait(false),
-                    deviceId,
-                    0,
-                    null
-                );
+                return newChat.ToChatDto(creator.Id);
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                throw new InvalidDataException("Couldn't create group/dialog. Probably there exists one already.", ex);
+                throw new InvalidDataException("Couldn't create dialog. Probably there exists one already.", e);
             }
         }
         
@@ -265,8 +254,7 @@ namespace Vibechat.BusinessLogic.Services.Chat
             
             foreach (var user in result)
             {
-                user.IsBlockedInConversation =
-                    await bansService.IsBannedFromConversation(chatId, user.Id);
+                user.IsBlockedInConversation = await bansService.IsBannedFromConversation(chatId, user.Id);
                 user.ChatRole = await GetChatRole(user.Id, chatId);
             }
 
@@ -338,30 +326,9 @@ namespace Vibechat.BusinessLogic.Services.Chat
                 throw new InvalidDataException("Search string coudn't be null.");
             }
 
-            var groups = await conversationRepository.ListAsync(new ChatsByNameSpec(name));
+            var groups = await conversationRepository.GetChatsByName(name);
 
-            if (groups == null)
-            {
-                return null;
-            }
-
-            var result = new List<Shared.DTO.Conversations.Chat>();
-
-            foreach (var conversation in groups)
-            {
-                result.Add(
-                    conversation.ToChatDto(
-                        await GetParticipants(conversation.Id, MaxParticipantsToReturn),
-                        null,
-                        conversation.PublicKey,
-                        await rolesRepository.GetByIdAsync(conversation.Id, whoAccessedId),
-                        null,
-                        0,
-                        null
-                    ));
-            }
-    
-            return result;
+            return groups?.Select(x => x.ToChatDto(whoAccessedId)).ToList();
         }
 
         public async Task ChangePublicState(int conversationId, string whoAccessedId)
@@ -562,52 +529,11 @@ namespace Vibechat.BusinessLogic.Services.Chat
 
             var chats = await usersConversationsRepository.GetUserChats(deviceId, whoAccessedId);
 
-            var returnData = new List<Shared.DTO.Conversations.Chat>();
-
-            foreach (var chat in chats)
-            {
-                var lastMessage = await messagesService.GetLastRecentMessage(chat.Id, whoAccessedId);
-
-                var dtoChat = chat.ToChatDto(
-                    chat.IsGroup ? await GetParticipants(chat.Id, MaxParticipantsToReturn) : null,
-                    chat.IsGroup
-                        ? null
-                        :await usersConversationsRepository.GetUserInDialog(chat.Id, whoAccessedId),
-                    chat.PublicKey,
-                    await rolesRepository.GetByIdAsync(chat.Id, whoAccessedId),
-                    chat.IsSecure ? await GetDeviceId(chat.Id, whoAccessedId) : null,
-                    (await lastMessagesRepository.GetByIdAsync(whoAccessedId, chat.Id))?.MessageID ?? 0,
-                    lastMessage
-                );
-
-                dtoChat.IsMessagingRestricted =
-                    await bansService.IsBannedFromConversation(chat.Id, whoAccessedId);
-
-                dtoChat.MessagesUnread = await messagesService.GetUnreadMessagesAmount(dtoChat, whoAccessedId);
-                dtoChat.ChatRole = await GetChatRole(whoAccessedId, chat.Id);
-
-                if (chat.IsGroup)
-                {
-                    foreach (var User in dtoChat.Participants)
-                    {
-                        User.IsBlockedInConversation =
-                            await bansService.IsBannedFromConversation(chat.Id, User.Id);
-                        User.ChatRole = await GetChatRole(User.Id, chat.Id);
-                    }
-                }
-
-                returnData.Add(dtoChat);
-            }
+            var returnData = chats.Select(x => x.ToChatDto(whoAccessedId)).ToList();
 
             returnData.Sort(chatComparer);
             
             return returnData;
-        }
-
-        private async Task<string> GetDeviceId(int chatId, string userId)
-        {
-            var chat = await usersConversationsRepository.GetByIdAsync(userId, chatId);
-            return chat.DeviceId;
         }
 
         public async Task<List<AppUserDto>> GetParticipants(int chatId, int maximum = 0)
@@ -621,7 +547,7 @@ namespace Vibechat.BusinessLogic.Services.Chat
                 throw defaultErrorMessage;
             }
 
-            var participants = await usersConversationsRepository.GetChatParticipants(chatId);
+            var participants = (await usersConversationsRepository.GetChatParticipants(chatId)).ToList();
 
             var users = (from participant in participants
                          select participant.ToAppUserDto()
@@ -649,60 +575,20 @@ namespace Vibechat.BusinessLogic.Services.Chat
         /// <returns></returns>
         public async Task<Shared.DTO.Conversations.Chat> GetById(int conversationId, string whoAccessedId)
         {
-            var conversation = await conversationRepository.GetByIdAsync(conversationId);
+            var existsInChat = await usersConversationsRepository.Exists(whoAccessedId, conversationId);
+            
+            var conversation = await conversationRepository.GetByIdAsync(conversationId, whoAccessedId);
 
             if (conversation == null)
             {
                 throw new KeyNotFoundException("No such conversation was found.");
             }
-
-            var dialogUser = new AppUser();
-            var members = new List<AppUserDto>();
-
-            if (conversation.IsGroup)
-            {
-                members = (await usersConversationsRepository.GetChatParticipants(conversationId))
-                    .Select(x => x.ToAppUserDto())
-                    .ToList();
-
-                if (!conversation.IsPublic && members.All(usr => usr.Id != whoAccessedId))
-                {
-                    throw new UnauthorizedAccessException("You are not allowed to view this chat.");
-                }
-            }
-            else
-            {
-                dialogUser = await usersConversationsRepository.GetUserInDialog(conversationId, whoAccessedId);
-
-                if (dialogUser == null)
-                {
-                    throw new InvalidDataException("Unexpected error: no corresponding user in dialogue.");
-                }
-            }
             
-
-            var dtoChat = conversation.ToChatDto(
-                members,
-                dialogUser,
-                conversation.PublicKey,
-                await rolesRepository.GetByIdAsync(conversation.Id, whoAccessedId),
-                null,
-                0,
-                null);
-
-            dtoChat.IsMessagingRestricted = await bansService.IsBannedFromConversation(dtoChat.Id, whoAccessedId);
-            dtoChat.ClientLastMessageId = (await lastMessagesRepository.GetByIdAsync(whoAccessedId, conversationId))?.MessageID ?? 0;
-            
-            if (conversation.IsGroup)
+            if (!existsInChat && !conversation.IsPublic)
             {
-                foreach (var User in dtoChat.Participants)
-                {
-                    User.IsBlockedInConversation = await bansService.IsBannedFromConversation(conversation.Id, User.Id);
-                    User.ChatRole = await GetChatRole(User.Id, conversation.Id);
-                }
+                throw new UnauthorizedAccessException("You are not allowed to view this chat.");
             }
-
-            return dtoChat;
+            return conversation.ToChatDto(whoAccessedId);
         }
 
         public async Task<Shared.DTO.Conversations.Chat> GetByIdSimplified(int conversationId, string whoAccessedId)

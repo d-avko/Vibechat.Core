@@ -13,7 +13,7 @@ namespace Vibechat.DataLayer.Repositories
 
         Task<UsersConversationDataModel> GetDialog(string firstUserId, string secondUserId);
 
-        Task<IEnumerable<ConversationDataModel>> GetUserChats(string deviceId, string userId);
+        Task<IEnumerable<ConversationDataModel>> GetUserChats(string deviceId, string userId, int maxParticipants = 100);
 
         Task<IEnumerable<AppUser>> GetChatParticipants(int chatId);
 

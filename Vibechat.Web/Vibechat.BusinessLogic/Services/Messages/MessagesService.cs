@@ -142,12 +142,11 @@ namespace Vibechat.BusinessLogic.Services.Messages
                 throw new KeyNotFoundException("Wrong conversation.");
             }
 
-            var members = (await usersConversationsRepository.ListAsync(new GetParticipantsSpec(chatId)))
-                .Select(x => x.User);
+            var existsInChat = await usersConversationsRepository.Exists(whoAccessedId, chatId);
 
             //only member of conversation could request messages of non-public conversation.
 
-            if (members.FirstOrDefault(x => x.Id == whoAccessedId) == null && !conversation.IsPublic)
+            if (!existsInChat && !conversation.IsPublic)
             {
                 throw new UnauthorizedAccessException("You are unauthorized to do such an action.");
             }
@@ -156,15 +155,13 @@ namespace Vibechat.BusinessLogic.Services.Messages
             {
                 throw new InvalidDataException("Wrong maxMessageId was provided.");
             }
-
-            var deleted = await deletedMessages.AsQuerableAsync(new GetDeletedMessagesOfUserSpec(whoAccessedId));
-
+            
             ISpecification<MessageDataModel> spec;
 
             if (history)
             {
                 spec = new GetMessagesHistorySpec(
-                    deleted,
+                    whoAccessedId,
                     chatId,
                     maxMessageId,
                     offset,
@@ -173,7 +170,7 @@ namespace Vibechat.BusinessLogic.Services.Messages
             else
             {
                 spec = new GetRecentMessagesSpec(
-                    deleted,
+                    whoAccessedId,
                     chatId,
                     maxMessageId,
                     offset,

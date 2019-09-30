@@ -16,7 +16,7 @@ namespace Vibechat.DataLayer.Repositories
         }
 
         public virtual async Task<T> GetByIdAsync(int id)
-        {
+        {  
             return await _dbContext.Set<T>().FindAsync(id);
         }
 

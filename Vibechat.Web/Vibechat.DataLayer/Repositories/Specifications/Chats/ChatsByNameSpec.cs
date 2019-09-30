@@ -9,6 +9,7 @@ namespace Vibechat.DataLayer.Repositories.Specifications.Chats
             chat => chat.IsPublic &&
             EF.Functions.Like(chat.Name, name + "%"))
         {
+            
         }
     }
 }
