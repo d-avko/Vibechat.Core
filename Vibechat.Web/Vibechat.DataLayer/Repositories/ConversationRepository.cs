@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Vibechat.DataLayer.DataModels;
+using Vibechat.DataLayer.Repositories.Specifications.Messages;
 
 namespace Vibechat.DataLayer.Repositories
 {
@@ -49,8 +50,10 @@ namespace Vibechat.DataLayer.Repositories
                 }
                 chat.ClientLastMessage =
                     chat.LastMessages?.FirstOrDefault(x => x.UserID == userId)?.Message?.MessageID ?? 0;
-                chat.LastMessage = await messages.GetMostRecentMessage(chat.Id);
-                chat.UnreadCount = await messages.GetUnreadMessagesCount(chat.Id, chat.LastMessage?.MessageID ?? 0, userId);
+                
+                chat.LastMessage = await messages.SingleOrDefaultAsync(new GetMostRecentMessageSpec(chat.Id));
+                chat.UnreadCount = await messages.CountAsync(new UnreadMessagesCountSpec(userId, chat.Id, chat.ClientLastMessage));
+                
                 chat.IsMessagingRestricted = chat.BannedUsers?.Any(x => x.UserID == userId) ?? false;
                 chat.Role = chat.Roles?.FirstOrDefault(x => x.UserId == userId);
             }

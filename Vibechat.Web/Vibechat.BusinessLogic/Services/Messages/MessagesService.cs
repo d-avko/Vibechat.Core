@@ -85,15 +85,6 @@ namespace Vibechat.BusinessLogic.Services.Messages
                 select msg.ToMessage()).ToList();
         }
 
-        public async Task<int> GetUnreadMessagesAmount(Shared.DTO.Conversations.Chat chat, string userId)
-        {
-            var lastMessage = await lastMessagesRepository.GetByIdAsync(userId, chat.Id);
-            IQueryable<DeletedMessagesDataModel> deleted = await deletedMessages
-                .AsQuerableAsync(new GetDeletedMessagesSpec(chat.Id, userId));
-
-            return await messagesRepository.CountAsync(new UnreadMessagesCountSpec(deleted, chat.Id, lastMessage?.MessageID ?? 0));
-        }
-
         /// <summary>
         /// Performs case-insensitive message search.
         /// </summary>
