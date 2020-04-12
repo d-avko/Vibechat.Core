@@ -1,8 +1,8 @@
 import {ServerResponse} from "../../ApiModels/ServerResponse";
 import {Inject} from "@angular/core";
-import {UploaderService} from "./uploads/upload.service";
 import {UpdateThumbnailResponse} from "../../ApiModels/UpdateThumbnailResponse";
 import {Attachment} from "../../Data/Attachment";
+import { UploaderService } from "./uploads/upload.service";
 
 export class UploadsApi {
 

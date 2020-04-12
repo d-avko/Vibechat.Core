@@ -18,7 +18,7 @@ namespace Vibechat.DataLayer.Repositories
 
         public async Task<ConversationDataModel> GetByIdAsync(int id, string userId, int maxParticipants = 100)
         {
-            var result = _dbContext
+            var result = await _dbContext
                 .Conversations
                 .Include(x => x.Participants)
                     .ThenInclude(x => x.User)
@@ -32,7 +32,8 @@ namespace Vibechat.DataLayer.Repositories
                 .Include(x => x.LastMessages)
                     .ThenInclude(x => x.Message)
                         .ThenInclude(x => x.Event.UserInvolved)
-                .Where(x => x.Id == id);
+                .Where(x => x.Id == id)
+                .ToListAsync();
 
             foreach (var chat in result)
             {
@@ -67,6 +68,7 @@ namespace Vibechat.DataLayer.Repositories
                 .Conversations
                 .Include(x => x.Roles)
                 .Include(x => x.Participants)
+                .ThenInclude(x => x.User)
                 .Where(chat => chat.IsPublic &&
                                EF.Functions.Like(chat.Name, name + "%"));
 

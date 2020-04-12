@@ -7,6 +7,7 @@ namespace Vibechat.DataLayer.Repositories
 {
     public interface IAsyncRepository<T> where T: class
     {
+        ApplicationDbContext _dbContext { get; }
         Task<T> GetByIdAsync(int id);
         Task<IReadOnlyList<T>> ListAllAsync();
         Task<IReadOnlyList<T>> ListAsync(ISpecification<T> spec);
