@@ -8,7 +8,7 @@ namespace Vibechat.DataLayer.Repositories
 {
     public abstract class BaseRepository<T> where T: class
     {
-        protected readonly ApplicationDbContext _dbContext;
+        public ApplicationDbContext _dbContext { get; set; }
 
         public BaseRepository(ApplicationDbContext dbContext)
         {

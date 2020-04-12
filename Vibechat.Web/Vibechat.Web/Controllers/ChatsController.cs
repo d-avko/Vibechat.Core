@@ -289,7 +289,7 @@ namespace Vibechat.Web.Controllers
                     ErrorMessage = ex.Message
                 });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return StatusCode((int)HttpStatusCode.InternalServerError, new ResponseApiModel<bool>
                 {

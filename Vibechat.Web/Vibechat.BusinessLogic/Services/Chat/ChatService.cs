@@ -170,7 +170,14 @@ namespace Vibechat.BusinessLogic.Services.Chat
                 newChat.participants = new List<AppUser> {creator};
                 
                 await unitOfWork.Commit();
-                
+
+                newChat.Role = new ChatRoleDataModel()
+                {
+                    ChatId = newChat.Id,
+                    RoleId = ChatRole.Creator
+                };
+
+
                 return newChat.ToChatDto(creator.Id);
             }
             catch (Exception e)

@@ -44,7 +44,8 @@ namespace Vibechat.DataLayer.Repositories
                      .ThenInclude(x => x.Message)
                          .ThenInclude(x => x.Event.UserInvolved)
                  .Where(chat => chat.UserID == userId && (chat.DeviceId == null || chat.DeviceId == deviceId))
-                 .Select(x => x.Conversation);
+                 .Select(x => x.Conversation)
+                 .ToList();
 
             foreach (var chat in result)
             {
@@ -71,8 +72,7 @@ namespace Vibechat.DataLayer.Repositories
                 chat.Role = chat.Roles?.FirstOrDefault(x => x.UserId == userId);
             }
 
-            return await result
-                .ToListAsync();
+            return result;
         }
 
         public async Task<IEnumerable<AppUser>> GetChatParticipants(int chatId)

@@ -10,13 +10,12 @@
 *.userosscache
 *.sln.docstates
 
-appsettings.json
 hosting.json
 vibechat-ng-firebase-adminsdk-te5qc-a9cfc0974d.json
 docker-compose.yml
 docker-compose.production.yml
 wwwroot/
-Uploads/
+
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

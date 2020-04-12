@@ -51,12 +51,12 @@ namespace Vibechat.Web
             if (environment.IsStaging() || environment.IsDevelopment())
             {
                 services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseNpgsql(Configuration["ConnectionStrings:Development"]), ServiceLifetime.Transient);
+                    options.UseNpgsql(Configuration["ConnectionStrings:Development"]), ServiceLifetime.Scoped);
             }
             else if(environment.IsProduction())
             {
                 services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseNpgsql(Configuration["ConnectionStrings:DefaultConnection"]), ServiceLifetime.Transient);
+                    options.UseNpgsql(Configuration["ConnectionStrings:DefaultConnection"]), ServiceLifetime.Scoped);
             }
 
             services.AddIdentity<AppUser, IdentityRole>()
