@@ -47,7 +47,7 @@
     "reflect-metadata": "0.1.13",
     "rxjs": "6.5.2",
     "rxjs-tslint": "0.1.7",
-    "ua-parser-js": "^0.7.20",
+    "ua-parser-js": "^0.7.24",
     "zone.js": "0.9.1"
   },
   "devDependencies": {
